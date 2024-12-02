@@ -114,6 +114,11 @@
   virtualisation.virtualbox.host.enable = true;
   
   programs.dconf.enable = true;
+    
+  programs.appimage = {
+    enable = true;
+    binfmt = true;
+  };
   
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
