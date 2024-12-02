@@ -6,6 +6,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    stylix.url = "github:danth/stylix";
   };
 
   outputs = inputs@{ self, nixpkgs, home-manager, ... }: {
@@ -15,6 +16,7 @@
         modules = [
           ./configuration.nix
           ./modules/system/greetd.nix
+          inputs.stylix.nixosModules.stylix
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
