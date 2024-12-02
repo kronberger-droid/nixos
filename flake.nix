@@ -6,10 +6,9 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-    stylix.url = "github:danth/stylix";
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, stylix, ... }: {
+  outputs = inputs@{ self, nixpkgs, home-manager,  ... }: {
     nixosConfigurations = {
       kronberger = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -17,7 +16,6 @@
           ./configuration.nix
           ./modules/system/greetd.nix
           home-manager.nixosModules.home-manager
-          stylix.homeManagerModules.stylix
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
