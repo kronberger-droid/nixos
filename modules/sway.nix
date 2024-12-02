@@ -69,7 +69,6 @@ in
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
-
     extraConfigEarly = ''
       exec_always {
         ${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.8 --focused 1.0;

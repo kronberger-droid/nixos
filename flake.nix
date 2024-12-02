@@ -84,6 +84,11 @@
                 settings = { manager = { show_hidden = true; }; };
               };
 
+              programs.appimage = {
+                enable = true;
+                binfmt = true;
+              };
+              
               programs.vscode = {
                 enable = true;
                 package = pkgs.vscodium;

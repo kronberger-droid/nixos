@@ -39,7 +39,6 @@
                 "--keep-logs"
                 "--keep-intermediates"
                 "--outdir=build"
-                "-Zshell-escape"
               ];
               directory = "build";
               auxDirectory = "build";
