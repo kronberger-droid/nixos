@@ -9,7 +9,7 @@
     stylix.url = "github:danth/stylix";
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, ... }: {
+  outputs = inputs@{ self, nixpkgs, home-manager, stylix, ... }: {
     nixosConfigurations = {
       kronberger = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -17,7 +17,7 @@
           ./configuration.nix
           ./modules/system/greetd.nix
           home-manager.nixosModules.home-manager
-          inputs.stylix.nixosModules.stylix
+          stylix.homeManagerModules.stylix
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -81,6 +81,9 @@
                 fill_shape=true
               '';
 
+              stylix.enable = true;
+              stylix.image = ./configs/deathpaper.jpg;
+              
               programs.yazi = {
                 enable = true;
                 settings = { manager = { show_hidden = true; }; };
