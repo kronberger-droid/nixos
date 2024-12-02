@@ -39,13 +39,6 @@
 
   security.polkit.enable = true;
 
-
-  # Stylix config
-  stylix.enable = true;
-  # stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
-
-  stylix.image = ./configs/deathpaper.jpg;
-  
   # Configure keymap in X11
   services.xserver.xkb = {
     layout = "us";

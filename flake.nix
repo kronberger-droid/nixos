@@ -79,6 +79,8 @@
                 fill_shape=true
               '';
 
+
+              stylix.targets.xyz.enable = true;
               programs.yazi = {
                 enable = true;
                 settings = { manager = { show_hidden = true; }; };
