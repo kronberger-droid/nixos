@@ -29,7 +29,6 @@
                 ./modules/helix.nix
                 ./modules/shell.nix
               ];
-              
               home.username = "kronberger";
               home.homeDirectory = "/home/kronberger";
               programs.home-manager.enable = true;
@@ -67,7 +66,7 @@
                 xdg-desktop-portal
                 speedcrunch
               ];
-
+              stylix.enable = true;
               home.file.".config/swappy/config".text = ''
                 [Default]
                 save_dir=$HOME/Pictures/Screenshots
