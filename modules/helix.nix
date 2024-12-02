@@ -44,6 +44,7 @@
               ];
               directory = "build";
               auxDirectory = "build";
+              onSavePostCommand = "${pkgs.zathura}/bin/zathura build/%f:r.pdf &";
             };
             chktex = {
               onOpenAndSave = true;
