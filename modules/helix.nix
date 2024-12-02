@@ -1,4 +1,3 @@
-# modules/helix.nix
 { config, pkgs, lib, ... }:
 
 {
@@ -6,6 +5,7 @@
     nil
     texlab
     tectonic
+    zathura
   ];
 
   programs.helix = {
@@ -44,7 +44,14 @@
               ];
               directory = "build";
               auxDirectory = "build";
-              onSavePostCommand = "${pkgs.zathura}/bin/zathura build/%f:r.pdf &";
+            };
+            forwardSearch = {
+              executable = "${pkgs.zathura}/bin/zathura";
+              args = [
+                "--synctex-forward"
+                "%l:1:%f"
+                "%p"
+              ];
             };
             chktex = {
               onOpenAndSave = true;
