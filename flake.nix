@@ -64,6 +64,7 @@
                 xdg-desktop-portal
                 speedcrunch
                 element-desktop
+                caligula
               ];
 
               home.file.".config/swappy/config".text = ''
