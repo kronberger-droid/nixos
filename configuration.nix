@@ -41,9 +41,9 @@
 
 
   # Stylix config
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
+  # stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/gruvbox-dark-medium.yaml";
 
-  stylix.image = ./configs/deathpaper.png;
+  stylix.image = ./configs/deathpaper.jpg;
   
   # Configure keymap in X11
   services.xserver.xkb = {
