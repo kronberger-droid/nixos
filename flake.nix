@@ -65,7 +65,9 @@
                 xdg-desktop-portal-wlr
                 xdg-desktop-portal
                 speedcrunch
+                element-desktop
               ];
+
               home.file.".config/swappy/config".text = ''
                 [Default]
                 save_dir=$HOME/Pictures/Screenshots
@@ -79,8 +81,6 @@
                 fill_shape=true
               '';
 
-
-              stylix.targets.xyz.enable = true;
               programs.yazi = {
                 enable = true;
                 settings = { manager = { show_hidden = true; }; };
