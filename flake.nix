@@ -81,9 +81,6 @@
                 fill_shape=true
               '';
 
-              stylix.enable = true;
-              stylix.image = ./configs/deathpaper.jpg;
-              
               programs.yazi = {
                 enable = true;
                 settings = { manager = { show_hidden = true; }; };
