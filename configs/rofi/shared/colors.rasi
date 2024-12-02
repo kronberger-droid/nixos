@@ -1,0 +1,15 @@
+/**
+ * Author: Aditya Shakya (adi1090x)
+ * Github: @adi1090x
+ *
+ * Colors finely adjusted to match Base16 Seti UI theme with added transparency
+ **/
+
+* {
+    background:     rgba(30, 30, 30, 0.9); /* Dark grey with 90% opacity */
+    background-alt: rgba(30, 30, 30, 0.9); /* Dark blue-grey with 90% opacity */
+    foreground:     #dfe1e8; /* Light grey with full opacity for clear readability */
+    selected:       rgba(138, 129, 119, 1.0); /* Soft brown, using $color12 for selected items */
+    active:         rgba(108, 122, 137, 0.9); /* Cool grey, given 90% opacity */
+    urgent:         rgba(66, 60, 56, 0.9); /* Dark brown with 90% opacity for urgent items */
+}
