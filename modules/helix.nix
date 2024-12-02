@@ -5,7 +5,6 @@
     nil
     texlab
     tectonic
-    zathura
   ];
 
   programs.helix = {
@@ -15,7 +14,7 @@
       theme = "base16_default";
       editor = {
         line-number = "relative";
-        lsp.display-messages = false;
+        lsp.display-messages = true;
       };
     };
     languages = {
