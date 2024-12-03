@@ -95,7 +95,7 @@
   };
 
   fonts.packages = with pkgs; [
-    (nerdfonts.override { fonts = [ "DroidSansMono" ]; })
+    (nerd-fonts.override { fonts = [ "DroidSansMono" ]; })
     dejavu_fonts # mind the underscore! most of the packages are named with a hypen, not this one however
     noto-fonts
     noto-fonts-cjk-sans
