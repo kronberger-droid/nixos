@@ -14,7 +14,7 @@
       theme = "base16_default";
       editor = {
         line-number = "relative";
-        soft-wrap = true;
+        soft-wrap.enable = true;
         lsp.display-messages = true;
       };
     };
