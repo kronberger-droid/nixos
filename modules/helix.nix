@@ -48,7 +48,7 @@
               args = [
                 "--synctex-forward"
                 "%l:1:%f"
-                "%p"
+                "build/main.pdf"
               ];
             };
             chktex = {
