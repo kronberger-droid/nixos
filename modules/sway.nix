@@ -72,7 +72,7 @@ in
     extraConfigEarly = ''
       exec_always {
         ${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.8 --focused 1.0;
-        swaymsg 'output HDMI-A-1 bg /etc/nixos/configs/sway/deathpaper.jpg fill'
+        swaymsg 'output HDMI-A-1 bg /etc/nixos/configs/deathpaper.jpg fill'
         autotiling
       }
     '';
