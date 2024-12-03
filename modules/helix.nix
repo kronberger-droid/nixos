@@ -27,6 +27,7 @@
         file-types = [ "latex" ];
         config = {
           texlab = {
+            rootDirectory = ".";
             build = {
               onSave = true;
               forwardSearchAfter = true;
@@ -34,10 +35,9 @@
               args = [
                 "-X"
                 "compile"
-                "%f"
+                "main.tex"
                 "--synctex"
                 "--keep-logs"
-                "--keep-intermediates"
                 "--outdir=build"
               ];
               directory = "build";
