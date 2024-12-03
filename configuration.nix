@@ -88,6 +88,9 @@
     extraGroups = [ "networkmanager" "wheel" ];
     shell = pkgs.nushell;  
   };
+
+  security.soteria.enable = true;
+  
   environment.shells = [ pkgs.nushell ];
   # Allow unfree packages
   nixpkgs.config = {
