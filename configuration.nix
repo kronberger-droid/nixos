@@ -88,7 +88,7 @@
     extraGroups = [ "networkmanager" "wheel" ];
     shell = pkgs.nushell;  
   };
-
+  environment.shells = [ pkgs.nushell ];
   # Allow unfree packages
   nixpkgs.config = {
     allowUnfree = true;
