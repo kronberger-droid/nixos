@@ -109,6 +109,7 @@
     wget
     git
     curl
+    gparted
   ];
 
   virtualisation.virtualbox.host.enable = true;
