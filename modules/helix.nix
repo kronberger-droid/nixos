@@ -5,6 +5,7 @@
     nil
     texlab
     tectonic
+    ltex-ls
   ];
 
   programs.helix = {
@@ -18,11 +19,18 @@
         lsp.display-messages = true;
       };
     };
+    
     languages = {
       language-server.nil = {
         command = "${pkgs.nil}/bin/nil";
         file-types = [ "nix" ];
       };
+      
+      language-server.ltex = {
+        command = "${pkgs.ltex-ls}/bin/ltex-ls";
+        file-types = [ "latex" ];
+      };
+      
       language-server.texlab = {
         command = "${pkgs.texlab}/bin/texlab";
         file-types = [ "latex" ];
