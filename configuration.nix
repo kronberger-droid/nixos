@@ -93,7 +93,7 @@
   
   environment.shells = [ pkgs.nushell ];
   
-  environment.variables.EDITOR = "helix";
+  environment.variables.EDITOR = "hx";
   
   # Allow unfree packages
   nixpkgs.config = {
