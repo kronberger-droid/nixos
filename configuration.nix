@@ -92,7 +92,8 @@
   security.soteria.enable = true;
   
   environment.shells = [ pkgs.nushell ];
-  environment.variables.EDITOR = [ pkgs.helix ];
+  
+  environment.variables.EDITOR = "helix";
   
   # Allow unfree packages
   nixpkgs.config = {
