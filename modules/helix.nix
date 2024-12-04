@@ -14,13 +14,22 @@
     settings = {
       theme = "base16_default";
       editor = {
-        line-number = "relative";
         soft-wrap.enable = true;
-        lsp.display-messages = true;
+        lsp = {
+          display-messages = true;
+          display-inlay-hints = true;
+        };
       };
     };
     
     languages = {
+      language = [{
+        name = "latex";
+        language-servers = [
+        "texlab"
+        "ltex"
+        ];
+      }];
       language-server.nil = {
         command = "${pkgs.nil}/bin/nil";
         file-types = [ "nix" ];
