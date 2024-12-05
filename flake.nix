@@ -65,6 +65,7 @@
                 speedcrunch
                 element-desktop
                 caligula
+                gthumb
               ];
 
               home.file.".config/swappy/config".text = ''
