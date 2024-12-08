@@ -3,12 +3,10 @@
   programs.nushell = {
     enable = true;
 
-    # Write the zoxide init output to a file
-    extraFiles."zoxide.nu" = {
-      text = builtins.readFile "${pkgs.zoxide}/share/zoxide/init.nu";
-    };
-
-    # Add zoxide sourcing and other configurations
+		extraEnv = ''
+			zoxide init nushell | save -f ~/.zoxide.nu
+		'';
+	
     extraConfig = ''
       # Source zoxide.nu
       source ~/.zoxide.nu
