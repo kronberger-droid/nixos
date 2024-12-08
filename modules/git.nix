@@ -1,10 +1,10 @@
 {
   programs.ssh = {
     enable = true;
+    startAgent = true;
     extraConfig = ''
-      Host *
-        AddKeysToAgent yes
-        IdentityFile ~/.ssh/id_ed25519
+      AddKeysToAgent yes
+      UseKeychain yes
     '';
   };
 
