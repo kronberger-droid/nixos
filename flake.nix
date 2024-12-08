@@ -21,11 +21,7 @@
             home-manager.useUserPackages = true;
             home-manager.users.kronberger = { pkgs, ... }: {
               imports = [
-                ./modules/sway.nix
-                ./modules/kitty.nix
-                ./modules/gtk.nix
-                ./modules/helix.nix
-                ./modules/shell.nix
+                ./modules
               ];
               home.username = "kronberger";
               home.homeDirectory = "/home/kronberger";
@@ -89,12 +85,6 @@
               programs.vscode = {
                 enable = true;
                 package = pkgs.vscodium;
-              };
-
-              programs.git = {
-                enable = true;
-                userName = "Martin Kronberger";
-                userEmail = "e12202316@student.tuwien.ac.at";
               };
 
               home.stateVersion = "24.11";
