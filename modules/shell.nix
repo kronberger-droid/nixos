@@ -8,8 +8,10 @@
 		'';
 	
     extraConfig = ''
-      # Source zoxide.nu
-      source ~/.zoxide.nu
+      # Source zoxide.nu if it exists
+      if ($HOME/.zoxide.nu | path exists) {
+        source $HOME/.zoxide.nu
+      }
 
       # Disable banner
       $env.config.show_banner = false
