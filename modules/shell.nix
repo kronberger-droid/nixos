@@ -1,11 +1,6 @@
 # modules/shell.nix            
 { pkgs, ... }:
 {
-  environment.systemPackages = with pkgs; [
-  	bat
-		zoxide
-	];
-	
 	programs.nushell = {
 		enable = true;
 		extraConfig = ''

@@ -119,6 +119,8 @@
     git
     curl
     gparted
+    bat
+    zoxide
   ];
 
   virtualisation.virtualbox.host.enable = true;
