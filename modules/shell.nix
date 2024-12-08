@@ -1,11 +1,20 @@
 # modules/shell.nix            
 { pkgs, ... }:
 {
+  environment.systemPackages = with pkgs; [
+  	bat
+		zoxide
+	];
+	
 	programs.nushell = {
-	enable = true;
-	extraConfig = ''
-	  $env.config.show_banner = false
-	'';
+		enable = true;
+		extraConfig = ''
+		  $env.config.show_banner = false
+		'';
+		shellAliases = {
+			cd = "zoxide";
+			cat = "bat";
+		};
 	};
 
 	programs.starship = {
