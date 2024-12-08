@@ -17,7 +17,7 @@
 
     # Add shell aliases
     shellAliases = {
-      cd = "zoxide";
+      cd = "z";
       cat = "bat";
     };
   };
