@@ -21,7 +21,12 @@
             home-manager.useUserPackages = true;
             home-manager.users.kronberger = { pkgs, ... }: {
               imports = [
-                ./modules
+                ./modules/sway.nix
+                ./modules/kitty.nix
+                ./modules/gtk.nix
+                ./modules/helix.nix
+                ./modules/shell.nix
+                ./modules/git.nix
               ];
               home.username = "kronberger";
               home.homeDirectory = "/home/kronberger";
