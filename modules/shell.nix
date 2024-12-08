@@ -3,14 +3,14 @@
   programs.nushell = {
     enable = true;
 
-		extraEnv = ''
-			zoxide init nushell | save -f ~/.zoxide.nu
-		'';
-	
+    extraEnv = ''
+      zoxide init nushell | save -f ~/.zoxide.nu
+    '';
+
     extraConfig = ''
       # Source zoxide.nu if it exists
-      if ($HOME/.zoxide.nu | path exists) {
-        source $HOME/.zoxide.nu
+      if (env HOME | path join .zoxide.nu | path exists) {
+        source (env HOME | path join .zoxide.nu)
       }
 
       # Disable banner
@@ -23,7 +23,7 @@
       cat = "bat";
     };
   };
-
+  
   programs.starship = {
     enable = true;
     enableNushellIntegration = true;
