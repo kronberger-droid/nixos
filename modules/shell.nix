@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
   programs.nushell = {
     enable = true;
@@ -8,11 +8,8 @@
     '';
 
     extraConfig = ''
-      # Source zoxide.nu if it exists
-      if (env HOME | path join .zoxide.nu | path exists) {
-        source (env HOME | path join .zoxide.nu)
-      }
-
+      source ~/.zoxide.nu
+     
       # Disable banner
       $env.config.show_banner = false
     '';

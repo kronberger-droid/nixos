@@ -67,6 +67,8 @@
                 element-desktop
                 caligula
                 gthumb
+                serpl
+                taskwarrior
               ];
 
               home.file.".config/swappy/config".text = ''

@@ -41,7 +41,7 @@ in
 
   home.packages = with pkgs; [
     # for sway
-    swaylock
+    swaylock-effects
     swayidle
     wl-clipboard
     mako
@@ -56,6 +56,7 @@ in
     swaycwd
     jq
     gron
+    libnotify
   ];
 
   services.mako = {
@@ -65,7 +66,7 @@ in
     borderColor = accentColor;
     backgroundColor = backgroundColor + "CC";
   };
-  
+ 
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
