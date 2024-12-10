@@ -32,6 +32,7 @@
       #cpu,
       #memory,
       #mode,
+      #idle_inhibitor,
       #network,
       #pulseaudio, 
       #temperature,
@@ -134,6 +135,7 @@
         "sway/language"
         "pulseaudio"
         "bluetooth"
+        "idle_inhibitor"
         "network"
         "cpu"
         "memory"
@@ -196,6 +198,13 @@
         format-muted = " {format_source}";
         format-source = "";
         format-source-muted = "";
+      };
+      "idle_inhibitor" = {
+          format = "{icon}";
+          format-icons = {
+              activated = "";
+              deactivated = "";
+          };
       };
       "sway/mode" = { format = ''<span style="italic">{}</span>''; };
       temperature = {
