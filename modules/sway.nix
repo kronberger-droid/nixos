@@ -66,7 +66,51 @@ in
     borderColor = accentColor;
     backgroundColor = backgroundColor + "CC";
   };
- 
+
+  programs.swaylock = {
+    enable = true;
+    package = pkgs.swaylock-effects;
+    settings = {
+      effect-blur = "7x5";
+      screenshots = true;
+      font-size = 24;
+      indicator-idle-visible = false;
+      inside-color = backgroundColor + "CC";
+      indicator-radius = 80;
+      ring-color = backgroundColor;
+      key-hl-color = accentColor;
+      show-failed-attempts = true;
+      fade-in = 0.2;
+      clock = true;
+    };
+  };
+
+  services.swayidle = {
+    enable = true;
+    systemdTarget = "sway-session.target";
+    timeouts = [
+      {
+        timeout = 295;
+        command = "${pkgs.libnotify}/bin/notify-send 'Locking in 5 seconds' -t 5000";
+      }
+      {
+        timeout = 300;
+        command = "${pkgs.swaylock-effects}/bin/swaylock";
+      }
+      {
+        timeout = 360;
+        command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
+        resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
+      }
+    ];
+    events = [
+      {
+        event = "before-sleep";
+        command = "${pkgs.swaylock-effects}/bin/swaylock";
+      }
+    ];
+  };
+  
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
@@ -85,7 +129,7 @@ in
       for_window [app_id = "floating_file_shell"] floating enable, sticky enable, resize set 1600 1000
       for_window [app_id = "org.gnome.Nautilus"] floating enable, sticky enable, resize set 1200 800
       for_window [app_id = "floating_shell"] floating enable, border pixel 1, sticky enable, resize set 900 700
-      for_window [instance = "megasync"] floating enable, sticky enable, move position cursor, move down 35
+      for_window [instance = "megasync"] floating enable, sticky enable, border pixel 0, move position cursor, move down 35
       for_window [app_id = "localsend_app"] floating enable, sticky enable, resize set 1200 800
       for_window [instance = "bitwarden"] floating enable, sticky enable, resize set 1200 800
       for_window [app_id = "org.speedcrunch"] floating enable, sticky enable, resize set 1200 800
@@ -148,7 +192,6 @@ in
       defaultWorkspace = "workspace ${ws1}";
       
       keybindings = lib.mkOptionDefault {
-        # "Mod4+Shift+x" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_file_shell -e ${pkgs.yazi}/bin/yazi";
         "${modifier}+Shift+x" = "exec nautilus";
         "${modifier}+Shift+s" = "exec ${pkgs.brave}/bin/brave";
         "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";

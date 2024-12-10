@@ -68,7 +68,7 @@
                 caligula
                 gthumb
                 serpl
-                taskwarrior
+                taskwarrior3
               ];
 
               home.file.".config/swappy/config".text = ''
