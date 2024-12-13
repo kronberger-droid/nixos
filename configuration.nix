@@ -47,10 +47,28 @@
     layout = "us";
     variant = "";
   };
-
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
+  xdg.portal = {
+    enable = true;
+    extraPortals = [ pkgs.xdg-desktop-portal-gtk ]; # Adds GTK portal for GTK-based applications
+      config = {
+        common.default = [ "wlr" "gtk" ]; # Sets the default portal order
+      };
+    wlr = {
+      enable = true;
+      settings = {
+        screencast = {
+          output_name = "HDMI-A-1";
+          max_fps = 60;
+          chooser_type = "simple";
+          chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -or";
+        };
+      }; 
+    };
+  };
+  
   # Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
 
@@ -121,6 +139,7 @@
     gparted
     bat
     zoxide
+    neovim
   ];
 
   virtualisation.virtualbox.host.enable = true;

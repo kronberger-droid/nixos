@@ -33,7 +33,9 @@
               programs.home-manager.enable = true;
               home.packages = with pkgs; [
                 thunderbird
+                # Browsers
                 brave
+                chromium
                 bitwarden-desktop
                 nautilus
                 obsidian
@@ -55,7 +57,6 @@
                 zotero-beta
                 onlyoffice-desktopeditors
                 nomachine-client
-                teams-for-linux
                 ltunify
                 pandoc
                 localsend
@@ -63,6 +64,7 @@
                 xdg-user-dirs
                 xdg-desktop-portal-wlr
                 xdg-desktop-portal
+                xdg-desktop-portal-gtk
                 speedcrunch
                 element-desktop
                 caligula
@@ -88,6 +90,8 @@
                 enable = true;
                 settings = { manager = { show_hidden = true; }; };
               };
+
+              services.megasync.enable = true;
 
               programs.vscode = {
                 enable = true;

@@ -87,7 +87,7 @@ in
 
   services.swayidle = {
     enable = true;
-    systemdTarget = "sway-session.target";
+    systemdTarget = "graphical-session.target";
     timeouts = [
       {
         timeout = 295;
@@ -95,7 +95,7 @@ in
       }
       {
         timeout = 300;
-        command = "${pkgs.swaylock-effects}/bin/swaylock";
+        command = "${pkgs.swaylock-effects}/bin/swaylock -f";
       }
       {
         timeout = 360;
@@ -106,7 +106,7 @@ in
     events = [
       {
         event = "before-sleep";
-        command = "${pkgs.swaylock-effects}/bin/swaylock";
+        command = "${pkgs.swaylock-effects}/bin/swaylock -f";
       }
     ];
   };
@@ -123,9 +123,6 @@ in
     '';
 
     extraConfig = ''
-      exec_always {
-        ${pkgs.megasync}/bin/megasync &
-      }
       for_window [app_id = "floating_file_shell"] floating enable, sticky enable, resize set 1600 1000
       for_window [app_id = "org.gnome.Nautilus"] floating enable, sticky enable, resize set 1200 800
       for_window [app_id = "floating_shell"] floating enable, border pixel 1, sticky enable, resize set 900 700
@@ -179,10 +176,11 @@ in
         };
       };
 
+      focus.mouseWarping = "container";
       window = {
         titlebar = false;
       };
-
+      
       menu = "rofi -show drun -theme /etc/nixos/configs/rofi/launcher/style-2.rasi";
 
       startup = [
@@ -213,16 +211,16 @@ in
         "${modifier}+0" = "workspace ${ws10}";
 
         # Move container to workspace
-        "${modifier}+Shift+1" = "move container to workspace ${ws1}";
-        "${modifier}+Shift+2" = "move container to workspace ${ws2}";
-        "${modifier}+Shift+3" = "move container to workspace ${ws3}";
-        "${modifier}+Shift+4" = "move container to workspace ${ws4}";
-        "${modifier}+Shift+5" = "move container to workspace ${ws5}";
-        "${modifier}+Shift+6" = "move container to workspace ${ws6}";
-        "${modifier}+Shift+7" = "move container to workspace ${ws7}";
-        "${modifier}+Shift+8" = "move container to workspace ${ws8}";
-        "${modifier}+Shift+9" = "move container to workspace ${ws9}";
-        "${modifier}+Shift+0" = "move container to workspace ${ws10}";
+        "${modifier}+Shift+1" = "move container to workspace ${ws1}; workspace ${ws1}";
+        "${modifier}+Shift+2" = "move container to workspace ${ws2}; workspace ${ws2}";
+        "${modifier}+Shift+3" = "move container to workspace ${ws3}; workspace ${ws3}";
+        "${modifier}+Shift+4" = "move container to workspace ${ws4}; workspace ${ws4}";
+        "${modifier}+Shift+5" = "move container to workspace ${ws5}; workspace ${ws5}";
+        "${modifier}+Shift+6" = "move container to workspace ${ws6}; workspace ${ws6}";
+        "${modifier}+Shift+7" = "move container to workspace ${ws7}; workspace ${ws7}";
+        "${modifier}+Shift+8" = "move container to workspace ${ws8}; workspace ${ws8}";
+        "${modifier}+Shift+9" = "move container to workspace ${ws9}; workspace ${ws9}";
+        "${modifier}+Shift+0" = "move container to workspace ${ws10}; workspace ${ws10}";
       };
       
       gaps = {
