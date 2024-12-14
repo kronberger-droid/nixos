@@ -95,18 +95,18 @@ in
       }
       {
         timeout = 300;
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f";
+        command = "${pkgs.swaylock-effects}/bin/swaylock -f &";
       }
       {
         timeout = 360;
-        command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
-        resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
+        command = "${pkgs.sway}/bin/swaymsg 'output HDMI-A-1 dpms off'";
+        resumeCommand = "${pkgs.sway}/bin/swaymsg 'output HDMI-A-1 dpms on'";
       }
     ];
     events = [
       {
         event = "before-sleep";
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f";
+        command = "${pkgs.swaylock-effects}/bin/swaylock -f &";
       }
     ];
   };

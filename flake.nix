@@ -71,6 +71,8 @@
                 gthumb
                 serpl
                 taskwarrior3
+                # Gaming 
+                dolphin-emu
               ];
 
               home.file.".config/swappy/config".text = ''
