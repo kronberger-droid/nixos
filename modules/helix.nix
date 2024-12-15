@@ -46,6 +46,7 @@
         config = {
           texlab = {
             rootDirectory = ".";
+            completion.matcher = "prefix";
             build = {
               onSave = true;
               forwardSearchAfter = true;

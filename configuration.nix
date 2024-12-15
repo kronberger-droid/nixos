@@ -140,6 +140,7 @@
     bat
     zoxide
     neovim
+    nmap
   ];
 
   virtualisation.virtualbox.host.enable = true;
