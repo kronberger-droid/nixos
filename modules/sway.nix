@@ -105,8 +105,8 @@ in
       }
       {
         timeout = 360;
-        command = "${pkgs.sway}/bin/swaymsg 'output HDMI-A-1 dpms off'";
-        resumeCommand = "${pkgs.sway}/bin/swaymsg 'output HDMI-A-1 dpms on'";
+        command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
+        resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
       }
     ];
     events = [
@@ -123,7 +123,7 @@ in
     extraConfigEarly = ''
       exec_always {
         ${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.8 --focused 1.0;
-        swaymsg 'output ${ouputName} bg /etc/nixos/configs/deathpaper.jpg fill'
+        swaymsg 'output ${outputName} bg /etc/nixos/configs/deathpaper.jpg fill'
         autotiling
       }
     '';
