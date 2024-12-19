@@ -23,7 +23,7 @@
         system = "x86_64-linux";
         modules = [
           ./hosts/t480s/configuration.nix
-          .modules/system/greetd.nix
+          ./modules/system/greetd.nix
           home-manager.nixosModules.home-manager
           ./modules/home-manager/kronberger.nix
         ];
