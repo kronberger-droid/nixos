@@ -41,7 +41,7 @@ in
 
   home.packages = with pkgs; [
     # for sway
-    swaylock-effects
+    swaylock
     swayidle
     wl-clipboard
     mako
@@ -69,10 +69,9 @@ in
 
   programs.swaylock = {
     enable = true;
-    package = pkgs.swaylock-effects;
+    package = pkgs.swaylock;
     settings = {
-      effect-blur = "7x5";
-      screenshots = true;
+      image = "/etc/nixos/configs/deathpaper.jpg";
       font-size = 24;
       indicator-idle-visible = false;
       inside-color = backgroundColor + "CC";
@@ -80,8 +79,6 @@ in
       ring-color = backgroundColor;
       key-hl-color = accentColor;
       show-failed-attempts = true;
-      fade-in = 0.2;
-      clock = true;
     };
   };
 

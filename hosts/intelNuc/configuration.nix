@@ -127,6 +127,7 @@
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-emoji
+    liberation_ttf
   ];
 
   # List packages installed in system profile. To search, run:

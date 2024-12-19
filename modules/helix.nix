@@ -6,6 +6,8 @@
     texlab
     tectonic
     ltex-ls
+    texlivePackages.latexindent
+    zathura
   ];
 
   programs.helix = {
@@ -15,13 +17,16 @@
       theme = "base16_default";
       editor = {
         soft-wrap.enable = true;
+        cursor-shape = {
+          insert = "bar";
+        };
         lsp = {
           display-messages = true;
           display-inlay-hints = true;
         };
       };
     };
-    
+
     languages = {
       language = [{
         name = "latex";
@@ -45,6 +50,10 @@
         file-types = [ "latex" ];
         config = {
           texlab = {
+            latexindent = {
+              modifyLineBreaks = true;
+              
+            };
             rootDirectory = ".";
             completion.matcher = "prefix";
             build = {
