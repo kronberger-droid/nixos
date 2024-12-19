@@ -140,6 +140,7 @@
         "cpu"
         "memory"
         "temperature"
+        "battery"
         "tray"        
         "clock"
         "custom/power"
@@ -176,10 +177,10 @@
       };
       network = {
         interval = 1;
-        format-alt = "{ifname}: {ipaddr}/{cidr}";
         format-disconnected = "Disconnected ⚠";
         format-ethernet = "{ipaddr}/{cidr}  ";
-        format-wifi = "{essid} ({signalStrength}%) ";
+        format-wifi = "{essid} ";
+        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.networkmanager}/bin/nmtui";
       };
       pulseaudio = {
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.pulsemixer}/bin/pulsemixer";
@@ -207,10 +208,14 @@
           };
       };
       "sway/mode" = { format = ''<span style="italic">{}</span>''; };
+      "battery" = {
+        format = "{capacity}% {icon}";
+        format-icons = "󰁹";
+      };
       temperature = {
         critical-threshold = 80;
         format = "{temperatureC}°C {icon}";
-        format-icons = [ "" "" "" ];
+        format-icons = "";
       };
     }];
   };
