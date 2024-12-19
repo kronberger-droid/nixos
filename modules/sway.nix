@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, host, ... }:
 
 let
   color0 = "#1e1e1e";
@@ -34,14 +34,14 @@ let
   ws9 = "9 social";
   ws10 = "10 git";
 
-    # Get the hostname using `builtins.hostname`
-  hostname = builtins.getEnv "HOSTNAME";
-
-  # Use match for case-like behavior
-  outputName = pkgs.lib.match hostname {
-    "intelNuc" = "HMDI-A-1";
-    "t480s" = "eDP-1";
-  };
+  # Determine the output name based on the hostname
+  outputName =
+  if host == "intelNuc" then
+    "HDMI-A-1"
+  else if host == "t480s" then
+    "eDP-1"
+  else
+    throw "Unknown hostname: ${host}";
 in
 {
   imports = [

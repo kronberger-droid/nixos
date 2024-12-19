@@ -12,6 +12,9 @@
     nixosConfigurations = {
       intelNuc = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
+        specialArgs = {
+          host = "intelNuc";
+        };
         modules = [
           ./hosts/intelNuc/configuration.nix
           ./modules/system/greetd.nix
@@ -21,6 +24,9 @@
       
       t480s = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
+        specialArgs = {
+          host = "t480s";
+        };
         modules = [
           ./hosts/t480s/configuration.nix
           ./modules/system/greetd.nix
