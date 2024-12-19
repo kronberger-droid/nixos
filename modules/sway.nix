@@ -33,6 +33,15 @@ let
   ws8 = "8 studying";
   ws9 = "9 social";
   ws10 = "10 git";
+
+    # Get the hostname using `builtins.hostname`
+  hostname = builtins.getEnv "HOSTNAME";
+
+  # Use match for case-like behavior
+  outputName = pkgs.lib.match hostname {
+    "intelNuc" = "HMDI-A-1";
+    "t480s" = "eDP-1";
+  };
 in
 {
   imports = [
@@ -114,7 +123,7 @@ in
     extraConfigEarly = ''
       exec_always {
         ${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.8 --focused 1.0;
-        swaymsg 'output HDMI-A-1 bg /etc/nixos/configs/deathpaper.jpg fill'
+        swaymsg 'output ${ouputName} bg /etc/nixos/configs/deathpaper.jpg fill'
         autotiling
       }
     '';
@@ -179,10 +188,6 @@ in
       };
       
       menu = "rofi -show drun -theme /etc/nixos/configs/rofi/launcher/style-2.rasi";
-
-      startup = [
-        { command = "swaymsg output HDMI-A-1 bg /etc/nixos/configs/sway/deathpaper.jpg fill"; }
-      ];
 
       defaultWorkspace = "workspace ${ws1}";
       
