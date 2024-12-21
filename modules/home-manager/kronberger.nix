@@ -60,7 +60,7 @@
         taskwarrior3
         translate-shell
       ];
-
+      
       home.file.".config/swappy/config".text = ''
         [Default]
         save_dir=$HOME/Pictures/Screenshots
