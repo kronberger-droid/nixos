@@ -1,5 +1,7 @@
 { pkgs, inputs, host, ... }:
-
+let
+  isNotebook = host == "t480s";
+in
 {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
@@ -25,9 +27,10 @@
         brave
         chromium
         bitwarden-desktop
-        nautilus
+        nemo
         obsidian
         github-desktop
+        firefox
         libsecret
         yazi
         bluetuith
@@ -46,7 +49,6 @@
         onlyoffice-desktopeditors
         nomachine-client
         ltunify
-        pandoc
         localsend
         okular
         xdg-user-dirs
@@ -79,8 +81,10 @@
         settings = { manager = { show_hidden = true; }; };
       };
 
-      services.megasync.enable = true;
-
+      home.file.".config/way-displays/cfg.yaml" = if isNotebook then {
+        source = ../../configs/way-displays/cfg.yaml;
+      } else null;
+      
       home.stateVersion = "24.11";
     };
   };
