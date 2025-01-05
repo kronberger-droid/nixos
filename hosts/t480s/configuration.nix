@@ -2,8 +2,16 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
-
+{ pkgs, lib, host, ... }:
+let
+  outputName =
+    if host == "intelNuc" then
+      "HDMI-A-1"
+    else if host == "t480s" then
+      "eDP-1"
+    else
+      throw "Unknown hostname: ${host}";
+in
 {
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
    
@@ -12,34 +20,38 @@
   ];
 
   # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.plymouth.enable = true;
+  boot = {
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+    plymouth.enable = true;
+  };
   
-  networking.networkmanager.enable = true;
-  
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+  networking = {
+    networkmanager.enable = true;
+    hostName = host;
+  };  
 
   # Set your time zone.
   time.timeZone = "Europe/Vienna";
 
   # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "de_AT.UTF-8";
-    LC_IDENTIFICATION = "de_AT.UTF-8";
-    LC_MEASUREMENT = "de_AT.UTF-8";
-    LC_MONETARY = "de_AT.UTF-8";
-    LC_NAME = "de_AT.UTF-8";
-    LC_NUMERIC = "de_AT.UTF-8";
-    LC_PAPER = "de_AT.UTF-8";
-    LC_TELEPHONE = "de_AT.UTF-8";
-    LC_TIME = "de_AT.UTF-8";
+  i18n = {
+    defaultLocale = "en_US.UTF-8";
+    extraLocaleSettings = {
+      LC_ADDRESS = "de_AT.UTF-8";
+      LC_IDENTIFICATION = "de_AT.UTF-8";
+      LC_MEASUREMENT = "de_AT.UTF-8";
+      LC_MONETARY = "de_AT.UTF-8";
+      LC_NAME = "de_AT.UTF-8";
+      LC_NUMERIC = "de_AT.UTF-8";
+      LC_PAPER = "de_AT.UTF-8";
+      LC_TELEPHONE = "de_AT.UTF-8";
+      LC_TIME = "de_AT.UTF-8";
+    };
   };
-
+  
   security.polkit.enable = true;
 
   # Configure keymap in X11
@@ -60,7 +72,7 @@
       enable = true;
       settings = {
         screencast = {
-          output_name = "HDMI-A-1";
+          output_name = outputName;
           max_fps = 60;
           chooser_type = "simple";
           chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -or";
@@ -77,6 +89,8 @@
     powerOnBoot = true;
   };
 
+  hardware.firmware = [ pkgs.linux-firmware ];
+
   services.gvfs.enable = true;
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.greetd.enableGnomeKeyring = true;
@@ -84,6 +98,13 @@
   security.rtkit.enable = true;
 
   security.pam.services.swaylock = {};
+  
+  programs.xwayland.enable = true;
+  services.xserver.enable = true;
+
+
+  hardware.opengl.enable = true;
+  services.xserver.videoDrivers = [ "modesetting" ];
   
   services.pipewire = {
     enable = true;
@@ -106,11 +127,9 @@
     createHome = true;
     isNormalUser = true;
     description = "Kronberger";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "vboxusers" ];
     shell = pkgs.nushell;  
   };
-
-  security.soteria.enable = true;
   
   environment.shells = [ pkgs.nushell ];
   
@@ -121,6 +140,8 @@
     allowUnfree = true;
   };
 
+  programs.nix-ld.enable = true;
+  
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
     dejavu_fonts # mind the underscore! most of the packages are named with a hypen, not this one however
@@ -145,9 +166,10 @@
   ];
 
   virtualisation.virtualbox.host.enable = true;
+  virtualisation.virtualbox.host.enableExtensionPack = true;
+
+  programs.dconf.enable = true;  
   
-  programs.dconf.enable = true;
-    
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;

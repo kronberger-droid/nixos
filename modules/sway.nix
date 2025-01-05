@@ -42,6 +42,8 @@ let
     "eDP-1"
   else
     throw "Unknown hostname: ${host}";
+
+  isNotebook = host == "480s";
 in
 {
   imports = [
@@ -53,7 +55,9 @@ in
     swaylock
     swayidle
     wl-clipboard
+    brightnessctl
     mako
+    wlsunset
     grim
     rofi
     slurp
@@ -66,6 +70,8 @@ in
     jq
     gron
     libnotify
+    way-displays
+    swaybg
   ];
 
   services.mako = {
@@ -122,26 +128,36 @@ in
     wrapperFeatures.gtk = true;
     extraConfigEarly = ''
       exec_always {
-        ${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.8 --focused 1.0;
-        swaymsg 'output ${outputName} bg /etc/nixos/configs/deathpaper.jpg fill'
-        autotiling
+        --no-startup-id sleep 30 && ${pkgs.megasync} &
+        --no-startup-id sleep 33 && ${pkgs.megasync} &        
+        ${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.8 --focused 1.0
+        ${pkgs.swaybg}/bin/swaybg -i /etc/nixos/configs/deathpaper.jpg -m fill
+        ${pkgs.autotiling}/bin/autotiling
+        ${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4
       }
     '';
 
     extraConfig = ''
       for_window [app_id = "floating_file_shell"] floating enable, sticky enable, resize set 1600 1000
-      for_window [app_id = "org.gnome.Nautilus"] floating enable, sticky enable, resize set 1200 800
+      for_window [app_id = "nemo"] floating enable, sticky enable, resize set 900 700
       for_window [app_id = "floating_shell"] floating enable, border pixel 1, sticky enable, resize set 900 700
       for_window [instance = "megasync"] floating enable, sticky enable, border pixel 0, move position cursor, move down 35
       for_window [app_id = "localsend_app"] floating enable, sticky enable, resize set 1200 800
       for_window [instance = "bitwarden"] floating enable, sticky enable, resize set 1200 800
       for_window [app_id = "org.speedcrunch"] floating enable, sticky enable, resize set 1200 800
+      
+      bindgesture swipe:3:right workspace next
+      bindgesture swipe:3:left workspace prev
     '';
 
     config = rec {
       modifier = "Mod4"; # Super key
       terminal = "kitty";
 
+      startup = lib.optional isNotebook {
+        command = "way-displays > /tmp/way-displays.\${XDG_VTNR}.\${USER}.log 2>&1 &";
+      };
+      
       colors = {
         background = backgroundColor;
 
@@ -192,7 +208,7 @@ in
       defaultWorkspace = "workspace ${ws1}";
       
       keybindings = lib.mkOptionDefault {
-        "${modifier}+Shift+x" = "exec nautilus";
+        "${modifier}+Shift+x" = "exec ${pkgs.nemo}/bin/nemo";
         "${modifier}+Shift+s" = "exec ${pkgs.brave}/bin/brave";
         "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
         "${modifier}+Shift+c" = "exec swaymsg reload";

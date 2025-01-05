@@ -1,4 +1,8 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, host, lib, ... }:
+
+let
+  isNotebook = host == "t480s";
+in
 
 {
   programs.waybar = {
@@ -34,19 +38,17 @@
       #mode,
       #idle_inhibitor,
       #network,
-      #pulseaudio, 
+      #pulseaudio,
+      #backlight, 
       #temperature,
+      #bluetooth,
       #custom-menu,
       #custom-power,
+      #sway-language,
       #tray {
           padding-left: 8px;
           padding-right: 8px;
       }
-
-      /* -----------------------------------------------------------------------------
-       * Module styles with color adjustments - using lighter text colors for better visibility
-       * -------------------------------------------------------------------------- */
-
       /* Highlighting the focused workspace and clock */
       #custom-menu,
       #custom-power, 
@@ -129,58 +131,83 @@
       layer = "top";
       position = "top";
       tray = { spacing = 10; };
-      modules-center = [ "sway/window" ];
       modules-left = ["custom/menu" "sway/workspaces" "sway/mode" ];
-      modules-right = [
-        "sway/language"
-        "pulseaudio"
-        "bluetooth"
-        "idle_inhibitor"
-        "network"
-        "cpu"
-        "memory"
-        "temperature"
-        "tray"        
-        "clock"
-        "custom/power"
-      ];
+        modules-right = [
+          "sway/language"
+          "bluetooth"
+          "idle_inhibitor"
+          "network"
+          "pulseaudio"
+          "cpu"
+        ] ++ lib.optionals (!isNotebook) [
+          "memory"
+          "temperature"
+        ] ++ lib.optionals (isNotebook) [
+          "battery"
+          "backlight"
+        ] ++ [
+          "tray"
+          "clock"
+          "custom/power"
+        ];      
       "sway/language" = {
-        format = "{} ";
+        format = "{}  ";
       };
+      
       clock = {
         interval = 60;
         format = "{:%e %b %Y %H:%M}";      
       };
+      
       cpu = {
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
         format = "{usage}% ";
         tooltip = false;
       };
+      
       "custom/menu" = {
         format = "  ";
         on-click = "${pkgs.rofi}/bin/rofi -show drun -theme /etc/nixos/configs/rofi/launcher/style-2.rasi";
         tooltip = false;
       };
+      
       "custom/power" = {
         format = "  ";
         on-click = "${pkgs.sway}/bin/swaymsg exec /etc/nixos/configs/rofi/powermenu/powermenu.sh";
         tooltip = false;
       };
+      
       memory = { format = "{}% "; };
+      
       bluetooth = {
-        format =  "󰂯";
+        format = "󰂯";
         format-disabled = "󰂲";
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.bluetuith}/bin/bluetuith";
         on-click-right = "rfkill toggle bluetooth";
         tooltip-format = "{}";
       };
+      
       network = {
-        interval = 1;
-        format-alt = "{ifname}: {ipaddr}/{cidr}";
-        format-disconnected = "Disconnected ⚠";
-        format-ethernet = "{ipaddr}/{cidr}  ";
-        format-wifi = "{essid} ({signalStrength}%) ";
+        interval = 5;
+        format-wifi = "{icon}";
+        format-ethernet = "󰈀";
+        format-disconnected = "󰖪";
+        format-disabled = "󰀝";
+        format-icons = [
+          "󰤯"
+          "󰤟"
+          "󰤢"
+          "󰤥"
+          "󰤨"
+        ];
+        tooltip-format = "{icon} {ifname}: {ipaddr}";
+        tooltip-format-ethernet = "{icon} {ifname}: {ipaddr}";
+        tooltip-format-wifi = "{icon} {ifname} ({essid}): {ipaddr}";
+        tooltip-format-disconnected = "{icon} disconnected";
+        tooltip-format-disabled = "{icon} disabled";
+        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.networkmanager}/bin/nmtui connect";
       };
+      
       pulseaudio = {
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.pulsemixer}/bin/pulsemixer";
         format = "{volume}% {icon} {format_source}";
@@ -199,6 +226,7 @@
         format-source = "";
         format-source-muted = "";
       };
+      
       "idle_inhibitor" = {
           format = "{icon}";
           format-icons = {
@@ -206,11 +234,29 @@
               deactivated = "";
           };
       };
+      
       "sway/mode" = { format = ''<span style="italic">{}</span>''; };
+      
+      "battery" = {
+        interval = 30;
+        states = {
+          warning = 30;
+          critical = 15;
+        };
+        format = "{capacity}% {icon}";
+        format-icons = [ "󱃍" "󰁺" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
+      };
+      
       temperature = {
         critical-threshold = 80;
         format = "{temperatureC}°C {icon}";
-        format-icons = [ "" "" "" ];
+        format-icons = "";
+      };
+      backlight = {
+        format = "{percent}% {icon}";
+        format-icons = ["󰃞" "󰃟" "󰃠"];
+        on-scroll-up = "${pkgs.brightnessctl}/bin/brightnessctl set +50";
+        on-scroll-down = "${pkgs.brightnessctl}/bin/brightnessctl set 50-";
       };
     }];
   };
