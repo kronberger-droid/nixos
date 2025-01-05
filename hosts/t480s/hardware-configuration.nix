@@ -13,6 +13,8 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
+  boot.kernelParams = [ "nowatchdog" ];
+  
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/512a8054-302f-460a-b2bf-6a3d28e8c42f";
       fsType = "ext4";

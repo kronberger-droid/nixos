@@ -3,7 +3,6 @@
 {
   qt.enable = true;
 
-  
   home.pointerCursor = {
     gtk.enable = true;
     package = pkgs.quintom-cursor-theme;
