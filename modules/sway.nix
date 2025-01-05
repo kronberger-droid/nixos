@@ -215,6 +215,7 @@ in
         "${modifier}+Shift+e" = "exec /etc/nixos/configs/rofi/powermenu/powermenu.sh";
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
         "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
+        "${modifier}+Return" = "exec bash -c 'kitty --working-directory $(/etc/nixos/scripts/cwd.sh)'";
         
         # Workspace switching
         "${modifier}+1" = "workspace ${ws1}";
