@@ -43,7 +43,7 @@ let
   else
     throw "Unknown hostname: ${host}";
 
-  isNotebook = host == "480s";
+  isNotebook = host == "t480s";
 in
 {
   imports = [
