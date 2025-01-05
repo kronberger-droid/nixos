@@ -42,6 +42,8 @@ let
     "eDP-1"
   else
     throw "Unknown hostname: ${host}";
+
+  isNotebook = host == "480s";
 in
 {
   imports = [
@@ -152,11 +154,10 @@ in
       modifier = "Mod4"; # Super key
       terminal = "kitty";
 
-      startup = [
-        {
-          command = "way-displays > /tmp/way-displays.\${XDG_VTNR}.\${USER}.log 2>&1 &";
-        }
-      ];
+      startup = lib.optional isNotebook {
+        command = "way-displays > /tmp/way-displays.\${XDG_VTNR}.\${USER}.log 2>&1 &";
+      };
+      
       colors = {
         background = backgroundColor;
 
