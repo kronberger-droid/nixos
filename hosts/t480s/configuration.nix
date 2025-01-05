@@ -82,7 +82,7 @@ in
   };
   
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
 
   hardware.bluetooth = {
     enable = true;
@@ -100,12 +100,7 @@ in
   security.pam.services.swaylock = {};
   
   programs.xwayland.enable = true;
-  services.xserver.enable = true;
 
-
-  hardware.opengl.enable = true;
-  services.xserver.videoDrivers = [ "modesetting" ];
-  
   services.pipewire = {
     enable = true;
     alsa.enable = true;
