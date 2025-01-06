@@ -33,7 +33,7 @@ AUTO_SCALE_MIN: 1.0
 # Auto scale may be overridden for each display.
 SCALE:
   - NAME_DESC: 'InfoVision Optoelectronics (Kunshan) Co.,Ltd China 0x057D (eDP-1)'
-    SCALE: 1.25
+    SCALE: 1.2
     
   - NAME_DESC: 'Hewlett Packard HP E241i CN44450K5L (HDMI-A-2)'
     SCALE: 1.0
