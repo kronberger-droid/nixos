@@ -70,8 +70,9 @@ in
     jq
     gron
     libnotify
-    way-displays
     swaybg
+  ] ++ lib.optionals isNotebook [
+    way-displays
   ];
 
   services.mako = {

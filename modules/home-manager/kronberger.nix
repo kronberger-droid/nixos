@@ -1,4 +1,4 @@
-{ pkgs, inputs, host, ... }:
+{ lib, pkgs, inputs, host, ... }:
 let
   isNotebook = host == "t480s";
 in
@@ -59,32 +59,31 @@ in
         caligula
         gthumb
         serpl
-        taskwarrior3
         translate-shell
       ];
       
-      home.file.".config/swappy/config".text = ''
-        [Default]
-        save_dir=$HOME/Pictures/Screenshots
-        save_filename_format=swappy-%Y-%m-%d-%H-%M-%S.png
-        show_panel=true
-        line_size=10
-        text_size=15
-        text_font=monospace
-        paint_mode=rectangle
-        early_exit=true
-        fill_shape=true
-      '';
+      home.file = {
+        ".config/swappy/config".text = ''
+          [Default]
+          save_dir=$HOME/Pictures/Screenshots
+          save_filename_format=swappy-%Y-%m-%d-%H-%M-%S.png
+          show_panel=true
+          line_size=10
+          text_size=15
+          text_font=monospace
+          paint_mode=rectangle
+          early_exit=true
+          fill_shape=true
+        '';
+      } // lib.optionalAttrs isNotebook {
+        ".config/way-displays/cfg.yaml".source = ../../configs/way-displays/cfg.yaml;
+      };
 
       programs.yazi = {
         enable = true;
         settings = { manager = { show_hidden = true; }; };
       };
-
-      home.file.".config/way-displays/cfg.yaml" = if isNotebook then {
-        source = ../../configs/way-displays/cfg.yaml;
-      } else null;
-      
+     
       home.stateVersion = "24.11";
     };
   };

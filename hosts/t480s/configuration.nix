@@ -139,7 +139,7 @@ in
   
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
-    dejavu_fonts # mind the underscore! most of the packages are named with a hypen, not this one however
+    dejavu_fonts
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-emoji
