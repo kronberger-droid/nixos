@@ -13,16 +13,14 @@ in
           border: none;
           border-radius: 15;
           min-height: 0;
-          margin-left: 2px;
-          margin-right: 2px;
           padding: 1px;
-          font-family: "JetBrainsMono NF", "Roboto Mono", sans-serif;
       }
 
       /* The whole bar with new background transparency */
       window#waybar {
           background: transparent; /* dark grey with 90% opacity */
           color: rgba(223, 225, 232, 1); /* light grey, full opacity for readability */
+          font-family: "JetBrainsMono NF", sans-serif;
           font-size: 13px;
       }
 
@@ -42,12 +40,12 @@ in
       #backlight, 
       #temperature,
       #bluetooth,
+      #sway-language,
       #custom-menu,
       #custom-power,
-      #sway-language,
       #tray {
-          padding-left: 8px;
-          padding-right: 8px;
+          padding: 0px 5px;
+          margin: 0px 5px;
       }
       /* Highlighting the focused workspace and clock */
       #custom-menu,
@@ -151,7 +149,7 @@ in
           "custom/power"
         ];      
       "sway/language" = {
-        format = "{}  ";
+        format = "{} ";
       };
       
       clock = {
@@ -183,14 +181,13 @@ in
         format = "󰂯";
         format-disabled = "󰂲";
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.bluetuith}/bin/bluetuith";
-        on-click-right = "rfkill toggle bluetooth";
-        tooltip-format = "{}";
+        # on-click-right = "rfkill toggle bluetooth";
       };
       
       network = {
         interval = 5;
         format-wifi = "{icon}";
-        format-ethernet = "󰈀";
+        format-ethernet = if isNotebook then "" else "{ipaddr} ";
         format-disconnected = "󰖪";
         format-disabled = "󰀝";
         format-icons = [
