@@ -27,7 +27,7 @@ in
         brave
         chromium
         bitwarden-desktop
-        nemo
+        nemo-with-extensions
         obsidian
         github-desktop
         firefox

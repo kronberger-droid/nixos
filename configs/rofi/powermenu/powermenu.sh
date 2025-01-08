@@ -1,21 +1,12 @@
 #!/usr/bin/env bash
 
-## Author : Aditya Shakya (adi1090x)
-## Github : @adi1090x
-#
-## Rofi   : Power Menu
-#
-## Available Styles
-#
-## style-1   style-2   style-3   style-4   style-5
-
 # Current Theme
 dir="/etc/nixos/configs/rofi/powermenu"
 theme='style-1'
 
 # CMDs
-uptime="`uptime -p | sed -e 's/up //g'`"
-host=`hostname`
+uptime=$(awk '{uptime=$1; h=int(uptime/3600); m=int((uptime%3600)/60); s=int(uptime%60); printf "%dh %dm %ds\n", h, m, s}' /proc/uptime)
+host=$(hostname)
 
 # Options
 shutdown='󰐥 Shutdown'
@@ -32,7 +23,7 @@ rofi_cmd() {
 	rofi -dmenu \
 		-p "$host" \
 		-mesg "Uptime: $uptime" \
-		-theme ${dir}/${theme}.rasi
+		-theme "${dir}/${theme}.rasi"
 }
 
 # Confirmation CMD
@@ -45,7 +36,7 @@ confirm_cmd() {
 		-dmenu \
 		-p 'Confirmation' \
 		-mesg 'Are you Sure?' \
-		-theme ${dir}/${theme}.rasi
+		-theme "${dir}/${theme}.rasi"
 }
 
 # Ask for confirmation
@@ -90,19 +81,19 @@ case ${chosen} in
 		run_cmd --reboot
         ;;
     $lock)
-		if [[ -x '/usr/bin/betterlockscreen' ]]; then
+		if [[ -x '/usr/bin/swaylock' ]]; then
+			swaylock
+		elif [[ -x '/usr/bin/betterlockscreen' ]]; then
 			betterlockscreen -l
 		elif [[ -x '/usr/bin/i3lock' ]]; then
 			i3lock
-		elif [[ -x '/usr/bin/swaylock' ]]; then
-			swaylock
 		fi
         ;;
     $suspend)
 		run_cmd --suspend
         ;;
   	$hibernate)
-  	run_cmd --hibernate
+  		run_cmd --hibernate
   			;;
     $logout)
 		run_cmd --logout
