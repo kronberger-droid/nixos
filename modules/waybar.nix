@@ -40,9 +40,9 @@ in
       #backlight, 
       #temperature,
       #bluetooth,
-      #sway-language,
       #custom-menu,
       #custom-power,
+      #language,
       #tray {
           padding: 0px 5px;
           margin: 0px 5px;
@@ -149,9 +149,12 @@ in
           "custom/power"
         ];      
       "sway/language" = {
-        format = "{} ";
+        format = "{}  ";
+        on-click = "${pkgs.sway}/bin/swaymsg input type:keyboard xkb_switch_layout next";
       };
-      
+      "custom/seperator" = {
+        format = "|";
+      };
       clock = {
         interval = 60;
         format = "{:%e %b %Y %H:%M}";      
@@ -181,7 +184,7 @@ in
         format = "󰂯";
         format-disabled = "󰂲";
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.bluetuith}/bin/bluetuith";
-        # on-click-right = "rfkill toggle bluetooth";
+        on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
       };
       
       network = {
@@ -240,6 +243,7 @@ in
           warning = 30;
           critical = 15;
         };
+        format-charging = "{capacity}% 󰂄";
         format = "{capacity}% {icon}";
         format-icons = [ "󱃍" "󰁺" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
       };

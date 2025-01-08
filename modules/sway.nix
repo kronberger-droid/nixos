@@ -103,15 +103,15 @@ in
     systemdTarget = "graphical-session.target";
     timeouts = [
       {
-        timeout = 295;
+        timeout = 395;
         command = "${pkgs.libnotify}/bin/notify-send 'Locking in 5 seconds' -t 5000";
       }
       {
-        timeout = 300;
+        timeout = 400;
         command = "${pkgs.swaylock-effects}/bin/swaylock -f &";
       }
       {
-        timeout = 360;
+        timeout = 460;
         command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
         resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
       }
@@ -129,8 +129,7 @@ in
     wrapperFeatures.gtk = true;
     extraConfigEarly = ''
       exec_always {
-        --no-startup-id sleep 30 && ${pkgs.megasync} &
-        --no-startup-id sleep 33 && ${pkgs.megasync} &        
+        ${pkgs.megasync}/bin/megasync && ${pkgs.megasync}/bin/megasync 
         ${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.8 --focused 1.0
         ${pkgs.swaybg}/bin/swaybg -i /etc/nixos/configs/deathpaper.jpg -m fill
         ${pkgs.autotiling}/bin/autotiling
@@ -209,7 +208,7 @@ in
       defaultWorkspace = "workspace ${ws1}";
       
       keybindings = lib.mkOptionDefault {
-        "${modifier}+Shift+x" = "exec ${pkgs.nemo}/bin/nemo";
+        "${modifier}+Shift+x" = "exec ${pkgs.nemo-with-extensions}/bin/nemo";
         "${modifier}+Shift+s" = "exec ${pkgs.brave}/bin/brave";
         "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
         "${modifier}+Shift+c" = "exec swaymsg reload";
