@@ -16,11 +16,25 @@
     settings = {
       theme = "base16_default";
       editor = {
+        end-of-line-diagnostics = "hint";
         soft-wrap.enable = true;
         cursor-shape = {
           insert = "bar";
+          normal = "block";
+          select = "underline";
+        };
+        indent-guides = {
+          character = "╎";
+        };
+        statusline = {
+          left = [ "mode" "spinner" "version-control" "file-name" ];
+        };
+        inline-diagnostics = {
+          cursor-line = "error";
+          other-lines = "disable";
         };
         lsp = {
+          auto-signature-help = false;
           display-messages = true;
           display-inlay-hints = true;
         };

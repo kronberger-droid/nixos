@@ -62,6 +62,7 @@ in
         translate-shell
         freecad-wayland
         lxqt.lxqt-policykit
+        rpi-imager
       ];
       
       home.file = {
