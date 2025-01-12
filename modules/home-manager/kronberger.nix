@@ -60,6 +60,7 @@ in
         gthumb
         serpl
         translate-shell
+        rpi-imager
       ];
       
       home.file = {
