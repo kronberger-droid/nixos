@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, ... }:
 
 {
   home.packages = with pkgs; [
@@ -35,53 +35,55 @@
         "ltex"
         ];
       }];
-      language-server.nil = {
-        command = "${pkgs.nil}/bin/nil";
-        file-types = [ "nix" ];
-      };
+      language-server = {
+        nil = {
+          command = "${pkgs.nil}/bin/nil";
+          file-types = [ "nix" ];
+        };
       
-      language-server.ltex = {
-        command = "${pkgs.ltex-ls}/bin/ltex-ls";
-        file-types = [ "latex" ];
-      };
+        ltex = {
+          command = "${pkgs.ltex-ls}/bin/ltex-ls";
+          file-types = [ "latex" ];
+        };
       
-      language-server.texlab = {
-        command = "${pkgs.texlab}/bin/texlab";
-        file-types = [ "latex" ];
-        config = {
-          texlab = {
-            latexindent = {
-              modifyLineBreaks = true;
-              
-            };
-            rootDirectory = ".";
-            completion.matcher = "prefix";
-            build = {
-              onSave = true;
-              forwardSearchAfter = true;
-              executable = "${pkgs.tectonic}/bin/tectonic";
-              args = [
-                "-X"
-                "compile"
-                "main.tex"
-                "--synctex"
-                "--keep-logs"
-                "--outdir=build"
-              ];
-              directory = "build";
-              auxDirectory = "build";
-            };
-            forwardSearch = {
-              executable = "${pkgs.zathura}/bin/zathura";
-              args = [
-                "--synctex-forward"
-                "%l:1:%f"
-                "build/main.pdf"
-              ];
-            };
-            chktex = {
-              onOpenAndSave = true;
-              onEdit = true;
+        texlab = {
+          command = "${pkgs.texlab}/bin/texlab";
+          file-types = [ "latex" ];
+          config = {
+            texlab = {
+              latexindent = {
+                modifyLineBreaks = true;
+            
+              };
+              rootDirectory = ".";
+              completion.matcher = "prefix";
+              build = {
+                onSave = true;
+                forwardSearchAfter = true;
+                executable = "${pkgs.tectonic}/bin/tectonic";
+                args = [
+                  "-X"
+                  "compile"
+                  "main.tex"
+                  "--synctex"
+                  "--keep-logs"
+                  "--outdir=build"
+                ];
+                directory = "build";
+                auxDirectory = "build";
+              };
+              forwardSearch = {
+                executable = "${pkgs.zathura}/bin/zathura";
+                args = [
+                  "--synctex-forward"
+                  "%l:1:%f"
+                  "build/main.pdf"
+                ];
+              };
+              chktex = {
+                onOpenAndSave = true;
+                onEdit = true;
+              };
             };
           };
         };

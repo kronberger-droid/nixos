@@ -60,6 +60,8 @@ in
         gthumb
         serpl
         translate-shell
+        freecad-wayland
+        lxqt.lxqt-policykit
       ];
       
       home.file = {

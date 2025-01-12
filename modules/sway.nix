@@ -75,14 +75,17 @@ in
     way-displays
   ];
 
-  services.mako = {
-    enable = true;
-    defaultTimeout = 10000;
-    borderRadius = 8;
-    borderColor = accentColor;
-    backgroundColor = backgroundColor + "CC";
+  services = {
+    gnome-keyring.enable = true;
+    mako = {
+      enable = true;
+      defaultTimeout = 10000;
+      borderRadius = 8;
+      borderColor = accentColor;
+      backgroundColor = backgroundColor + "CC";
+    };
   };
-
+  
   programs.swaylock = {
     enable = true;
     package = pkgs.swaylock;
@@ -134,6 +137,7 @@ in
         ${pkgs.swaybg}/bin/swaybg -i /etc/nixos/configs/deathpaper.jpg -m fill
         ${pkgs.autotiling}/bin/autotiling
         ${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4
+        ${pkgs.lxqt.lxqt-policykit}/bin/lxqt-policykit-agent
       }
     '';
 
@@ -145,6 +149,9 @@ in
       for_window [app_id = "localsend_app"] floating enable, sticky enable, resize set 1200 800
       for_window [instance = "bitwarden"] floating enable, sticky enable, resize set 1200 800
       for_window [app_id = "org.speedcrunch"] floating enable, sticky enable, resize set 1200 800
+      for_window [instance = "gpartedbin"] floating enable, sticky enable, resize set 1200 800
+
+      for_window [title="Authentication Required"] floating enable, sticky enable, resize set 1200 800
       
       bindgesture swipe:3:right workspace next
       bindgesture swipe:3:left workspace prev
@@ -217,6 +224,15 @@ in
         "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
         "${modifier}+Return" = "exec bash -c 'kitty --working-directory $(/etc/nixos/scripts/cwd.sh)'";
         
+        # Brightness control
+        "XF86MonBrightnessDown" = "exec ${pkgs.light}/bin/light -U 10";
+        "XF86MonBrightnessUp" = "exec ${pkgs.light}/bin/light -A 10";
+
+        # Volume control using pulsemixer
+        "XF86AudioRaiseVolume" = "exec ${pkgs.pulsemixer}/bin/pulsemixer --change-volume +1";
+        "XF86AudioLowerVolume" = "exec ${pkgs.pulsemixer}/bin/pulsemixer --change-volume -1";
+        "XF86AudioMute" = "exec ${pkgs.pulsemixer}/bin/pulsemixer --toggle-mute";
+
         # Workspace switching
         "${modifier}+1" = "workspace ${ws1}";
         "${modifier}+2" = "workspace ${ws2}";

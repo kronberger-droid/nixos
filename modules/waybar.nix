@@ -5,6 +5,10 @@ let
 in
 
 {
+  home.packages = with pkgs; [
+    playerctl
+  ];
+
   programs.waybar = {
     enable = true;
     systemd.enable = true;
@@ -41,6 +45,7 @@ in
       #temperature,
       #bluetooth,
       #custom-menu,
+      #custom-playerctl,
       #custom-power,
       #language,
       #tray {
@@ -52,7 +57,6 @@ in
       #custom-power, 
       #workspaces button.focused,
       #clock {
-          padding: 1px; 
           color: rgba(223, 225, 232, 1); /* lighter grey to enhance readability */
           background-color: rgba(138, 129, 119, 0.9); /* soft brown with transparency */
           border-radius: 15px;
@@ -128,14 +132,18 @@ in
       height = 30;
       layer = "top";
       position = "top";
-      tray = { spacing = 10; };
+      tray = {
+        spacing = 10;
+      };
       modules-left = ["custom/menu" "sway/workspaces" "sway/mode" ];
         modules-right = [
           "sway/language"
-          "bluetooth"
           "idle_inhibitor"
-          "network"
+          "custom/playerctl"
+          "bluetooth"
           "pulseaudio"
+          "custom/seperator"
+          "network"
           "cpu"
         ] ++ lib.optionals (!isNotebook) [
           "memory"
@@ -179,7 +187,24 @@ in
       };
       
       memory = { format = "{}% "; };
-      
+
+      "custom/playerctl" = {
+        "interval" = "once";
+        "tooltip" = true;
+        "return-type" = "json";
+        "format" = "{icon}";
+        "format-icons" = {
+          "Playing" = "󰏦";
+          "Paused" = "󰐍";
+        };
+        "exec" = "${pkgs.playerctl}/bin/playerctl metadata --format '{\"alt\": \"{{status}}\", \"tooltip\": \"{{playerName}} = {{markup_escape(title)}} - {{markup_escape(artist)}}\" }'";
+        "on-click" = "${pkgs.playerctl}/bin/playerctl play-pause";
+        "on-click-right" = "${pkgs.playerctl}/bin/playerctl next";
+        "on-scroll-up" = "${pkgs.playerctl}/bin/playerctl position 10+";
+        "on-scroll-down" = "${pkgs.playerctl}/bin/playerctl position 10-";
+        "signal" =  5;
+      };
+            
       bluetooth = {
         format = "󰂯";
         format-disabled = "󰂲";
@@ -212,7 +237,7 @@ in
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.pulsemixer}/bin/pulsemixer";
         format = "{volume}% {icon} {format_source}";
         format-bluetooth = "{volume}% {icon} {format_source}";
-        format-bluetooth-muted = " {icon} {format_source}";
+        format-bluetooth-muted = " {icon} {format_source}";
         format-icons = {
           car = "";
           default = [ "" "" "" ];
@@ -222,7 +247,7 @@ in
           phone = "";
           portable = "";
         };
-        format-muted = " {format_source}";
+        format-muted = " {format_source}";
         format-source = "";
         format-source-muted = "";
       };
