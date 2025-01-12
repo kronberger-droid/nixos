@@ -60,12 +60,19 @@ in
       };
     };
 
-    printing.enable = true;
-    
+    printing = {
+      enable = true;
+      drivers = [ pkgs.gutenprint ];
+    };
+
+    /*
     "06cb-009a-fingerprint-sensor" = {                                 
       enable = true;                                                            
-      backend = "python-validity";                                              
-    };      
+      backend = "libfprint-tod";                                              
+      # backend = "python-validity";
+      calib-data-file = ./calib-data.bin;
+    };
+    */    
 
     pipewire = {
       enable = true;

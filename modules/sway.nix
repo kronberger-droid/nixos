@@ -155,7 +155,7 @@ in
       
       bindgesture swipe:3:right workspace next
       bindgesture swipe:3:left workspace prev
-    '';
+      '';
 
     config = rec {
       modifier = "Mod4"; # Super key
@@ -268,6 +268,10 @@ in
           xkb_options = "grp:lalt_lshift_toggle,caps:escape";
           xkb_layout = "us,at";
           xkb_variant = ",";
+        };
+        "1267:32:Elan_Touchpad" = {
+          natural_scroll = "enabled";
+          tap = "enabled";
         };
       };
 
