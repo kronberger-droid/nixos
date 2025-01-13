@@ -143,7 +143,7 @@ in
 
     extraConfig = ''
       for_window [app_id = "floating_file_shell"] floating enable, sticky enable, resize set 1600 1000
-      for_window [app_id = "nemo"] floating enable, sticky enable, resize set 900 700
+      for_window [app_id = "nemo"] floating enable, sticky enable, resize set 1200 800
       for_window [app_id = "floating_shell"] floating enable, border pixel 1, sticky enable, resize set 900 700
       for_window [instance = "megasync"] floating enable, sticky enable, border pixel 0, move position cursor, move down 35
       for_window [app_id = "localsend_app"] floating enable, sticky enable, resize set 1200 800
@@ -256,6 +256,11 @@ in
         "${modifier}+Shift+8" = "move container to workspace ${ws8}; workspace ${ws8}";
         "${modifier}+Shift+9" = "move container to workspace ${ws9}; workspace ${ws9}";
         "${modifier}+Shift+0" = "move container to workspace ${ws10}; workspace ${ws10}";
+
+        "Mod1+l" = "workspace next";
+        "Mod1+Right" = "workspace next";
+        "Mod1+h" = "workspace prev";
+        "Mod1+Left" = "workspace prev";
       };
       
       gaps = {
