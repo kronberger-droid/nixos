@@ -63,6 +63,7 @@ in
         freecad-wayland
         lxqt.lxqt-policykit
         rpi-imager
+        element-desktop
       ];
       
       home.file = {
@@ -84,7 +85,7 @@ in
 
       programs.yazi = {
         enable = true;
-        settings = { manager = { show_hidden = true; }; };
+        settings.manager.show_hidden = true;
       };
      
       home.stateVersion = "24.11";
