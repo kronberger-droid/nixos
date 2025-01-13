@@ -1,4 +1,4 @@
-{ config, pkgs, lib, host, ... }:
+{ pkgs, host, ... }:
 let
   outputName =
     if host == "intelNuc" then
@@ -21,6 +21,13 @@ in
       efi.canTouchEfiVariables = true;
     };
     plymouth.enable = true;
+    initrd.verbose = false;
+    kernelParams = [
+      "quiet"
+      "udev.log_level=3"
+      "nowatchdog"
+      "nmi_watchdog=0"
+    ];
   };
 
   networking = {
