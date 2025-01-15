@@ -66,7 +66,7 @@
                 modifyLineBreaks = true;
             
               };
-              rootDirectory = "src";
+              rootDirectory = ".";
               completion.matcher = "prefix";
               build = {
                 onSave = true;
