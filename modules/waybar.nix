@@ -54,7 +54,7 @@ in
       }
       /* Highlighting the focused workspace and clock */
       #custom-menu,
-      #custom-power, 
+      #custom-power,
       #workspaces button.focused,
       #clock {
           color: rgba(223, 225, 232, 1); /* lighter grey to enhance readability */
@@ -62,6 +62,14 @@ in
           border-radius: 15px;
           padding-left: 10px;
           padding-right: 10px;
+      }
+
+      #scratchpad {
+          color: rgba(223, 225, 232, 1); /* lighter grey to enhance readability */
+          background-color: rgba(138, 129, 119, 0.9); /* soft brown with transparency */
+          border-radius: 15px;
+          padding: 0px 10px;
+          margin: 0px 10px;
       }
 
       /* Battery animations with warning and critical states */
@@ -135,7 +143,7 @@ in
       tray = {
         spacing = 10;
       };
-      modules-left = ["custom/menu" "sway/workspaces" "sway/mode" ];
+      modules-left = ["custom/menu" "sway/workspaces" "sway/scratchpad" "sway/mode" ];
         modules-right = [
           "sway/language"
           "idle_inhibitor"
@@ -159,6 +167,13 @@ in
       "sway/language" = {
         format = "{}  ";
         on-click = "${pkgs.sway}/bin/swaymsg input type:keyboard xkb_switch_layout next";
+      };
+      "sway/scratchpad" = {
+      	"format" = "{icon} {count}";
+      	"show-empty" = false;
+      	"format-icons" = ["" "󱂬"];
+      	"tooltip" = true;
+      	"tooltip-format" = "{app} = {title}";
       };
       "custom/seperator" = {
         format = "|";
