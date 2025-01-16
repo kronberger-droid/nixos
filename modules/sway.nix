@@ -71,6 +71,8 @@ in
     gron
     libnotify
     swaybg
+    swayimg
+    sway-scratch
   ] ++ lib.optionals isNotebook [
     way-displays
   ];
@@ -257,6 +259,7 @@ in
         "${modifier}+Shift+9" = "move container to workspace ${ws9}; workspace ${ws9}";
         "${modifier}+Shift+0" = "move container to workspace ${ws10}; workspace ${ws10}";
 
+        # Workspace Cycling
         "Mod1+l" = "workspace next";
         "Mod1+Right" = "workspace next";
         "Mod1+h" = "workspace prev";

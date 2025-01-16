@@ -9,7 +9,6 @@
 
     extraConfig = ''
       source ~/.zoxide.nu
-     
       # Disable banner
       $env.config.show_banner = false
     '';
