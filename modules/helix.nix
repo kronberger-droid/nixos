@@ -23,9 +23,6 @@
           normal = "block";
           select = "underline";
         };
-        indent-guides = {
-          character = "╎";
-        };
         statusline = {
           left = [ "mode" "spinner" "version-control" "file-name" ];
         };
@@ -84,7 +81,7 @@
                   "--outdir=build"
                 ];
                 directory = "build";
-                auxDirectory = "build";
+                auxDirectory = "src";
               };
               forwardSearch = {
                 executable = "${pkgs.zathura}/bin/zathura";
