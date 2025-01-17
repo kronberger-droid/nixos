@@ -164,20 +164,24 @@ in
           "clock"
           "custom/power"
         ];      
+
       "sway/language" = {
         format = "{}  ";
         on-click = "${pkgs.sway}/bin/swaymsg input type:keyboard xkb_switch_layout next";
       };
+
       "sway/scratchpad" = {
       	"format" = "{icon} {count}";
       	"show-empty" = false;
-      	"format-icons" = ["" "󱂬"];
+      	"format-icons" = ["" ""];
       	"tooltip" = true;
       	"tooltip-format" = "{app} = {title}";
       };
+
       "custom/seperator" = {
         format = "|";
       };
+
       clock = {
         interval = 60;
         format = "{:%e %b %Y %H:%M}";      
@@ -209,8 +213,8 @@ in
         "return-type" = "json";
         "format" = "{icon}";
         "format-icons" = {
-          "Playing" = "󰏦";
-          "Paused" = "󰐍";
+          "Playing" = "󰐍";
+          "Paused" = "󰏦";
         };
         "exec" = "${pkgs.playerctl}/bin/playerctl metadata --format '{\"alt\": \"{{status}}\", \"tooltip\": \"{{playerName}} = {{markup_escape(title)}} - {{markup_escape(artist)}}\" }'";
         "on-click" = "${pkgs.playerctl}/bin/playerctl play-pause";
