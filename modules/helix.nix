@@ -55,6 +55,14 @@
         ltex = {
           command = "${pkgs.ltex-ls}/bin/ltex-ls";
           file-types = [ "latex" ];
+          config = {
+            ltex.dictionary = {
+              "en-US" = [
+                "isentropic" "Isentropic"
+                "Kronberger"
+              ];
+            }; 
+          };
         };
       
         texlab = {
