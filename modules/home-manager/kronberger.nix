@@ -25,12 +25,10 @@ in
       home.packages = with pkgs; [
         thunderbird
         brave
-        chromium
         bitwarden-desktop
         nemo-with-extensions
         obsidian
         github-desktop
-        firefox
         libsecret
         yazi
         bluetuith
