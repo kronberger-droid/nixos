@@ -39,7 +39,6 @@ in
         zed-editor
         zathura
         drawio
-        feh
         inkscape
         megasync
         megacli
