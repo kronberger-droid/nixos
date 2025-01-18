@@ -37,6 +37,10 @@
           display-inlay-hints = true;
         };
       };
+      keys.normal = {
+        space.space = "file_picker";
+        ret.ret = ":w";
+      };
     };
 
     languages = {
