@@ -18,6 +18,7 @@
       editor = {
         end-of-line-diagnostics = "hint";
         soft-wrap.enable = true;
+        line-number = "relative";
         cursor-shape = {
           insert = "bar";
           normal = "block";
