@@ -213,8 +213,8 @@ in
         "return-type" = "json";
         "format" = "{icon}";
         "format-icons" = {
-          "Playing" = "󰐍";
-          "Paused" = "󰏦";
+            "Playing" =  "󰏦";
+            "Paused" =  "󰐍";
         };
         "exec" = "${pkgs.playerctl}/bin/playerctl metadata --format '{\"alt\": \"{{status}}\", \"tooltip\": \"{{playerName}} = {{markup_escape(title)}} - {{markup_escape(artist)}}\" }'";
         "on-click" = "${pkgs.playerctl}/bin/playerctl play-pause";
@@ -223,14 +223,14 @@ in
         "on-scroll-down" = "${pkgs.playerctl}/bin/playerctl position 10-";
         "signal" =  5;
       };
-            
+
       bluetooth = {
         format = "󰂯";
         format-disabled = "󰂲";
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.bluetuith}/bin/bluetuith";
         on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
       };
-      
+
       network = {
         interval = 5;
         format-wifi = "{icon}";
@@ -251,7 +251,7 @@ in
         tooltip-format-disabled = "{icon} disabled";
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.networkmanager}/bin/nmtui connect";
       };
-      
+
       pulseaudio = {
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.pulsemixer}/bin/pulsemixer";
         format = "{volume}% {icon} {format_source}";
