@@ -54,6 +54,7 @@ in
     # for sway
     swaylock
     swayidle
+    sway-audio-idle-inhibit
     wl-clipboard
     brightnessctl
     mako
@@ -140,6 +141,7 @@ in
         ${pkgs.autotiling}/bin/autotiling
         ${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4
         ${pkgs.lxqt.lxqt-policykit}/bin/lxqt-policykit-agent
+        ${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit
       }
     '';
 
