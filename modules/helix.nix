@@ -40,6 +40,8 @@
       keys.normal = {
         space.space = "file_picker";
         ret.ret = ":w";
+        ret.q = ":q";
+        ret.w = ":wq";
       };
     };
 
