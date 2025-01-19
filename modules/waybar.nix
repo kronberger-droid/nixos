@@ -6,136 +6,13 @@ in
 
 {
   home.packages = with pkgs; [
-    playerctl
+    waybar-mpris
   ];
 
   programs.waybar = {
     enable = true;
     systemd.enable = true;
-    style = ''
-      * {
-          border: none;
-          border-radius: 15;
-          min-height: 0;
-          padding: 1px;
-      }
-
-      /* The whole bar with new background transparency */
-      window#waybar {
-          background: transparent; /* dark grey with 90% opacity */
-          color: rgba(223, 225, 232, 1); /* light grey, full opacity for readability */
-          font-family: "JetBrainsMono NF", sans-serif;
-          font-size: 13px;
-      }
-
-      /* -----------------------------------------------------------------------------
-       * Each module with new padding and color handling
-       * -------------------------------------------------------------------------- */
-
-      /* All modules uniform padding */
-      #battery,
-      #clock, 
-      #cpu,
-      #memory,
-      #mode,
-      #idle_inhibitor,
-      #network,
-      #pulseaudio,
-      #backlight, 
-      #temperature,
-      #bluetooth,
-      #custom-menu,
-      #custom-playerctl,
-      #custom-power,
-      #language,
-      #tray {
-          padding: 0px 5px;
-          margin: 0px 5px;
-      }
-      /* Highlighting the focused workspace and clock */
-      #custom-menu,
-      #custom-power,
-      #workspaces button.focused,
-      #clock {
-          color: rgba(223, 225, 232, 1); /* lighter grey to enhance readability */
-          background-color: rgba(138, 129, 119, 0.9); /* soft brown with transparency */
-          border-radius: 15px;
-          padding-left: 10px;
-          padding-right: 10px;
-      }
-
-      #scratchpad {
-          color: rgba(223, 225, 232, 1); /* lighter grey to enhance readability */
-          background-color: rgba(138, 129, 119, 0.9); /* soft brown with transparency */
-          border-radius: 15px;
-          padding: 0px 10px;
-          margin: 0px 10px;
-      }
-
-      /* Battery animations with warning and critical states */
-      #battery.warning {
-          color: rgba(223, 225, 232, 0.9); /* lighter grey for visibility */
-      }
-
-      #battery.critical {
-          color: rgba(223, 225, 232, 0.9); /* lighter grey for visibility */
-      }
-
-      #battery.warning.discharging,
-      #battery.critical.discharging {
-          animation-duration: 2s;
-      }
-
-      /* CPU and Memory warning and critical colors */
-      #cpu.warning,
-      #memory.warning {
-          color: rgba(223, 225, 232, 0.9);
-      }
-
-      #cpu.critical,
-      #memory.critical {
-          color: rgba(223, 225, 232, 0.9);
-          animation-name: blink-critical;
-          animation-duration: 2s;
-      }
-
-      /* Mode and network disconnections */
-      #mode {
-          background: rgba(30, 30, 30, 0.9);
-      }
-
-      #network.disconnected,
-      #pulseaudio.muted {
-          color: rgba(223, 225, 232, 0.9);
-      }
-
-      #temperature.critical {
-          color: rgba(223, 225, 232, 0.9);
-      }
-
-      #workspaces {
-          background: rgba(30, 30, 30, 0.9);
-          border-radius: 15px;
-          padding-right: 0px;
-          padding-left: 0px;
-      }
-
-      #workspaces button {
-          padding-left: 10px;
-          padding-right: 10px;
-          color: rgba(223, 225, 232, 1);
-          border-radius: 15px;
-      }
-
-      #workspaces button.focused {
-          border-color: rgba(138, 129, 119, 0.9);
-      }
-
-      #workspaces button.urgent {
-          border-color: rgba(66, 60, 56, 0.9);
-          color: rgba(66, 60, 56, 0.9);
-      }
-    '';
+    style = "${../configs/waybar/style.css}";
     settings = [{
       height = 30;
       layer = "top";
@@ -147,9 +24,9 @@ in
         modules-right = [
           "sway/language"
           "idle_inhibitor"
-          "custom/playerctl"
           "bluetooth"
           "pulseaudio"
+          "custom/mpris"
           "custom/seperator"
           "network"
           "cpu"
@@ -166,7 +43,7 @@ in
         ];      
 
       "sway/language" = {
-        format = "{}  ";
+        format = "{} \ ";
         on-click = "${pkgs.sway}/bin/swaymsg input type:keyboard xkb_switch_layout next";
       };
 
@@ -207,21 +84,12 @@ in
       
       memory = { format = "{}% "; };
 
-      "custom/playerctl" = {
-        "interval" = "once";
-        "tooltip" = true;
-        "return-type" = "json";
-        "format" = "{icon}";
-        "format-icons" = {
-            "Playing" =  "󰏦";
-            "Paused" =  "󰐍";
-        };
-        "exec" = "${pkgs.playerctl}/bin/playerctl metadata --format '{\"alt\": \"{{status}}\", \"tooltip\": \"{{playerName}} = {{markup_escape(title)}} - {{markup_escape(artist)}}\" }'";
-        "on-click" = "${pkgs.playerctl}/bin/playerctl play-pause";
-        "on-click-right" = "${pkgs.playerctl}/bin/playerctl next";
-        "on-scroll-up" = "${pkgs.playerctl}/bin/playerctl position 10+";
-        "on-scroll-down" = "${pkgs.playerctl}/bin/playerctl position 10-";
-        "signal" =  5;
+      "custom/mpris" = {
+        return-type = "json";
+        exec = "${pkgs.waybar-mpris}/bin/waybar-mpris --order 'SYMBOL:PLAYER' --separator '' --autofocus";
+        on-click = "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
+        on-click-right = "${pkgs.waybar-mpris}/bin/waybar-mpris --send player-next";
+        escape = true;
       };
 
       bluetooth = {
@@ -271,17 +139,17 @@ in
         format-source-muted = "";
       };
       
-      "idle_inhibitor" = {
+      idle_inhibitor = {
           format = "{icon}";
           format-icons = {
-              activated = "";
-              deactivated = "";
+              activated = "\ ";
+              deactivated = "\ ";
           };
       };
       
       "sway/mode" = { format = ''<span style="italic">{}</span>''; };
       
-      "battery" = {
+      battery = {
         interval = 30;
         states = {
           warning = 30;
