@@ -43,7 +43,7 @@ in
         ];      
 
       "sway/language" = {
-        format = "{} \ ";
+        format = "{} ";
         on-click = "${pkgs.sway}/bin/swaymsg input type:keyboard xkb_switch_layout next";
       };
 
@@ -71,13 +71,13 @@ in
       };
       
       "custom/menu" = {
-        format = "  ";
+        format = "";
         on-click = "${pkgs.rofi}/bin/rofi -show drun -theme /etc/nixos/configs/rofi/launcher/style-2.rasi";
         tooltip = false;
       };
       
       "custom/power" = {
-        format = "  ";
+        format = "";
         on-click = "${pkgs.sway}/bin/swaymsg exec /etc/nixos/configs/rofi/powermenu/powermenu.sh";
         tooltip = false;
       };
@@ -86,7 +86,7 @@ in
 
       "custom/mpris" = {
         return-type = "json";
-        exec = "${pkgs.waybar-mpris}/bin/waybar-mpris --order 'SYMBOL:PLAYER' --separator '' --autofocus";
+        exec = "${pkgs.waybar-mpris}/bin/waybar-mpris --order 'SYMBOL:PLAYER' --separator '' --autofocus --pause '' --play ''";
         on-click = "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
         on-click-right = "${pkgs.waybar-mpris}/bin/waybar-mpris --send player-next";
         escape = true;
@@ -142,8 +142,8 @@ in
       idle_inhibitor = {
           format = "{icon}";
           format-icons = {
-              activated = "\ ";
-              deactivated = "\ ";
+              activated = "";
+              deactivated = "";
           };
       };
       
