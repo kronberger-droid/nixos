@@ -135,18 +135,17 @@ in
 
   environment = {
     shells = [ pkgs.nushell ];
-    variables.EDITOR = "hx";
+    variables = {
+      EDITOR = "hx";
+    };
     systemPackages = with pkgs; [
       helix
-      wget
       git
       curl
       gparted
       bat
       zoxide
-      neovim
       nmap
-      libfprint
       usbutils
     ];
   };
