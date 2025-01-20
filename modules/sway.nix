@@ -54,6 +54,7 @@ in
     # for sway
     swaylock
     swayidle
+    foot
     sway-audio-idle-inhibit
     wl-clipboard
     brightnessctl
@@ -163,7 +164,7 @@ in
 
     config = rec {
       modifier = "Mod4"; # Super key
-      terminal = "kitty";
+      terminal = "${pkgs.foot}/bin/foot";
 
       startup = lib.optional isNotebook {
         command = "way-displays > /tmp/way-displays.\${XDG_VTNR}.\${USER}.log 2>&1 &";
