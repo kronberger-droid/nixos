@@ -60,7 +60,6 @@ in
         freecad-wayland
         lxqt.lxqt-policykit
         rpi-imager
-        element-desktop
       ];
       
       home.file = {
