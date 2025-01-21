@@ -137,7 +137,7 @@ in
   };
   programs = {
     xwayland.enable = true;
-    nix-ld.enable = true;
+    ssh.startAgent = true;    
   };
 
   users.users.kronberger = {
