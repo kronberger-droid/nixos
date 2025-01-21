@@ -49,6 +49,9 @@
       layout = "us";
       variant = "";
     };
+    hardware = {
+      openrgb.enable = true;
+    };
     pulseaudio.enable = false;
     printing.enable = true;
     pipewire = {
@@ -80,9 +83,11 @@
     };
   };
   
-  hardware.bluetooth = {
-    enable = true;
-    powerOnBoot = true;
+  hardware = {
+    bluetooth = {
+      enable = true;
+      powerOnBoot = true;
+    };
   };
 
   security = {
@@ -112,13 +117,11 @@
     };
     systemPackages = with pkgs; [
       helix
-      wget
       git
       curl
       gparted
       bat
       zoxide
-      neovim
       nmap
     ];
   };

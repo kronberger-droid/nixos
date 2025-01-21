@@ -45,7 +45,6 @@ in
     # for sway
     swaylock
     swayidle
-    foot
     sway-audio-idle-inhibit
     wl-clipboard
     brightnessctl
@@ -80,12 +79,12 @@ in
       backgroundColor = backgroundColor + "CC";
     };
   };
-  
+
   programs.swaylock = {
     enable = true;
     package = pkgs.swaylock;
     settings = {
-      image = "/etc/nixos/configs/deathpaper.jpg";
+      image = "${../configs/deathpaper.jpg}";
       font-size = 24;
       indicator-idle-visible = false;
       inside-color = backgroundColor + "CC";
@@ -121,13 +120,13 @@ in
       }
     ];
   };
-  
+
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
     extraConfigEarly = ''
       exec_always {
-        ${pkgs.megasync}/bin/megasync && ${pkgs.megasync}/bin/megasync 
+        ${pkgs.megasync}/bin/megasync && ${pkgs.megasync}/bin/megasync
         ${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.8 --focused 1.0
         ${pkgs.swaybg}/bin/swaybg -i /etc/nixos/configs/deathpaper.jpg -m fill
         ${pkgs.autotiling}/bin/autotiling
@@ -149,19 +148,19 @@ in
       for_window [instance = "gpartedbin"] floating enable, sticky enable, resize set 1200 800
 
       for_window [title="Authentication Required"] floating enable, sticky enable, resize set 1200 800
-      
+
       bindgesture swipe:3:right workspace next
       bindgesture swipe:3:left workspace prev
       '';
 
     config = rec {
       modifier = "Mod4"; # Super key
-      terminal = "${pkgs.foot}/bin/foot";
+      terminal = "${pkgs.kitty}/bin/kitty";
 
       startup = lib.optional isNotebook {
         command = "way-displays > /tmp/way-displays.\${XDG_VTNR}.\${USER}.log 2>&1 &";
       };
-      
+
       colors = {
         background = backgroundColor;
 
@@ -206,11 +205,11 @@ in
       window = {
         titlebar = false;
       };
-      
+
       menu = "rofi -show drun -theme /etc/nixos/configs/rofi/launcher/style-2.rasi";
 
       defaultWorkspace = "workspace ${ws1}";
-      
+
       keybindings = lib.mkOptionDefault {
         "${modifier}+Shift+x" = "exec ${pkgs.nemo-with-extensions}/bin/nemo";
         "${modifier}+Shift+s" = "exec ${pkgs.brave}/bin/brave";
@@ -219,8 +218,8 @@ in
         "${modifier}+Shift+e" = "exec /etc/nixos/configs/rofi/powermenu/powermenu.sh";
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
         "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
-        "${modifier}+Return" = "exec bash -c 'kitty --working-directory $(/etc/nixos/scripts/cwd.sh)'";
-        
+        "${modifier}+Return" = "exec 'kitty --working-directory $(/etc/nixos/scripts/cwd.sh)'";
+
         # Brightness control
         "XF86MonBrightnessDown" = "exec ${pkgs.light}/bin/light -U 10";
         "XF86MonBrightnessUp" = "exec ${pkgs.light}/bin/light -A 10";
@@ -260,7 +259,7 @@ in
         "Mod1+h" = "workspace prev";
         "Mod1+Left" = "workspace prev";
       };
-      
+
       gaps = {
         inner = 8;
         outer = 4;
