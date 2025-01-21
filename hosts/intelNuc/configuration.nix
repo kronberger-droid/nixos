@@ -61,6 +61,20 @@
       pulse.enable = true;
     };
     gvfs.enable = true;
+    keyd = {
+      enable = true;
+      keyboards = {
+        default = {
+          ids = [ "*"];
+          settings = {
+            main = {
+              leftalt = "leftmeta";
+              leftmeta = "leftalt";
+            };
+          };
+        };
+      };
+    };
     gnome.gnome-keyring.enable = true;
   };
 
