@@ -1,4 +1,4 @@
-{ config, pkgs, lib, host, ... }:
+{ pkgs, lib, host, ... }:
 
 let
   color0 = "#1e1e1e";
@@ -33,15 +33,6 @@ let
   ws8 = "8 studying";
   ws9 = "9 social";
   ws10 = "10 git";
-
-  # Determine the output name based on the hostname
-  outputName =
-  if host == "intelNuc" then
-    "HDMI-A-1"
-  else if host == "t480s" then
-    "eDP-1"
-  else
-    throw "Unknown hostname: ${host}";
 
   isNotebook = host == "t480s";
 in
@@ -143,6 +134,7 @@ in
         ${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4
         ${pkgs.lxqt.lxqt-policykit}/bin/lxqt-policykit-agent
         ${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit
+        ${(if isNotebook then "${../scripts}/clamshell.sh" else "")}
       }
     '';
 
