@@ -267,7 +267,7 @@ in
 
       input = {
         "*" = {
-          xkb_options = "grp:lalt_lshift_toggle,caps:escape";
+          xkb_options = "grp:lalt_lshift_toggle";
           xkb_layout = "us,at";
           xkb_variant = ",";
         };
