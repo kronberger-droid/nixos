@@ -7,6 +7,9 @@ in
 {
   home.packages = with pkgs; [
     waybar-mpris
+    calcurse
+    kitty
+    rofi
   ];
 
   programs.waybar = {
@@ -48,11 +51,12 @@ in
       };
 
       "sway/scratchpad" = {
-      	"format" = "{icon} {count}";
-      	"show-empty" = false;
-      	"format-icons" = ["" ""];
-      	"tooltip" = true;
-      	"tooltip-format" = "{app} = {title}";
+      	format = "{icon} {count}";
+      	show-empty = false;
+      	format-icons = ["" ""];
+        on-click = "${pkgs.sway}/bin/swaymsg 'scratchpad show'";
+      	tooltip = true;
+      	tooltip-format = "{app} = {title}";
       };
 
       "custom/seperator" = {
@@ -62,6 +66,9 @@ in
       clock = {
         interval = 60;
         format = "{:%e %b %Y %H:%M}";      
+        tooltip = true;
+        tooltip-format = "<big>{:%B %Y}</big>\n<tt>{calendar}</tt>";
+        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.calcurse}/bin/calcurse"; 
       };
       
       cpu = {
@@ -94,7 +101,7 @@ in
 
       bluetooth = {
         format = "󰂯";
-        format-disabled = "󰂲";
+        format-disabled = "󰂲 off";
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.bluetuith}/bin/bluetuith";
         on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
       };
@@ -135,8 +142,8 @@ in
           portable = "";
         };
         format-muted = " {format_source}";
-        format-source = "";
-        format-source-muted = "";
+        format-source = "\ ";
+        format-source-muted = "\ ";
       };
       
       idle_inhibitor = {
