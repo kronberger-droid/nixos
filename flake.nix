@@ -43,13 +43,15 @@
           # nixos-06cb-009a-fingerprint-sensor.nixosModules."06cb-009a-fingerprint-sensor"
         ];
       };
-      devPi = nixpkgs.lib.nixosSysytem {
+      devPi = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
         specialArgs = {
           host = "devPi";
         };
         modules = [
+          home-manager.nixosModules.home-manager
           ./hosts/devPi/configuration.nix
+          ./modules/home-manager/devPi.nix
         ];
       };
     };
