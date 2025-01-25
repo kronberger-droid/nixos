@@ -138,6 +138,7 @@ in
     '';
 
     extraConfig = ''
+      # Floating Window Configurations
       for_window [app_id = "floating_file_shell"] floating enable, sticky enable, resize set 1600 1000
       for_window [app_id = "nemo"] floating enable, sticky enable, resize set 1200 800
       for_window [app_id = "floating_shell"] floating enable, border pixel 1, sticky enable, resize set 900 700
@@ -146,7 +147,6 @@ in
       for_window [instance = "bitwarden"] floating enable, sticky enable, resize set 1200 800
       for_window [app_id = "org.speedcrunch"] floating enable, sticky enable, resize set 1200 800
       for_window [instance = "gpartedbin"] floating enable, sticky enable, resize set 1200 800
-
       for_window [title="Authentication Required"] floating enable, sticky enable, resize set 1200 800
 
       bindgesture swipe:3:right workspace next
