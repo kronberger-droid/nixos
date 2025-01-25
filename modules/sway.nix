@@ -124,22 +124,8 @@ in
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
-    extraConfigEarly = ''
-      exec_always {
-        ${pkgs.megasync}/bin/megasync && ${pkgs.megasync}/bin/megasync
-        ${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.8 --focused 1.0
-        ${pkgs.swaybg}/bin/swaybg -i /etc/nixos/configs/deathpaper.jpg -m fill
-        ${pkgs.autotiling}/bin/autotiling
-        ${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4
-        ${pkgs.lxqt.lxqt-policykit}/bin/lxqt-policykit-agent
-        ${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit
-        ${(if isNotebook then "${../scripts}/clamshell.sh" else "")}
-      }
-    '';
-
     extraConfig = ''
       # Floating Window Configurations
-      for_window [app_id = "floating_file_shell"] floating enable, sticky enable, resize set 1600 1000
       for_window [app_id = "nemo"] floating enable, sticky enable, resize set 1200 800
       for_window [app_id = "floating_shell"] floating enable, border pixel 1, sticky enable, resize set 900 700
       for_window [instance = "megasync"] floating enable, sticky enable, border pixel 0, move position cursor, move down 35
@@ -149,6 +135,17 @@ in
       for_window [instance = "gpartedbin"] floating enable, sticky enable, resize set 1200 800
       for_window [title="Authentication Required"] floating enable, sticky enable, resize set 1200 800
 
+      # set floating mode for generated windows
+      for_window [title="(?:Open|Save) (?:File|Folder|As)"] floating enable
+      for_window [title="(?:Open|Save) (?:File|Folder|As)"] resize set 800 600
+      for_window [window_role="pop-up"] floating enable
+      for_window [window_role="bubble"] floating enable
+      for_window [window_role="task_dialog"] floating enable
+      for_window [window_role="Preferences"] floating enable
+      for_window [window_type="dialog"] floating enable
+      for_window [window_type="menu"] floating enable
+
+      # Set gestures for notebooks
       bindgesture swipe:3:right workspace next
       bindgesture swipe:3:left workspace prev
       '';
@@ -156,11 +153,45 @@ in
     config = rec {
       modifier = "Mod4"; # Super key
       terminal = "${pkgs.kitty}/bin/kitty";
-
-      startup = lib.optional isNotebook {
-        command = "way-displays > /tmp/way-displays.\${XDG_VTNR}.\${USER}.log 2>&1 &";
-      };
-
+      startup = [
+        {
+          command = "${pkgs.megasync}/bin/megasync $$ ${pkgs.megasync}/bin/megasync";
+          always = false;
+        }
+        {
+          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.8 --focused 1.0";
+          always = false;
+        }
+        {
+          command = "${pkgs.swaybg}/bin/swaybg -i /etc/nixos/configs/deathpaper.jpg -m fill";
+          always = false;
+        }
+        {
+          command = "${pkgs.autotiling}/bin/autotiling";
+          always = false;
+        }
+        {
+          command = "${pkgs.lxqt.lxqt-policykit}/bin/lxqt-policykit-agent";
+          always = false;
+        }
+        {
+          command = "${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4";
+          always = false;
+        }
+        {
+          command = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
+          always = false;
+        }
+      ] ++ lib.optionals isNotebook [
+        {
+          command = "${pkgs.way-displays}/bin/way-displays > /tmp/way-displays.\${XDG_VTNR}.\${USER}.log 2>&1 &";
+          always = false;
+        }
+        {
+          command = "${../scripts}/clamshell.sh";
+          always = true;
+        }
+      ];
       colors = {
         background = backgroundColor;
 
