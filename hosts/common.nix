@@ -120,7 +120,6 @@ in
 
   programs = {
     xwayland.enable = true;
-    ssh.startAgent = true;
     dconf.enable = true;
   };
 
