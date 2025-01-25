@@ -23,14 +23,14 @@ let
   selectionColor = color1;
   accentColor = color12;
 
-  ws1 = "1 work";
-  ws2 = "2 research";
-  ws3 = "3 coding";
-  ws4 = "4 browser";
-  ws5 = "5 terminal";
-  ws6 = "6 nix";
+  ws1 = "1 browser";
+  ws2 = "2 writing";
+  ws3 = "3 research";
+  ws4 = "4 coding";
+  ws5 = "5 studying";
+  ws6 = "6 work";
   ws7 = "7 pending";
-  ws8 = "8 studying";
+  ws8 = "8 nix";
   ws9 = "9 social";
   ws10 = "10 git";
 
@@ -124,42 +124,35 @@ in
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
-    extraConfig = ''
-      # Floating Window Configurations
-      for_window [app_id = "nemo"] floating enable, sticky enable, resize set 1200 800
-      for_window [app_id = "floating_shell"] floating enable, border pixel 1, sticky enable, resize set 900 700
-      for_window [instance = "megasync"] floating enable, sticky enable, border pixel 0, move position cursor, move down 35
-      for_window [app_id = "localsend_app"] floating enable, sticky enable, resize set 1200 800
-      for_window [instance = "bitwarden"] floating enable, sticky enable, resize set 1200 800
-      for_window [app_id = "org.speedcrunch"] floating enable, sticky enable, resize set 1200 800
-      for_window [instance = "gpartedbin"] floating enable, sticky enable, resize set 1200 800
-      for_window [title="Authentication Required"] floating enable, sticky enable, resize set 1200 800
-
-      # set floating mode for generated windows
-      for_window [title="(?:Open|Save) (?:File|Folder|As)"] floating enable
-      for_window [title="(?:Open|Save) (?:File|Folder|As)"] resize set 800 600
-      for_window [window_role="pop-up"] floating enable
-      for_window [window_role="bubble"] floating enable
-      for_window [window_role="task_dialog"] floating enable
-      for_window [window_role="Preferences"] floating enable
-      for_window [window_type="dialog"] floating enable
-      for_window [window_type="menu"] floating enable
-
-      # Set gestures for notebooks
-      bindgesture swipe:3:right workspace next
-      bindgesture swipe:3:left workspace prev
-      '';
-
+    extraConfig = builtins.readFile "${../configs/sway/config}";
     config = rec {
       modifier = "Mod4"; # Super key
       terminal = "${pkgs.kitty}/bin/kitty";
+      assigns = {
+        "${ws9}" = [
+          { title = "WhatsApp Web"; }
+          { app_id = "thunderbird"; }
+          { class = "Spotify"; }
+        ];
+        "${ws10}" = [
+          { class = "GitHub Desktop"; }
+        ];
+      };
+      window = {
+        titlebar = false;
+      };
+      floating = {
+        criteria = [
+          { app_id = "nemo"; }
+        ];
+      };
       startup = [
         {
           command = "${pkgs.megasync}/bin/megasync $$ ${pkgs.megasync}/bin/megasync";
           always = false;
         }
         {
-          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.8 --focused 1.0";
+          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.85 --focused 1.0";
           always = false;
         }
         {
@@ -233,9 +226,6 @@ in
       };
 
       focus.mouseWarping = "container";
-      window = {
-        titlebar = false;
-      };
 
       menu = "rofi -show drun -theme /etc/nixos/configs/rofi/launcher/style-2.rasi";
 
@@ -290,12 +280,10 @@ in
         "Mod1+h" = "workspace prev";
         "Mod1+Left" = "workspace prev";
       };
-
       gaps = {
         inner = 8;
         outer = 4;
       };
-
       input = {
         "*" = {
           xkb_options = "grp:lalt_lshift_toggle";
@@ -307,7 +295,6 @@ in
           tap = "enabled";
         };
       };
-
       bars = [];
     };
   };
