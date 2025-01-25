@@ -56,6 +56,7 @@ in
   };
 
   services = {
+    openssh.enable = true;
     pulseaudio.enable = false;
     pipewire = {
       enable = true;
@@ -150,6 +151,7 @@ in
       zoxide
       nmap
       usbutils
+      exfat
     ];
   };
 
