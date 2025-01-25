@@ -1,9 +1,7 @@
 { pkgs, host, lib, ... }:
-
 let
   isNotebook = host == "t480s";
 in
-
 {
   home.packages = with pkgs; [
     waybar-mpris
@@ -22,6 +20,8 @@ in
       position = "top";
       tray = {
         spacing = 10;
+        icon-size = 14;
+        show-passive-items = true;
       };
       modules-left = ["custom/menu" "sway/workspaces" "sway/scratchpad" "sway/mode" ];
         modules-right = [
@@ -30,7 +30,7 @@ in
           "bluetooth"
           "pulseaudio"
           "custom/mpris"
-          "custom/seperator"
+          "custom/separator"
           "network"
           "cpu"
         ] ++ lib.optionals (!isNotebook) [
@@ -59,7 +59,7 @@ in
       	tooltip-format = "{app} = {title}";
       };
 
-      "custom/seperator" = {
+      "custom/separator" = {
         format = "|";
       };
 
