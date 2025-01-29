@@ -88,7 +88,6 @@ in
       };
     };
     gvfs.enable = true;
-    gnome.gnome-keyring.enable = true;
   };
 
   hardware = {

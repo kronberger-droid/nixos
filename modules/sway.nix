@@ -89,7 +89,6 @@ in
   ];
 
   services = {
-    gnome-keyring.enable = true;
     mako = {
       enable = true;
       defaultTimeout = 10000;
