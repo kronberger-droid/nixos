@@ -35,6 +35,25 @@ let
   ws10 = "10 git";
 
   isNotebook = host == "t480s";
+
+  powermenu = "${../configs/rofi/powermenu}";
+
+  
+  # Define paths for colors and fonts
+  # colorsPath = "${toString powermenu}/shared/colors.rasi";
+  # fontsPath = "${toString powermenu}/shared/fonts.rasi";
+
+  # # Function to process theme files
+  # processTheme = path: builtins.replaceStrings 
+  #   [ "COLORS_PATH" "FONTS_PATH" ]
+  #   [ colorsPath fontsPath ]
+  #   (builtins.readFile path);
+  #  # Process all theme files
+
+  # themeFiles = {
+  #   "style-1.rasi" = processTheme "${powermenu}/style-1.rasi";
+  #   "style-2.rasi" = processTheme "${powermenu}/style-2.rasi";
+  # };
 in
 {
   imports = [
@@ -172,8 +191,8 @@ in
           always = false;
         }
         {
-          command = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
-          always = false;
+          command = "exec ${../scripts/once.sh} ${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
+          always = true;
         }
       ] ++ lib.optionals isNotebook [
         {
@@ -236,7 +255,7 @@ in
         "${modifier}+Shift+s" = "exec ${pkgs.brave}/bin/brave";
         "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
         "${modifier}+Shift+c" = "exec swaymsg reload";
-        "${modifier}+Shift+e" = "exec /etc/nixos/configs/rofi/powermenu/powermenu.sh";
+        "${modifier}+Shift+e" = "exec ${powermenu}/powermenu.sh";
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
         "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
         "${modifier}+Return" = "exec 'kitty --working-directory $(/etc/nixos/scripts/cwd.sh)'";
