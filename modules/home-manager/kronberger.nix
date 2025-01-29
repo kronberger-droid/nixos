@@ -63,6 +63,11 @@ in
         keyd
       ];
       
+      services = {
+        gnome-keyring.enable = true;
+        ssh-agent.enable = true;
+      };
+
       home.file = {
         ".config/swappy/config".text = ''
           [Default]
