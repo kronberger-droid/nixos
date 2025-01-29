@@ -33,8 +33,8 @@
         };
         lsp = {
           auto-signature-help = false;
-          display-messages = true;
-          display-inlay-hints = true;
+          display-messages = false;
+          display-inlay-hints = false;
         };
       };
       keys.normal = {
@@ -46,19 +46,33 @@
     };
 
     languages = {
-      language = [{
-        name = "latex";
-        language-servers = [
-        "texlab"
-        "ltex"
-        ];
-      }];
+      language = [
+        {
+          name = "latex";
+          language-servers = [
+            "texlab"
+            "ltex"
+          ];
+        }
+        {
+          name = "rust";
+          language-servers = [
+            "rust-analyzer"
+          ];
+        }
+      ];
       language-server = {
         nil = {
           command = "${pkgs.nil}/bin/nil";
           file-types = [ "nix" ];
         };
       
+        rust-analyzer = {
+          command = "${pkgs.rust-analyzer}/bin/rust-analyzer";
+          config = {
+            check.command = "clippy";
+          };
+        };
         ltex = {
           command = "${pkgs.ltex-ls}/bin/ltex-ls";
           file-types = [ "latex" ];
@@ -79,7 +93,6 @@
             texlab = {
               latexindent = {
                 modifyLineBreaks = true;
-            
               };
               rootDirectory = ".";
               completion.matcher = "prefix";
