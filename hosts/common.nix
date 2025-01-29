@@ -1,4 +1,4 @@
-{ pkgs, host, ... }:
+{ pkgs, config, host, ... }:
 let
   outputName =
     if host == "intelNuc" then
@@ -56,13 +56,7 @@ in
   };
 
   services = {
-    openssh = {
-      enable = true;
-      authorizedKeysFiles = [
-        ".ssh/id_ed25519"
-        ".ssh/github_edu"        
-      ];
-    };
+    openssh.enable = true;
     pulseaudio.enable = false;
     pipewire = {
       enable = true;
@@ -126,7 +120,6 @@ in
   programs = {
     xwayland.enable = true;
     dconf.enable = true;
-    ssh.startAgent = true;
   };
 
   virtualisation.virtualbox.host = {
