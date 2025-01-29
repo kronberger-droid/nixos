@@ -1,29 +1,44 @@
 #!/usr/bin/env bash
 
-# Current Theme
-dir="/etc/nixos/configs/rofi/powermenu"
-theme='style-1'
+# Defaults
+default_dir="/etc/nixos/configs/rofi/powermenu"
+default_theme="style-1"
+
+# Environment variables fallback
+dir="${ROFI_THEME_DIR:-$default_dir}"
+theme="${ROFI_THEME:-$default_theme}"
+
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --dir) dir="$2"; shift ;;
+        --theme) theme="$2"; shift ;;
+        *) echo "Unknown parameter: $1"; exit 1 ;;
+    esac
+    shift
+done
+
 
 # CMDs
 uptime=$(awk '{uptime=$1; h=int(uptime/3600); m=int((uptime%3600)/60); s=int(uptime%60); printf "%dh %dm %ds\n", h, m, s}' /proc/uptime)
 host=$(hostname)
 
 # Options
-shutdown='󰐥 Shutdown'
-reboot='󰜉 Reboot'
-lock=' Lock'
-hibernate='󰒲 Hibernate'
-suspend='󰤄 Suspend'
-logout='󰍃 Logout'
-yes=' Yes'
-no=' No'
+shutdown='󰐥 shutdown'
+reboot='󰜉 reboot'
+lock=' lock'
+hibernate='󰒲 hibernate'
+suspend='󰤄 suspend'
+logout='󰍃 logout'
+yes=' yes'
+no=' no'
 
 # Rofi CMD
 rofi_cmd() {
 	rofi -dmenu \
 		-p "$host" \
 		-mesg "Uptime: $uptime" \
-		-theme "${dir}/${theme}.rasi"
+		-theme "${dir}/${theme}.rasi"\
+		-matching fuzzy 
 }
 
 # Confirmation CMD
