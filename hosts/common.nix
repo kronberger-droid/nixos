@@ -9,7 +9,7 @@ let
       throw "Unknown hostname: ${host}";
 in
 {
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
 
   boot = {
     loader = {
