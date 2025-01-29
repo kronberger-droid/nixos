@@ -56,7 +56,13 @@ in
   };
 
   services = {
-    openssh.enable = true;
+    openssh = {
+      enable = true;
+      authorizedKeysFiles = [
+        ".ssh/id_ed25519"
+        ".ssh/github_edu"        
+      ];
+    };
     pulseaudio.enable = false;
     pipewire = {
       enable = true;
