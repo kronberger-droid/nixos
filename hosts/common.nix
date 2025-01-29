@@ -121,6 +121,7 @@ in
   programs = {
     xwayland.enable = true;
     dconf.enable = true;
+    ssh.startAgent = true;
   };
 
   virtualisation.virtualbox.host = {
