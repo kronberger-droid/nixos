@@ -61,6 +61,7 @@ in
         lxqt.lxqt-policykit
         rpi-imager
         keyd
+        ipe
       ];
       
       home.file = {
