@@ -1,4 +1,4 @@
-{ pkgs, host, lib, ... }:
+{ config, pkgs, host, lib, ... }:
 let
   isNotebook = host == "t480s";
 in
@@ -13,7 +13,7 @@ in
   programs.waybar = {
     enable = true;
     systemd.enable = true;
-    style = "${../configs/waybar/style.css}";
+    style = "${./style.css}";
     settings = [{
       height = 30;
       layer = "top";
@@ -79,13 +79,13 @@ in
       
       "custom/menu" = {
         format = "";
-        on-click = "${pkgs.rofi}/bin/rofi -show drun -theme /etc/nixos/configs/rofi/launcher/style-2.rasi";
+        on-click = "${pkgs.rofi}/bin/rofi -show drun";
         tooltip = false;
       };
       
       "custom/power" = {
         format = "";
-        on-click = "${pkgs.sway}/bin/swaymsg exec /etc/nixos/configs/rofi/powermenu/powermenu.sh";
+        on-click = "${pkgs.sway}/bin/swaymsg exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
         tooltip = false;
       };
       

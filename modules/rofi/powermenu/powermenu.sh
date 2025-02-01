@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Defaults
-default_dir="/etc/nixos/configs/rofi/powermenu"
+default_dir="~/.config/rofi/powermenu"
 default_theme="style-1"
 
 # Environment variables fallback

@@ -1,6 +1,7 @@
 { config, pkgs, lib, ... }:
 
 {
+  xdg.configFile."kitty/cwd.sh".source = ./cwd.sh;
   programs.kitty = {
     enable = true;
     settings = {

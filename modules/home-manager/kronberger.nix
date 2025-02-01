@@ -1,7 +1,4 @@
 { lib, pkgs, inputs, host, ... }:
-let
-  isNotebook = host == "t480s";
-in
 {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
@@ -12,12 +9,11 @@ in
     };
     users.kronberger = {
       imports = [
-        ../../modules/sway.nix
-        ../../modules/kitty.nix
-        ../../modules/gtk.nix
-        ../../modules/helix.nix
-        ../../modules/shell.nix
-        ../../modules/git.nix
+        ../sway/sway.nix
+        ../kitty/kitty.nix
+        ../helix.nix
+        ../shell.nix
+        ../git.nix
       ];
       home.username = "kronberger";
       home.homeDirectory = "/home/kronberger";
@@ -81,15 +77,8 @@ in
           early_exit=true
           fill_shape=true
         '';
-      } // lib.optionalAttrs isNotebook {
-        ".config/way-displays/cfg.yaml".source = ../../configs/way-displays/cfg.yaml;
       };
 
-      programs.yazi = {
-        enable = true;
-        settings.manager.show_hidden = true;
-      };
-     
       home.stateVersion = "24.11";
     };
   };
