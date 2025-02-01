@@ -13,7 +13,7 @@
         ../sway/sway.nix
         ../kitty/kitty.nix
         ../helix.nix
-        ../shell.nix
+        ../nushell/nushell.nix
         ../git.nix
       ];
       home.username = "kronberger";
