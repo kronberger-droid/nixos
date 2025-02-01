@@ -1,4 +1,4 @@
-{ pkgs, lib, host, ... }:
+{ config, pkgs, lib, host, ... }:
 
 let
   color0 = "#1e1e1e";
@@ -35,31 +35,18 @@ let
   ws10 = "10 git";
 
   isNotebook = host == "t480s";
-
-  powermenu = "${../configs/rofi/powermenu}";
-
-  
-  # Define paths for colors and fonts
-  # colorsPath = "${toString powermenu}/shared/colors.rasi";
-  # fontsPath = "${toString powermenu}/shared/fonts.rasi";
-
-  # # Function to process theme files
-  # processTheme = path: builtins.replaceStrings 
-  #   [ "COLORS_PATH" "FONTS_PATH" ]
-  #   [ colorsPath fontsPath ]
-  #   (builtins.readFile path);
-  #  # Process all theme files
-
-  # themeFiles = {
-  #   "style-1.rasi" = processTheme "${powermenu}/style-1.rasi";
-  #   "style-2.rasi" = processTheme "${powermenu}/style-2.rasi";
-  # };
 in
 {
   imports = [
-    ./waybar.nix
+    ../waybar/waybar.nix
+    ./gtk.nix
+    ../rofi/rofi.nix
+  ] ++ lib.optionals isNotebook [
+    ../way-displays/way-displays.nix
   ];
 
+  xdg.configFile."sway/once.sh".source = ./once.sh;
+  
   home.packages = with pkgs; [
     # for sway
     swaylock
@@ -83,9 +70,8 @@ in
     libnotify
     swaybg
     swayimg
+    lsof
     sway-scratch
-  ] ++ lib.optionals isNotebook [
-    way-displays
   ];
 
   services = {
@@ -102,7 +88,7 @@ in
     enable = true;
     package = pkgs.swaylock;
     settings = {
-      image = "${../configs/deathpaper.jpg}";
+      image = "${./deathpaper.jpg}";
       font-size = 24;
       indicator-idle-visible = false;
       inside-color = backgroundColor + "CC";
@@ -142,7 +128,7 @@ in
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
-    extraConfig = builtins.readFile "${../configs/sway/config}";
+    extraConfig = builtins.readFile "${./config}";
     config = rec {
       modifier = "Mod4"; # Super key
       terminal = "${pkgs.kitty}/bin/kitty";
@@ -174,8 +160,8 @@ in
           always = false;
         }
         {
-          command = "${pkgs.swaybg}/bin/swaybg -i /etc/nixos/configs/deathpaper.jpg -m fill";
-          always = false;
+          command = "${config.xdg.configHome}/sway/once.sh ${pkgs.swaybg}/bin/swaybg -i ${./deathpaper.jpg} -m fill";
+          always = true;
         }
         {
           command = "${pkgs.autotiling}/bin/autotiling";
@@ -190,16 +176,7 @@ in
           always = false;
         }
         {
-          command = "exec ${../scripts/once.sh} ${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
-          always = true;
-        }
-      ] ++ lib.optionals isNotebook [
-        {
-          command = "${pkgs.way-displays}/bin/way-displays > /tmp/way-displays.\${XDG_VTNR}.\${USER}.log 2>&1 &";
-          always = false;
-        }
-        {
-          command = "${../scripts}/clamshell.sh";
+          command = "${config.xdg.configHome}/sway/once.sh ${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
           always = true;
         }
       ];
@@ -245,7 +222,7 @@ in
 
       focus.mouseWarping = "container";
 
-      menu = "rofi -show drun -theme /etc/nixos/configs/rofi/launcher/style-2.rasi";
+      menu = "rofi -show drun";
 
       defaultWorkspace = "workspace ${ws1}";
 
@@ -254,10 +231,10 @@ in
         "${modifier}+Shift+s" = "exec ${pkgs.brave}/bin/brave";
         "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
         "${modifier}+Shift+c" = "exec swaymsg reload";
-        "${modifier}+Shift+e" = "exec ${powermenu}/powermenu.sh";
+        "${modifier}+Shift+e" = "exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
         "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
-        "${modifier}+Return" = "exec 'kitty --working-directory $(/etc/nixos/scripts/cwd.sh)'";
+        "${modifier}+Return" = "exec '${pkgs.kitty}/bin/kitty --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)'";
 
         # Brightness control
         "XF86MonBrightnessDown" = "exec ${pkgs.light}/bin/light -U 10";

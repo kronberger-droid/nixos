@@ -11,6 +11,10 @@
       source ~/.zoxide.nu
       # Disable banner
       $env.config.show_banner = false
+      def flake-reload [] {
+        git add .
+        sudo nixos-rebuild switch --flake ~/.config/nixos#t480s --show-trace
+      }
     '';
 
     # Add shell aliases

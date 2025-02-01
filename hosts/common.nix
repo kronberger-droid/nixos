@@ -58,6 +58,7 @@ in
   services = {
     openssh.enable = true;
     pulseaudio.enable = false;
+    avahi.enable = true;
     pipewire = {
       enable = true;
       alsa = {
