@@ -10,21 +10,26 @@
 			".config/way-displays/clamshell.sh" = {
 				source = ./clamshell.sh; 
 				executable = true;
+			};
 			".config/way-displays/cfg.yaml".source = ./cfg.yaml;
 		};
 	};
 
-	systemd.user.services.lid-switch-handler = {
-	  Description = "Run a script when the lid state changes";
-	  WantedBy = [ "default.target" ];
-	  Service = {
-	    ExecStart = "${config.xdg.configHome}/way-displays/clamshell.sh";
-	    Restart = "always";
-	    Environment = [
-	      "WAYLAND_DISPLAY=wayland-0"
-	      "XDG_RUNTIME_DIR=/run/user/%U"
-	    ];
-	  };
+	systemd.user.services = {
+		lid-switch-handler = {
+		  Unit = {
+				Description = "Run a script when the lid state changes";
+			};
+		  WantedBy = [ "default.target" ];
+		  Service = {
+		    ExecStart = "${config.xdg.configHome}/way-displays/clamshell.sh";
+		    Restart = "always";
+		    Environment = [
+		      "WAYLAND_DISPLAY=wayland-0"
+		      "XDG_RUNTIME_DIR=/run/user/%U"
+		    ];
+		  };
+		};
 	};
 	wayland.windowManager.sway.config.startup = lib.mkAfter [
 		{
