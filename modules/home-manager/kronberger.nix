@@ -60,7 +60,7 @@
         rpi-imager
         keyd
         ipe
-        anydesk
+        rustdesk
       ];
       
       services = {
