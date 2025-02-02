@@ -30,6 +30,7 @@
         yazi
         bluetuith
         spotify
+        spotify-player
         btop
         zed-editor
         zathura
@@ -59,6 +60,8 @@
         rpi-imager
         keyd
         ipe
+        prismlauncher
+        anydesk
       ];
       
       services = {
