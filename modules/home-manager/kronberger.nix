@@ -60,8 +60,7 @@
         rpi-imager
         keyd
         ipe
-        prismlauncher
-        anydesk
+        rustdesk
       ];
       
       services = {
