@@ -60,7 +60,6 @@
         rpi-imager
         keyd
         ipe
-        rustdesk
       ];
       
       services = {
