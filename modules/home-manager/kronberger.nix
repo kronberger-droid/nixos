@@ -60,6 +60,7 @@
         rpi-imager
         keyd
         ipe
+        gimp
       ];
       
       services = {
