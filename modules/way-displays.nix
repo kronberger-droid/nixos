@@ -8,14 +8,14 @@
 
 		file = {
 			".config/way-displays/clamshell.sh" = {
-				source = ./clamshell.sh; 
+				source = ./way-displays/clamshell.sh; 
 				executable = true;
 			};
-			".config/way-displays/cfg.yaml".source = ./cfg.yaml;
+			".config/way-displays/cfg.yaml".source = ./way-displays/cfg.yaml;
 		};
 	};
 
- #  systemd.user.services = {
+ 	#  systemd.user.services = {
 	# 	lid-switch-handler = {
 	# 		Unit = {
 	# 			Description = "Run clamshell script when the lid state changes";
