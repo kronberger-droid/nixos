@@ -61,7 +61,11 @@
         rpi-imager
         keyd
         ipe
+<<<<<<< HEAD
         firefox
+=======
+        gimp
+>>>>>>> 574b8cdb2f3a020fae3ae4987164554ba8bf6753
       ];
       
       services = {
