@@ -48,7 +48,6 @@ in
   xdg.configFile."sway/once.sh".source = ./sway/once.sh;
   
   home.packages = with pkgs; [
-    # for sway
     swaylock
     swayidle
     sway-audio-idle-inhibit
@@ -151,10 +150,10 @@ in
         ];
       };
       startup = [
-        {
-          command = "${pkgs.megasync}/bin/megasync $$ ${pkgs.megasync}/bin/megasync";
-          always = false;
-        }
+        # {
+        #   command = "${pkgs.megasync}/bin/megasync $$ ${pkgs.megasync}/bin/megasync";
+        #   always = false;
+        # }
         {
           command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.85 --focused 1.0";
           always = false;
