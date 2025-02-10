@@ -15,6 +15,7 @@
         ../helix.nix
         ../nushell/nushell.nix
         ../git.nix
+        ../zathura.nix
       ];
       home.username = "kronberger";
       home.homeDirectory = "/home/kronberger";
@@ -60,6 +61,7 @@
         rpi-imager
         keyd
         ipe
+        firefox
       ];
       
       services = {

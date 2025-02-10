@@ -13,7 +13,7 @@ in
   programs.waybar = {
     enable = true;
     systemd.enable = true;
-    style = "${./style.css}";
+    style = "${./waybar/style.css}";
     settings = [{
       height = 30;
       layer = "top";

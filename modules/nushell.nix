@@ -3,9 +3,9 @@
   programs.nushell = {
     enable = true;
 
-    extraEnv = builtins.readFile ./extra_env.nu;
+    extraEnv = builtins.readFile ./nushell/extra_env.nu;
 
-    extraConfig = builtins.readFile ./extra_config.nu;
+    extraConfig = builtins.readFile ./nushell/extra_config.nu;
 
     # Add shell aliases
     shellAliases = {
