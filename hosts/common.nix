@@ -1,4 +1,4 @@
-{ pkgs, config, host, ... }:
+{ pkgs, host, ... }:
 let
   outputName =
     if host == "intelNuc" then
@@ -9,6 +9,10 @@ let
       throw "Unknown hostname: ${host}";
 in
 {
+  imports = [
+    ../modules/system/megasync.nix
+  ];
+
   nix.settings.experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
 
   boot = {

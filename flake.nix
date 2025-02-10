@@ -24,9 +24,9 @@
         };
         modules = [
           ./hosts/intelNuc/configuration.nix
-          ./modules/boot/greetd.nix
+          ./modules/system/greetd.nix
           home-manager.nixosModules.home-manager
-          ./modules/home-manager/kronberger.nix
+          ./modules/home-manager/users/kronberger.nix
         ];
       };
 
@@ -37,9 +37,9 @@
         };
         modules = [
           ./hosts/t480s/configuration.nix
-          ./modules/boot/greetd.nix
+          ./modules/system/greetd.nix
           home-manager.nixosModules.home-manager
-          ./modules/home-manager/kronberger.nix
+          ./modules/home-manager/users/kronberger.nix
           # nixos-06cb-009a-fingerprint-sensor.nixosModules."06cb-009a-fingerprint-sensor"
         ];
       };
