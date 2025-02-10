@@ -10,7 +10,7 @@
     wantedBy = [ "default.target" ];  
 
     serviceConfig = {
-      ExecStartPre = "${pkgs.bash}/bin/bash -c 'while ! ${pkgs.procps}/bin/pgrep -x .waybar-wrapped > /dev/null; do sleep 1; done'";
+      ExecStartPre = "${pkgs.bash}/bin/bash -c 'while ! ${pkgs.procps}/bin/pgrep -x .waybar-wrapped > /dev/null; do sleep 5; done'";
       ExecStart = "${pkgs.megasync}/bin/megasync";
       Restart = "on-failure";
       RestartSec = "5s";  
