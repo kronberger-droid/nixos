@@ -38,14 +38,14 @@ let
 in
 {
   imports = [
-    ../waybar/waybar.nix
-    ./gtk.nix
-    ../rofi/rofi.nix
+    ./waybar.nix
+    ./sway/gtk.nix
+    ./rofi.nix
   ] ++ lib.optionals isNotebook [
-    ../way-displays/way-displays.nix
+    ./way-displays.nix
   ];
 
-  xdg.configFile."sway/once.sh".source = ./once.sh;
+  xdg.configFile."sway/once.sh".source = ./sway/once.sh;
   
   home.packages = with pkgs; [
     # for sway
@@ -88,7 +88,7 @@ in
     enable = true;
     package = pkgs.swaylock;
     settings = {
-      image = "${./deathpaper.jpg}";
+      image = "${./sway/deathpaper.jpg}";
       font-size = 24;
       indicator-idle-visible = false;
       inside-color = backgroundColor + "CC";
@@ -128,7 +128,7 @@ in
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
-    extraConfig = builtins.readFile "${./config}";
+    extraConfig = builtins.readFile "${./sway/config}";
     config = rec {
       modifier = "Mod4"; # Super key
       terminal = "${pkgs.kitty}/bin/kitty";
@@ -160,7 +160,7 @@ in
           always = false;
         }
         {
-          command = "${config.xdg.configHome}/sway/once.sh ${pkgs.swaybg}/bin/swaybg -i ${./deathpaper.jpg} -m fill";
+          command = "${config.xdg.configHome}/sway/once.sh ${pkgs.swaybg}/bin/swaybg -i ${./sway/deathpaper.jpg} -m fill";
           always = true;
         }
         {
