@@ -145,6 +145,7 @@ in
         titlebar = false;
       };
       floating = {
+        border = 0;
         criteria = [
           { app_id = "nemo"; }
         ];
@@ -275,8 +276,8 @@ in
         "Mod1+Left" = "workspace prev";
       };
       gaps = {
-        inner = 8;
-        outer = 4;
+        inner = 6;
+        outer = 3;
       };
       input = {
         "*" = {

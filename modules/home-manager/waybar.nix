@@ -21,7 +21,6 @@ in
       tray = {
         spacing = 10;
         icon-size = 14;
-        show-passive-items = true;
       };
       modules-left = ["custom/menu" "sway/workspaces" "sway/scratchpad" "sway/mode" ];
         modules-right = [
@@ -40,7 +39,7 @@ in
           "battery"
           "backlight"
         ] ++ [
-          "tray"
+          # "tray"
           "clock"
           "custom/power"
         ];      
