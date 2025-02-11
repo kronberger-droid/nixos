@@ -63,6 +63,7 @@
         ipe
         firefox
         gimp
+        element-desktop
       ];
       
       services = {
