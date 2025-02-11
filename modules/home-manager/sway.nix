@@ -39,7 +39,7 @@ in
 {
   imports = [
     ./waybar.nix
-    ./sway/gtk.nix
+    ./theme.nix
     ./rofi.nix
   ] ++ lib.optionals isNotebook [
     ./way-displays.nix
