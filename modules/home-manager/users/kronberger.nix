@@ -75,13 +75,13 @@
           [Default]
           save_dir=$HOME/Pictures/Screenshots
           save_filename_format=swappy-%Y-%m-%d-%H-%M-%S.png
-          show_panel=true
-          line_size=10
+          show_panel=false
+          line_size=5
           text_size=15
           text_font=monospace
           paint_mode=rectangle
           early_exit=true
-          fill_shape=true
+          fill_shape=false
         '';
       };
 

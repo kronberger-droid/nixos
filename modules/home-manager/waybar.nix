@@ -39,7 +39,7 @@ in
           "battery"
           "backlight"
         ] ++ [
-          # "tray"
+          "tray"
           "clock"
           "custom/power"
         ];      
