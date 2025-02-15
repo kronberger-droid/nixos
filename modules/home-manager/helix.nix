@@ -106,17 +106,15 @@
                   "main.tex"
                   "--synctex"
                   "--keep-logs"
-                  "--outdir=build"
+                  "--outdir=."
                 ];
-                directory = "build";
-                auxDirectory = "src";
               };
               forwardSearch = {
                 executable = "${pkgs.zathura}/bin/zathura";
                 args = [
                   "--synctex-forward"
                   "%l:1:%f"
-                  "build/main.pdf"
+                  "main.pdf"
                 ];
               };
               chktex = {
