@@ -156,7 +156,7 @@ in
         #   always = false;
         # }
         {
-          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.85 --focused 1.0";
+          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.9 --focused 1.0";
           always = false;
         }
         {
