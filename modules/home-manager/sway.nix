@@ -151,10 +151,6 @@ in
         ];
       };
       startup = [
-        # {
-        #   command = "${pkgs.megasync}/bin/megasync $$ ${pkgs.megasync}/bin/megasync";
-        #   always = false;
-        # }
         {
           command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.9 --focused 1.0";
           always = false;
