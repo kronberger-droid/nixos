@@ -33,7 +33,6 @@
         spotify
         spotify-player
         btop
-        zed-editor
         zathura
         drawio
         inkscape
