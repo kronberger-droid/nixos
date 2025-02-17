@@ -156,7 +156,7 @@ in
           always = false;
         }
         {
-          command = "${config.xdg.configHome}/sway/once.sh ${pkgs.swaybg}/bin/swaybg -i ${./sway/deathpaper.jpg} -m fill";
+          command = "${config.xdg.configHome}/sway/once.sh ${pkgs.swaybg}/bin/swaybg -i ${./sway/deathpaper.jpg} -m fill -o '*'";
           always = true;
         }
         {
@@ -277,7 +277,7 @@ in
       };
       input = {
         "*" = {
-          xkb_options = "grp:lalt_lshift_toggle";
+          xkb_options = "grp:shifts_toggle,compose:menu";
           xkb_layout = "us,at";
           xkb_variant = ",";
         };
