@@ -79,7 +79,7 @@ in
           ids = [ "*"];
           settings = {
             main = {
-              leftalt = "overload(leftmeta, oneshot(layer(meta_layer))";
+              leftalt = "leftmeta";
               leftmeta = "leftalt";
               rightalt = "layer(meta_layer)";
               capslock = "overload(control, esc)";
