@@ -79,7 +79,7 @@ in
           ids = [ "*"];
           settings = {
             main = {
-              leftalt = "leftmeta";
+              leftalt = "overload(leftmeta, oneshot(layer(meta_layer))";
               leftmeta = "leftalt";
               rightalt = "layer(meta_layer)";
               capslock = "overload(control, esc)";
@@ -139,16 +139,11 @@ in
     dconf.enable = true;
   };
 
-  virtualisation.virtualbox.host = {
-    enable = true;
-    enableExtensionPack = true;
-  };
-  
   users.users.kronberger = {
     createHome = true;
     isNormalUser = true;
     description = "Kronberger";
-    extraGroups = [ "networkmanager" "wheel" "vboxusers" ];
+    extraGroups = [ "networkmanager" "wheel" ];
     shell = pkgs.nushell;
   };
 
