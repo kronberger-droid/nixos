@@ -7,40 +7,49 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    /*
-    nixos-06cb-009a-fingerprint-sensor = {
-      url = "github:ahbnr/nixos-06cb-009a-fingerprint-sensor?ref=24.11";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    */
+    agenix.url = "github:ryantm/agenix";
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, ... }: {
+  outputs = inputs@{ self, nixpkgs, home-manager, agenix, ... }: {
     nixosConfigurations = {
-      intelNuc = nixpkgs.lib.nixosSystem {
+      intelNuc =
+      let
         system = "x86_64-linux";
+      in nixpkgs.lib.nixosSystem {
+        inherit system;
         specialArgs = {
           host = "intelNuc";
+          inherit inputs;
         };
         modules = [
           ./hosts/intelNuc/configuration.nix
           ./modules/system/greetd.nix
           home-manager.nixosModules.home-manager
           ./modules/home-manager/users/kronberger.nix
+          agenix.nixosModules.default
+          {
+            environment.systemPackages = [ agenix.packages.${system}.default ];
+          }
         ];
       };
 
-      t480s = nixpkgs.lib.nixosSystem {
+      t480s = let
         system = "x86_64-linux";
+      in nixpkgs.lib.nixosSystem {
+        inherit system;
         specialArgs = {
           host = "t480s";
+          inherit inputs;
         };
         modules = [
           ./hosts/t480s/configuration.nix
           ./modules/system/greetd.nix
           home-manager.nixosModules.home-manager
           ./modules/home-manager/users/kronberger.nix
-          # nixos-06cb-009a-fingerprint-sensor.nixosModules."06cb-009a-fingerprint-sensor"
+          agenix.nixosModules.default
+          {
+            environment.systemPackages = [ agenix.packages.${system}.default ];
+          }
         ];
       };
       devPi = nixpkgs.lib.nixosSysytem {
