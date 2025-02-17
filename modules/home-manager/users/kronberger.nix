@@ -1,4 +1,4 @@
-{ lib, pkgs, inputs, host, ... }:
+{ pkgs, inputs, host, ... }:
 {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
@@ -64,6 +64,7 @@
         firefox
         gimp
         element-desktop
+        vlc
       ];
       
       services = {

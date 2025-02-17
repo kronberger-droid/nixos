@@ -1,4 +1,4 @@
-{ pkgs, host, ... }:
+{ pkgs, host, inputs, ... }:
 let
   outputName =
     if host == "intelNuc" then
@@ -11,9 +11,10 @@ in
 {
   imports = [
     ../modules/system/megasync.nix
+    ../modules/system/agenix.nix
   ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" "pipe-operators" ];
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   boot = {
     loader = {
@@ -79,7 +80,8 @@ in
           settings = {
             main = {
               leftalt = "leftmeta";
-             leftmeta = "leftalt";
+              leftmeta = "leftalt";
+              rightalt = "layer(meta_layer)";
               capslock = "overload(control, esc)";
             };
             "control:C" = {
@@ -87,6 +89,16 @@ in
               k = "up";
               j = "down";
               l = "right";
+            };
+            "meta_layer" = {
+              ";" = "macro(compose o \")";
+              "[" = "macro(compose u \")";
+              "'" = "macro(compose a \")";
+            };
+            "shift+meta_layer" = {
+              ";" = "macro(compose O \")";
+              "[" = "macro(compose U \")";
+              "'" = "macro(compose A \")";
             };
           };
         };
