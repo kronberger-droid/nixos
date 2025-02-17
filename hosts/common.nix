@@ -91,14 +91,15 @@ in
               l = "right";
             };
             "meta_layer" = {
-              ";" = "macro(compose o \")";
-              "[" = "macro(compose u \")";
-              "'" = "macro(compose a \")";
+              "o" = "macro(compose o \")";
+              "u" = "macro(compose u \")";
+              "a" = "macro(compose a \")";
+              "s" = "macro(compose s s)";
             };
             "shift+meta_layer" = {
-              ";" = "macro(compose O \")";
-              "[" = "macro(compose U \")";
-              "'" = "macro(compose A \")";
+              "o" = "macro(compose O \")";
+              "u" = "macro(compose U \")";
+              "a" = "macro(compose A \")";
             };
           };
         };
