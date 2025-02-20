@@ -277,8 +277,7 @@ in
       };
       input = {
         "*" = {
-          xkb_options = "grp:shifts_toggle,compose:menu";
-          xkb_layout = "us,at";
+          xkb_layout = "us";
           xkb_variant = ",";
         };
         "1267:32:Elan_Touchpad" = {
