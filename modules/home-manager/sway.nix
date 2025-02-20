@@ -277,6 +277,7 @@ in
       };
       input = {
         "*" = {
+          xkb_options = "compose:menu";
           xkb_layout = "us";
           xkb_variant = ",";
         };
