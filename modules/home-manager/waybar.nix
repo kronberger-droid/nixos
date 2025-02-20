@@ -24,7 +24,6 @@ in
       };
       modules-left = ["custom/menu" "sway/workspaces" "sway/scratchpad" "sway/mode" ];
         modules-right = [
-          "sway/language"
           "idle_inhibitor"
           "bluetooth"
           "pulseaudio"
