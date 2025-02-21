@@ -156,6 +156,7 @@ in
     };
     systemPackages = with pkgs; [
       helix
+      neovim
       git
       curl
       gparted
