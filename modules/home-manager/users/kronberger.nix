@@ -66,9 +66,9 @@
         vlc
       ];
       
-      services = {
-        gnome-keyring.enable = true;
-      };
+      # services = {
+      #   gnome-keyring.enable = true;
+      # };
 
       home.file = {
         ".config/swappy/config".text = ''
