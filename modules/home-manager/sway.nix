@@ -241,6 +241,14 @@ in
         "XF86AudioLowerVolume" = "exec ${pkgs.pulsemixer}/bin/pulsemixer --change-volume -1";
         "XF86AudioMute" = "exec ${pkgs.pulsemixer}/bin/pulsemixer --toggle-mute";
 
+        # Music control using waybar-mpris
+        "XF86AudioNext" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send next";
+        "XF86AudioPrev" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send prev";
+        "XF86AudioPlay" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
+
+        
+        # Scaling using way-displays
+
         # Workspace switching
         "${modifier}+1" = "workspace ${ws1}";
         "${modifier}+2" = "workspace ${ws2}";
