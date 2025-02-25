@@ -8,6 +8,7 @@
     ltex-ls
     texlivePackages.latexindent
     zathura
+    markdown-oxide
   ];
 
   programs.helix = {
