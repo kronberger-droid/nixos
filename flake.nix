@@ -12,8 +12,8 @@
 
   outputs = inputs@{ self, nixpkgs, home-manager, agenix, ... }: {
     nixosConfigurations = {
-      intelNuc =
-      let
+
+      intelNuc = let
         system = "x86_64-linux";
       in nixpkgs.lib.nixosSystem {
         inherit system;
@@ -52,6 +52,26 @@
           }
         ];
       };
+
+      spectre = let
+        system = "x86_64-linux";
+      in nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          host = "spectre";
+          inherit inputs;
+        };
+        modules = [
+          ./modules/system/greetd.nix
+          home-manager.nixosModules.home-manager
+          ./modules/home-manager/users/kronberger.nix
+          agenix.nixosModules.default
+          {
+            environment.systemPackages = [ agenix.packages.${system}.default ];
+          }
+        ];
+      };
+
       devPi = nixpkgs.lib.nixosSysytem {
         system = "aarch64-linux";
         specialArgs = {
