@@ -58,7 +58,6 @@
         freecad-wayland
         lxqt.lxqt-policykit
         rpi-imager
-        keyd
         ipe
         firefox
         gimp
