@@ -81,6 +81,7 @@
             ltex.dictionary = {
               "en-US" = [
                 "isentropic" "Isentropic"
+                "microfluidics" "Microfluidics"
                 "Kronberger"
               ];
             }; 
