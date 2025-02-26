@@ -12,6 +12,7 @@ in
   imports = [
     ../modules/system/megasync.nix
     ../modules/system/agenix.nix
+    ../modules/system/keyd.nix
   ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -72,39 +73,6 @@ in
         support32Bit = true;
       };
       pulse.enable = true;
-    };
-    keyd = {
-      enable = true;
-      keyboards = {
-        default = {
-          ids = [ "*"];
-          settings = {
-            main = {
-              leftalt = "leftmeta";
-              leftmeta = "leftalt";
-              rightalt = "layer(meta_layer)";
-              capslock = "overload(control, esc)";
-            };
-            "control:C" = {
-              h = "left";
-              k = "up";
-              j = "down";
-              l = "right";
-            };
-            "meta_layer" = {
-              "o" = "macro(compose o \")";
-              "u" = "macro(compose u \")";
-              "a" = "macro(compose a \")";
-              "s" = "macro(compose s s)";
-            };
-            "shift+meta_layer" = {
-              "o" = "macro(compose O \")";
-              "u" = "macro(compose U \")";
-              "a" = "macro(compose A \")";
-            };
-          };
-        };
-      };
     };
     gvfs.enable = true;
   };
