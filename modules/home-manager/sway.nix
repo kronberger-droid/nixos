@@ -245,7 +245,6 @@ in
         "XF86AudioNext" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send next";
         "XF86AudioPrev" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send prev";
         "XF86AudioPlay" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
-
         
         # Scaling using way-displays
 
@@ -278,6 +277,11 @@ in
         "Mod1+Right" = "workspace next";
         "Mod1+h" = "workspace prev";
         "Mod1+Left" = "workspace prev";
+
+        "Mod1+Shift+h" = "move workspace output left";
+        "Mod1+Shift+l" = "move workspace output right";
+        "Mod1+Shift+k" = "move workspace output up";
+        "Mod1+Shift+j" = "move workspace output down";
       };
       gaps = {
         inner = 6;
