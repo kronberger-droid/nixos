@@ -133,6 +133,7 @@ in
       nmap
       usbutils
       exfat
+      seahorse
     ];
   };
 
