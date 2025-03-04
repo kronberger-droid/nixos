@@ -81,3 +81,20 @@ window#waybar {
   border-color: rgba(66, 60, 56, 0.9);
   color: rgba(66, 60, 56, 0.9);
 }
+
+@keyframes blink-critical {
+  0% { color: @text; }
+  100% { color: red; }
+}
+
+#battery.warning {
+  color : orange;
+}
+
+#battery.critical:not(.charging) {
+  animation-name            : blink-critical;
+  animation-duration        : 0.5s;
+  animation-timing-function : linear;
+  animation-iteration-count : infinite;
+  animation-direction       : alternate;
+}
