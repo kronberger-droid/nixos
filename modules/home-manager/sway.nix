@@ -81,6 +81,7 @@ in
       borderColor = accentColor;
       backgroundColor = backgroundColor + "CC";
     };
+    poweralertd.enable = true;
   };
 
   programs.swaylock = {
@@ -230,6 +231,8 @@ in
         "${modifier}+Shift+e" = "exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
         "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
+        "${modifier}+Shift+t" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
+
         "${modifier}+Return" = "exec '${pkgs.kitty}/bin/kitty --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)'";
 
         # Brightness control
@@ -245,6 +248,9 @@ in
         "XF86AudioNext" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send next";
         "XF86AudioPrev" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send prev";
         "XF86AudioPlay" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
+
+        # Size of scratchpad
+        "${modifier}+minus" = "scratchpad show, resize set 1600 900";
         
         # Scaling using way-displays
 

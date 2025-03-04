@@ -56,13 +56,18 @@ in
 
   security = {
     polkit.enable = true;
-    pam.services.greetd.enableGnomeKeyring = true;
+    # pam.services.greetd.enableGnomeKeyring = true;
     rtkit.enable = true;
     pam.services.swaylock = {};
   };
 
   services = {
-    openssh.enable = true;
+    openssh = {
+      enable = true;
+      settings = {
+        X11Forwarding = true;
+      };
+    };
     gnome.gnome-keyring.enable = true;
     pulseaudio.enable = false;
     avahi.enable = true;
@@ -75,6 +80,7 @@ in
       pulse.enable = true;
     };
     gvfs.enable = true;
+    upower.enable = true;
   };
 
   hardware = {
