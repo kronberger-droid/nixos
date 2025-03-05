@@ -1,12 +1,12 @@
 # Floating Window Configurations
-for_window [app_id = "nemo"] floating enable, sticky enable, resize set 1200 800
-for_window [app_id = "floating_shell"] floating enable, border pixel 1, sticky enable, resize set 900 700
-for_window [instance = "megasync"] floating enable, sticky enable, border pixel 0, move position cursor, move down 35
-for_window [app_id = "localsend_app"] floating enable, sticky enable, resize set 1200 800
-for_window [instance = "bitwarden"] floating enable, sticky enable, resize set 1200 800
-for_window [app_id = "org.speedcrunch"] floating enable, sticky enable, resize set 800 600
-for_window [instance = "gpartedbin"] floating enable, sticky enable, resize set 1200 800
-for_window [title="Authentication Required"] floating enable, sticky enable, resize set 1200 800
+for_window [app_id = "nemo"] floating enable, resize set 1200 800
+for_window [app_id = "floating_shell"] floating enable, border pixel 1, resize set 900 700
+for_window [instance = "megasync"] floating enable, border pixel 0, move position cursor, move down 35
+for_window [app_id = "localsend_app"] floating enable, resize set 1200 800
+for_window [instance = "bitwarden"] floating enable, resize set 1200 800
+for_window [app_id = "org.speedcrunch"] floating enable, resize set 800 600
+for_window [instance = "gpartedbin"] floating enable, resize set 1200 800
+for_window [title="Authentication Required"] floating enable, resize set 1200 800
 
 # set floating mode for generated windows
 for_window [title="(?:Open|Save) (?:File|Folder|As)"] floating enable
