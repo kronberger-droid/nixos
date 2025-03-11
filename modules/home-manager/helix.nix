@@ -9,6 +9,7 @@
     texlivePackages.latexindent
     zathura
     markdown-oxide
+    rustup
   ];
 
   programs.helix = {
@@ -27,6 +28,9 @@
         };
         statusline = {
           left = [ "mode" "spinner" "version-control" "file-name" ];
+        };
+        file-picker = {
+          hidden = false;
         };
         inline-diagnostics = {
           cursor-line = "error";
@@ -115,6 +119,7 @@
                 executable = "${pkgs.zathura}/bin/zathura";
                 args = [
                   "--synctex-forward"
+                  "--log-level=error"
                   "%l:1:%f"
                   "main.pdf"
                 ];
