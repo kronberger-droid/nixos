@@ -63,6 +63,7 @@
         gimp
         element-desktop
         vlc
+        lmms
       ];
       
       # services = {
