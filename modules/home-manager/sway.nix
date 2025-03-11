@@ -96,6 +96,7 @@ in
       ring-color = backgroundColor;
       key-hl-color = accentColor;
       show-failed-attempts = true;
+      ignore-empty-password = true;
     };
   };
 
