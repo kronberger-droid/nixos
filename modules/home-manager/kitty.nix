@@ -5,7 +5,7 @@
   programs.kitty = {
     enable = true;
     settings = {
-      background_opacity = 0.95;
+      background_opacity = 1.0;
       confirm_os_window_close = 0;
       background = "#202020";
       foreground = "#d0d0d0";
