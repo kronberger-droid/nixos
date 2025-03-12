@@ -21,6 +21,8 @@ def "dev rust" [] {
 }
 
 def color-picker [] {
+		echo "In 1 sec you can pick a color!"
+		sleep 1sec
     # Use slurp to let you select a screen area
     let geometry = (slurp -p)
 
