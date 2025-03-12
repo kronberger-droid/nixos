@@ -64,6 +64,7 @@
         element-desktop
         vlc
         lmms
+        seahorse
       ];
       
       # services = {
