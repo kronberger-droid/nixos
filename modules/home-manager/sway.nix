@@ -225,7 +225,7 @@ in
       defaultWorkspace = "workspace ${ws1}";
 
       keybindings = lib.mkOptionDefault {
-        "${modifier}+Shift+x" = "exec ${pkgs.nemo-with-extensions}/bin/nemo";
+        "${modifier}+Shift+x" = "exec ${pkgs.nemo-with-extensions}/bin/nemo $(${config.xdg.configHome}/kitty/cwd.sh)";
         "${modifier}+Shift+s" = "exec ${pkgs.brave}/bin/brave";
         "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
         "${modifier}+Shift+c" = "exec swaymsg reload";
