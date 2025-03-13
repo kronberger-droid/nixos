@@ -139,6 +139,7 @@ in
       nmap
       usbutils
       exfat
+      uutils-coreutils-noprefix
     ];
   };
 

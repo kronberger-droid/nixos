@@ -158,7 +158,7 @@ in
       };
       startup = [
         {
-          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.9 --focused 1.0";
+          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.95 --focused 1.0";
           always = false;
         }
         {
