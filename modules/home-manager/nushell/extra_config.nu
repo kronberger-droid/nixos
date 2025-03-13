@@ -12,6 +12,17 @@ def dev [] {
 	nix develop
 }
 
+def "dev thesis" [] {
+	cd ~/GitHub/Thesis-Latex-Source
+	dev
+}
+
+def "dev python" [] {
+	cd ~/Programming/python
+	dev
+	python	
+}
+
 def "dev rust" [] {
   let current_dir = (~/.config/nixos/modules/home-manager/kitty/cwd.sh)
 
