@@ -60,6 +60,13 @@
           ];
         }
         {
+          name = "markdown";
+          language-servers = [
+            "ltex"
+            "markdown-oxide"
+          ];
+        }
+        {
           name = "rust";
           language-servers = [
             "rust-analyzer"
