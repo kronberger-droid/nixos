@@ -28,8 +28,8 @@ let
   ws3 = "3 research";
   ws4 = "4 coding";
   ws5 = "5 studying";
-  ws6 = "6 work";
-  ws7 = "7 pending";
+  ws6 = "6 homework";
+  ws7 = "7 work";
   ws8 = "8 nix";
   ws9 = "9 social";
   ws10 = "10 git";
