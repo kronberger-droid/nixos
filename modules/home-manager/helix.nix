@@ -12,6 +12,10 @@
     rustup
   ];
 
+  imports = [
+    ./helix/dprint.nix
+  ];
+
   programs.helix = {
     enable = true;
     defaultEditor = true;
@@ -65,6 +69,10 @@
             "ltex"
             "markdown-oxide"
           ];
+          formatter = {
+            command = "${pkgs.dprint}/bin/dprint";
+            args = [ "fmt" "--stdin" "md"];
+          };
         }
         {
           name = "rust";
