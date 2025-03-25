@@ -45,7 +45,7 @@
         nomachine-client
         ltunify
         localsend
-        okular
+        kdePackages.okular
         xdg-user-dirs
         xdg-desktop-portal-wlr
         xdg-desktop-portal
@@ -66,10 +66,6 @@
         lmms
         seahorse
       ];
-      
-      # services = {
-      #   gnome-keyring.enable = true;
-      # };
 
       home.file = {
         ".config/swappy/config".text = ''
