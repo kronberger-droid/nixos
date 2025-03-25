@@ -86,7 +86,6 @@
           command = "${pkgs.nil}/bin/nil";
           file-types = [ "nix" ];
         };
-      
         rust-analyzer = {
           command = "${pkgs.rust-analyzer}/bin/rust-analyzer";
           config = {
