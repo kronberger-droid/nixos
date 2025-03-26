@@ -9,7 +9,10 @@
     texlivePackages.latexindent
     zathura
     markdown-oxide
+    # Basic programming setup
     rustup
+    clang
+    llvmPackages.bintools
   ];
 
   imports = [
