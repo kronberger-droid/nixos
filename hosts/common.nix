@@ -58,7 +58,12 @@ in
     polkit.enable = true;
     # pam.services.greetd.enableGnomeKeyring = true;
     rtkit.enable = true;
-    pam.services.swaylock = {};
+    pam.services = {
+      swaylock = {};
+      greetd.enableGnomeKeyring = true;
+      greetd-password.enableGnomeKeyring = true;
+      login.enableGnomeKeyring = true;  
+    };
   };
 
   services = {
