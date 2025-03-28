@@ -65,7 +65,15 @@
         vlc
         lmms
         seahorse
+        gcr
       ];
+
+      services.gpg-agent = {
+        enable = true;
+        enableNushellIntegration = true;
+        enableSshSupport = true;
+        pinentryPackage = pkgs.pinentry-rofi;
+      };
 
       home.file = {
         ".config/swappy/config".text = ''

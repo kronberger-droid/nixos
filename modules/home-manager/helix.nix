@@ -10,7 +10,6 @@
     zathura
     markdown-oxide
     # Basic programming setup
-    rustup
   ];
 
   imports = [
