@@ -60,6 +60,7 @@ in
     pam.services = {
       swaylock = {};
       greetd.enableGnomeKeyring = true;
+      login.enableGnomeKeyring = true;
     };
   };
   services = {
