@@ -86,6 +86,10 @@ in
     };
     gvfs.enable = true;
     upower.enable = true;
+    dbus.packages = [
+      pkgs.gnome-keyring
+      pkgs.gcr
+    ];
   };
 
   hardware = {
