@@ -56,16 +56,12 @@ in
 
   security = {
     polkit.enable = true;
-    # pam.services.greetd.enableGnomeKeyring = true;
     rtkit.enable = true;
     pam.services = {
       swaylock = {};
       greetd.enableGnomeKeyring = true;
-      greetd-password.enableGnomeKeyring = true;
-      login.enableGnomeKeyring = true;  
     };
   };
-
   services = {
     openssh = {
       enable = true;
@@ -86,10 +82,6 @@ in
     };
     gvfs.enable = true;
     upower.enable = true;
-    dbus.packages = [
-      pkgs.gnome-keyring
-      pkgs.gcr
-    ];
   };
 
   hardware = {
@@ -122,6 +114,7 @@ in
   programs = {
     xwayland.enable = true;
     dconf.enable = true;
+    seahorse.enable = true;
   };
 
   users.users.kronberger = {
