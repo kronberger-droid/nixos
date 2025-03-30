@@ -1,13 +1,12 @@
 { pkgs, inputs, host, ... }:
 {
-  home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = true;
-  home-manager.backupFileExtension = "backup";
-
   home-manager = {
     extraSpecialArgs = {
       inherit inputs host;
     };
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    backupFileExtension = "backup";
     users.kronberger = {
       imports = [
         ../sway.nix
@@ -19,10 +18,9 @@
       ];
       home.username = "kronberger";
       home.homeDirectory = "/home/kronberger";
-      programs.home-manager.enable = true;
       home.packages = with pkgs; [
-        thunderbird
         brave
+        thunderbird
         bitwarden-desktop
         nemo-with-extensions
         obsidian
@@ -66,14 +64,8 @@
         lmms
         seahorse
         gcr
+        rustlings
       ];
-
-      services.gpg-agent = {
-        enable = true;
-        enableNushellIntegration = true;
-        enableSshSupport = true;
-        pinentryPackage = pkgs.pinentry-rofi;
-      };
 
       home.file = {
         ".config/swappy/config".text = ''
