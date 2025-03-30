@@ -17,6 +17,16 @@ in
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  nixpkgs.overlays = [
+    (final: prev: {
+      brave = prev.brave.override {
+        commandLineArgs = [
+          "--password-store=gnome-keyring"
+        ];
+      };
+    })
+  ];
+
   boot = {
     loader = {
       systemd-boot.enable = true;
@@ -70,7 +80,9 @@ in
         X11Forwarding = true;
       };
     };
-    gnome.gnome-keyring.enable = true;
+    gnome.gnome-keyring = {
+      enable = true;
+    };
     pulseaudio.enable = false;
     avahi.enable = true;
     pipewire = {
@@ -142,6 +154,7 @@ in
       nmap
       usbutils
       exfat
+      libsecret
     ];
   };
 
