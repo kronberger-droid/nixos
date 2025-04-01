@@ -65,6 +65,7 @@
         seahorse
         gcr
         rustlings
+        pdfarranger
       ];
 
       home.file = {
