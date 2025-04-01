@@ -66,6 +66,7 @@
         gcr
         rustlings
         pdfarranger
+        ffmpeg_6
       ];
 
       home.file = {
