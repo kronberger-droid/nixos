@@ -35,6 +35,8 @@ let
   ws10 = "10 git";
 
   isNotebook = host == "t480s";
+
+  modKey= "Mod4";
 in
 {
   imports = [
@@ -135,7 +137,7 @@ in
     wrapperFeatures.gtk = true;
     extraConfig = builtins.readFile "${./sway/config}";
     config = rec {
-      modifier = "Mod4"; # Super key
+      modifier = modKey; # Super key
       terminal = "${pkgs.kitty}/bin/kitty";
       assigns = {
         "${ws9}" = [
@@ -240,6 +242,9 @@ in
 
         "${modifier}+Shift+Return" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)";
         "${modifier}+Return" = "exec '${pkgs.kitty}/bin/kitty --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)'";
+
+        # Toggle waybar
+        "${modifier}+Shift+b" = "exec ${config.xdg.configHome}/waybar/toggle-waybar.sh";
 
         # Brightness control
         "XF86MonBrightnessDown" = "exec ${pkgs.light}/bin/light -U 10";
