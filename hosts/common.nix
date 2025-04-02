@@ -44,6 +44,7 @@ in
 
   networking = {
     networkmanager.enable = true;
+    wireless.enable = false;
     hostName = host;
   };
 
@@ -85,10 +86,20 @@ in
     };
     pulseaudio.enable = false;
     avahi.enable = true;
+    clamav = {
+      daemon.enable = true;
+      updater.enable = true;
+      scanner.scanDirectories = [
+        "/home"
+        "/var/lib"
+        "/tmp"
+        "/etc"
+        "/var/tmp"
+      ];
+    };
     pipewire = {
       enable = true;
-      alsa = {
-        enable = true;
+      alsa = { enable = true;
         support32Bit = true;
       };
       pulse.enable = true;
@@ -127,7 +138,7 @@ in
   programs = {
     xwayland.enable = true;
     dconf.enable = true;
-    seahorse.enable = true;
+   seahorse.enable = true;
   };
 
   users.users.kronberger = {
@@ -155,6 +166,7 @@ in
       usbutils
       exfat
       libsecret
+      busybox
     ];
   };
 

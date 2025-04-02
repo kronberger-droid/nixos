@@ -108,8 +108,9 @@ in
 
       network = {
         interval = 5;
-        format-wifi = "{icon}";
-        format-ethernet = if isNotebook then "" else "{ipaddr} ";
+        format-wifi = "{essid} {icon}";
+        family = "ipv4";
+        format-ethernet = if isNotebook then "" else "{ifname} ";
         format-disconnected = "󰖪";
         format-disabled = "󰀝";
         format-icons = [
