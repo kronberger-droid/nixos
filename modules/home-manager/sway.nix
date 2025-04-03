@@ -1,3 +1,4 @@
+# /etc/nixos/modules/home-manager/sway.nix
 { config, pkgs, lib, host, ... }:
 
 let

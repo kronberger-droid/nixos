@@ -1,3 +1,4 @@
+# /etc/nixos/modules/home-manager/helix.nix
 { pkgs, ... }:
 
 {
@@ -22,7 +23,6 @@
     settings = {
       theme = "base16_default";
       editor = {
-        end-of-line-diagnostics = "hint";
         soft-wrap.enable = true;
         line-number = "relative";
         cursor-shape = {
@@ -36,9 +36,9 @@
         file-picker = {
           hidden = false;
         };
+        end-of-line-diagnostics = "hint";
         inline-diagnostics = {
-          cursor-line = "error";
-          other-lines = "disable";
+          cursor-line = "warning";
         };
         lsp = {
           auto-signature-help = false;
