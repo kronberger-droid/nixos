@@ -62,6 +62,7 @@
           inherit inputs;
         };
         modules = [
+          ./hosts/spectre/configuration.nix
           ./modules/system/greetd.nix
           home-manager.nixosModules.home-manager
           ./modules/home-manager/users/kronberger.nix

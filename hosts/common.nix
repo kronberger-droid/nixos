@@ -167,6 +167,7 @@ in
       exfat
       libsecret
       busybox
+      wirelesstools
     ];
   };
 
