@@ -1,5 +1,5 @@
 # /etc/nixos/modules/home-manager/sway.nix
-{ config, pkgs, lib, isNotebook, ... }:
+{ config, pkgs, lib, host, isNotebook, ... }:
 
 let
   color0 = "#1e1e1e";
@@ -72,6 +72,7 @@ in
     swayimg
     lsof
     sway-scratch
+    libinput
   ];
 
   services = {
@@ -311,11 +312,19 @@ in
           xkb_layout = "us";
           xkb_variant = ",";
         };
-        "1267:32:Elan_Touchpad" = {
-          natural_scroll = "enabled";
-          tap = "enabled";
-        };
-      };
+      } // (
+        if host == "t480s" then {
+          "1267:32:Elan_Touchpad" = {
+            natural_scroll = "enabled";
+            tap = "enabled";
+          };
+        } else if host == "spectre" then {
+          "1739:52912:SYNA32BF" = {
+            natural_scroll = "enables";
+            tap = "enabled";
+          };
+        } else {}
+      );
       bars = [];
     };
   };
