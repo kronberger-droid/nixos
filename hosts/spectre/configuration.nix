@@ -1,16 +1,12 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
+
 {
-  imports = [
-    ./hardware-configuration.nix
-    ../common.nix
-  ];
+  imports =
+    [ # Include the results of the hardware scan.
+      ./hardware-configuration.nix
+      ../common.nix
+    ];
 
-  services = {
-    printing = {
-      enable = true;
-      drivers = [ pkgs.gutenprint ];
-    };
-  };
+  system.stateVersion = "24.11"; # Did you read the comment?
 
-  system.stateVersion = "24.05";
 }

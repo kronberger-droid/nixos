@@ -3,7 +3,7 @@ let
   outputName =
     if host == "intelNuc" then
       "HDMI-A-1"
-    else if host == ( "t480s" || "spectre" ) then
+    else if host ==  "t480s" || host =="spectre" then
       "eDP-1"
     else
       throw "Unknown hostname: ${host}";
@@ -46,6 +46,7 @@ in
     networkmanager.enable = true;
     wireless.enable = false;
     hostName = host;
+    firewall.allowedTCPPorts = [ 22 ];
   };
 
   time.timeZone = "Europe/Vienna";
@@ -75,9 +76,14 @@ in
     };
   };
   services = {
+    fail2ban.enable = true;
     openssh = {
       enable = true;
+      ports = [ 22 ];
       settings = {
+        PasswordAuthentication = true;
+        AllowUsers = null;
+        UseDns = true;
         X11Forwarding = true;
       };
     };
