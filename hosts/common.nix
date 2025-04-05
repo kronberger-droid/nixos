@@ -138,7 +138,8 @@ in
   programs = {
     xwayland.enable = true;
     dconf.enable = true;
-   seahorse.enable = true;
+    seahorse.enable = true;
+    ssh.startAgent = true;
   };
 
   users.users.kronberger = {
