@@ -3,7 +3,7 @@ let
   outputName =
     if host == "intelNuc" then
       "HDMI-A-1"
-    else if host == "t480s" then
+    else if host == ( "t480s" || "spectre" ) then
       "eDP-1"
     else
       throw "Unknown hostname: ${host}";
@@ -168,6 +168,7 @@ in
       libsecret
       busybox
       wirelesstools
+      popsicle
     ];
   };
 

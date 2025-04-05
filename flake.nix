@@ -39,6 +39,7 @@
         inherit system;
         specialArgs = {
           host = "t480s";
+          isNotebook = true;
           inherit inputs;
         };
         modules = [
@@ -59,6 +60,7 @@
         inherit system;
         specialArgs = {
           host = "spectre";
+          isNotebook = true;
           inherit inputs;
         };
         modules = [

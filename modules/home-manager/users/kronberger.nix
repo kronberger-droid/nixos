@@ -1,8 +1,8 @@
-{ pkgs, inputs, host, ... }:
+{ pkgs, inputs, host, isNotebook, ... }:
 {
   home-manager = {
     extraSpecialArgs = {
-      inherit inputs host;
+      inherit inputs host isNotebook;
     };
     useGlobalPkgs = true;
     useUserPackages = true;
