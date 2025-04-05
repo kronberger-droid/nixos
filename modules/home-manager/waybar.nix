@@ -1,7 +1,4 @@
-{ config, pkgs, host, lib, ... }:
-let
-  isNotebook = host == "t480s";
-in
+{ config, pkgs, isNotebook, lib, ... }:
 {
   home.packages = with pkgs; [
     waybar-mpris

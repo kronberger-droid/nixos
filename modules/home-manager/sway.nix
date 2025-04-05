@@ -1,5 +1,5 @@
 # /etc/nixos/modules/home-manager/sway.nix
-{ config, pkgs, lib, host, ... }:
+{ config, pkgs, lib, isNotebook, ... }:
 
 let
   color0 = "#1e1e1e";
@@ -34,8 +34,6 @@ let
   ws8 = "8 nix";
   ws9 = "9 social";
   ws10 = "10 git";
-
-  isNotebook = host == "t480s";
 
   modKey= "Mod4";
 in
@@ -304,6 +302,8 @@ in
       gaps = {
         inner = 6;
         outer = 3;
+        smartGaps = true;
+        smartBorders = "no_gaps";
       };
       input = {
         "*" = {
