@@ -319,9 +319,10 @@ in
             tap = "enabled";
           };
         } else if host == "spectre" then {
-          "1739:52912:SYNA32BF" = {
-            natural_scroll = "enables";
+          "1739:52912:SYNA32BF:00_06CB:CEB0_Touchpad" = {
+            natural_scroll = "enabled";
             tap = "enabled";
+            pointer_accel = "0.2";
           };
         } else {}
       );
