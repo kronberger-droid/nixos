@@ -67,6 +67,7 @@
         rustlings
         pdfarranger
         ffmpeg_6
+        xdg-user-dirs
       ];
 
       home.file = {
