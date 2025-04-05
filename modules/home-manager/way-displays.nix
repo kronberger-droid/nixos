@@ -1,11 +1,17 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, host, ... }:
+let
+	cfgFile = {
+		"t480s" = ./way-displays/cfg_t480s.yaml;
+		"spectre" = ./way-displays/cfg_spectre.yaml;
+	}.${host};
+in
 {
 	home = {
 		packages = with pkgs; [
 			way-displays
 		];
-
-		file.".config/way-displays/cfg.yaml".source = ./way-displays/cfg.yaml;
+		
+		file.".config/way-displays/cfg.yaml".source = cfgFile;
 	};
 	wayland.windowManager.sway = {
 		extraConfigEarly = lib.mkAfter ''
