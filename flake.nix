@@ -19,6 +19,7 @@
         inherit system;
         specialArgs = {
           host = "intelNuc";
+          isNotebook = false;
           inherit inputs;
         };
         modules = [
