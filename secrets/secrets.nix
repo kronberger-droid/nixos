@@ -4,5 +4,8 @@ let
 	spectre = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGdvzi72hgDqgWaRa8/M0WiuWaj6jH12o6341hMOWgvV e12202316@student.tuwien.ac.at";
 in
 {
-	"cms-pswd.age".publicKeys = [ intelNuc t480s spectre ];
+	age.secrets."cms-pswd" = {
+		file = ./cms-pswd.age;
+		publicKeys = [ intelNuc t480s spectre ];
+	};
 }
