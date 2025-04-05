@@ -61,7 +61,7 @@ TRANSFORM:
 
 # VRR / adaptive sync is enabled by default. Disable it per display.
 VRR_OFF:
-  # - DP-2
+  - eDP-1
   # - '!.*my monitor.*'
 
 
