@@ -105,7 +105,7 @@
 
       network = {
         interval = 5;
-        format-wifi = "{essid} {icon}";
+        format-wifi = "{icon}";
         family = "ipv4";
         format-ethernet = if isNotebook then "" else "{ifname} ";
         format-disconnected = "󰖪";
