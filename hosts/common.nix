@@ -22,6 +22,9 @@ in
       brave = prev.brave.override {
         commandLineArgs = [
           "--password-store=gnome-keyring"
+          "--enable-features=UseOzonePlatform"
+          "--ozone-platform=wayland"
+          "--disable-gpu"
         ];
       };
     })
