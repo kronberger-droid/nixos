@@ -149,11 +149,10 @@ in
     createHome = true;
     isNormalUser = true;
     description = "Kronberger";
-    extraGroups = [ "networkmanager" "wheel" "libvirtd" ];
+    extraGroups = [ "networkmanager" "wheel" ];
     shell = pkgs.nushell;
   };
 
-  virtualisation.libvirtd.enable = true;
   environment = {
     shells = [ pkgs.nushell ];
     variables = {
@@ -174,14 +173,7 @@ in
       busybox
       wirelesstools
       popsicle
-      virt-manager
-      woeusb-ng
-      ntfs3g
       qemu
-      virt-manager
-      libvirt
-      OVMF
-      spice-gtk
       quickemu
     ];
   };
