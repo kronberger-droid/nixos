@@ -153,6 +153,9 @@ in
     shell = pkgs.nushell;
   };
 
+  virtualisation.virtualbox.host.enable = true;
+  users.extraGroups.vboxusers.members = [ "user-with-access-to-virtualbox" ];
+
   environment = {
     shells = [ pkgs.nushell ];
     variables = {
@@ -173,9 +176,6 @@ in
       busybox
       wirelesstools
       popsicle
-      virt-manager
-      woeusb-ng
-      ntfs3g
     ];
   };
 
