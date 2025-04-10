@@ -79,7 +79,6 @@ in
     };
   };
   services = {
-    fail2ban.enable = true;
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -179,6 +178,9 @@ in
       busybox
       wirelesstools
       popsicle
+      virt-manager
+      woeusb-ng
+      ntfs3g
     ];
   };
 
