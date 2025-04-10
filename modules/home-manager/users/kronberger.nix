@@ -22,6 +22,7 @@
         brave
         thunderbird
         bitwarden-desktop
+        bitwarden-cli
         nemo-with-extensions
         obsidian
         github-desktop
