@@ -10,5 +10,7 @@
     ../common.nix
   ];
 
-  system.stateVersion = "24.05";
+  programs.steam.enable = true;
+ 
+  system.stateVersion = "24.11";
 }

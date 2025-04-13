@@ -62,7 +62,7 @@ inputbar {
     border-color:                @selected;
     background-color:            transparent;
     text-color:                  @foreground;
-    children:                    [ "textbox-prompt-colon", "prompt"];
+    children:                    [ "textbox-prompt-colon", "prompt", "entry"];
 }
 
 textbox-prompt-colon {
@@ -80,6 +80,17 @@ prompt {
     border-radius:               10px;
     background-color:            @active;
     text-color:                  @background;
+}
+
+entry {
+    enabled:                     true;
+    background-color:            inherit;
+    text-color:                  inherit;
+    padding:                     10px;
+    border-radius:               10px;
+    cursor:                      text;
+    placeholder:                 "search...";
+    placeholder-color:           inherit;
 }
 
 /*****----- Message -----*****/

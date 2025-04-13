@@ -1,7 +1,4 @@
-{ pkgs, host, lib, ... }:
-let
-  isNotebook = host == "t480s";
-in
+{ config, pkgs, isNotebook, lib, ... }:
 {
   home.packages = with pkgs; [
     waybar-mpris
@@ -10,10 +7,12 @@ in
     rofi
   ];
 
+  xdg.configFile."waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
+
   programs.waybar = {
     enable = true;
     systemd.enable = true;
-    style = "${../configs/waybar/style.css}";
+    style = "${./waybar/style.css}";
     settings = [{
       height = 30;
       layer = "top";
@@ -21,11 +20,9 @@ in
       tray = {
         spacing = 10;
         icon-size = 14;
-        show-passive-items = true;
       };
       modules-left = ["custom/menu" "sway/workspaces" "sway/scratchpad" "sway/mode" ];
         modules-right = [
-          "sway/language"
           "idle_inhibitor"
           "bluetooth"
           "pulseaudio"
@@ -79,13 +76,13 @@ in
       
       "custom/menu" = {
         format = "";
-        on-click = "${pkgs.rofi}/bin/rofi -show drun -theme /etc/nixos/configs/rofi/launcher/style-2.rasi";
+        on-click = "${pkgs.rofi}/bin/rofi -show drun";
         tooltip = false;
       };
       
       "custom/power" = {
         format = "";
-        on-click = "${pkgs.sway}/bin/swaymsg exec /etc/nixos/configs/rofi/powermenu/powermenu.sh";
+        on-click = "${pkgs.sway}/bin/swaymsg exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
         tooltip = false;
       };
       
@@ -109,7 +106,7 @@ in
       network = {
         interval = 5;
         format-wifi = "{icon}";
-        format-ethernet = if isNotebook then "" else "{ipaddr} ";
+        format-ethernet = if isNotebook then "" else "{ifname} ";
         format-disconnected = "󰖪";
         format-disabled = "󰀝";
         format-icons = [

@@ -1,3 +1,4 @@
+# /etc/nixos/modules/home-manager/helix.nix
 { pkgs, ... }:
 
 {
@@ -8,6 +9,12 @@
     ltex-ls
     texlivePackages.latexindent
     zathura
+    markdown-oxide
+    # Basic programming setup
+  ];
+
+  imports = [
+    ./helix/dprint.nix
   ];
 
   programs.helix = {
@@ -16,7 +23,6 @@
     settings = {
       theme = "base16_default";
       editor = {
-        end-of-line-diagnostics = "hint";
         soft-wrap.enable = true;
         line-number = "relative";
         cursor-shape = {
@@ -27,14 +33,17 @@
         statusline = {
           left = [ "mode" "spinner" "version-control" "file-name" ];
         };
+        file-picker = {
+          hidden = false;
+        };
+        end-of-line-diagnostics = "hint";
         inline-diagnostics = {
-          cursor-line = "error";
-          other-lines = "disable";
+          cursor-line = "warning";
         };
         lsp = {
           auto-signature-help = false;
-          display-messages = true;
-          display-inlay-hints = true;
+          display-messages = false;
+          display-inlay-hints = false;
         };
       };
       keys.normal = {
@@ -46,19 +55,43 @@
     };
 
     languages = {
-      language = [{
-        name = "latex";
-        language-servers = [
-        "texlab"
-        "ltex"
-        ];
-      }];
+      language = [
+        {
+          name = "latex";
+          language-servers = [
+            "texlab"
+            "ltex"
+          ];
+        }
+        {
+          name = "markdown";
+          language-servers = [
+            "ltex"
+            "markdown-oxide"
+          ];
+          formatter = {
+            command = "${pkgs.dprint}/bin/dprint";
+            args = [ "fmt" "--stdin" "md"];
+          };
+        }
+        {
+          name = "rust";
+          language-servers = [
+            "rust-analyzer"
+          ];
+        }
+      ];
       language-server = {
         nil = {
           command = "${pkgs.nil}/bin/nil";
           file-types = [ "nix" ];
         };
-      
+        rust-analyzer = {
+          command = "${pkgs.rust-analyzer}/bin/rust-analyzer";
+          config = {
+            check.command = "clippy";
+          };
+        };
         ltex = {
           command = "${pkgs.ltex-ls}/bin/ltex-ls";
           file-types = [ "latex" ];
@@ -66,6 +99,7 @@
             ltex.dictionary = {
               "en-US" = [
                 "isentropic" "Isentropic"
+                "microfluidics" "Microfluidics"
                 "Kronberger"
               ];
             }; 
@@ -79,7 +113,6 @@
             texlab = {
               latexindent = {
                 modifyLineBreaks = true;
-            
               };
               rootDirectory = ".";
               completion.matcher = "prefix";
@@ -93,17 +126,16 @@
                   "main.tex"
                   "--synctex"
                   "--keep-logs"
-                  "--outdir=build"
+                  "--outdir=."
                 ];
-                directory = "build";
-                auxDirectory = "src";
               };
               forwardSearch = {
                 executable = "${pkgs.zathura}/bin/zathura";
                 args = [
                   "--synctex-forward"
+                  "--log-level=error"
                   "%l:1:%f"
-                  "build/main.pdf"
+                  "main.pdf"
                 ];
               };
               chktex = {
