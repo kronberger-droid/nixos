@@ -3,15 +3,9 @@
   programs.nushell = {
     enable = true;
 
-    extraEnv = ''
-      zoxide init nushell | save -f ~/.zoxide.nu
-    '';
+    extraEnv = builtins.readFile ./nushell/extra_env.nu;
 
-    extraConfig = ''
-      source ~/.zoxide.nu
-      # Disable banner
-      $env.config.show_banner = false
-    '';
+    extraConfig = builtins.readFile ./nushell/extra_config.nu;
 
     # Add shell aliases
     shellAliases = {

@@ -22,8 +22,8 @@
       };
     };
     iconTheme = {
-      package = pkgs.fluent-icon-theme;
-      name = "Fluent";
+      name = "Qogir";
+      package = pkgs.qogir-icon-theme;
     };
   };
 }

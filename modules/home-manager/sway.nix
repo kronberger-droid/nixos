@@ -1,4 +1,5 @@
-{ pkgs, lib, host, ... }:
+# /etc/nixos/modules/home-manager/sway.nix
+{ config, pkgs, lib, host, isNotebook, ... }:
 
 let
   color0 = "#1e1e1e";
@@ -28,21 +29,26 @@ let
   ws3 = "3 research";
   ws4 = "4 coding";
   ws5 = "5 studying";
-  ws6 = "6 work";
-  ws7 = "7 pending";
+  ws6 = "6 homework";
+  ws7 = "7 work";
   ws8 = "8 nix";
   ws9 = "9 social";
   ws10 = "10 git";
 
-  isNotebook = host == "t480s";
+  modKey= "Mod4";
 in
 {
   imports = [
     ./waybar.nix
+    ./theme.nix
+    ./rofi.nix
+  ] ++ lib.optionals isNotebook [
+    ./way-displays.nix
   ];
 
+  xdg.configFile."sway/once.sh".source = ./sway/once.sh;
+  
   home.packages = with pkgs; [
-    # for sway
     swaylock
     swayidle
     sway-audio-idle-inhibit
@@ -64,13 +70,12 @@ in
     libnotify
     swaybg
     swayimg
+    lsof
     sway-scratch
-  ] ++ lib.optionals isNotebook [
-    way-displays
+    libinput
   ];
 
   services = {
-    gnome-keyring.enable = true;
     mako = {
       enable = true;
       defaultTimeout = 10000;
@@ -78,13 +83,14 @@ in
       borderColor = accentColor;
       backgroundColor = backgroundColor + "CC";
     };
+    poweralertd.enable = true;
   };
 
   programs.swaylock = {
     enable = true;
     package = pkgs.swaylock;
     settings = {
-      image = "${../configs/deathpaper.jpg}";
+      image = "${./sway/deathpaper.jpg}";
       font-size = 24;
       indicator-idle-visible = false;
       inside-color = backgroundColor + "CC";
@@ -92,6 +98,7 @@ in
       ring-color = backgroundColor;
       key-hl-color = accentColor;
       show-failed-attempts = true;
+      ignore-empty-password = true;
     };
   };
 
@@ -112,6 +119,10 @@ in
         command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
         resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
       }
+      {
+        timeout = 560;
+        command = "${pkgs.systemd}/bin/systemctl suspend";
+      }
     ];
     events = [
       {
@@ -124,9 +135,9 @@ in
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
-    extraConfig = builtins.readFile "${../configs/sway/config}";
+    extraConfig = builtins.readFile "${./sway/config}";
     config = rec {
-      modifier = "Mod4"; # Super key
+      modifier = modKey; # Super key
       terminal = "${pkgs.kitty}/bin/kitty";
       assigns = {
         "${ws9}" = [
@@ -142,22 +153,19 @@ in
         titlebar = false;
       };
       floating = {
+        border = 0;
         criteria = [
           { app_id = "nemo"; }
         ];
       };
       startup = [
         {
-          command = "${pkgs.megasync}/bin/megasync $$ ${pkgs.megasync}/bin/megasync";
+          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.95 --focused 1.0";
           always = false;
         }
         {
-          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.85 --focused 1.0";
-          always = false;
-        }
-        {
-          command = "${pkgs.swaybg}/bin/swaybg -i /etc/nixos/configs/deathpaper.jpg -m fill";
-          always = false;
+          command = "${config.xdg.configHome}/sway/once.sh ${pkgs.swaybg}/bin/swaybg -i ${./sway/deathpaper.jpg} -m fill -o '*'";
+          always = true;
         }
         {
           command = "${pkgs.autotiling}/bin/autotiling";
@@ -174,15 +182,6 @@ in
         {
           command = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
           always = false;
-        }
-      ] ++ lib.optionals isNotebook [
-        {
-          command = "${pkgs.way-displays}/bin/way-displays > /tmp/way-displays.\${XDG_VTNR}.\${USER}.log 2>&1 &";
-          always = false;
-        }
-        {
-          command = "${../scripts}/clamshell.sh";
-          always = true;
         }
       ];
       colors = {
@@ -227,19 +226,25 @@ in
 
       focus.mouseWarping = "container";
 
-      menu = "rofi -show drun -theme /etc/nixos/configs/rofi/launcher/style-2.rasi";
+      menu = "rofi -show drun";
 
       defaultWorkspace = "workspace ${ws1}";
 
       keybindings = lib.mkOptionDefault {
-        "${modifier}+Shift+x" = "exec ${pkgs.nemo-with-extensions}/bin/nemo";
+        "${modifier}+Shift+x" = "exec ${pkgs.nemo-with-extensions}/bin/nemo $(${config.xdg.configHome}/kitty/cwd.sh)";
         "${modifier}+Shift+s" = "exec ${pkgs.brave}/bin/brave";
         "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
         "${modifier}+Shift+c" = "exec swaymsg reload";
-        "${modifier}+Shift+e" = "exec /etc/nixos/configs/rofi/powermenu/powermenu.sh";
+        "${modifier}+Shift+e" = "exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
         "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
-        "${modifier}+Return" = "exec 'kitty --working-directory $(/etc/nixos/scripts/cwd.sh)'";
+        "${modifier}+Shift+t" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
+
+        "${modifier}+Shift+Return" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)";
+        "${modifier}+Return" = "exec '${pkgs.kitty}/bin/kitty --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)'";
+
+        # Toggle waybar
+        "${modifier}+Shift+b" = "exec ${config.xdg.configHome}/waybar/toggle-waybar.sh";
 
         # Brightness control
         "XF86MonBrightnessDown" = "exec ${pkgs.light}/bin/light -U 10";
@@ -249,6 +254,16 @@ in
         "XF86AudioRaiseVolume" = "exec ${pkgs.pulsemixer}/bin/pulsemixer --change-volume +1";
         "XF86AudioLowerVolume" = "exec ${pkgs.pulsemixer}/bin/pulsemixer --change-volume -1";
         "XF86AudioMute" = "exec ${pkgs.pulsemixer}/bin/pulsemixer --toggle-mute";
+
+        # Music control using waybar-mpris
+        "XF86AudioNext" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send next";
+        "XF86AudioPrev" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send prev";
+        "XF86AudioPlay" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
+
+        # Size of scratchpad
+        "${modifier}+minus" = "scratchpad show, resize set 1600 900";
+        
+        # Scaling using way-displays
 
         # Workspace switching
         "${modifier}+1" = "workspace ${ws1}";
@@ -279,22 +294,38 @@ in
         "Mod1+Right" = "workspace next";
         "Mod1+h" = "workspace prev";
         "Mod1+Left" = "workspace prev";
+
+        "Mod1+Shift+h" = "move workspace output left";
+        "Mod1+Shift+l" = "move workspace output right";
+        "Mod1+Shift+k" = "move workspace output up";
+        "Mod1+Shift+j" = "move workspace output down";
       };
       gaps = {
-        inner = 8;
-        outer = 4;
+        inner = 6;
+        outer = 3;
+        smartGaps = true;
+        smartBorders = "no_gaps";
       };
       input = {
         "*" = {
-          xkb_options = "grp:lalt_lshift_toggle";
-          xkb_layout = "us,at";
+          xkb_options = "compose:menu";
+          xkb_layout = "us";
           xkb_variant = ",";
         };
-        "1267:32:Elan_Touchpad" = {
-          natural_scroll = "enabled";
-          tap = "enabled";
-        };
-      };
+      } // (
+        if host == "t480s" then {
+          "1267:32:Elan_Touchpad" = {
+            natural_scroll = "enabled";
+            tap = "enabled";
+          };
+        } else if host == "spectre" then {
+          "1739:52912:SYNA32BF:00_06CB:CEB0_Touchpad" = {
+            natural_scroll = "enabled";
+            tap = "enabled";
+            pointer_accel = "0.2";
+          };
+        } else {}
+      );
       bars = [];
     };
   };

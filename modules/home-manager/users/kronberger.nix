@@ -1,31 +1,28 @@
-{ lib, pkgs, inputs, host, ... }:
-let
-  isNotebook = host == "t480s";
-in
+{ pkgs, inputs, host, isNotebook, ... }:
 {
-  home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = true;
-
   home-manager = {
     extraSpecialArgs = {
-      inherit inputs host;
+      inherit inputs host isNotebook;
     };
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    backupFileExtension = "backup";
     users.kronberger = {
       imports = [
-        ../../modules/sway.nix
-        ../../modules/kitty.nix
-        ../../modules/gtk.nix
-        ../../modules/helix.nix
-        ../../modules/shell.nix
-        ../../modules/git.nix
+        ../sway.nix
+        ../kitty.nix
+        ../helix.nix
+        ../nushell.nix
+        ../git.nix
+        ../zathura.nix
       ];
       home.username = "kronberger";
       home.homeDirectory = "/home/kronberger";
-      programs.home-manager.enable = true;
       home.packages = with pkgs; [
-        thunderbird
         brave
+        thunderbird
         bitwarden-desktop
+        bitwarden-cli
         nemo-with-extensions
         obsidian
         github-desktop
@@ -33,8 +30,8 @@ in
         yazi
         bluetuith
         spotify
+        spotify-player
         btop
-        zed-editor
         zathura
         drawio
         inkscape
@@ -47,7 +44,7 @@ in
         nomachine-client
         ltunify
         localsend
-        okular
+        kdePackages.okular
         xdg-user-dirs
         xdg-desktop-portal-wlr
         xdg-desktop-portal
@@ -60,31 +57,44 @@ in
         freecad-wayland
         lxqt.lxqt-policykit
         rpi-imager
-        keyd
+        ipe
+        firefox
+        gimp
+        element-desktop
+        vlc
+        lmms
+        seahorse
+        gcr
+        rustlings
+        pdfarranger
+        ffmpeg_6
+        xdg-user-dirs
       ];
-      
+
       home.file = {
         ".config/swappy/config".text = ''
           [Default]
           save_dir=$HOME/Pictures/Screenshots
           save_filename_format=swappy-%Y-%m-%d-%H-%M-%S.png
-          show_panel=true
-          line_size=10
+          show_panel=false
+          line_size=5
           text_size=15
           text_font=monospace
           paint_mode=rectangle
           early_exit=true
-          fill_shape=true
+          fill_shape=false
         '';
-      } // lib.optionalAttrs isNotebook {
-        ".config/way-displays/cfg.yaml".source = ../../configs/way-displays/cfg.yaml;
+        ".local/share/applications/whatsapp-web.desktop".text = ''
+          [Desktop Entry]
+          Name=WhatsApp Web
+          Exec=brave --app=https://web.whatsapp.com --password-store=gnome-keyring
+          Icon=whatsapp
+          Type=Application
+          Categories=Network;
+        '';
       };
 
-      programs.yazi = {
-        enable = true;
-        settings.manager.show_hidden = true;
-      };
-     
+
       home.stateVersion = "24.11";
     };
   };

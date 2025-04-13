@@ -1,26 +1,40 @@
-{ pkgs, host, ... }:
+{ pkgs, host, inputs, ... }:
 let
   outputName =
     if host == "intelNuc" then
       "HDMI-A-1"
-    else if host == "t480s" then
+    else if host ==  "t480s" || host =="spectre" then
       "eDP-1"
     else
       throw "Unknown hostname: ${host}";
 in
 {
+  imports = [
+    ../modules/system/megasync.nix
+    ../modules/system/agenix.nix
+    ../modules/system/keyd.nix
+  ];
+
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  nixpkgs.overlays = [
+    (final: prev: {
+      brave = prev.brave.override {
+        commandLineArgs = [
+          "--password-store=gnome-keyring"
+        ];
+      };
+    })
+  ];
 
   boot = {
     loader = {
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
     };
-    plymouth.enable = true;
-    initrd.verbose = false;
+    # plymouth.enable = true;
+    # initrd.verbose = false;
     kernelParams = [
-      "quiet"
-      "udev.log_level=3"
       "nowatchdog"
       "nmi_watchdog=0"
     ];
@@ -28,7 +42,9 @@ in
 
   networking = {
     networkmanager.enable = true;
+    wireless.enable = false;
     hostName = host;
+    firewall.allowedTCPPorts = [ 22 ];
   };
 
   time.timeZone = "Europe/Vienna";
@@ -50,45 +66,49 @@ in
 
   security = {
     polkit.enable = true;
-    pam.services.greetd.enableGnomeKeyring = true;
     rtkit.enable = true;
-    pam.services.swaylock = {};
+    pam.services = {
+      swaylock = {};
+      greetd.enableGnomeKeyring = true;
+      # login.enableGnomeKeyring = true;
+    };
   };
-
   services = {
-    openssh.enable = true;
+    openssh = {
+      enable = true;
+      ports = [ 22 ];
+      settings = {
+        PasswordAuthentication = true;
+        AllowUsers = null;
+        UseDns = true;
+        X11Forwarding = true;
+      };
+    };
+    gnome.gnome-keyring = {
+      enable = true;
+    };
     pulseaudio.enable = false;
+    avahi.enable = true;
+    clamav = {
+      daemon.enable = true;
+      updater.enable = true;
+      scanner.scanDirectories = [
+        "/home"
+        "/var/lib"
+        "/tmp"
+        "/etc"
+        "/var/tmp"
+      ];
+    };
     pipewire = {
       enable = true;
-      alsa = {
-        enable = true;
+      alsa = { enable = true;
         support32Bit = true;
       };
       pulse.enable = true;
     };
-    keyd = {
-      enable = true;
-      keyboards = {
-        default = {
-          ids = [ "*"];
-          settings = {
-            main = {
-              leftalt = "leftmeta";
-             leftmeta = "leftalt";
-              capslock = "overload(control, esc)";
-            };
-            "control:C" = {
-              h = "left";
-              k = "up";
-              j = "down";
-              l = "right";
-            };
-          };
-        };
-      };
-    };
     gvfs.enable = true;
-    gnome.gnome-keyring.enable = true;
+    upower.enable = true;
   };
 
   hardware = {
@@ -121,18 +141,15 @@ in
   programs = {
     xwayland.enable = true;
     dconf.enable = true;
+    seahorse.enable = true;
+    ssh.startAgent = true;
   };
 
-  virtualisation.virtualbox.host = {
-    enable = true;
-    enableExtensionPack = true;
-  };
-  
   users.users.kronberger = {
     createHome = true;
     isNormalUser = true;
     description = "Kronberger";
-    extraGroups = [ "networkmanager" "wheel" "vboxusers" ];
+    extraGroups = [ "networkmanager" "wheel" ];
     shell = pkgs.nushell;
   };
 
@@ -143,6 +160,7 @@ in
     };
     systemPackages = with pkgs; [
       helix
+      neovim
       git
       curl
       gparted
@@ -151,6 +169,12 @@ in
       nmap
       usbutils
       exfat
+      libsecret
+      busybox
+      wirelesstools
+      popsicle
+      qemu
+      quickemu
     ];
   };
 
