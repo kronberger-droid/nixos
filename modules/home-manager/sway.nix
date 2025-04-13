@@ -180,8 +180,8 @@ in
           always = false;
         }
         {
-          command = "${config.xdg.configHome}/sway/once.sh ${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
-          always = true;
+          command = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
+          always = false;
         }
       ];
       colors = {
