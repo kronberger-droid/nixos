@@ -12,9 +12,4 @@
       filter.lfs.process = "git-lfs filter-process";
     };
   };
-
-  # Add GitHub Desktop to the system
-  home.packages = with pkgs; [
-    github-desktop
-  ];
 }
