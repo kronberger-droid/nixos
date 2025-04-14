@@ -76,7 +76,7 @@
         ];
       };
 
-      devPi = nixpkgs.lib.nixosSysytem {
+      devPi = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
         specialArgs = {
           host = "devPi";
