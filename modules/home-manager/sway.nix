@@ -1,6 +1,4 @@
-# /etc/nixos/modules/home-manager/sway.nix
 { config, pkgs, lib, host, isNotebook, ... }:
-
 let
   color0 = "#1e1e1e";
   color1 = "#2c2f33";
@@ -35,7 +33,7 @@ let
   ws9 = "9 social";
   ws10 = "10 git";
 
-  modKey= "Mod4";
+  modKey = "Mod4";
 in
 {
   imports = [
@@ -43,6 +41,11 @@ in
     ./theme.nix
     ./rofi.nix
     ./sway/audio-idle-inhibit.nix
+    ./sway/swayidle.nix
+    ( import ./sway/mako.nix {
+      inherit pkgs config lib;
+      inherit backgroundColor accentColor;
+    })
   ] ++ lib.optionals isNotebook [
     ./way-displays.nix
   ];
@@ -54,7 +57,6 @@ in
     swayidle
     wl-clipboard
     brightnessctl
-    mako
     wlsunset
     grim
     rofi
@@ -75,69 +77,12 @@ in
     libinput
   ];
 
-  services = {
-    mako = {
-      enable = true;
-      defaultTimeout = 10000;
-      borderRadius = 8;
-      borderColor = accentColor;
-      backgroundColor = backgroundColor + "CC";
-    };
-    poweralertd.enable = true;
-  };
-
-  programs.swaylock = {
-    enable = true;
-    package = pkgs.swaylock;
-    settings = {
-      image = "${./sway/deathpaper.jpg}";
-      font-size = 24;
-      indicator-idle-visible = false;
-      inside-color = backgroundColor + "CC";
-      indicator-radius = 80;
-      ring-color = backgroundColor;
-      key-hl-color = accentColor;
-      show-failed-attempts = true;
-      ignore-empty-password = true;
-    };
-  };
-
-  services.swayidle = {
-    enable = true;
-    systemdTarget = "graphical-session.target";
-    timeouts = [
-      {
-        timeout = 395;
-        command = "${pkgs.libnotify}/bin/notify-send 'Locking in 5 seconds' -t 5000";
-      }
-      {
-        timeout = 400;
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f &";
-      }
-      {
-        timeout = 460;
-        command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
-        resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
-      }
-      {
-        timeout = 560;
-        command = "${pkgs.systemd}/bin/systemctl suspend";
-      }
-    ];
-    events = [
-      {
-        event = "before-sleep";
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f &";
-      }
-    ];
-  };
-
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
     extraConfig = builtins.readFile "${./sway/config}";
     config = rec {
-      modifier = modKey; # Super key
+      modifier = modKey;
       terminal = "${pkgs.kitty}/bin/kitty";
       assigns = {
         "${ws9}" = [
