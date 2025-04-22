@@ -1,18 +1,24 @@
+{ config, lib, pkgs, ... }:
 
-{ pkgs, ... }: {
-  environment.systemPackages = with pkgs; [
-    sway-audio-idle-inhibit
+{
+  home.packages = [
+    pkgs.sway-audio-idle-inhibit
   ];
 
-  systemd.user.services.audio-idle-inhibit= {
-    description = "audio-idle-inhibit service";
-    after = [ "sway.service" ];
-    wantedBy = [ "default.target" ];  
+  systemd.user.services.audio-idle-inhibit = {
+    Unit = {
+      Description = "audio-idle-inhibit service";
+      After = [ "graphical-session.target" ];
+    };
 
-    serviceConfig = {
+    Service = {
       ExecStart = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
       Restart = "on-failure";
-      RestartSec = "5s";  
+      RestartSec = 5;
+    };
+
+    Install = {
+      WantedBy = [ "default.target" ];
     };
   };
 }
