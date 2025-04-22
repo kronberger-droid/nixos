@@ -42,6 +42,7 @@ in
     ./waybar.nix
     ./theme.nix
     ./rofi.nix
+    ./sway/audio-idle-inhibit.nix
   ] ++ lib.optionals isNotebook [
     ./way-displays.nix
   ];
@@ -51,7 +52,6 @@ in
   home.packages = with pkgs; [
     swaylock
     swayidle
-    sway-audio-idle-inhibit
     wl-clipboard
     brightnessctl
     mako
