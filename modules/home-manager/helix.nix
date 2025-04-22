@@ -10,7 +10,6 @@
     texlivePackages.latexindent
     zathura
     markdown-oxide
-    # Basic programming setup
   ];
 
   imports = [
@@ -21,7 +20,7 @@
     enable = true;
     defaultEditor = true;
     settings = {
-      theme = "base16_default";
+      theme = "base16_transparent";
       editor = {
         soft-wrap.enable = true;
         line-number = "relative";
