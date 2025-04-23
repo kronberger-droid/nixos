@@ -87,6 +87,7 @@
           name = "typst";
           language-servers = [
             "tinymist"
+            "ltex"
           ];
           formatter = {
             command = "${pkgs.typstfmt}/bin/typstfmt";
