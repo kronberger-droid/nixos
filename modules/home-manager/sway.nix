@@ -42,6 +42,10 @@ in
     ./rofi.nix
     ./sway/audio-idle-inhibit.nix
     ./sway/swayidle.nix
+    (import ./sway/swaylock.nix {
+      inherit pkgs config lib;
+      inherit backgroundColor accentColor;
+    })
     ( import ./sway/mako.nix {
       inherit pkgs config lib;
       inherit backgroundColor accentColor;
