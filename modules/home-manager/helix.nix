@@ -6,6 +6,10 @@
     nil
     texlab
     tectonic
+    typst
+    typstfmt
+    typst-live
+    tinymist
     ltex-ls
     texlivePackages.latexindent
     zathura
@@ -78,6 +82,17 @@
           language-servers = [
             "rust-analyzer"
           ];
+        }
+        {
+          name = "typst";
+          language-servers = [
+            "tinymist"
+          ];
+          formatter = {
+            command = "${pkgs.typstfmt}/bin/typstfmt";
+            args = [ "--output" "-"];
+          };
+          auto-format = true;
         }
       ];
       language-server = {

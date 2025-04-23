@@ -124,10 +124,6 @@ in
           command = "${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4";
           always = false;
         }
-        {
-          command = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
-          always = false;
-        }
       ];
       colors = {
         background = backgroundColor;
@@ -246,8 +242,8 @@ in
         "Mod1+Shift+j" = "move workspace output down";
       };
       gaps = {
-        inner = 6;
-        outer = 3;
+        inner = 4;
+        outer = 2;
         smartGaps = true;
         smartBorders = "no_gaps";
       };
