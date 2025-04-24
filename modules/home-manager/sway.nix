@@ -66,7 +66,7 @@ in
     rofi
     slurp
     pulsemixer
-    autotiling-rs
+    autotiling
     swappy
     sway-contrib.grimshot
     sway-contrib.inactive-windows-transparency
@@ -117,7 +117,7 @@ in
           always = true;
         }
         {
-          command = "${pkgs.autotiling-rs}/bin/autotiling-rs";
+          command = "${pkgs.autotiling}/bin/autotiling";
           always = false;
         }
         {

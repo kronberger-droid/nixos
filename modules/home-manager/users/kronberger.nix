@@ -19,56 +19,87 @@
       home.username = "kronberger";
       home.homeDirectory = "/home/kronberger";
       home.packages = with pkgs; [
+        # Browsers
         brave
+        nyxt
+        firefox
+
+        # Mail
         thunderbird
-        bitwarden-desktop
-        bitwarden-cli
+
+        # Filemanagers
         nemo-with-extensions
-        obsidian
-        github-desktop
-        libsecret
         yazi
-        bluetuith
+        github-desktop
+        megasync
+        zotero-beta
+        megacli
+        serpl
+
+        # Editors
+        obsidian
+        onlyoffice-desktopeditors
+
+        # Music
+        lmms
         spotify
         spotify-player
+
+        # Information
         btop
+        neofetch
+        fzf
+        serpl
+        translate-shell
+
+        # Images
         zathura
         drawio
         inkscape
-        megasync
-        megacli
-        neofetch
-        fzf
-        zotero-beta
-        onlyoffice-desktopeditors
-        nomachine-client
-        ltunify
-        localsend
         kdePackages.okular
+        gthumb
+        ipe
+        gimp
+        pdfarranger
+        ffmpeg_6
+
+        # Remote
+        nomachine-client
+        localsend
+
+        # System
+        ltunify
+        rpi-imager
+        bluetuith
+
+        # xdg portal
         xdg-user-dirs
         xdg-desktop-portal-wlr
         xdg-desktop-portal
         xdg-desktop-portal-gtk
+
+        # Math
         speedcrunch
-        caligula
-        gthumb
-        serpl
-        translate-shell
+
+        # CAD
         freecad-wayland
+
+        # Safety
         lxqt.lxqt-policykit
-        rpi-imager
-        ipe
-        firefox
-        gimp
-        element-desktop
-        vlc
-        lmms
         seahorse
+        libsecret
+        bitwarden-desktop
+        bitwarden-cli
+
+        # Social
+        element-desktop
+
+        # Video
+        vlc
+
+        # ?
         gcr
-        rustlings
-        pdfarranger
-        ffmpeg_6
-        xdg-user-dirs
+
       ];
 
       home.file = {
