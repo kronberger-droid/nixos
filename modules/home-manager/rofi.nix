@@ -1,6 +1,7 @@
 {config, lib, pkgs, ...}:{
   programs.rofi = {
     enable = true;
+    package = pkgs.rofi-wayland;
     theme = "${config.xdg.configHome}/rofi/launcher/style-2.rasi";
   };
 
