@@ -15,6 +15,9 @@
     shellAliases = {
       cd = "z";
       cat = "bat";
+      icat = "kitten icat";
+      c = "clear";
+      e = "exit";
     };
   };
   
