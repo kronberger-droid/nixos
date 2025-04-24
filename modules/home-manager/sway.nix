@@ -63,7 +63,6 @@ in
     brightnessctl
     wlsunset
     grim
-    rofi
     slurp
     pulsemixer
     autotiling
@@ -75,10 +74,10 @@ in
     gron
     libnotify
     swaybg
-    swayimg
     lsof
     sway-scratch
     libinput
+    woomer
   ];
 
   wayland.windowManager.sway = {
@@ -171,7 +170,7 @@ in
 
       focus.mouseWarping = "container";
 
-      menu = "rofi -show drun";
+      menu = "${pkgs.rofi-wayland}/bin/rofi -show drun";
 
       defaultWorkspace = "workspace ${ws1}";
 
@@ -184,6 +183,7 @@ in
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
         "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
         "${modifier}+Shift+t" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
+        "${modifier}+Shift+y" = "exec ${pkgs.woomer}/bin/woomer";
 
         "${modifier}+Shift+Return" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)";
         "${modifier}+Return" = "exec '${pkgs.kitty}/bin/kitty --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)'";

@@ -22,6 +22,8 @@ in
       brave = prev.brave.override {
         commandLineArgs = [
           "--password-store=gnome-keyring"
+          "--enable-features=UseOzonePlatform"
+          "--ozone-platform=wayland"
         ];
       };
     })
@@ -37,6 +39,9 @@ in
     kernelParams = [
       "nowatchdog"
       "nmi_watchdog=0"
+    ];
+    blacklistedKernelModules = [
+      "wdat_wdt"
     ];
   };
 
@@ -172,6 +177,7 @@ in
       exfat
       libsecret
       busybox
+      tree
       wirelesstools
       popsicle
       qemu

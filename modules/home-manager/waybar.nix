@@ -4,7 +4,8 @@
     waybar-mpris
     calcurse
     kitty
-    rofi
+    rofi-wayland
+    kitti3
   ];
 
   xdg.configFile."waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
@@ -76,7 +77,7 @@
       
       "custom/menu" = {
         format = "";
-        on-click = "${pkgs.rofi}/bin/rofi -show drun";
+        on-click = "${pkgs.rofi-wayland}/bin/rofi -show drun";
         tooltip = false;
       };
       

@@ -42,7 +42,6 @@
 
         # Music
         lmms
-        spotify
         spotify-player
 
         # Information
@@ -86,6 +85,7 @@
 
         # Safety
         lxqt.lxqt-policykit
+        gcr
         seahorse
         libsecret
         bitwarden-desktop
@@ -96,10 +96,6 @@
 
         # Video
         vlc
-
-        # ?
-        gcr
-
       ];
 
       home.file = {
@@ -118,8 +114,16 @@
         ".local/share/applications/whatsapp-web.desktop".text = ''
           [Desktop Entry]
           Name=WhatsApp Web
-          Exec=brave --app=https://web.whatsapp.com --password-store=gnome-keyring
+          Exec=brave --app=https://web.whatsapp.com --password-store=gnome-keyring --enable-features=UseOzonePlatform --ozone-platform=wayland
           Icon=whatsapp
+          Type=Application
+          Categories=Network;
+        '';
+        ".local/share/applications/spotify.desktop".text = ''
+          [Desktop Entry]
+          Name=Spotify
+          Exec=brave --app=https://open.spotify.com/ --password-store=gnome-keyring --enable-features=UseOzonePlatform --ozone-platform=wayland
+          Icon=spotify
           Type=Application
           Categories=Network;
         '';
