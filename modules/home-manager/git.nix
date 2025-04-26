@@ -9,11 +9,17 @@
     userEmail = "kronberger@proton.me";
 
     lfs.enable = true;
+
     extraConfig = {
-      filter.lfs.required = true;
-      filter.lfs.clean = "git-lfs clean -- %f";
-      filter.lfs.smudge = "git-lfs smudge -- %f";
-      filter.lfs.process = "git-lfs filter-process";
+      init = {
+        defaultBranch = "main";
+      };
+      filter.lfs = {
+        required = true;
+        clean = "git-lfs clean -- %f";
+        smudge = "git-lfs smudge -- %f";
+        process = "git-lfs filter-process";
+      };
     };
   };
 }
