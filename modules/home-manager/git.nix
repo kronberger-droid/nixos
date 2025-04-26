@@ -1,10 +1,14 @@
 { pkgs, ... }:{
+  home.packages = with pkgs; [
+    github-desktop
+    gh
+  ];
   programs.git = {
     enable = true;
-    userName = "Martin Kronberger";
-    userEmail = "e12202316@student.tuwien.ac.at";
+    userName = "kronberger-droid";
+    userEmail = "kronberger@proton.me";
 
-    lfs.enable = true;  # Enables Git LFS
+    lfs.enable = true;
     extraConfig = {
       filter.lfs.required = true;
       filter.lfs.clean = "git-lfs clean -- %f";

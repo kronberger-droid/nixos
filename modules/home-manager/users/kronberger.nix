@@ -30,7 +30,6 @@
         # Filemanagers
         nemo-with-extensions
         yazi
-        github-desktop
         megasync
         zotero-beta
         megacli
@@ -46,7 +45,7 @@
 
         # Information
         btop
-        neofetch
+        fastfetch
         fzf
         serpl
         translate-shell

@@ -16,7 +16,7 @@
       home.packages = with pkgs; [
         yazi
         btop
-        neofetch
+        fastfetch
         fzf
       ];
   
