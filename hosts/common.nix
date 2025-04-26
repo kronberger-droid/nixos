@@ -73,12 +73,12 @@ in
     polkit.enable = true;
     rtkit.enable = true;
     pam.services = {
-      swaylock = {};
+      swaylock.enableGnomeKeyring = true;
       greetd.enableGnomeKeyring = true;
-      # login.enableGnomeKeyring = true;
     };
   };
   services = {
+    # OpenSSH
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -89,30 +89,21 @@ in
         X11Forwarding = true;
       };
     };
-    gnome.gnome-keyring = {
-      enable = true;
-    };
+
+    # Audio
     pulseaudio.enable = false;
-    avahi.enable = true;
-    # clamav = {
-    #   daemon = {
-    #     enable = true;
-    #   updater.enable = true;
-    #   scanner.scanDirectories = [
-    #     "/home"
-    #     "/var/lib"
-    #     "/tmp"
-    #     "/etc"
-    #     "/var/tmp"
-    #   ];
-    # };
+
     pipewire = {
       enable = true;
-      alsa = { enable = true;
+      alsa = {
+        enable = true;
         support32Bit = true;
       };
       pulse.enable = true;
+      wireplumber.enable = true;
     };
+
+    avahi.enable = true;
     gvfs.enable = true;
     upower.enable = true;
   };

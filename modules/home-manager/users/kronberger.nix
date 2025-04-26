@@ -97,6 +97,9 @@
         # Video
         vlc
       ];
+      services.gnome-keyring = {
+        enable = true;
+      };
 
       home.file = {
         ".config/swappy/config".text = ''
