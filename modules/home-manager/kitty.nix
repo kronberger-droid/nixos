@@ -1,7 +1,12 @@
 { config, pkgs, lib, ... }:
 
 {
+  home.packages = with pkgs; [
+    imagemagick    
+  ];
+
   xdg.configFile."kitty/cwd.sh".source = ./kitty/cwd.sh;
+
   programs.kitty = {
     enable = true;
     settings = {
