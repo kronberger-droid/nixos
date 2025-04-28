@@ -187,6 +187,8 @@ in
       popsicle
       qemu
       quickemu
+      eza
+      ripgrep
     ];
   };
 
