@@ -41,6 +41,7 @@
 
         # Music
         lmms
+        spotify
         spotify-player
 
         # Information
@@ -96,6 +97,18 @@
         # Video
         vlc
       ];
+
+      xdg = {
+        enable = true;
+        mimeApps = {
+          enable = true;
+          defaultApplications = {
+            "application/pdf" = "org.pwmt.zathura.desktop";  
+            "x-scheme-handler/mailto" = "thunderbird.desktop";
+          };
+        };
+      };
+      
       services.gnome-keyring = {
         enable = true;
       };
@@ -118,14 +131,6 @@
           Name=WhatsApp Web
           Exec=brave --app=https://web.whatsapp.com --password-store=gnome-keyring --enable-features=UseOzonePlatform --ozone-platform=wayland
           Icon=whatsapp
-          Type=Application
-          Categories=Network;
-        '';
-        ".local/share/applications/spotify.desktop".text = ''
-          [Desktop Entry]
-          Name=Spotify
-          Exec=brave --app=https://open.spotify.com/ --password-store=gnome-keyring --enable-features=UseOzonePlatform --ozone-platform=wayland
-          Icon=spotify
           Type=Application
           Categories=Network;
         '';
