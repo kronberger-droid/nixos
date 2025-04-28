@@ -15,7 +15,14 @@ in
     ../modules/system/keyd.nix
   ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix = {
+    settings.experimental-features = [ "nix-command" "flakes" ];
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 7d";
+    };
+  };
 
   nixpkgs.overlays = [
     (final: prev: {
@@ -29,6 +36,10 @@ in
     })
   ];
 
+  system.autoUpgrade = {
+    enable = true;
+  };
+
   boot = {
     loader = {
       systemd-boot.enable = true;
@@ -36,6 +47,9 @@ in
     };
     # plymouth.enable = true;
     # initrd.verbose = false;
+    kernel.sysctl = {
+      "vm.swappiness" = 10;
+    };
     kernelParams = [
       "nowatchdog"
       "nmi_watchdog=0"
@@ -184,6 +198,7 @@ in
     noto-fonts-cjk-sans
     noto-fonts-emoji
     liberation_ttf
+    cm_unicode
   ];
 
   nixpkgs.config.allowUnfree = true;

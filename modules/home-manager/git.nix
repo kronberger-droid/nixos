@@ -1,8 +1,13 @@
 { pkgs, ... }:{
   home.packages = with pkgs; [
     github-desktop
-    gh
   ];
+  programs.gh = {
+    enable = true;
+    settings = {
+      git_protocoll = "ssh";
+    };
+  };
   programs.git = {
     enable = true;
     userName = "kronberger-droid";
