@@ -1,8 +1,11 @@
 { pkgs, inputs, host, isNotebook, ... }:
+let
+  dropkittenPkg = inputs.dropkitten.packages.${pkgs.system}.dropkitten;
+in
 {
   home-manager = {
     extraSpecialArgs = {
-      inherit inputs host isNotebook;
+      inherit inputs host isNotebook dropkittenPkg;
     };
     useGlobalPkgs = true;
     useUserPackages = true;
@@ -23,6 +26,7 @@
         brave
         nyxt
         firefox
+        dropkittenPkg
 
         # Mail
         thunderbird

@@ -1,4 +1,4 @@
-{ config, pkgs, lib, host, isNotebook, ... }:
+{ inputs, config, pkgs, lib, host, isNotebook, ... }:
 let
   color0 = "#1e1e1e";
   color1 = "#2c2f33";

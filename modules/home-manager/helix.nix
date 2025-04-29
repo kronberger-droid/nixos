@@ -26,6 +26,8 @@ in
     typst-live
     tinymist
 
+    # Rust
+
     # Markdown
     markdown-oxide
 
