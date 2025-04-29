@@ -10,8 +10,15 @@
   programs.kitty = {
     enable = true;
     settings = {
-      background_opacity = 1.0;
+      # No confirmation
       confirm_os_window_close = 0;
+
+      # for dropdown menu
+      allow_remote_control = "socket-only";
+      listen_on = "unix:/tmp/kitty-rc.sock";
+
+      # Theme
+      background_opacity = 1.0;
       background = "#202020";
       foreground = "#d0d0d0";
       cursor = "#d0d0d0";
