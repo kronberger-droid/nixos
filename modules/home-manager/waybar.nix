@@ -8,7 +8,6 @@ in
     calcurse
     kitty
     rofi-wayland
-    kitti3
   ];
 
   xdg.configFile."waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
