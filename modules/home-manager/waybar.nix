@@ -1,4 +1,7 @@
-{ config, pkgs, isNotebook, lib, ... }:
+{ inputs, config, pkgs, isNotebook, lib, ... }:
+let
+  dropkittenPkg = inputs.dropkitten.packages.${pkgs.system}.dropkitten;
+in
 {
   home.packages = with pkgs; [
     waybar-mpris
@@ -10,7 +13,8 @@
 
   xdg.configFile."waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
 
-  programs.waybar = {
+  programs.waybar =
+  {
     enable = true;
     systemd.enable = true;
     style = "${./waybar/style.css}";
@@ -100,7 +104,7 @@
       bluetooth = {
         format = "󰂯";
         format-disabled = "󰂲 off";
-        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.bluetuith}/bin/bluetuith";
+        on-click = "${dropkittenPkg}/bin/dropkitten bluetuith";
         on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
       };
 
@@ -122,11 +126,11 @@
         tooltip-format-wifi = "{icon} {ifname} ({essid}): {ipaddr}";
         tooltip-format-disconnected = "{icon} disconnected";
         tooltip-format-disabled = "{icon} disabled";
-        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.networkmanager}/bin/nmtui connect";
+        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.networkmanager}/bin/nmtui connect";
       };
 
       pulseaudio = {
-        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.pulsemixer}/bin/pulsemixer";
+        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.pulsemixer}/bin/pulsemixer";
         format = "{volume}% {icon} {format_source}";
         format-bluetooth = "{volume}% {icon} {format_source}";
         format-bluetooth-muted = " {icon} {format_source}";
