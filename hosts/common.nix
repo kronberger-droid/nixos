@@ -36,10 +36,6 @@ in
     })
   ];
 
-  system.autoUpgrade = {
-    enable = true;
-  };
-
   boot = {
     loader = {
       systemd-boot.enable = true;
