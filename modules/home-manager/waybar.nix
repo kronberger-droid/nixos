@@ -69,7 +69,7 @@ in
         format = "{:%e %b %Y %H:%M}";      
         tooltip = true;
         tooltip-format = "<big>{:%B %Y}</big>\n<tt>{calendar}</tt>";
-        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.calcurse}/bin/calcurse"; 
+        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.calcurse}/bin/calcurse"; 
       };
       
       cpu = {
@@ -103,7 +103,7 @@ in
       bluetooth = {
         format = "󰂯";
         format-disabled = "󰂲 off";
-        on-click = "${dropkittenPkg}/bin/dropkitten bluetuith";
+        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.bluetuith}/bin/bluetuith";
         on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
       };
 

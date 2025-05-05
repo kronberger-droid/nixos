@@ -26,6 +26,8 @@ in
         brave
         nyxt
         firefox
+
+        #custom Packages
         dropkittenPkg
 
         # Mail
