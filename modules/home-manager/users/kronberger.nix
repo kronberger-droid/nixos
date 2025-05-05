@@ -99,6 +99,7 @@ in
 
         # Social
         element-desktop
+        zapzap
 
         # Video
         vlc
@@ -132,16 +133,7 @@ in
           early_exit=true
           fill_shape=false
         '';
-        ".local/share/applications/whatsapp-web.desktop".text = ''
-          [Desktop Entry]
-          Name=WhatsApp Web
-          Exec=brave --app=https://web.whatsapp.com --password-store=gnome-keyring --enable-features=UseOzonePlatform --ozone-platform=wayland
-          Icon=whatsapp
-          Type=Application
-          Categories=Network;
-        '';
       };
-
 
       home.stateVersion = "24.11";
     };
