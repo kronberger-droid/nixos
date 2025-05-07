@@ -8,6 +8,8 @@ def flake-reload [] {
 	sudo nixos-rebuild switch --flake ~/.config/nixos#(hostname)
 }
 
+# NIX DEVELOPMENT
+
 def dev [] {
 	nix develop
 }
@@ -30,6 +32,8 @@ def "dev rust" [] {
 
   nix develop ..#($project_name)
 }
+
+# CUSTOM COLOR PICKER
 
 def color-picker [] {
 		echo "In 1 sec you can pick a color!"

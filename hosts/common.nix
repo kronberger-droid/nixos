@@ -15,13 +15,22 @@ in
     ../modules/system/keyd.nix
   ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix = {
+    settings.experimental-features = [ "nix-command" "flakes" ];
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 7d";
+    };
+  };
 
   nixpkgs.overlays = [
     (final: prev: {
       brave = prev.brave.override {
         commandLineArgs = [
           "--password-store=gnome-keyring"
+          "--enable-features=UseOzonePlatform"
+          "--ozone-platform=wayland"
         ];
       };
     })
@@ -34,9 +43,15 @@ in
     };
     # plymouth.enable = true;
     # initrd.verbose = false;
+    kernel.sysctl = {
+      "vm.swappiness" = 10;
+    };
     kernelParams = [
       "nowatchdog"
       "nmi_watchdog=0"
+    ];
+    blacklistedKernelModules = [
+      "wdat_wdt"
     ];
   };
 
@@ -68,12 +83,12 @@ in
     polkit.enable = true;
     rtkit.enable = true;
     pam.services = {
-      swaylock = {};
+      swaylock.enableGnomeKeyring = true;
       greetd.enableGnomeKeyring = true;
-      login.enableGnomeKeyring = true;
     };
   };
   services = {
+    # OpenSSH
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -84,29 +99,21 @@ in
         X11Forwarding = true;
       };
     };
-    gnome.gnome-keyring = {
-      enable = true;
-    };
+
+    # Audio
     pulseaudio.enable = false;
-    avahi.enable = true;
-    clamav = {
-      daemon.enable = true;
-      updater.enable = true;
-      scanner.scanDirectories = [
-        "/home"
-        "/var/lib"
-        "/tmp"
-        "/etc"
-        "/var/tmp"
-      ];
-    };
+
     pipewire = {
       enable = true;
-      alsa = { enable = true;
+      alsa = {
+        enable = true;
         support32Bit = true;
       };
       pulse.enable = true;
+      wireplumber.enable = true;
     };
+
+    avahi.enable = true;
     gvfs.enable = true;
     upower.enable = true;
   };
@@ -171,10 +178,13 @@ in
       exfat
       libsecret
       busybox
+      tree
       wirelesstools
       popsicle
       qemu
       quickemu
+      eza
+      ripgrep
     ];
   };
 
@@ -186,6 +196,7 @@ in
     noto-fonts-cjk-sans
     noto-fonts-emoji
     liberation_ttf
+    cm_unicode
   ];
 
   nixpkgs.config.allowUnfree = true;

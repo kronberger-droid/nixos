@@ -1,5 +1,9 @@
 { config, pkgs, ... }:
 {
+  home.packages = with pkgs; [
+    bat
+    zoxide
+  ];
   programs.nushell = {
     enable = true;
 
@@ -11,6 +15,9 @@
     shellAliases = {
       cd = "z";
       cat = "bat";
+      icat = "kitten icat";
+      c = "clear";
+      e = "exit";
     };
   };
   

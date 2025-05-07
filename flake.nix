@@ -8,9 +8,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     agenix.url = "github:ryantm/agenix";
+    dropkitten.url = "github:kronberger-droid/dropkitten";
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, agenix, ... }: {
+  outputs = inputs@{ self, nixpkgs, home-manager, agenix, dropkitten, ... }: {
     nixosConfigurations = {
 
       intelNuc = let
@@ -21,6 +22,7 @@
           host = "intelNuc";
           isNotebook = false;
           inherit inputs;
+          inherit dropkitten;
         };
         modules = [
           ./hosts/intelNuc/configuration.nix
@@ -29,7 +31,9 @@
           ./modules/home-manager/users/kronberger.nix
           agenix.nixosModules.default
           {
-            environment.systemPackages = [ agenix.packages.${system}.default ];
+            environment.systemPackages = [
+              agenix.packages.${system}.default
+            ];
           }
         ];
       };
@@ -76,13 +80,15 @@
         ];
       };
 
-      devPi = nixpkgs.lib.nixosSysytem {
+      devPi = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
         specialArgs = {
           host = "devPi";
         };
         modules = [
+          home-manager.nixosModules.home-manager
           ./hosts/devPi/configuration.nix
+          ./modules/home-manager/devPi.nix
         ];
       };
     };

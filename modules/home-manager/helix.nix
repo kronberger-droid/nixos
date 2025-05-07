@@ -1,27 +1,54 @@
 # /etc/nixos/modules/home-manager/helix.nix
-{ pkgs, ... }:
-
+{ lib, pkgs, ... }:
+let
+  default-pairs = {
+    "(" = ")";
+    "{" = "}";
+    "[" = "]";
+    "$" = "$";
+    "\"" = "\"";
+  };
+in
 {
   home.packages = with pkgs; [
+    # Nix
     nil
+
+    # LaTeX
     texlab
     tectonic
-    ltex-ls
     texlivePackages.latexindent
-    zathura
+
+    # Typst
+    typst
+    typstfmt
+    typstyle
+    typst-live
+    tinymist
+
+    # Rust
+
+    # Markdown
     markdown-oxide
-    # Basic programming setup
+
+    # Spellcheck
+    ltex-ls
+
+    # PDF Viewer
+    zathura
   ];
 
   imports = [
     ./helix/dprint.nix
   ];
 
+  home.file.".config/helix/ignore".source = ./helix/ignore;
+
   programs.helix = {
     enable = true;
     defaultEditor = true;
     settings = {
-      theme = "base16_default";
+      theme = "base16_transparent";
       editor = {
         soft-wrap.enable = true;
         line-number = "relative";
@@ -31,7 +58,13 @@
           select = "underline";
         };
         statusline = {
-          left = [ "mode" "spinner" "version-control" "file-name" ];
+          left = [
+            "mode"
+            "spinner"
+            "version-control"
+            "file-modification-indicator"
+            "file-name"
+          ];
         };
         file-picker = {
           hidden = false;
@@ -78,6 +111,21 @@
           name = "rust";
           language-servers = [
             "rust-analyzer"
+          ];
+        }
+        {
+          name = "typst";
+          language-servers = [
+            "tinymist"
+          ];
+          formatter = {
+            command = "${pkgs.typstyle}/bin/typstyle";
+          };
+          auto-format = true;
+          auto-pairs = lib.mkMerge [
+            default-pairs
+            { "*" = "*"; }
+            { "<" = ">"; }
           ];
         }
       ];
