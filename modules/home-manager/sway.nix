@@ -1,6 +1,4 @@
-# /etc/nixos/modules/home-manager/sway.nix
-{ config, pkgs, lib, host, isNotebook, ... }:
-
+{ inputs, config, pkgs, lib, host, isNotebook, ... }:
 let
   color0 = "#1e1e1e";
   color1 = "#2c2f33";
@@ -35,13 +33,23 @@ let
   ws9 = "9 social";
   ws10 = "10 git";
 
-  modKey= "Mod4";
+  modKey = "Mod4";
 in
 {
   imports = [
     ./waybar.nix
     ./theme.nix
     ./rofi.nix
+    ./sway/audio-idle-inhibit.nix
+    ./sway/swayidle.nix
+    (import ./sway/swaylock.nix {
+      inherit pkgs config lib;
+      inherit backgroundColor accentColor;
+    })
+    ( import ./sway/mako.nix {
+      inherit pkgs config lib;
+      inherit backgroundColor accentColor;
+    })
   ] ++ lib.optionals isNotebook [
     ./way-displays.nix
   ];
@@ -51,13 +59,10 @@ in
   home.packages = with pkgs; [
     swaylock
     swayidle
-    sway-audio-idle-inhibit
     wl-clipboard
     brightnessctl
-    mako
     wlsunset
     grim
-    rofi
     slurp
     pulsemixer
     autotiling
@@ -69,75 +74,18 @@ in
     gron
     libnotify
     swaybg
-    swayimg
     lsof
     sway-scratch
     libinput
+    woomer
   ];
-
-  services = {
-    mako = {
-      enable = true;
-      defaultTimeout = 10000;
-      borderRadius = 8;
-      borderColor = accentColor;
-      backgroundColor = backgroundColor + "CC";
-    };
-    poweralertd.enable = true;
-  };
-
-  programs.swaylock = {
-    enable = true;
-    package = pkgs.swaylock;
-    settings = {
-      image = "${./sway/deathpaper.jpg}";
-      font-size = 24;
-      indicator-idle-visible = false;
-      inside-color = backgroundColor + "CC";
-      indicator-radius = 80;
-      ring-color = backgroundColor;
-      key-hl-color = accentColor;
-      show-failed-attempts = true;
-      ignore-empty-password = true;
-    };
-  };
-
-  services.swayidle = {
-    enable = true;
-    systemdTarget = "graphical-session.target";
-    timeouts = [
-      {
-        timeout = 395;
-        command = "${pkgs.libnotify}/bin/notify-send 'Locking in 5 seconds' -t 5000";
-      }
-      {
-        timeout = 400;
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f &";
-      }
-      {
-        timeout = 460;
-        command = "${pkgs.sway}/bin/swaymsg 'output * dpms off'";
-        resumeCommand = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
-      }
-      {
-        timeout = 560;
-        command = "${pkgs.systemd}/bin/systemctl suspend";
-      }
-    ];
-    events = [
-      {
-        event = "before-sleep";
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f &";
-      }
-    ];
-  };
 
   wayland.windowManager.sway = {
     enable = true;
     wrapperFeatures.gtk = true;
     extraConfig = builtins.readFile "${./sway/config}";
     config = rec {
-      modifier = modKey; # Super key
+      modifier = modKey;
       terminal = "${pkgs.kitty}/bin/kitty";
       assigns = {
         "${ws9}" = [
@@ -178,10 +126,6 @@ in
         {
           command = "${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4";
           always = false;
-        }
-        {
-          command = "${config.xdg.configHome}/sway/once.sh ${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
-          always = true;
         }
       ];
       colors = {
@@ -226,7 +170,7 @@ in
 
       focus.mouseWarping = "container";
 
-      menu = "rofi -show drun";
+      menu = "${pkgs.rofi-wayland}/bin/rofi -show drun";
 
       defaultWorkspace = "workspace ${ws1}";
 
@@ -239,6 +183,7 @@ in
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
         "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
         "${modifier}+Shift+t" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
+        "${modifier}+Shift+y" = "exec ${pkgs.woomer}/bin/woomer";
 
         "${modifier}+Shift+Return" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)";
         "${modifier}+Return" = "exec '${pkgs.kitty}/bin/kitty --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)'";
@@ -301,8 +246,8 @@ in
         "Mod1+Shift+j" = "move workspace output down";
       };
       gaps = {
-        inner = 6;
-        outer = 3;
+        inner = 4;
+        outer = 2;
         smartGaps = true;
         smartBorders = "no_gaps";
       };

@@ -1,15 +1,19 @@
-{ config, pkgs, isNotebook, lib, ... }:
+{ inputs, config, pkgs, isNotebook, lib, ... }:
+let
+  dropkittenPkg = inputs.dropkitten.packages.${pkgs.system}.dropkitten;
+in
 {
   home.packages = with pkgs; [
     waybar-mpris
     calcurse
     kitty
-    rofi
+    rofi-wayland
   ];
 
   xdg.configFile."waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
 
-  programs.waybar = {
+  programs.waybar =
+  {
     enable = true;
     systemd.enable = true;
     style = "${./waybar/style.css}";
@@ -65,7 +69,7 @@
         format = "{:%e %b %Y %H:%M}";      
         tooltip = true;
         tooltip-format = "<big>{:%B %Y}</big>\n<tt>{calendar}</tt>";
-        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.calcurse}/bin/calcurse"; 
+        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.calcurse}/bin/calcurse"; 
       };
       
       cpu = {
@@ -76,7 +80,7 @@
       
       "custom/menu" = {
         format = "";
-        on-click = "${pkgs.rofi}/bin/rofi -show drun";
+        on-click = "${pkgs.rofi-wayland}/bin/rofi -show drun";
         tooltip = false;
       };
       
@@ -99,7 +103,7 @@
       bluetooth = {
         format = "󰂯";
         format-disabled = "󰂲 off";
-        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.bluetuith}/bin/bluetuith";
+        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.bluetuith}/bin/bluetuith";
         on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
       };
 
@@ -121,11 +125,11 @@
         tooltip-format-wifi = "{icon} {ifname} ({essid}): {ipaddr}";
         tooltip-format-disconnected = "{icon} disconnected";
         tooltip-format-disabled = "{icon} disabled";
-        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.networkmanager}/bin/nmtui connect";
+        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.networkmanager}/bin/nmtui connect";
       };
 
       pulseaudio = {
-        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.pulsemixer}/bin/pulsemixer";
+        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.pulsemixer}/bin/pulsemixer";
         format = "{volume}% {icon} {format_source}";
         format-bluetooth = "{volume}% {icon} {format_source}";
         format-bluetooth-muted = " {icon} {format_source}";

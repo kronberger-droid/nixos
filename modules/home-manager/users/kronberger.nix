@@ -1,8 +1,11 @@
 { pkgs, inputs, host, isNotebook, ... }:
+let
+  dropkittenPkg = inputs.dropkitten.packages.${pkgs.system}.dropkitten;
+in
 {
   home-manager = {
     extraSpecialArgs = {
-      inherit inputs host isNotebook;
+      inherit inputs host isNotebook dropkittenPkg;
     };
     useGlobalPkgs = true;
     useUserPackages = true;
@@ -19,57 +22,103 @@
       home.username = "kronberger";
       home.homeDirectory = "/home/kronberger";
       home.packages = with pkgs; [
+        # Browsers
         brave
+        nyxt
+        firefox
+
+        #custom Packages
+        dropkittenPkg
+
+        # Mail
         thunderbird
-        bitwarden-desktop
-        bitwarden-cli
+
+        # Filemanagers
         nemo-with-extensions
-        obsidian
-        github-desktop
-        libsecret
         yazi
-        bluetuith
+        megasync
+        zotero-beta
+        megacli
+        serpl
+
+        # Editors
+        obsidian
+        onlyoffice-desktopeditors
+
+        # Music
+        lmms
         spotify
         spotify-player
+
+        # Information
         btop
+        fastfetch
+        fzf
+        serpl
+        translate-shell
+
+        # Images
         zathura
         drawio
         inkscape
-        megasync
-        megacli
-        neofetch
-        fzf
-        zotero-beta
-        onlyoffice-desktopeditors
-        nomachine-client
-        ltunify
-        localsend
         kdePackages.okular
+        gthumb
+        ipe
+        gimp
+        pdfarranger
+        ffmpeg_6
+
+        # Remote
+        nomachine-client
+        localsend
+
+        # System
+        ltunify
+        rpi-imager
+        bluetuith
+
+        # xdg portal
         xdg-user-dirs
         xdg-desktop-portal-wlr
         xdg-desktop-portal
         xdg-desktop-portal-gtk
+
+        # Math
         speedcrunch
-        caligula
-        gthumb
-        serpl
-        translate-shell
+
+        # CAD
         freecad-wayland
+
+        # Safety
         lxqt.lxqt-policykit
-        rpi-imager
-        ipe
-        firefox
-        gimp
-        element-desktop
-        vlc
-        lmms
-        seahorse
         gcr
-        rustlings
-        pdfarranger
-        ffmpeg_6
-        xdg-user-dirs
+        seahorse
+        libsecret
+        bitwarden-desktop
+        bitwarden-cli
+
+        # Social
+        element-desktop
+        zapzap
+
+        # Video
+        vlc
       ];
+
+      xdg = {
+        enable = true;
+        mimeApps = {
+          enable = true;
+          defaultApplications = {
+            "application/pdf" = "org.pwmt.zathura.desktop";  
+            "x-scheme-handler/mailto" = "thunderbird.desktop";
+          };
+        };
+      };
+      
+      services.gnome-keyring = {
+        enable = true;
+      };
 
       home.file = {
         ".config/swappy/config".text = ''
@@ -84,16 +133,7 @@
           early_exit=true
           fill_shape=false
         '';
-        ".local/share/applications/whatsapp-web.desktop".text = ''
-          [Desktop Entry]
-          Name=WhatsApp Web
-          Exec=brave --app=https://web.whatsapp.com --password-store=gnome-keyring
-          Icon=whatsapp
-          Type=Application
-          Categories=Network;
-        '';
       };
-
 
       home.stateVersion = "24.11";
     };
