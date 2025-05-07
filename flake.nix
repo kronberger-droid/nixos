@@ -46,6 +46,7 @@
           host = "t480s";
           isNotebook = true;
           inherit inputs;
+          inherit dropkitten;
         };
         modules = [
           ./hosts/t480s/configuration.nix
@@ -67,6 +68,7 @@
           host = "spectre";
           isNotebook = true;
           inherit inputs;
+          inherit dropkitten;
         };
         modules = [
           ./hosts/spectre/configuration.nix
