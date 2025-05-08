@@ -49,11 +49,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1746639347,
-        "narHash": "sha256-oBqOtCxlfMvZlpqqwC1d8eB/4oJ8mgcYrd1F4qYDo8Y=",
+        "lastModified": 1746704218,
+        "narHash": "sha256-8YEowcGvP94RkLNz9CCiPG9jVmcLs5O5Bzixx2lrAQY=",
         "owner": "kronberger-droid",
         "repo": "dropkitten",
-        "rev": "014520034984a8bfb646d1bc404b79cc2611723c",
+        "rev": "e264a251a9123d9081ac59dba16d27a5f4c11a76",
         "type": "github"
       },
       "original": {
@@ -108,11 +108,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1746632058,
-        "narHash": "sha256-Mp5Bbvb+YlFEZ76C/0wFS6C1lRfH3D60u465wFNlnS0=",
+        "lastModified": 1746703400,
+        "narHash": "sha256-mSqWQsJYMJBI3+X3opqaUqeNsGQxVdaNL5iUF7a6p50=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "708074ae6db9e0468e4f48477f856e8c2d059795",
+        "rev": "50894120e8ac792a5d3046d23e4e4c4ef32cf09c",
         "type": "github"
       },
       "original": {
