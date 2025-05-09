@@ -122,11 +122,6 @@ in
             command = "${pkgs.typstyle}/bin/typstyle";
           };
           auto-format = true;
-          auto-pairs = lib.mkMerge [
-            default-pairs
-            { "*" = "*"; }
-            { "<" = ">"; }
-          ];
         }
       ];
       language-server = {
