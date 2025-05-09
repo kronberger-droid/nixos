@@ -9,7 +9,7 @@ in
     };
     useGlobalPkgs = true;
     useUserPackages = true;
-    backupFileExtension = "backup";
+    backupFileExtension = "bak";
     users.kronberger = {
       imports = [
         ../sway.nix

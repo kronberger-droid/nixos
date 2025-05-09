@@ -14,7 +14,7 @@
         backgroundColor = backgroundColor + "CC";
       };
     };
-    poweralertd.enable = true;
+    # poweralertd.enable = true;
   };
 
 }
