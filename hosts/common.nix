@@ -40,6 +40,7 @@ in
     # initrd.verbose = false;
     kernel.sysctl = {
       "vm.swappiness" = 10;
+      "kvm.ignore_msrs" = 1;
     };
     kernelParams = [
       "nowatchdog"
@@ -118,6 +119,10 @@ in
       enable = true;
       powerOnBoot = true;
     };
+    opengl = {
+      enable = true;
+      driSupport32Bit = true;
+    };
     firmware = [ pkgs.linux-firmware ];
   };
   
@@ -176,7 +181,7 @@ in
       tree
       wirelesstools
       popsicle
-      qemu
+      qemu_full
       quickemu
       eza
       ripgrep
