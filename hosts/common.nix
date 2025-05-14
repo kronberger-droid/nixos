@@ -119,10 +119,6 @@ in
       enable = true;
       powerOnBoot = true;
     };
-    opengl = {
-      enable = true;
-      driSupport32Bit = true;
-    };
     firmware = [ pkgs.linux-firmware ];
   };
   
