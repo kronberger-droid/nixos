@@ -205,9 +205,6 @@ in
         "XF86AudioPrev" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send prev";
         "XF86AudioPlay" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
 
-        # Size of scratchpad
-        "${modifier}+minus" = "scratchpad show, resize set 1600 900";
-        
         # Scaling using way-displays
 
         # Workspace switching
