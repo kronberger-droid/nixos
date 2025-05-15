@@ -17,11 +17,6 @@ in
 
   nix = {
     settings.experimental-features = [ "nix-command" "flakes" ];
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 7d";
-    };
   };
 
   nixpkgs.overlays = [
@@ -45,6 +40,7 @@ in
     # initrd.verbose = false;
     kernel.sysctl = {
       "vm.swappiness" = 10;
+      "kvm.ignore_msrs" = 1;
     };
     kernelParams = [
       "nowatchdog"
@@ -181,7 +177,7 @@ in
       tree
       wirelesstools
       popsicle
-      qemu
+      qemu_full
       quickemu
       eza
       ripgrep

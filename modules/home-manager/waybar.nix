@@ -1,6 +1,19 @@
 { inputs, config, pkgs, isNotebook, lib, ... }:
 let
   dropkittenPkg = inputs.dropkitten.packages.${pkgs.system}.dropkitten;
+
+  dropkitten_size = if isNotebook then {
+    width = "0.5";
+    height = "0.4";
+    yshift = "35";
+  } else {
+    width = "0.4";
+    height = "0.4";
+    yshift = "35";
+  };
+
+  # dropkitten_command = "${dropkittenPkg}/bin/dropkitten -W ${dropkitten_size.width} -H ${dropkitten_size.height} -y ${dropkitten_size.yshift} --";
+  dropkitten_command = "${dropkittenPkg}/bin/dropkitten";
 in
 {
   home.packages = with pkgs; [
@@ -69,7 +82,7 @@ in
         format = "{:%e %b %Y %H:%M}";      
         tooltip = true;
         tooltip-format = "<big>{:%B %Y}</big>\n<tt>{calendar}</tt>";
-        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.calcurse}/bin/calcurse"; 
+        on-click = "${dropkitten_command} ${pkgs.calcurse}/bin/calcurse"; 
       };
       
       cpu = {
@@ -103,7 +116,7 @@ in
       bluetooth = {
         format = "󰂯";
         format-disabled = "󰂲 off";
-        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.bluetuith}/bin/bluetuith";
+        on-click = "${dropkitten_command} ${pkgs.bluetuith}/bin/bluetuith";
         on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
       };
 
@@ -125,11 +138,11 @@ in
         tooltip-format-wifi = "{icon} {ifname} ({essid}): {ipaddr}";
         tooltip-format-disconnected = "{icon} disconnected";
         tooltip-format-disabled = "{icon} disabled";
-        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.networkmanager}/bin/nmtui connect";
+        on-click = "${dropkitten_command} ${pkgs.networkmanager}/bin/nmtui connect";
       };
 
       pulseaudio = {
-        on-click = "${dropkittenPkg}/bin/dropkitten ${pkgs.pulsemixer}/bin/pulsemixer";
+        on-click = "${dropkitten_command} ${pkgs.pulsemixer}/bin/pulsemixer";
         format = "{volume}% {icon} {format_source}";
         format-bluetooth = "{volume}% {icon} {format_source}";
         format-bluetooth-muted = " {icon} {format_source}";
