@@ -14,7 +14,7 @@
         backgroundColor = backgroundColor;
       };
     };
-    poweralertd.enable = true;
+    # poweralertd.enable = true;
   };
 
 }
