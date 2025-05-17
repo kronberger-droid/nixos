@@ -55,7 +55,7 @@ in
     networkmanager.enable = true;
     wireless.enable = false;
     hostName = host;
-    firewall.allowedTCPPorts = [ 22 ];
+    firewall.allowedTCPPorts = [ 22 53317 ];
   };
 
   time.timeZone = "Europe/Vienna";
