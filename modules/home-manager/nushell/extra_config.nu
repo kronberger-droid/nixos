@@ -14,25 +14,6 @@ def dev [] {
 	nix develop
 }
 
-def "dev thesis" [] {
-	cd ~/GitHub/Thesis-Latex-Source
-	dev
-}
-
-def "dev python" [] {
-	cd ~/Programming/python
-	dev
-	python	
-}
-
-def "dev rust" [] {
-  let current_dir = (~/.config/nixos/modules/home-manager/kitty/cwd.sh)
-
-  let project_name = ($current_dir | path basename | to text)
-
-  nix develop ..#($project_name)
-}
-
 # CUSTOM COLOR PICKER
 
 def color-picker [] {
