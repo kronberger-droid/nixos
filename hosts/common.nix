@@ -122,7 +122,7 @@ in
     firmware = [ pkgs.linux-firmware ];
     graphics = {
       enable = true;
-      driSupport32bit = true;
+      enable32Bit = true;
     };
   };
   
