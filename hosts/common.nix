@@ -120,6 +120,10 @@ in
       powerOnBoot = true;
     };
     firmware = [ pkgs.linux-firmware ];
+    graphics = {
+      enable = true;
+      driSupport32bit = true;
+    };
   };
   
   xdg.portal = {
