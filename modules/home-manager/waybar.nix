@@ -2,18 +2,13 @@
 let
   dropkittenPkg = inputs.dropkitten.packages.${pkgs.system}.dropkitten;
 
-  dropkitten_size = if isNotebook then {
-    width = "0.5";
-    height = "0.4";
-    yshift = "35";
-  } else {
-    width = "0.4";
+  dropkitten_size = {
+    width = "0.3";
     height = "0.4";
     yshift = "35";
   };
 
-  # dropkitten_command = "${dropkittenPkg}/bin/dropkitten -W ${dropkitten_size.width} -H ${dropkitten_size.height} -y ${dropkitten_size.yshift} --";
-  dropkitten_command = "${dropkittenPkg}/bin/dropkitten";
+  dropkitten_command = "${dropkittenPkg}/bin/dropkitten -W ${dropkitten_size.width} -H ${dropkitten_size.height} -y ${dropkitten_size.yshift} --";
 in
 {
   home.packages = with pkgs; [
