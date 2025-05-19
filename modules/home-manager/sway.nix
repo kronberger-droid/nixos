@@ -87,6 +87,13 @@ in
     config = rec {
       modifier = modKey;
       terminal = "${pkgs.kitty}/bin/kitty";
+      output = lib.mkIf (host == "intelNuc") {
+        "HDMI-A-1" = {
+          mode = "2560x1440@143.912Hz";
+          pos = "0 0";
+          scale = "1";
+        };
+      };
       assigns = {
         "${ws9}" = [
           { title = "WhatsApp Web"; }

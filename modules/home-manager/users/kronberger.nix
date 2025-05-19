@@ -103,6 +103,9 @@ in
 
         # Video
         vlc
+
+        # AI
+        ollama
       ];
 
       xdg = {
