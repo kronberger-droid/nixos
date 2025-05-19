@@ -18,6 +18,7 @@
       icat = "kitten icat";
       c = "clear";
       e = "exit";
+      "git add" = "git add .";
     };
   };
   
@@ -27,7 +28,7 @@
 
     # Add custom starship settings
     settings = (with builtins; fromTOML (readFile "${pkgs.starship}/share/starship/presets/nerd-font-symbols.toml")) // {
-      command_timeout = 2000;  # Global timeout (2 seconds for all commands)
+      command_timeout = 2000;
       git_branch.symbol = " ";
       time = {
         disabled = false;
