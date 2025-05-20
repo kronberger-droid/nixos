@@ -121,6 +121,7 @@ in
       
       services.gnome-keyring = {
         enable = true;
+        components = [ "secrets" "ssh" ];
       };
 
       home.file = {
