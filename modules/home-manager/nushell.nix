@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
   home.packages = with pkgs; [
     bat
@@ -18,7 +18,10 @@
       icat = "kitten icat";
       c = "clear";
       e = "exit";
-      "git add" = "git add .";
+      "ga" = "git add";
+      "gcm" = "git commit";
+      "gp" = "git push";
+      "gc" = "git clone";
     };
   };
   
