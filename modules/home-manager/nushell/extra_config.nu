@@ -1,6 +1,18 @@
 source ~/.zoxide.nu
 
-$env.config.show_banner = false
+$env.config = {
+	show_banner: false
+	edit_mode: 'vi'
+	keybindings: [
+		{
+			name: accept_completion
+			modifier: CONTROL
+			keycode: char_f
+			mode: [vi_insert vi_normal]
+			event: { send: HistoryHintComplete }
+		}
+	]
+}
 
 def flake-reload [] {
 	let hostname = (hostname)
