@@ -148,6 +148,10 @@ in
           command = "${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4";
           always = false;
         }
+        {
+          command = "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --components=ssh";
+          always = false;
+        }
       ];
       colors = {
         background = backgroundColor;
