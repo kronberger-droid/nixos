@@ -77,7 +77,7 @@ in
     polkit.enable = true;
     rtkit.enable = true;
     pam.services = {
-      swaylock.enableGnomeKeyring = true;
+      # swaylock.enableGnomeKeyring = true;
       greetd.enableGnomeKeyring = true;
     };
   };
