@@ -1,25 +1,25 @@
-{ inputs, config, pkgs, lib, host, isNotebook, ... }:
+{ config, pkgs, lib, host, isNotebook, ... }:
 let
   color0 = "#1e1e1e";
   color1 = "#2c2f33";
-  color2 = "#373c45";
+  # color2 = "#373c45";
   color3 = "#555555";
-  color4 = "#6c7a89";
+  # color4 = "#6c7a89";
   color5 = "#c0c5ce";
   color6 = "#dfe1e8";
-  color7 = "#eff0f1";
+  # color7 = "#eff0f1";
   color8 = "#423c38";
   color9 = "#6e665f";
-  color10 = "#786048";
-  color11 = "#988a71";
+  # color10 = "#786048";
+  # color11 = "#988a71";
   color12 = "#8a8177";
-  color13 = "#9c9287";
-  color14 = "#a39e93";
-  color15 = "#b6b1a9";
+  # color13 = "#9c9287";
+  # color14 = "#a39e93";
+  # color15 = "#b6b1a9";
 
   backgroundColor = color0;
   textColor = color6;
-  selectionColor = color1;
+  # selectionColor = color1;
   accentColor = color12;
 
   ws1 = "1 browser";
@@ -34,6 +34,24 @@ let
   ws10 = "10 git";
 
   modKey = "Mod4";
+
+  backgroundImage = ./sway/deathpaper.jpg;
+
+  hostDispl = {
+    intelNuc = {
+      "HDMI-A-1" = {
+        mode  = "2560x1440@143.912Hz";
+        pos   = "0 0";
+        scale = "1";
+        bg = "${backgroundImage} fill";
+      };
+    };
+    spectre = {
+      "eDP-1" = {
+        bg = "${backgroundImage} fill";
+      };
+    };
+  };
 in
 {
   imports = [
@@ -54,8 +72,6 @@ in
     ./way-displays.nix
   ];
 
-  xdg.configFile."sway/once.sh".source = ./sway/once.sh;
-  
   home.packages = with pkgs; [
     swaylock
     swayidle
@@ -90,16 +106,9 @@ in
     config = rec {
       modifier = modKey;
       terminal = "${pkgs.kitty}/bin/kitty";
-      output = lib.mkIf (host == "intelNuc") {
-        "HDMI-A-1" = {
-          mode = "2560x1440@143.912Hz";
-          pos = "0 0";
-          scale = "1";
-        };
-      };
+      output = if builtins.hasAttr host hostDispl then hostDispl.${host} else {};
       assigns = {
         "${ws9}" = [
-          { title = "WhatsApp Web"; }
           { app_id = "thunderbird"; }
           { class = "Spotify"; }
         ];
@@ -120,10 +129,6 @@ in
         {
           command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.95 --focused 1.0";
           always = false;
-        }
-        {
-          command = "${config.xdg.configHome}/sway/once.sh ${pkgs.swaybg}/bin/swaybg -i ${./sway/deathpaper.jpg} -m fill -o '*'";
-          always = true;
         }
         {
           command = "${pkgs.autotiling}/bin/autotiling";
@@ -274,7 +279,7 @@ in
           "1739:52912:SYNA32BF:00_06CB:CEB0_Touchpad" = {
             natural_scroll = "enabled";
             tap = "enabled";
-            pointer_accel = "0.2";
+            pointer_accel = "0.3";
           };
         } else {}
       );

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports =
@@ -14,7 +14,28 @@
     };
   };  
 
-  boot.kernelModules = [ "hp_wmi" ];
+  hardware = {
+    ipu6 = {
+      enable = true;
+      platform = "ipu6ep";
+    };
+    enableRedistributableFirmware = true;
+  };
+
+  boot = {
+    kernelModules = [ "hp_wmi" ];
+    kernelParams = [ "i915.enable_psr=0" "mem_sleep_default=deep" ];
+  };
+
+  systemd.sleep.extraConfig = ''
+    SuspendState=mem
+  '';
+
+  environment.systemPackages = with pkgs; [
+    libcamera
+    v4l-utils
+    ipu6-camera-bins
+  ];
 
   system.stateVersion = "24.11"; # Did you read the comment?
 
