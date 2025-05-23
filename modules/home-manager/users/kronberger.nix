@@ -48,7 +48,7 @@ in
         # Music
         lmms
         spotify
-        spotify-player
+        ncspot
 
         # Information
         btop
@@ -56,6 +56,7 @@ in
         fzf
         serpl
         translate-shell
+        wiki-tui
 
         # Images
         zathura
@@ -76,12 +77,6 @@ in
         ltunify
         rpi-imager
         bluetuith
-
-        # xdg portal
-        xdg-user-dirs
-        xdg-desktop-portal-wlr
-        xdg-desktop-portal
-        xdg-desktop-portal-gtk
 
         # Math
         speedcrunch

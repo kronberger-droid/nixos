@@ -183,6 +183,8 @@ in
       quickemu
       eza
       ripgrep
+      fd
+      dust
     ];
   };
 
