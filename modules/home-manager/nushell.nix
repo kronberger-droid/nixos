@@ -20,8 +20,8 @@
       e = "exit";
       "ga" = "git add";
       "gcm" = "git commit";
-      "gp" = "git push";
-      "gc" = "git clone";
+      "gps" = "git push";
+      "gcl" = "git clone";
     };
   };
   
