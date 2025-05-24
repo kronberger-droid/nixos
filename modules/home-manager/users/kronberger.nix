@@ -18,6 +18,7 @@ in
         ../nushell.nix
         ../git.nix
         ../zathura.nix
+        ../yazi.nix
       ];
       home.username = "kronberger";
       home.homeDirectory = "/home/kronberger";
@@ -35,11 +36,9 @@ in
 
         # Filemanagers
         nemo-with-extensions
-        yazi
         megasync
         zotero-beta
         megacli
-        serpl
 
         # Editors
         obsidian
@@ -110,14 +109,15 @@ in
           defaultApplications = {
             "application/pdf" = "org.pwmt.zathura.desktop";  
             "x-scheme-handler/mailto" = "thunderbird.desktop";
+            "image/png"       = "swayimg.desktop";
+            "image/jpeg"      = "swayimg.desktop";
+            "image/gif"       = "swayimg.desktop";
+            "image/webp"      = "swayimg.desktop";
+            "image/svg+xml"   = "swayimg.desktop";
+            "image/tiff"      = "swayimg.desktop";
           };
         };
       };
-      
-      # services.gnome-keyring = {
-      #   enable = true;
-      #   components = [ "secrets" "ssh" ];
-      # };
 
       home.file = {
         ".config/swappy/config".text = ''
