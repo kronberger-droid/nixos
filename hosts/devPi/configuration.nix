@@ -30,6 +30,7 @@
     shells = [ pkgs.nushell ];
     variables = {
       EDITOR = "hx";
+      VISUAL = "hx";
       GIT_EDITOR = "hx";
     };
     systemPackages = with pkgs; [
