@@ -201,16 +201,26 @@ in
       defaultWorkspace = "workspace ${ws1}";
 
       keybindings = lib.mkOptionDefault {
-        "${modifier}+Shift+x" = "exec ${pkgs.nemo-with-extensions}/bin/nemo $(${config.xdg.configHome}/kitty/cwd.sh)";
+        # brave
         "${modifier}+Shift+s" = "exec ${pkgs.brave}/bin/brave";
+        # take a screenshot
         "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
+        # reload sway
         "${modifier}+Shift+c" = "exec swaymsg reload";
+        # open powermenu
         "${modifier}+Shift+e" = "exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
+        # open local send app
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
+        # open bitwarden
         "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
+        # open floating btop shell
         "${modifier}+Shift+t" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
+        # zooming and marking for screen share
         "${modifier}+Shift+y" = "exec ${pkgs.woomer}/bin/woomer";
-
+        # open file managers
+        "${modifier}+Shift+x" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.yazi}/bin/yazi";
+        "${modifier}+Shift+n" = "exec ${pkgs.nemo-with-extensions}/bin/nemo $(${config.xdg.configHome}/kitty/cwd.sh)";
+        # open terminals
         "${modifier}+Shift+Return" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)";
         "${modifier}+Return" = "exec '${pkgs.kitty}/bin/kitty --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)'";
 
