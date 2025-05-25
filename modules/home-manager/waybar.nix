@@ -20,8 +20,7 @@ in
 
   xdg.configFile."waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
 
-  programs.waybar =
-  {
+  programs.waybar = {
     enable = true;
     systemd.enable = true;
     style = "${./waybar/style.css}";

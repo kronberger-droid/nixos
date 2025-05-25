@@ -117,11 +117,7 @@ in
           };
         };
       };
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> 48bfe9841c443a5f98bb2c0bd5f273368e4da38f
       home.file = {
         ".config/swappy/config".text = ''
           [Default]
