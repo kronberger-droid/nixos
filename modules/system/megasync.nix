@@ -1,19 +1,17 @@
-{ pkgs, ... }: {
-  environment.systemPackages = with pkgs; [
-    megasync
-  ];
+{ pkgs, ... }:
+{
+  # ensure the binary is available
+  environment.systemPackages = [ pkgs.megacmd ];
 
-  systemd.user.services.megasync = {
-    description = "MegaSync Service (Wait for Waybar)";
-    after = [ "waybar.service" ];
-    wants = [ "waybar.service" ];
-    wantedBy = [ "default.target" ];  
-
+  # define a user-level service
+  systemd.user.services.mega-cmd-server = {
+    description = "MEGAcmd daemon";
+    after = [ "graphical-session.target" ];
+    wants = [ "graphical-session.target" ];
     serviceConfig = {
-      ExecStartPre = "${pkgs.bash}/bin/bash -c 'while ! ${pkgs.procps}/bin/pgrep -x .waybar-wrapped > /dev/null; do sleep 5; done'";
-      ExecStart = "${pkgs.megasync}/bin/megasync";
+      ExecStart = "${pkgs.megacmd}/bin/mega-cmd-server";
       Restart = "on-failure";
-      RestartSec = "5s";  
     };
+    wantedBy = [ "default.target" ];
   };
 }

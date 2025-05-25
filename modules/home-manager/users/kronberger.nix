@@ -36,9 +36,7 @@ in
         # Filemanagers
         nemo-with-extensions
         yazi
-        megasync
         zotero-beta
-        megacli
         serpl
 
         # Editors
@@ -88,7 +86,6 @@ in
         lxqt.lxqt-policykit
         gcr
         seahorse
-        libsecret
         bitwarden-desktop
         bitwarden-cli
 
@@ -114,11 +111,6 @@ in
         };
       };
       
-      # services.gnome-keyring = {
-      #   enable = true;
-      #   components = [ "secrets" "ssh" ];
-      # };
-
       home.file = {
         ".config/swappy/config".text = ''
           [Default]
