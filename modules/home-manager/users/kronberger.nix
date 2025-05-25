@@ -18,6 +18,7 @@ in
         ../nushell.nix
         ../git.nix
         ../zathura.nix
+        ../yazi.nix
       ];
       home.username = "kronberger";
       home.homeDirectory = "/home/kronberger";
@@ -107,10 +108,20 @@ in
           defaultApplications = {
             "application/pdf" = "org.pwmt.zathura.desktop";  
             "x-scheme-handler/mailto" = "thunderbird.desktop";
+            "image/png"       = "swayimg.desktop";
+            "image/jpeg"      = "swayimg.desktop";
+            "image/gif"       = "swayimg.desktop";
+            "image/webp"      = "swayimg.desktop";
+            "image/svg+xml"   = "swayimg.desktop";
+            "image/tiff"      = "swayimg.desktop";
           };
         };
       };
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> 48bfe9841c443a5f98bb2c0bd5f273368e4da38f
       home.file = {
         ".config/swappy/config".text = ''
           [Default]
