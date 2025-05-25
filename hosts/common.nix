@@ -1,4 +1,4 @@
-{ pkgs, host, inputs, ... }:
+{ pkgs, host, ... }:
 let
   outputName =
     if host == "intelNuc" then
@@ -83,7 +83,6 @@ in
   };
 
   services = {
-    # OpenSSH
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -187,6 +186,7 @@ in
       fd
       dust
       gnome-keyring
+      xdg-desktop-portal-gtk
     ];
   };
 
