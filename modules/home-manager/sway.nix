@@ -56,6 +56,7 @@ in
 {
   imports = [
     ./waybar.nix
+    ./way-displays.nix
     ./theme.nix
     ./rofi.nix
     ./sway/audio-idle-inhibit.nix
@@ -69,7 +70,6 @@ in
       inherit backgroundColor accentColor;
     })
   ] ++ lib.optionals isNotebook [
-    ./way-displays.nix
   ];
 
   home.packages = with pkgs; [
