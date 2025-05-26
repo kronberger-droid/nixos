@@ -40,13 +40,6 @@ in
       "vm.swappiness" = 10;
       "kvm.ignore_msrs" = 1;
     };
-    kernelParams = [
-      "nowatchdog"
-      "nmi_watchdog=0"
-    ];
-    blacklistedKernelModules = [
-      "wdat_wdt"
-    ];
   };
 
   networking = {
