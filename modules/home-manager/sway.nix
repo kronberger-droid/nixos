@@ -215,10 +215,10 @@ in
         "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
         # open floating btop shell
         "${modifier}+Shift+t" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
-        # zooming and marking for screen share
+        # zooming and highlighting for screen share
         "${modifier}+Shift+y" = "exec ${pkgs.woomer}/bin/woomer";
         # open file managers
-        "${modifier}+Shift+x" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.yazi}/bin/yazi";
+        "${modifier}+Shift+x" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)";
         "${modifier}+Shift+n" = "exec ${pkgs.nemo-with-extensions}/bin/nemo $(${config.xdg.configHome}/kitty/cwd.sh)";
         # open terminals
         "${modifier}+Shift+Return" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)";

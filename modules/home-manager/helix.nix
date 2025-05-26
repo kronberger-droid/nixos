@@ -1,14 +1,5 @@
 # /etc/nixos/modules/home-manager/helix.nix
-{ lib, pkgs, ... }:
-let
-  default-pairs = {
-    "(" = ")";
-    "{" = "}";
-    "[" = "]";
-    "$" = "$";
-    "\"" = "\"";
-  };
-in
+{ pkgs, ... }:
 {
   home.packages = with pkgs; [
     # Nix

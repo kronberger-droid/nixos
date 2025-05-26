@@ -1,0 +1,104 @@
+[manager]
+cwd = { fg = "#9e4e85" }
+
+# tab
+tab_active   = { fg = "#202020", bg = "#e5b566", bold = true }
+tab_inactive = { fg = "#505050", bg = "#202020" }
+tab_width    = 1
+
+# find
+find_keyword  = { fg = "#6c99ba", bold = true, italic = true, underline = true }
+find_position = { fg = "#6c99ba", bold = true, italic = true }
+
+# marker
+marker_copied   = { fg = "#202020", bg = "#7e8d50" }
+marker_cut      = { fg = "#202020", bg = "#ac4142" }
+marker_marked   = { fg = "#202020", bg = "#6c99ba" }
+marker_selected = { fg = "#202020", bg = "#e5b566" }
+
+# count
+count_copied   = { fg = "#202020", bg = "#7e8d50" }
+count_cut      = { fg = "#505050", bg = "#ac4142" }
+count_selected = { fg = "#202020", bg = "#e5b566" }
+
+# border
+border_symbol = " "
+
+[mode]
+normal_main  = { fg = "#202020", bg = "#e5b566", bold = true }
+normal_alt   = { fg = "#6c99ba", bg = "#505050", bold = true }
+
+select_main  = { fg = "#202020", bg = "#6c99ba", bold = true }
+select_alt   = { fg = "#202020", bg = "#6c99ba", bold = true }
+
+unset_main   = { fg = "#202020", bg = "#ac4142", bold = true }
+unset_alt    = { fg = "#202020", bg = "#ac4142", bold = true }
+
+[status]
+separator_open  = ""
+separator_close = ""
+separator_style = { bg = "#505050", fg = "#e5b566" }
+
+progress_label  = { fg = "#202020", bold = true }
+progress_normal = { fg = "#e5b566", bg = "#202020" }
+progress_error  = { fg = "#ac4142", bg = "#202020" }
+
+perm_type = { fg = "#d0d0d0" }
+perm_write = { fg = "#ac4142" }
+perm_exec  = { fg = "#7e8d50" }
+perm_read  = { fg = "#6c99ba" }
+perm_sep   = { fg = "#505050" }
+
+[select]
+border   = { fg = "#e5b566" }
+active   = { fg = "#ac4142", bold = true }
+inactive = { fg = "#505050", bg = "#202020" }
+
+[input]
+border = { fg = "#e5b566" }
+value  = { fg = "#505050" }
+
+[completion]
+border = { fg = "#e5b566", bg = "#202020" }
+
+[tasks]
+border  = { fg = "#e5b566" }
+title   = { fg = "#505050" }
+hovered = { fg = "#7e8d50", underline = true }
+
+[which]
+cols            = 3
+mask            = { bg = "#202020" }
+cand            = { fg = "#e5b566" }
+rest            = { fg = "#202020" }
+desc            = { fg = "#505050" }
+separator       = " ⯈ "
+separator_style = { fg = "#505050" }
+
+[help]
+on     = { fg = "#e5b566" }
+run    = { fg = "#7e8d50" }
+footer = { fg = "#202020", bg = "#505050" }
+
+[notify]
+title_info  = { fg = "#7e8d50" }
+title_warn  = { fg = "#e5b566" }
+title_error = { fg = "#ac4142" }
+
+[filetype]
+rules = [
+  { name = "*/",                        fg = "#9e4e85" },
+  { name = "*",    is = "exec",         fg = "#7e8d50" },
+  { mime = "image/*",                   fg = "#e5b566" },
+  { mime = "{audio,video}/*",           fg = "#7e8d50" },
+  { mime = "application/{,g}zip",       fg = "#ac4142" },
+  { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", fg = "#ac4142" },
+  { mime = "application/{pdf,doc,rtf,vnd.*}", fg = "#6c99ba" },
+  { mime = "application/{x-shellscript,x-python,x-ruby,x-javascript}", fg = "#e5b566" },
+  { mime = "text/x-{c,c++}",            fg = "#6c99ba" },
+  { name = "*.json",                    fg = "#e5b566" },
+  { name = "*.yml",                     fg = "#6c99ba" },
+  { name = "*.toml",                    fg = "#9e4e85" },
+  { name = "*",    is = "orphan",       bg = "#202020" },
+  { name = "*",    is = "dummy",        bg = "#202020" },
+]
