@@ -22,7 +22,10 @@ in
 
   programs.waybar = {
     enable = true;
-    systemd.enable = true;
+    systemd = {
+      enable = true;
+      target = "sway-session.target";
+    };
     style = "${./waybar/style.css}";
     settings = [{
       height = 30;
