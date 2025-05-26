@@ -1,7 +1,11 @@
 { config, lib, pkgs, ... }:{
   programs.yazi = {
     enable = true;
+    flavors = {
+      "base16-transparent" = ./yazi/base16-transparent.toml;
+    };
     settings = {
+      flavor = "base16-transparent";
       opener = {
         "detached-pdf" = [
           {
