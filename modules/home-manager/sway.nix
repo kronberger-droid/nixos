@@ -55,12 +55,12 @@ let
 in
 {
   imports = [
+    ./sway/swayidle.nix
     ./waybar.nix
     ./way-displays.nix
     ./theme.nix
     ./rofi.nix
     ./sway/audio-idle-inhibit.nix
-    ./sway/swayidle.nix
     (import ./sway/swaylock.nix {
       inherit pkgs config lib;
       inherit backgroundColor accentColor;
