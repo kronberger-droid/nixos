@@ -24,7 +24,7 @@
 
   boot = {
     kernelModules = [ "hp_wmi" ];
-    kernelParams = [ "i915.enable_psr=0" "mem_sleep_default=deep" ];
+    kernelParams = [ "i915.enable_psr=0" "mem_sleep_default=s2idle" ];
     blacklistedKernelModules = [ "iTCO_wdt" "watchdog" ];
   };
 
