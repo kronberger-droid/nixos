@@ -86,6 +86,7 @@ in
     fwupd = {
       enable = true;
     };
+    gnome.gnome-keyring.enable = true;
     openssh = {
       enable = true;
       ports = [ 22 ];
