@@ -89,10 +89,12 @@ in
         seahorse
         bitwarden-desktop
         bitwarden-cli
+        openssl
 
         # Social
         element-desktop
         zapzap
+        iamb
 
         # Video
         vlc
