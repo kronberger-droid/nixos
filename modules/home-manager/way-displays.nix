@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 {
 	home.packages = with pkgs; [
 			way-displays
@@ -17,13 +17,5 @@
 				}
 			];
 		};
-	};
-
-
-		wayland.windowManager.sway = {
-		extraConfigEarly = lib.mkAfter ''
-			bindswitch --locked lid:on exec ${pkgs.way-displays}/bin/way-displays -s DISABLED "eDP-1"
-			bindswitch --locked lid:off exec ${pkgs.way-displays}/bin/way-displays -d DISABLED "eDP-1"
-		'';
 	};
 }

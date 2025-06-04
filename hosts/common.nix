@@ -83,6 +83,9 @@ in
   };
 
   services = {
+    fwupd = {
+      enable = true;
+    };
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -187,6 +190,7 @@ in
       dust
       gnome-keyring
       xdg-desktop-portal-gtk
+      fwupd
     ];
   };
 
