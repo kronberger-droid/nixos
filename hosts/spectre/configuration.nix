@@ -8,14 +8,14 @@
     ];
 
   services = {
-    v4l2-relayd.instances.ipu6 = {
-      enable       = true;
-      cardLabel    = "Intel IPU6 Camera";
-      input.format   = "YUYV";   # index 21
-      input.width    = 1920;     # your chosen resolution
-      input.height   = 1080;
-      input.framerate = 30;       # fps
-    };
+    # v4l2-relayd.instances.ipu6 = {
+    #   enable       = true;
+    #   cardLabel    = "Intel IPU6 Camera";
+    #   input.format   = "YUYV";   # index 21
+    #   input.width    = 1920;     # your chosen resolution
+    #   input.height   = 1080;
+    #   input.framerate = 30;       # fps
+    # };
     printing = {
       enable = true;
       drivers = [ pkgs.gutenprint ];
