@@ -1,7 +1,11 @@
-{ config, lib, pkgs, backgroundColor, accentColor, ... }:
+{ config, pkgs, ... }:
+let
+  backgroundColor = config.myTheme.backgroundColor;
+  accentColor = config.myTheme.accentColor;
+in
 {
-  home.packages = [
-    pkgs.swaylock
+  home.packages = with pkgs; [
+    swaylock
   ];
 
   programs.swaylock = {

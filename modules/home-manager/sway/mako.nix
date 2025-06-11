@@ -1,20 +1,15 @@
-{ pkgs, accentColor, backgroundColor, ... }:
+{ config, host, ... }:
 {
-  home.packages = with pkgs; [
-    mako
-  ];
-
   services = {
     mako = {
       enable = true;
       settings = {
-        defaultTimeout = "10000";
-        borderRadius = "8";
-        borderColor = accentColor;
-        backgroundColor = backgroundColor;
+        default-timeout = "10000";
+        border-radius = "8";
+        border-color = config.myTheme.accentColor;
+        background-color = config.myTheme.backgroundColor;
       };
     };
-    # poweralertd.enable = true;
+    poweralertd.enable = if host == "spectre" then true else false;
   };
-
 }
