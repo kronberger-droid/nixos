@@ -19,6 +19,8 @@ in
         ../git.nix
         ../zathura.nix
         ../yazi.nix
+        ../theme.nix
+        ../colors.nix
       ];
       home.username = "kronberger";
       home.homeDirectory = "/home/kronberger";

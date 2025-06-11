@@ -1,26 +1,9 @@
 { config, pkgs, lib, host, isNotebook, ... }:
 let
-  color0 = "#1e1e1e";
-  color1 = "#2c2f33";
-  # color2 = "#373c45";
-  color3 = "#555555";
-  # color4 = "#6c7a89";
-  color5 = "#c0c5ce";
-  color6 = "#dfe1e8";
-  # color7 = "#eff0f1";
-  color8 = "#423c38";
-  color9 = "#6e665f";
-  # color10 = "#786048";
-  # color11 = "#988a71";
-  color12 = "#8a8177";
-  # color13 = "#9c9287";
-  # color14 = "#a39e93";
-  # color15 = "#b6b1a9";
-
-  backgroundColor = color0;
-  textColor = color6;
-  # selectionColor = color1;
-  accentColor = color12;
+  palette         = config.myTheme.palette;
+  backgroundColor = config.myTheme.backgroundColor;
+  textColor       = config.myTheme.textColor;
+  accentColor     = config.myTheme.accentColor;
 
   ws1 = "1 browser";
   ws2 = "2 writing";
@@ -60,14 +43,8 @@ in
     ./theme.nix
     ./rofi.nix
     ./sway/audio-idle-inhibit.nix
-    (import ./sway/swaylock.nix {
-      inherit pkgs config lib;
-      inherit backgroundColor accentColor;
-    })
-    ( import ./sway/mako.nix {
-      inherit pkgs config lib;
-      inherit backgroundColor accentColor;
-    })
+    ./sway/swaylock.nix
+    ./sway/mako.nix
   ] ++ lib.optionals isNotebook [
     ./way-displays.nix
   ];
@@ -158,38 +135,38 @@ in
         background = backgroundColor;
 
         focused = {
-          border = accentColor;
-          background = accentColor;
-          text = backgroundColor;
-          indicator = textColor;
-          childBorder = accentColor;
+          border       = accentColor;
+          background   = accentColor;
+          text         = backgroundColor;
+          indicator    = textColor;
+          childBorder  = accentColor;
         };
         focusedInactive = {
-          border = color1;
-          background = color1;
-          text = color5;
-          indicator = color3;
-          childBorder = color1;
+          border      = palette.color1;
+          background  = palette.color1;
+          text        = palette.color5;
+          indicator   = palette.color3;
+          childBorder = palette.color1;
         };
         unfocused = {
-          border = color1;
-          background = backgroundColor;
-          text = color5;
-          indicator = textColor;
-          childBorder = color1;
+          border      = palette.color1;
+          background  = backgroundColor;
+          text        = palette.color5;
+          indicator   = textColor;
+          childBorder = palette.color1;
         };
         urgent = {
-          border = color8;
-          background = color8;
-          text = backgroundColor;
-          indicator = color9;
-          childBorder = color8;
+          border      = palette.color8;
+          background  = palette.color8;
+          text        = backgroundColor;
+          indicator   = palette.color9;
+          childBorder = palette.color8;
         };
         placeholder = {
-          border = backgroundColor;
-          background = backgroundColor;
-          text = color5;
-          indicator = backgroundColor;
+          border      = backgroundColor;
+          background  = backgroundColor;
+          text        = palette.color5;
+          indicator   = backgroundColor;
           childBorder = backgroundColor;
         };
       };
