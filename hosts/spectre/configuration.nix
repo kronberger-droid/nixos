@@ -50,14 +50,13 @@
       "hp_wmi"
     ];
     kernelParams = [
-      "mem_sleep_default=s2idle"
-
-      "i915.enable_psr=0"      # disable Panel Self Refresh
-      # add these:
-      "i915.enable_rc6=0"      # disable RC6 power‐saving states
-      "intel_idle.max_cstate=1" # prevent the CPU from entering deep C-states
-      "i915.enable_guc=0"      # disable GuC firmware loading
-      "i915.enable_fbc=0"      # disable Frame Buffer Compres
+      # "i915.enable_psr=0"      # disable Panel Self Refresh
+      # # add these:
+      # "i915.enable_rc6=1"      # disable RC6 power‐saving states
+      # "intel_idle.max_cstate=1" # prevent the CPU from entering deep C-states
+      # "i915.enable_guc=0"      # disable GuC firmware loading
+      # "i915.enable_fbc=1"      # disable Frame Buffer Compres
+      # "mem_sleep_default=s2idle"
     ];
     blacklistedKernelModules = [
       "iTCO_wdt"
