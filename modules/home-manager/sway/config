@@ -10,6 +10,8 @@ for_window [title="Authentication Required"] floating enable, sticky enable, res
 # set floating mode for generated windows
 for_window [title="(?:Open|Save) (?:File|Folder|As)"] floating enable
 for_window [title="(?:Open|Save) (?:File|Folder|As)"] resize set 800 600
+for_window [title="(?:open|save) (?:file|folder|as)"] floating enable
+for_window [title="(?:open|save) (?:file|folder|as)"] resize set 800 600
 for_window [window_role="bubble"] floating enable
 for_window [window_role="task_dialog"] floating enable
 for_window [window_role="Preferences"] floating enable

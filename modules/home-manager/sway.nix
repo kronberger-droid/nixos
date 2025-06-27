@@ -115,6 +115,10 @@ in
           always = false;
         }
         {
+          command = "${pkgs.thunderbird}/bin/thunderbird";
+          always = false;
+        }
+        {
           command = "${pkgs.autotiling}/bin/autotiling";
           always = false;
         }
