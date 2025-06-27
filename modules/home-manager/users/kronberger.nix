@@ -135,7 +135,13 @@ in
           early_exit=true
           fill_shape=false
         '';
+
+        ".local/share/fonts/Futura_PT".source = ../fonts/Futura_PT;
+
+        ".local/share/fonts/gfsneohellenicmath".source = ../fonts/gfsneohellenicmath;
       };
+
+      fonts.fontconfig.enable = true;
 
       home.stateVersion = "24.11";
     };
