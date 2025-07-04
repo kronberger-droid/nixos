@@ -13,6 +13,7 @@ in
     ../modules/system/megasync.nix
     ../modules/system/agenix.nix
     ../modules/system/keyd.nix
+    ../modules/system/samba.nix
   ];
 
   nix = {
