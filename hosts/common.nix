@@ -13,7 +13,7 @@ in
     ../modules/system/megasync.nix
     ../modules/system/agenix.nix
     ../modules/system/keyd.nix
-    ../modules/system/samba.nix
+    ../modules/system/virtualisation.nix
   ];
 
   nix = {
@@ -149,6 +149,8 @@ in
     };
   };
 
+  virtualisation.spiceUSBRedirection.enable = true;
+
   programs = {
     xwayland.enable = true;
     dconf.enable = true;
@@ -185,8 +187,6 @@ in
       tree
       wirelesstools
       popsicle
-      qemu_full
-      quickemu
       eza
       ripgrep
       fd

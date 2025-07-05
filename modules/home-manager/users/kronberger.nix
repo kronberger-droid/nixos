@@ -47,7 +47,7 @@ in
         onlyoffice-desktopeditors
 
         # Music
-        lmms
+        # lmms
         spotify
         ncspot
 
