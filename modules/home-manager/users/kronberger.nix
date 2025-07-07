@@ -87,7 +87,7 @@ in
 
         # Safety
         lxqt.lxqt-policykit
-        gcr
+        # gcr
         seahorse
         bitwarden-desktop
         bitwarden-cli

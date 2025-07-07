@@ -70,7 +70,6 @@
   '';
 
   environment.systemPackages = with pkgs; [
-    gnome-keyring
     libcamera
     v4l-utils
     ipu6-camera-bins
