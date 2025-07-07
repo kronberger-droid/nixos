@@ -153,7 +153,7 @@ in
     xwayland.enable = true;
     dconf.enable = true;
     seahorse.enable = true;
-    ssh.startAgent = true;
+    # ssh.startAgent = true;
   };
 
   users.users.kronberger = {
