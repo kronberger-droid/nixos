@@ -88,7 +88,10 @@ in
     fwupd = {
       enable = true;
     };
-    gnome.gnome-keyring.enable = true;
+    gnome.gnome-keyring = {
+      enable = true;
+      components = [ "secrets" "ssh" ];
+    };
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -155,7 +158,7 @@ in
     xwayland.enable = true;
     dconf.enable = true;
     seahorse.enable = true;
-    # ssh.startAgent = true;
+    ssh.startAgent = true;
   };
 
   users.users.kronberger = {
@@ -191,7 +194,6 @@ in
       ripgrep
       fd
       dust
-      gnome-keyring
       xdg-desktop-portal-gtk
       fwupd
     ];
