@@ -13,7 +13,7 @@ in
     ../modules/system/megasync.nix
     ../modules/system/agenix.nix
     ../modules/system/keyd.nix
-    ../modules/system/samba.nix
+    ../modules/system/virtualisation.nix
   ];
 
   nix = {
@@ -88,7 +88,10 @@ in
     fwupd = {
       enable = true;
     };
-    gnome.gnome-keyring.enable = true;
+    gnome.gnome-keyring = {
+      enable = true;
+      components = [ "secrets" "ssh" ];
+    };
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -149,6 +152,8 @@ in
     };
   };
 
+  virtualisation.spiceUSBRedirection.enable = true;
+
   programs = {
     xwayland.enable = true;
     dconf.enable = true;
@@ -185,13 +190,10 @@ in
       tree
       wirelesstools
       popsicle
-      qemu_full
-      quickemu
       eza
       ripgrep
       fd
       dust
-      gnome-keyring
       xdg-desktop-portal-gtk
       fwupd
     ];
