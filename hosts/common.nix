@@ -79,19 +79,10 @@ in
     polkit.enable = true;
     rtkit.enable = true;
     sudo-rs.enable = true;
-    # pam.services = {
-    #   swaylock.enableGnomeKeyring = true;
-    #   greetd.enableGnomeKeyring = true;
-    # };
   };
 
   services = {
-    fwupd = {
-      enable = true;
-    };
-    # gnome.gnome-keyring = {
-    #   enable = true;
-    # };
+    fwupd.enable = true;
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -103,7 +94,6 @@ in
       };
     };
 
-    # Audio
     pulseaudio.enable = false;
 
     pipewire = {
