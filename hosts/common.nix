@@ -90,7 +90,7 @@ in
     };
     gnome.gnome-keyring = {
       enable = true;
-      components = [ "secrets" "ssh" ];
+      # components = [ "secrets" "ssh" ];
     };
     openssh = {
       enable = true;
