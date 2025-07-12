@@ -84,9 +84,6 @@ in
     enable = true;
     wrapperFeatures.gtk = true;
     extraConfig = builtins.readFile "${./sway/config}";
-    extraSessionCommands = ''
-      export SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/keyring/ssh
-    '';
     config = rec {
       modifier = modKey;
       terminal = "${pkgs.kitty}/bin/kitty";
@@ -130,10 +127,6 @@ in
           command = "${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4";
           always = false;
         }
-        # {
-        #   command = "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --components=ssh";
-        #   always = false;
-        # }
       ];
       colors = {
         background = backgroundColor;
