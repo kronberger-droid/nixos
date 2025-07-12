@@ -14,6 +14,7 @@ in
     ../modules/system/agenix.nix
     ../modules/system/keyd.nix
     ../modules/system/virtualisation.nix
+    ../modules/system/gnome-keyring.nix
   ];
 
   nix = {
@@ -78,20 +79,19 @@ in
     polkit.enable = true;
     rtkit.enable = true;
     sudo-rs.enable = true;
-    pam.services = {
-      swaylock.enableGnomeKeyring = true;
-      greetd.enableGnomeKeyring = true;
-    };
+    # pam.services = {
+    #   swaylock.enableGnomeKeyring = true;
+    #   greetd.enableGnomeKeyring = true;
+    # };
   };
 
   services = {
     fwupd = {
       enable = true;
     };
-    gnome.gnome-keyring = {
-      enable = true;
-      components = [ "secrets" "ssh" ];
-    };
+    # gnome.gnome-keyring = {
+    #   enable = true;
+    # };
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -158,7 +158,7 @@ in
     xwayland.enable = true;
     dconf.enable = true;
     seahorse.enable = true;
-    ssh.startAgent = true;
+    # ssh.startAgent = true;
   };
 
   users.users.kronberger = {
