@@ -4,7 +4,6 @@
   environment.systemPackages = with pkgs; [
     quickemu
     qemu
-    spice-gtk
     samba
   ];
   
