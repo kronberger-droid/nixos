@@ -20,13 +20,13 @@ def flake-reload [] {
 	sudo nixos-rebuild switch --flake ~/.config/nixos#(hostname)
 }
 
-# NIX DEVELOPMENT
-
 def dev [] {
 	nix develop
 }
 
-# CUSTOM COLOR PICKER
+def nanonis [] {
+	quickemu --vm ~/Emulation/windows-11.conf --sound-card none
+} 
 
 def color-picker [] {
 		echo "In 1 sec you can pick a color!"
