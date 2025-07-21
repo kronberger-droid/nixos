@@ -10,6 +10,12 @@
 		settings = {
 			SCALING = true;
 			AUTO_SCALE = true;
+			ARRANGE = "COLUMN";
+			ALIGN = "MIDDLE";
+			ORDER = [
+				"DP-1"
+				"eDP-1"
+			];
 			SCALE = [
 				{
 					NAME_DESC = "eDP-1";

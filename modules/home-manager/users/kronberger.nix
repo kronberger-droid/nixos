@@ -103,6 +103,7 @@ in
 
         # AI
         ollama
+        claude-code
       ];
 
       xdg = {

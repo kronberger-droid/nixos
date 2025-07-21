@@ -33,6 +33,9 @@ let
       "eDP-1" = {
         bg = "${backgroundImage} fill";
       };
+      "DP-1" = {
+        bg = "${backgroundImage} fill";
+      };
     };
   };
 in
