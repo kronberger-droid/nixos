@@ -87,7 +87,7 @@ in
       enable = true;
       ports = [ 22 ];
       settings = {
-        PasswordAuthentication = true;
+        PasswordAuthentication = false;
         AllowUsers = null;
         UseDns = true;
         X11Forwarding = true;
@@ -157,6 +157,9 @@ in
     description = "Kronberger";
     extraGroups = [ "networkmanager" "wheel" ];
     shell = pkgs.nushell;
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEifxmkv6w0+8SGVET8DiDIjGMsGRPfpguSGwPU+MMax"
+    ];
   };
 
   environment = {
