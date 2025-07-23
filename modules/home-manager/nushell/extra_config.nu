@@ -24,21 +24,20 @@ def dev [] {
 	nix develop
 }
 
-def nanonis [] {
-	quickemu --vm ~/Emulation/windows-11.conf --sound-card none
+def nanonis-sim [] {
+	nohup quickemu --vm ~/Emulation/windows-11.conf o+e> /dev/null
+	sleep 2sec
+	exit
 } 
 
 def color-picker [] {
 		echo "In 1 sec you can pick a color!"
 		sleep 1sec
-    # Use slurp to let you select a screen area
+
     let geometry = (slurp -p)
 
-    # Capture the picked area as a ppm image with grim,
-    # then use ImageMagick to output pixel information from (0,0)
     let result = (grim -g $geometry -t ppm - | magick - -format '%[pixel:p{0,0}]' txt:-)
 
-    # Process the result to extract tokens
     let tokens = (
         $result 
         | split row "\n" 
@@ -49,4 +48,23 @@ def color-picker [] {
     )
 
     echo [[type value]; [RGB ($tokens | get 1 | str replace -ra "[()]" "")] [HEX ($tokens | get 2)] ]
+}
+
+def nanonis-dev [] {
+    let work_dir = "/home/kronberger/Programming/python/nanonis_tcp_test"
+    
+    swaymsg layout stacking
+    
+    nohup kitty -d $work_dir -e nix develop o+e> /dev/null
+    sleep 0.5sec
+    
+    nohup kitty -d $work_dir -e nix develop o+e> /dev/null
+    sleep 0.5sec
+    
+    swaymsg layout splith
+    
+    swaymsg layout stacking
+    
+    nohup kitty -d $work_dir claude o+e> /dev/null
+    sleep 0.5sec
 }
