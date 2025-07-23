@@ -20,6 +20,9 @@ let
 
   backgroundImage = ./sway/deathpaper.jpg;
 
+  # defaultBrowser = "${pkgs.brave}/bin/brave";
+  defaultBrowser = "${pkgs.firefox}/bin/firefox";
+
   hostDispl = {
     intelNuc = {
       "HDMI-A-1" = {
@@ -178,8 +181,8 @@ in
       defaultWorkspace = "workspace ${ws1}";
 
       keybindings = lib.mkOptionDefault {
-        # brave
-        "${modifier}+Shift+s" = "exec ${pkgs.brave}/bin/brave";
+        # browser
+        "${modifier}+Shift+s" = "exec ${defaultBrowser}";
         # take a screenshot
         "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
         # reload sway
