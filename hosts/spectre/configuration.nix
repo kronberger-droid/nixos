@@ -16,6 +16,16 @@
       lidSwitchDocked = "ignore";
       lidSwitchExternalPower = "suspend";
     };
+    # Better logging for crash analysis
+    journald = {
+      storage = "persistent";
+      forwardToSyslog = true;
+      extraConfig = ''
+        Compress=yes
+        SystemMaxUse=500M
+        RuntimeMaxUse=100M
+      '';
+    };
   };  
 
   hardware = {
@@ -39,6 +49,9 @@
       "watchdog"
       "igen6_edac"
     ];
+    # Enable crash dumps and better debugging
+    crashDump.enable = true;
+    kernel.sysctl."kernel.sysrq" = 1;
   };
 
   systemd.sleep.extraConfig = ''
