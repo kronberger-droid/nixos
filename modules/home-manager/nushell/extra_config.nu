@@ -20,15 +20,50 @@ def flake-reload [] {
 	sudo nixos-rebuild switch --flake ~/.config/nixos#(hostname)
 }
 
-def dev [] {
-	nix develop
+def --env dev-setup [work_dir: string] {
+    swaymsg layout splith
+    
+    swaymsg layout stacking
+    
+    swaymsg exec $"kitty --working-directory=($work_dir) --hold -e nu -c 'cd ($work_dir); nix develop'"
+    sleep 0.5sec
+    
+    swaymsg focus parent
+    
+    swaymsg exec $"kitty --working-directory=($work_dir) -e claude"
+    sleep 0.5sec
+
+    swaymsg layout stacking
+    
+    swaymsg focus left
+    cd $work_dir
+    nix develop
 }
 
-def nanonis-sim [] {
-	nohup quickemu --vm ~/Emulation/windows-11.conf o+e> /dev/null
-	sleep 2sec
-	exit
-} 
+def dev [project?: string] {
+    if ($project == null) {
+        nix develop
+    } else if ($project == "nanonis") {
+        dev-setup "/home/kronberger/Programming/python/nanonis_tcp_test"
+    } else {
+        let work_dir = if ($project | path exists) { 
+            $project | path expand 
+        } else { 
+            $"($env.HOME)/($project)" | path expand 
+        }
+        dev-setup $work_dir
+    }
+}
+
+def sim [project: string] {
+    if ($project == "nanonis") {
+        nohup quickemu --vm ~/Emulation/windows-11.conf o+e> /dev/null
+        sleep 2sec
+        exit
+    } else {
+        echo $"Unknown simulation project: ($project)"
+    }
+}
 
 def color-picker [] {
 		echo "In 1 sec you can pick a color!"
@@ -48,23 +83,4 @@ def color-picker [] {
     )
 
     echo [[type value]; [RGB ($tokens | get 1 | str replace -ra "[()]" "")] [HEX ($tokens | get 2)] ]
-}
-
-def nanonis-dev [] {
-    let work_dir = "/home/kronberger/Programming/python/nanonis_tcp_test"
-    
-    swaymsg layout stacking
-    
-    nohup kitty -d $work_dir -e nix develop o+e> /dev/null
-    sleep 0.5sec
-    
-    nohup kitty -d $work_dir -e nix develop o+e> /dev/null
-    sleep 0.5sec
-    
-    swaymsg layout splith
-    
-    swaymsg layout stacking
-    
-    nohup kitty -d $work_dir claude o+e> /dev/null
-    sleep 0.5sec
 }
