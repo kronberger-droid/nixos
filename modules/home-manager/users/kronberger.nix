@@ -22,6 +22,13 @@ in
         ../theme.nix
         ../colors.nix
       ];
+
+      programs.direnv = {
+        enable = true;
+        enableNushellIntegration = true;
+        nix-direnv.enable = true;
+      };
+
       home.username = "kronberger";
       home.homeDirectory = "/home/kronberger";
       home.packages = with pkgs; [
