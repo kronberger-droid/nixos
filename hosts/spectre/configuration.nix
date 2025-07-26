@@ -44,6 +44,12 @@
     kernelParams = [
       "i915.enable_fbc=0"        # disable Frame Buffer Compression
     ];
+    kernelPatches = [
+      {
+        name = "Fix freeze after sleep";
+        patch = ../../patches/sleep.patch;
+      }
+    ];
     blacklistedKernelModules = [
       "iTCO_wdt"
       "watchdog"
@@ -59,21 +65,8 @@
     HibernateDelaySec=90m
   '';
 
-  powerManagement = {
-    enable = true;
-    resumeCommands = ''
-      echo "System resumed from suspend"
-      # Re-enable bluetooth if needed
-      systemctl restart bluetooth.service || true
-    '';
-  };
+  powerManagement.enable = true;
 
-  services.udev.extraRules = ''
-    # Disable wakeup for problematic PCI devices
-    ACTION=="add", SUBSYSTEM=="pci", DRIVER=="pcieport", ATTR{power/wakeup}="disabled"
-    # Disable USB controller wakeup except for keyboard/mouse
-    ACTION=="add", SUBSYSTEM=="pci", ATTRS{vendor}=="0x8086", ATTRS{device}=="0x7e7d", ATTR{power/wakeup}="disabled"
-  '';
 
   environment.systemPackages = with pkgs; [
     libcamera
