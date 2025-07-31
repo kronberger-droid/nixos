@@ -86,12 +86,12 @@ in
     openssh = {
       enable = true;
       ports = [ 22 ];
-      settings = {
-        PasswordAuthentication = false;
-        AllowUsers = null;
-        UseDns = true;
-        X11Forwarding = true;
-      };
+      # settings = {
+      #   PasswordAuthentication = false;
+      #   AllowUsers = null;
+      #   UseDns = true;
+      #   X11Forwarding = true;
+      # };
     };
 
     pulseaudio.enable = false;
@@ -148,7 +148,6 @@ in
     xwayland.enable = true;
     dconf.enable = true;
     seahorse.enable = true;
-    # ssh.startAgent = true;
   };
 
   users.users.kronberger = {

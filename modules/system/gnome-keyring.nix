@@ -2,11 +2,11 @@
 
 {
   services = {
-    gnome = {
-      gnome-keyring.enable = true;
-      gcr-ssh-agent.enable = true;
-    };
+    gnome.gnome-keyring.enable = true;
+    gnome.gcr-ssh-agent.enable = true;
   };
+  
+  programs.ssh.startAgent = false;
   
   security.pam.services = {
     swaylock.enableGnomeKeyring = true;
@@ -19,13 +19,4 @@
     gcr_4
     libsecret
   ];
-
-  # systemd.user.sockets.gcr-ssh-agent = {
-  #   enable = true;
-  #   wantedBy = [ "sockets.target" ];
-  # };
-
-  # systemd.user.services.gcr-ssh-agent = {
-  #   enable = true;
-  # };
 }
