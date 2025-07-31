@@ -33,16 +33,8 @@
   };
 
   boot = {
-    extraModulePackages = [
-      pkgs.linuxKernel.packages.linux_6_12.ipu6-drivers
-      pkgs.linuxKernel.packages.linux_6_12.v4l2loopback
-    ];
     kernelModules = [
-      "v4l2loopback"
       "hp_wmi"
-    ];
-    kernelParams = [
-      "i915.enable_fbc=0"        # disable Frame Buffer Compression
     ];
     kernelPatches = [
       {
@@ -68,17 +60,8 @@
   powerManagement.enable = true;
 
 
-  environment.systemPackages = with pkgs; [
-    libcamera
-    v4l-utils
-    ipu6-camera-bins
-    gst_all_1.gstreamer
-    gst_all_1.gst-plugins-base
-    gst_all_1.gst-plugins-good
-    gst_all_1.gst-plugins-bad
-    gst_all_1.gst-libav
-    gst_all_1.icamerasrc-ipu6ep
-  ];
+  # environment.systemPackages = with pkgs; [
+  # ];
 
   system.stateVersion = "24.11"; # Did you read the comment?
 
