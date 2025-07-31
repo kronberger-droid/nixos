@@ -121,7 +121,6 @@ agenix -r
 - Configuration files for applications stored alongside .nix modules
 
 ### Hardware-Specific Configuration
-- Camera support (Intel IPU6 for spectre)
 - Power management for laptops (suspend-then-hibernate)
 - Display output configuration per host
 - Kernel parameters and module loading per device
