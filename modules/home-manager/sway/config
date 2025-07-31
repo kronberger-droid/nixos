@@ -1,5 +1,5 @@
 # Floating Window Configurations
-for_window [floating] resize set 50 ppt 60 ppt
+# for_window [floating] resize set 50 ppt 60 ppt
 for_window [app_id = "nemo"] floating enable, sticky enable, resize set 1200 800
 for_window [app_id = "floating_shell"] floating enable, border pixel 1, sticky enable, resize set 50ppt 60ppt
 for_window [app_id = "localsend_app"] floating enable, sticky enable, resize set 1200 800
