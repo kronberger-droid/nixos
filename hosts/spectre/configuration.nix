@@ -57,12 +57,6 @@
     HibernateDelaySec=90m
   '';
 
-  powerManagement.enable = true;
-
-
-  # environment.systemPackages = with pkgs; [
-  # ];
-
   system.stateVersion = "24.11"; # Did you read the comment?
 
 }

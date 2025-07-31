@@ -10,6 +10,14 @@
         background-color = config.myTheme.backgroundColor;
       };
     };
-    poweralertd.enable = if host == "spectre" then true else false;
+    poweralertd = {
+      enable = if host == "spectre" then true else false;
+    };
+  };
+
+  systemd.user.services.poweralertd = {
+    Unit = {
+      After = [ "mako.service" ];
+    };
   };
 }
