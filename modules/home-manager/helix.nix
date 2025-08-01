@@ -75,6 +75,7 @@
         ret.ret = ":w";
         ret.q = ":q";
         ret.w = ":wq";
+        ret.r = ":reload-all";
       };
     };
 

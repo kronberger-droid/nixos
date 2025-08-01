@@ -17,6 +17,10 @@ in
     ../modules/system/gnome-keyring.nix
   ];
 
+  programs.ssh.startAgent = true;
+  
+  systemd.user.services.ssh-agent.enable = true;
+
   nix = {
     settings.experimental-features = [ "nix-command" "flakes" ];
   };
@@ -36,8 +40,6 @@ in
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
     };
-    # plymouth.enable = true;
-    # initrd.verbose = false;
     kernel.sysctl = {
       "vm.swappiness" = 10;
       "kvm.ignore_msrs" = 1;
@@ -86,24 +88,19 @@ in
     openssh = {
       enable = true;
       ports = [ 22 ];
-      # settings = {
-      #   PasswordAuthentication = false;
-      #   AllowUsers = null;
-      #   UseDns = true;
-      #   X11Forwarding = true;
-      # };
     };
 
+   # Add these to your configuration
     pulseaudio.enable = false;
 
+    # Enhanced PipeWire configuration
     pipewire = {
       enable = true;
-      alsa = {
-        enable = true;
-        support32Bit = true;
-      };
-      pulse.enable = true;
-      wireplumber.enable = false;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;  # This is important for PulseAudio compatibility
+      jack.enable = true;
+      wireplumber.enable = true;
     };
 
     avahi.enable = true;
@@ -154,7 +151,7 @@ in
     createHome = true;
     isNormalUser = true;
     description = "Kronberger";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "audio" ];
     shell = pkgs.nushell;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEifxmkv6w0+8SGVET8DiDIjGMsGRPfpguSGwPU+MMax"
@@ -188,6 +185,7 @@ in
       dust
       xdg-desktop-portal-gtk
       fwupd
+      libcamera
     ];
   };
 
