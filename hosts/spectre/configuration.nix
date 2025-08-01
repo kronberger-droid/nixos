@@ -11,12 +11,13 @@
       enable = true;
       drivers = [ pkgs.gutenprint ];
     };
+
     logind = {
       lidSwitch = "suspend-then-hibernate";
       lidSwitchDocked = "ignore";
       lidSwitchExternalPower = "suspend";
     };
-    # Better logging for crash analysis
+
     journald = {
       storage = "persistent";
       forwardToSyslog = true;
@@ -45,7 +46,6 @@
     blacklistedKernelModules = [
       "iTCO_wdt"
       "watchdog"
-      "igen6_edac"
     ];
     # Enable crash dumps and better debugging
     crashDump.enable = true;

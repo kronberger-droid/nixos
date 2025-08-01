@@ -3,10 +3,8 @@
 {
   services = {
     gnome.gnome-keyring.enable = true;
-    gnome.gcr-ssh-agent.enable = true;
+    gnome.gcr-ssh-agent.enable = false;
   };
-  
-  programs.ssh.startAgent = false;
   
   security.pam.services = {
     swaylock.enableGnomeKeyring = true;
