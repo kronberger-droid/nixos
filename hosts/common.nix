@@ -15,11 +15,9 @@ in
     ../modules/system/keyd.nix
     ../modules/system/virtualisation.nix
     ../modules/system/gnome-keyring.nix
+    ../modules/system/wireplumber-config.nix
   ];
 
-  programs.ssh.startAgent = true;
-  
-  systemd.user.services.ssh-agent.enable = true;
 
   nix = {
     settings.experimental-features = [ "nix-command" "flakes" ];
