@@ -93,8 +93,6 @@ in
         freecad-wayland
 
         # Safety
-        # lxqt.lxqt-policykit
-        # gcr
         seahorse
         bitwarden-desktop
         bitwarden-cli
