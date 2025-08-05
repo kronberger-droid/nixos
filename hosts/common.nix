@@ -83,6 +83,7 @@ in
 
   services = {
     fwupd.enable = true;
+    thermald.enable = true;
     openssh = {
       enable = true;
       ports = [ 22 ];
