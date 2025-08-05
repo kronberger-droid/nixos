@@ -95,7 +95,8 @@ in
         # Safety
         seahorse
         bitwarden-desktop
-        bitwarden-cli
+        rofi-rbw-wayland
+        rbw
         openssl
 
         # Social
