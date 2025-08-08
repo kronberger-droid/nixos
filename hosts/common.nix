@@ -40,7 +40,6 @@ in
     };
     kernel.sysctl = {
       "vm.swappiness" = 10;
-      "kvm.ignore_msrs" = 1;
     };
     kernelParams = [
       "nowatchdog"
