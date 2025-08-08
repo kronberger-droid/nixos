@@ -83,21 +83,18 @@ in
 
   services = {
     fwupd.enable = true;
-    thermald.enable = true;
     openssh = {
       enable = true;
       ports = [ 22 ];
     };
 
-   # Add these to your configuration
     pulseaudio.enable = false;
 
-    # Enhanced PipeWire configuration
     pipewire = {
       enable = true;
       alsa.enable = true;
       alsa.support32Bit = true;
-      pulse.enable = true;  # This is important for PulseAudio compatibility
+      pulse.enable = true;
       jack.enable = true;
       wireplumber.enable = true;
     };
