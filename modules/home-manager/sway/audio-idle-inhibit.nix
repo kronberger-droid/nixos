@@ -8,7 +8,8 @@
   systemd.user.services.audio-idle-inhibit = {
     Unit = {
       Description = "audio-idle-inhibit service";
-      After = [ "sway-session.target" ];
+      After = [ "sway-session.target" "graphical-session.target" ];
+      Wants = [ "sway-session.target" ];
     };
 
     Service = {
@@ -18,7 +19,7 @@
     };
 
     Install = {
-      WantedBy = [ "default.target" ];
+      WantedBy = [ "sway-session.target" ];
     };
   };
 }
