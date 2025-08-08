@@ -38,17 +38,10 @@
     kernelModules = [
       "hp_wmi"
     ];
-    # kernelPatches = [
-    #   {
-    #     name = "Fix freeze after sleep";
-    #     patch = ../../patches/sleep.patch;
-    #   }
-    # ];
     blacklistedKernelModules = [
       "iTCO_wdt"
       "watchdog"
     ];
-    # Enable crash dumps and better debugging
     crashDump.enable = true;
     kernel.sysctl."kernel.sysrq" = 1;
   };

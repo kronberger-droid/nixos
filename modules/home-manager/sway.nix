@@ -187,8 +187,10 @@ in
         "${modifier}+Shift+e" = "exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
         # open local send app
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
-        # open bitwarden
-        "${modifier}+Shift+w" = "exec ${pkgs.bitwarden}/bin/bitwarden";
+        # open rbw-rofi for password selection
+        "${modifier}+Shift+w" = "exec ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw";
+        # open bitwarden GUI
+        "${modifier}+Shift+p" = "exec ${pkgs.bitwarden}/bin/bitwarden";
         # open floating btop shell
         "${modifier}+Shift+t" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
         # zooming and highlighting for screen share

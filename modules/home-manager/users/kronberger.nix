@@ -21,6 +21,7 @@ in
         ../yazi.nix
         ../theme.nix
         ../colors.nix
+        ../bitwarden.nix
       ];
 
       programs.direnv = {
@@ -104,10 +105,10 @@ in
         # Social
         element-desktop
         zapzap
-        iamb
 
         # Video
         vlc
+        obs-studio
 
         # AI
         ollama
