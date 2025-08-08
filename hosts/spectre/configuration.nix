@@ -4,6 +4,7 @@
     [
       ./hardware-configuration.nix
       ../common.nix
+      ../../modules/system/firmware/vbt.nix
     ];
 
   services = {
@@ -37,12 +38,12 @@
     kernelModules = [
       "hp_wmi"
     ];
-    kernelPatches = [
-      {
-        name = "Fix freeze after sleep";
-        patch = ../../patches/sleep.patch;
-      }
-    ];
+    # kernelPatches = [
+    #   {
+    #     name = "Fix freeze after sleep";
+    #     patch = ../../patches/sleep.patch;
+    #   }
+    # ];
     blacklistedKernelModules = [
       "iTCO_wdt"
       "watchdog"
