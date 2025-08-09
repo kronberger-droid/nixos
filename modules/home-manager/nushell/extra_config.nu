@@ -25,19 +25,19 @@ def --env dev-setup [work_dir: string] {
     
     swaymsg layout stacking
     
-    swaymsg exec $"kitty --working-directory=($work_dir) --hold -e nu -c 'cd ($work_dir); nix develop'"
+    swaymsg exec $"kitty --working-directory=($work_dir) -e nu -c 'cd ($work_dir); nix develop'"
     sleep 0.5sec
     
     swaymsg focus parent
     
-    swaymsg exec $"kitty --working-directory=($work_dir) -e claude"
+    swaymsg exec $"kitty --working-directory=($work_dir) -e bash -c 'cd ($work_dir) && nix develop .#dev --command bash -c \"clear && claude\"'"
     sleep 0.5sec
 
     swaymsg layout stacking
     
     swaymsg focus left
     cd $work_dir
-    nix develop
+    nix develop .#dev --command hx
 }
 
 def dev [project?: string] {
