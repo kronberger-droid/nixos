@@ -181,6 +181,7 @@ in
       xdg-desktop-portal-gtk
       fwupd
       libcamera
+      nixpkgs-review
     ];
   };
 
