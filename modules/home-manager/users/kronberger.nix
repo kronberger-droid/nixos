@@ -113,6 +113,7 @@ in
         # AI
         ollama
         claude-code
+        gemini-cli
       ];
 
       xdg = {
