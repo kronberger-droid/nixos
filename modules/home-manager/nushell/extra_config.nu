@@ -70,7 +70,8 @@ def dev [project?: string] {
         } else { 
             $"($env.HOME)/($project)" | path expand 
         }
-        dev-setup $work_dir
+        cd $work_dir
+        nix develop --command nu -c dev
     }
 }
 
