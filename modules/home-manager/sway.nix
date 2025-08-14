@@ -26,10 +26,12 @@ let
   hostDispl = {
     intelNuc = {
       "HDMI-A-1" = {
-        mode  = "2560x1440@143.912Hz";
+        mode  = "2560x1440@119.998Hz";
         pos   = "0 0";
         scale = "1";
         bg = "${backgroundImage} fill";
+        adaptive_sync = "on";
+        allow_tearing = "yes";
       };
     };
     spectre = {
