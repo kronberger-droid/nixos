@@ -15,9 +15,4 @@
   users.users.kronberger = {
     extraGroups = [ "libvirtd" "kvm" "qemu-libvirtd" ];
   };
-  
-  # Create the shared directory with proper permissions
-  systemd.tmpfiles.rules = [
-    "d /home/kronberger/Shared 0755 kronberger users -"
-  ];
 }

@@ -82,6 +82,7 @@ in
 
   services = {
     fwupd.enable = true;
+    thermald.enable = true;
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -197,4 +198,11 @@ in
   ];
 
   nixpkgs.config.allowUnfree = true;
+
+  powerManagement = {
+    enable = true;
+    resumeCommands = ''
+      systemctl restart thermald || true
+    '';
+  };
 }

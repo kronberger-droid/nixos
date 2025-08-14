@@ -30,24 +30,43 @@ def --env dev-setup [work_dir: string] {
     
     swaymsg focus parent
     
-    swaymsg exec $"kitty --working-directory=($work_dir) -e bash -c 'cd ($work_dir) && nix develop .#dev --command bash -c \"clear && claude\"'"
+    swaymsg exec $"kitty --working-directory=($work_dir) -e bash -c 'cd ($work_dir) && nix develop --command bash -c \"clear && claude\"'"
     sleep 0.5sec
 
     swaymsg layout stacking
     
     swaymsg focus left
     cd $work_dir
-    nix develop .#dev --command hx
+    nix develop --command hx
 }
 
 def dev [project?: string] {
     if ($project == null) {
         nix develop
-    } else if ($project == "nanonis") {
-        dev-setup "/home/kronberger/Programming/python/nanonis_tcp_test"
     } else {
+        let projects_dir = "/home/kronberger/Programming"
+        
+        # Search for project in language subdirectories
+        let found_project = (
+            ls $projects_dir 
+            | where type == dir 
+            | get name 
+            | each { |lang_dir| 
+                let project_path = $"($lang_dir)/($project)"
+                if ($project_path | path exists) { 
+                    $project_path 
+                } else { 
+                    null 
+                }
+            } 
+            | compact 
+            | first
+        )
+        
         let work_dir = if ($project | path exists) { 
             $project | path expand 
+        } else if ($found_project != null) {
+            $found_project | path expand
         } else { 
             $"($env.HOME)/($project)" | path expand 
         }
