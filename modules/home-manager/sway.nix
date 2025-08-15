@@ -20,23 +20,21 @@ let
 
   backgroundImage = ./sway/deathpaper.jpg;
 
-  # defaultBrowser = "${pkgs.brave}/bin/brave";
   defaultBrowser = "${pkgs.firefox}/bin/firefox";
 
   hostDispl = {
     intelNuc = {
+      "*" = {
+        bg = "${backgroundImage} fill";
+      };
       "HDMI-A-1" = {
         mode  = "2560x1440@143.912Hz";
         pos   = "0 0";
         scale = "1";
-        bg = "${backgroundImage} fill";
       };
     };
     spectre = {
-      "eDP-1" = {
-        bg = "${backgroundImage} fill";
-      };
-      "DP-1" = {
+      "*" = {
         bg = "${backgroundImage} fill";
       };
     };
