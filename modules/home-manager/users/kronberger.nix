@@ -12,6 +12,7 @@ in
     backupFileExtension = "bak";
     users.kronberger = {
       imports = [
+        ../taskwarrior.nix
         ../sway.nix
         ../kitty.nix
         ../helix.nix
@@ -120,6 +121,7 @@ in
         ollama
         claude-code
         gemini-cli
+
       ];
 
       xdg = {
