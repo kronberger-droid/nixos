@@ -83,13 +83,13 @@ in
   services = {
     fwupd.enable = true;
     thermald.enable = true;
+    flatpak.enable = true;
     openssh = {
       enable = true;
       ports = [ 22 ];
     };
 
     pulseaudio.enable = false;
-
     pipewire = {
       enable = true;
       alsa.enable = true;
@@ -101,6 +101,7 @@ in
 
     avahi.enable = true;
     gvfs.enable = true;
+    udisks2.enable = true;
     upower.enable = true;
   };
 
@@ -161,7 +162,6 @@ in
     };
     systemPackages = with pkgs; [
       helix
-      neovim
       git
       curl
       gparted
@@ -177,9 +177,9 @@ in
       popsicle
       eza
       ripgrep
+      rip2
       fd
       dust
-      xdg-desktop-portal-gtk
       fwupd
       libcamera
       nixpkgs-review

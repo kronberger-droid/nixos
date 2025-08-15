@@ -48,6 +48,7 @@ in
 
         # Filemanagers
         nemo-with-extensions
+        glib
         yazi
         zotero-beta
         serpl
