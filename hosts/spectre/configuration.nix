@@ -37,6 +37,8 @@
   boot = {
     kernelModules = [
       "hp_wmi"
+      "nvme_core.default_ps_max_latency_us=0"
+      "pcie_aspm=off" 
     ];
     blacklistedKernelModules = [
       "iTCO_wdt"
