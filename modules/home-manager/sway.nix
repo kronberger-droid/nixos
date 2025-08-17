@@ -41,6 +41,11 @@ let
         bg = "${backgroundImage} fill";
       };
     };
+    portable = {
+      "*" = {
+        bg = "${backgroundImage} fill";
+      };
+    };
   };
 in
 {
