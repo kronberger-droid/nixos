@@ -35,6 +35,23 @@
   };
 
   boot = {
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+    kernel.sysctl = {
+      "vm.swappiness" = 10;
+    };
+    kernelParams = [
+      "nowatchdog"
+      "nmi_watchdog=0"
+    ];
+    blacklistedKernelModules = [
+      "wdat_wdt"
+    ];
+  };
+
+  boot = {
     kernelModules = [
       "hp_wmi"
       "nvme_core.default_ps_max_latency_us=0"

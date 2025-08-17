@@ -34,7 +34,7 @@ in
       services.gnome-keyring.enable = true;
 
       home.username = "kronberger";
-      home.homeDirectory = "/home/kronberger";
+      # home.homeDirectory = "/home/kronberger";
       home.packages = with pkgs; [
         # Browsers
         brave

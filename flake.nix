@@ -85,11 +85,11 @@
         inherit system;
         specialArgs = {
           host = "portable";
-          isNotebook = true;
+          isNotebook = false;
           inherit inputs;
         };
         modules = [
-          # ./hosts/spectre/configuration.nix
+          ./hosts/portable/configuration.nix
           ./modules/system/greetd.nix
           home-manager.nixosModules.home-manager
           ./modules/home-manager/users/kronberger.nix
