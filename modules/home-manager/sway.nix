@@ -78,7 +78,7 @@ in
     lsof
     sway-scratch
     libinput
-    woomer
+    libsForQt5.polkit-kde-agent
 
     # xdg desktop portal
     xdg-user-dirs
@@ -123,7 +123,7 @@ in
           always = false;
         }
         {
-          command = "${pkgs.lxqt.lxqt-policykit}/bin/lxqt-policykit-agent";
+          command = "${pkgs.libsForQt5.polkit-kde-agent}/libexec/polkit-kde-authentication-agent-1";
           always = false;
         }
         {
