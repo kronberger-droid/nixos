@@ -79,6 +79,27 @@
         ];
       };
 
+      portable = let
+        system = "x86_64-linux";
+      in nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = {
+          host = "portable";
+          isNotebook = false;
+          inherit inputs;
+        };
+        modules = [
+          ./hosts/portable/configuration.nix
+          ./modules/system/greetd.nix
+          home-manager.nixosModules.home-manager
+          ./modules/home-manager/users/kronberger.nix
+          agenix.nixosModules.default
+          {
+            environment.systemPackages = [ agenix.packages.${system}.default ];
+          }
+        ];
+      };
+
       devPi = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
         specialArgs = {
