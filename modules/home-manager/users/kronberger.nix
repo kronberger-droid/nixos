@@ -12,6 +12,7 @@ in
     backupFileExtension = "bak";
     users.kronberger = {
       imports = [
+        ../taskwarrior.nix
         ../sway.nix
         ../kitty.nix
         ../helix.nix
@@ -33,7 +34,7 @@ in
       services.gnome-keyring.enable = true;
 
       home.username = "kronberger";
-      home.homeDirectory = "/home/kronberger";
+      # home.homeDirectory = "/home/kronberger";
       home.packages = with pkgs; [
         # Browsers
         brave
@@ -120,6 +121,7 @@ in
         ollama
         claude-code
         gemini-cli
+
       ];
 
       xdg = {

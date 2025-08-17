@@ -20,11 +20,13 @@ let
 
   backgroundImage = ./sway/deathpaper.jpg;
 
-  # defaultBrowser = "${pkgs.brave}/bin/brave";
   defaultBrowser = "${pkgs.firefox}/bin/firefox";
 
   hostDispl = {
     intelNuc = {
+      "*" = {
+        bg = "${backgroundImage} fill";
+      };
       "HDMI-A-1" = {
         mode  = "2560x1440@119.998Hz";
         pos   = "0 0";
@@ -35,10 +37,12 @@ let
       };
     };
     spectre = {
-      "eDP-1" = {
+      "*" = {
         bg = "${backgroundImage} fill";
       };
-      "DP-1" = {
+    };
+    portable = {
+      "*" = {
         bg = "${backgroundImage} fill";
       };
     };
@@ -79,7 +83,7 @@ in
     lsof
     sway-scratch
     libinput
-    woomer
+    libsForQt5.polkit-kde-agent
 
     # xdg desktop portal
     xdg-user-dirs
@@ -124,7 +128,7 @@ in
           always = false;
         }
         {
-          command = "${pkgs.lxqt.lxqt-policykit}/bin/lxqt-policykit-agent";
+          command = "${pkgs.libsForQt5.polkit-kde-agent}/libexec/polkit-kde-authentication-agent-1";
           always = false;
         }
         {

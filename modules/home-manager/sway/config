@@ -5,14 +5,14 @@ for_window [app_id = "floating_shell"] floating enable, border pixel 1, sticky e
 for_window [app_id = "localsend_app"] floating enable, sticky enable, resize set 1200 800
 for_window [instance = "bitwarden"] floating enable, sticky enable, resize set 1200 800
 for_window [app_id = "org.speedcrunch"] floating enable, sticky enable, resize set 800 600
-for_window [instance = "gpartedbin"] floating enable, sticky enable, resize set 1200 800
-for_window [title="Authentication Required"] floating enable, sticky enable, resize set 1200 800
+for_window [instance = "gpartedbin"] floating enable
+for_window [title="Authentication Required"] floating enable
 
 # set floating mode for generated windows
 for_window [title="(?:Open|Save) (?:File|Folder|As)"] floating enable
-for_window [title="(?:Open|Save) (?:File|Folder|As)"] resize set 800 600
+# for_window [title="(?:Open|Save) (?:File|Folder|As)"] resize set 800 600
 for_window [title="(?:open|save) (?:file|folder|as)"] floating enable
-for_window [title="(?:open|save) (?:file|folder|as)"] resize set 800 600
+# for_window [title="(?:open|save) (?:file|folder|as)"] resize set 800 600
 for_window [window_role="bubble"] floating enable
 for_window [window_role="task_dialog"] floating enable
 for_window [window_role="Preferences"] floating enable

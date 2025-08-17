@@ -1,10 +1,12 @@
-{ pkgs, host, ... }:
+{ pkgs, host, lib, ... }:
 let
   outputName =
     if host == "intelNuc" then
       "HDMI-A-1"
-    else if host ==  "t480s" || host =="spectre" then
+    else if host == "t480s" || host == "spectre" then
       "eDP-1"
+    else if host == "portable" then
+      "*"
     else
       throw "Unknown hostname: ${host}";
 in
@@ -33,22 +35,22 @@ in
     })
   ];
 
-  boot = {
-    loader = {
-      systemd-boot.enable = true;
-      efi.canTouchEfiVariables = true;
-    };
-    kernel.sysctl = {
-      "vm.swappiness" = 10;
-    };
-    kernelParams = [
-      "nowatchdog"
-      "nmi_watchdog=0"
-    ];
-    blacklistedKernelModules = [
-      "wdat_wdt"
-    ];
-  };
+  # boot = {
+  #   loader = {
+  #     systemd-boot.enable = true;
+  #     efi.canTouchEfiVariables = true;
+  #   };
+  #   kernel.sysctl = {
+  #     "vm.swappiness" = 10;
+  #   };
+  #   kernelParams = [
+  #     "nowatchdog"
+  #     "nmi_watchdog=0"
+  #   ];
+  #   blacklistedKernelModules = [
+  #     "wdat_wdt"
+  #   ];
+  # };
 
   networking = {
     networkmanager.enable = true;
@@ -143,7 +145,6 @@ in
     dconf.enable = true;
     seahorse.enable = true;
   };
-
   users.users.kronberger = {
     createHome = true;
     isNormalUser = true;

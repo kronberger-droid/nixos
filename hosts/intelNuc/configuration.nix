@@ -25,6 +25,23 @@
     gamescopeSession.enable = true;  # Optional: for better gaming experience
   };
 
+  boot = {
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+    kernel.sysctl = {
+      "vm.swappiness" = 10;
+    };
+    kernelParams = [
+      "nowatchdog"
+      "nmi_watchdog=0"
+    ];
+    blacklistedKernelModules = [
+      "wdat_wdt"
+    ];
+  };
+
   hardware.graphics = {
     enable = true;
     enable32Bit = true;

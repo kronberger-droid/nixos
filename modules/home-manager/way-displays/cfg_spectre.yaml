@@ -16,6 +16,8 @@ ALIGN: BOTTOM
 # The default ORDER is simply the order in which the displays are discovered.
 # Define your own.
 ORDER:
+  - 'DP-1'
+  - 'DP-3'
   - 'eDP-1'
 
 # Enable scaling, overrides AUTO_SCALE and SCALE
