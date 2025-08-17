@@ -41,28 +41,23 @@
     };
     kernel.sysctl = {
       "vm.swappiness" = 10;
+      "kernel.sysrq" = 1;
     };
     kernelParams = [
       "nowatchdog"
       "nmi_watchdog=0"
     ];
-    blacklistedKernelModules = [
-      "wdat_wdt"
-    ];
-  };
-
-  boot = {
     kernelModules = [
       "hp_wmi"
       "nvme_core.default_ps_max_latency_us=0"
       "pcie_aspm=off" 
     ];
     blacklistedKernelModules = [
+      "wdat_wdt"
       "iTCO_wdt"
       "watchdog"
     ];
     crashDump.enable = true;
-    kernel.sysctl."kernel.sysrq" = 1;
   };
 
   systemd.sleep.extraConfig = ''
