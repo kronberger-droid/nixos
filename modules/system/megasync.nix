@@ -1,16 +1,16 @@
 { pkgs, ... }:
 {
-  # ensure the binary is available
   environment.systemPackages = [ pkgs.megacmd ];
 
-  # define a user-level service
   systemd.user.services.mega-cmd-server = {
     description = "MEGAcmd daemon";
-    after = [ "graphical-session.target" ];
-    wants = [ "graphical-session.target" ];
+    after = [ "mnt-data.mount" ];
+    requisite = [ "mnt-data.mount" ];
     serviceConfig = {
       ExecStart = "${pkgs.megacmd}/bin/mega-cmd-server";
       Restart = "on-failure";
+      RestartSec = "10s";
+      Type = "simple";
     };
     wantedBy = [ "default.target" ];
   };

@@ -13,22 +13,23 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
-  fileSystems."/" =
-    { device = "/dev/mapper/nixos-root";
-      fsType = "ext4";
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/83d0833d-9fa9-4827-a24b-61e584aa3534";
+    fsType = "ext4";
+  };
 
-  boot.initrd.luks.devices."nixos-root".device = "/dev/disk/by-uuid/fcd4176b-da5b-4627-bef4-de88337b231f";
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/76C2-4189";
+    fsType = "vfat";
+    options = [ "fmask=0022" "dmask=0022" ];
+  };
 
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/76C2-4189";
-      fsType = "vfat";
-      options = [ "fmask=0022" "dmask=0022" ];
-    };
-
-  swapDevices =
-    [ { device = "/dev/disk/by-uuid/85499372-4284-4605-96da-1df3600b9f74"; }
-    ];
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 16384; # 16GB swap file
+    }
+  ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
