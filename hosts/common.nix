@@ -183,6 +183,7 @@ in
       fwupd
       libcamera
       nixpkgs-review
+      cryptsetup
     ];
   };
 
