@@ -28,10 +28,14 @@
   };
 
   fileSystems."/mnt/data" = {
-    device = "/dev/disk/by-uuid/bc997ac9-9068-4b5a-a89e-bf3d891d315f";
+    device = "/dev/disk/by-uuid/18d5e6e0-05b6-4496-b056-47a3fafd9acb";
     fsType = "ext4";
     options = [ "defaults" ];
   };
+
+  systemd.tmpfiles.rules = [
+    "d /mnt/data 0755 kronberger users - -"
+  ];
 
   networking.hostName = "portable";
 
