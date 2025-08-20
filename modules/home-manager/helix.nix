@@ -99,12 +99,12 @@
             args = [ "fmt" "--stdin" "md"];
           };
         }
-        # {
-        #   name = "rust";
-        #   language-servers = [
-        #     "rust-analyzer"
-        #   ];
-        # }
+        {
+          name = "rust";
+          language-servers = [
+            "rust-analyzer"
+          ];
+        }
         {
           name = "typst";
           language-servers = [
@@ -121,12 +121,12 @@
           command = "${pkgs.nil}/bin/nil";
           file-types = [ "nix" ];
         };
-        # rust-analyzer = {
-        #   command = "${pkgs.rust-analyzer-unwrapped}/bin/rust-analyzer";
-        #   config = {
-        #     check.command = "clippy";
-        #   };
-        # };
+        rust-analyzer = {
+          command = "${pkgs.rust-analyzer-unwrapped}/bin/rust-analyzer";
+          config = {
+            check.command = "clippy";
+          };
+        };
         ltex = {
           command = "${pkgs.ltex-ls}/bin/ltex-ls";
           file-types = [ "latex" ];
