@@ -1,8 +1,4 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
-{ config, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   imports =
@@ -12,38 +8,44 @@
     ];
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  boot.loader = {
-    grub = {
-      enable = true;
-      efiSupport = true;
-      efiInstallAsRemovable = true;
-      device = "nodev";
+  boot = {
+    kernelParams = [
+      "nowatchdog"
+      "nmi_watchdog=0"
+    ];
+    blacklistedKernelModules = [
+      "wdat_wdt"
+    ];
+    loader = {
+      grub = {
+        enable = true;
+        efiSupport = true;
+        efiInstallAsRemovable = true;
+        device = "nodev";
+      };
+      efi.canTouchEfiVariables = false;
     };
-    efi.canTouchEfiVariables = false;
   };
 
-  fileSystems."/" = lib.mkForce {
-    device = "/dev/disk/by-label/NIXROOT_EXT";
+  fileSystems."/mnt/data" = {
+    device = "/dev/disk/by-uuid/18d5e6e0-05b6-4496-b056-47a3fafd9acb";
     fsType = "ext4";
+    options = [ "defaults" ];
   };
 
-  fileSystems."/boot" = lib.mkForce {
-    device = "/dev/disk/by-label/NIXBOOT_EXT";
-    fsType = "vfat";  
-  };
+  systemd.tmpfiles.rules = [
+    "d /mnt/data 0755 kronberger users - -"
+  ];
 
-  networking.hostName = "portable"; # Define your hostname.
+  networking.hostName = "portable";
 
-  # Configure network connections interactively with nmcli or nmtui.
   networking.networkmanager.enable = true;
 
-  # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
     helix
     git
   ];
 
   system.stateVersion = "25.11"; # Did you read the comment?
-
 }
 

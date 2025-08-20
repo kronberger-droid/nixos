@@ -278,7 +278,7 @@ in
             natural_scroll = "enabled";
             tap = "enabled";
           };
-        } else if host == "spectre" then {
+        } else if host == "spectre" || host == "portable" then {
           "1739:52912:SYNA32BF:00_06CB:CEB0_Touchpad" = {
             natural_scroll = "enabled";
             tap = "enabled";
