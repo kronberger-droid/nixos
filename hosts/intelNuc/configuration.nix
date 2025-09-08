@@ -11,9 +11,7 @@
     android-tools
   ];
 
-  # Gaming and graphics environment variables
   environment.sessionVariables = {
-    # Force VSync for games to prevent screen tearing
     "__GL_SYNC_TO_VBLANK" = "1";
     "INTEL_DEBUG" = "sync";
   };
@@ -22,7 +20,7 @@
     enable = true;
     remotePlay.openFirewall = true;
     dedicatedServer.openFirewall = true;
-    gamescopeSession.enable = true;  # Optional: for better gaming experience
+    gamescopeSession.enable = true;
   };
 
   boot = {
@@ -40,7 +38,7 @@
       "nowatchdog"
       "nmi_watchdog=0"
       "mem_sleep_default=s2idle"
-      "i915.enable_psr=0"  # Disable PSR which can cause screen tearing
+      "i915.enable_psr=0"
     ];
     blacklistedKernelModules = [
       "wdat_wdt"
