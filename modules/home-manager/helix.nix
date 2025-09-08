@@ -5,11 +5,6 @@
     # Nix
     nil
 
-    # LaTeX
-    texlab
-    tectonic
-    texlivePackages.latexindent
-
     # Typst
     typst
     typstfmt
