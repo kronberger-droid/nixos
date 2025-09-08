@@ -13,7 +13,7 @@
       drivers = [ pkgs.gutenprint ];
     };
 
-    logind = {
+    logind.settings.Login = {
       lidSwitch = "suspend-then-hibernate";
       lidSwitchDocked = "ignore";
       lidSwitchExternalPower = "suspend";
