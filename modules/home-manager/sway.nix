@@ -83,7 +83,6 @@ in
     lsof
     sway-scratch
     libinput
-    libsForQt5.polkit-kde-agent
 
     # xdg desktop portal
     xdg-user-dirs
@@ -128,7 +127,7 @@ in
           always = false;
         }
         {
-          command = "${pkgs.libsForQt5.polkit-kde-agent}/libexec/polkit-kde-authentication-agent-1";
+          command = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";
           always = false;
         }
         {
