@@ -32,6 +32,10 @@
 
   hardware = {
     enableRedistributableFirmware = true;
+    ipu6 = {
+      enable = true;
+      platform = "ipu6ep";
+    };
   };
 
   boot = {
@@ -50,8 +54,10 @@
     kernelModules = [
       "hp_wmi"
       "nvme_core.default_ps_max_latency_us=0"
-      "pcie_aspm=off" 
+      "pcie_aspm=off"
+      "v4l2loopback"
     ];
+    extraModulePackages = [ pkgs.linuxPackages.v4l2loopback ];
     blacklistedKernelModules = [
       "wdat_wdt"
       "iTCO_wdt"
@@ -64,6 +70,17 @@
     SuspendState=mem
     HibernateDelaySec=90m
   '';
+
+  environment.systemPackages = with pkgs; [
+    v4l-utils
+    cheese
+    libcamera
+    gst_all_1.gstreamer
+    gst_all_1.gst-plugins-base
+    gst_all_1.gst-plugins-good
+    gst_all_1.gst-plugins-bad
+    gst_all_1.gst-plugins-ugly
+  ];
 
   system.stateVersion = "24.11"; # Did you read the comment?
 
