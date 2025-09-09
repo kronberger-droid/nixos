@@ -172,7 +172,7 @@ def dev [project?: string] {
             $"($env.HOME)/($project)" | path expand 
         }
         cd $work_dir
-        nix develop --command nu -c dev
+        nix develop --command 'exec nu --login'
     }
 }
 
