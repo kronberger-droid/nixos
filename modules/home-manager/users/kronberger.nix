@@ -41,7 +41,7 @@ in
         nyxt
         firefox
 
-        #custom Packages
+        # Custom Packages
         dropkittenPkg
 
         # Mail
@@ -77,15 +77,19 @@ in
         wiki-tui
 
         # Images
-        zathura
         drawio
         inkscape
-        kdePackages.okular
         gthumb
         ipe
         gimp
-        pdfarranger
         ffmpeg_6
+
+        # PDF
+        ghostscript
+        mupdf
+        pdfarranger
+        kdePackages.okular
+        zathura
 
         # Remote
         nomachine-client
