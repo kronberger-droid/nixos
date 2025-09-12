@@ -143,7 +143,7 @@ in
     createHome = true;
     isNormalUser = true;
     description = "Kronberger";
-    extraGroups = [ "networkmanager" "wheel" "audio" ];
+    extraGroups = [ "networkmanager" "wheel" "audio" "video" ];
     shell = pkgs.nushell;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEifxmkv6w0+8SGVET8DiDIjGMsGRPfpguSGwPU+MMax"
