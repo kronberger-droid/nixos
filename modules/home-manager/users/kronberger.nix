@@ -92,7 +92,6 @@ in
         zathura
 
         # Remote
-        nomachine-client
         localsend
 
         # System

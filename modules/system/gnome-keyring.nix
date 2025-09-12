@@ -11,6 +11,8 @@
   security.pam.services = {
     swaylock.enableGnomeKeyring = true;
     greetd.enableGnomeKeyring = true;
+    login.enableGnomeKeyring = true;
+    passwd.enableGnomeKeyring = true;
   };
 
   environment.systemPackages = with pkgs; [
