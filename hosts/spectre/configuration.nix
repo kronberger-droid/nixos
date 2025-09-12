@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 {
   imports =
     [
@@ -14,9 +14,9 @@
     };
 
     logind.settings.Login = {
-      lidSwitch = "suspend-then-hibernate";
-      lidSwitchDocked = "ignore";
-      lidSwitchExternalPower = "suspend";
+      HandleLidSwitch = "suspend-then-hibernate";
+      HandleLidSwitchDocked = "ignore";
+      HandleLidSwitchExternalPower = "suspend";
     };
 
     journald = {
@@ -28,10 +28,20 @@
         RuntimeMaxUse=100M
       '';
     };
+
+    udev.extraRules = ''
+      SUBSYSTEM=="video4linux", KERNEL=="video[0-9]*", ATTRS{name}=="Intel MIPI Camera", MODE="0660", GROUP="video"
+    '';
+
   };  
 
   hardware = {
     enableRedistributableFirmware = true;
+    ipu6 = {
+      enable = true;
+      platform = "ipu6ep";
+    };
+    firmware = [ pkgs.ipu6-camera-bins ];
   };
 
   boot = {
@@ -46,11 +56,17 @@
     kernelParams = [
       "nowatchdog"
       "nmi_watchdog=0"
+      "nvme_core.default_ps_max_latency_us=0"
+      "pcie_aspm=off"
+      "snd_intel_dspcfg.dsp_driver=1"
+      "intel_iommu=off"
     ];
     kernelModules = [
       "hp_wmi"
-      "nvme_core.default_ps_max_latency_us=0"
-      "pcie_aspm=off" 
+      "v4l2loopback"
+    ];
+    extraModulePackages = [ 
+      config.boot.kernelPackages.v4l2loopback
     ];
     blacklistedKernelModules = [
       "wdat_wdt"
@@ -64,6 +80,19 @@
     SuspendState=mem
     HibernateDelaySec=90m
   '';
+
+  environment.systemPackages = with pkgs; [
+    v4l-utils
+    cheese
+    libcamera
+    libcamera-qcam
+    gst_all_1.gstreamer
+    gst_all_1.gst-plugins-base
+    gst_all_1.gst-plugins-good
+    gst_all_1.gst-plugins-bad
+    gst_all_1.gst-plugins-ugly
+    gst_all_1.icamerasrc-ipu6ep
+  ];
 
   system.stateVersion = "24.11"; # Did you read the comment?
 
