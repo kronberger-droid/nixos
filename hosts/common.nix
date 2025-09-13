@@ -174,6 +174,7 @@ in
       ripgrep
       rip2
       fd
+      skim
       dust
       fwupd
       libcamera
