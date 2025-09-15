@@ -71,6 +71,13 @@ in
     fwupd.enable = true;
     thermald.enable = true;
     flatpak.enable = true;
+    
+    journald.extraConfig = ''
+      Storage=persistent
+      Compress=yes
+      SystemMaxUse=1G
+      RuntimeMaxUse=100M
+    '';
     openssh = {
       enable = true;
       ports = [ 22 ];
@@ -86,7 +93,11 @@ in
       wireplumber.enable = true;
     };
 
-    avahi.enable = true;
+    avahi = {
+      enable = true;
+      nssmdns4 = true;
+      nssmdns6 = true;
+    };
     gvfs.enable = true;
     udisks2.enable = true;
     upower.enable = true;
@@ -165,11 +176,15 @@ in
       ripgrep
       rip2
       fd
+      skim
+      xcp
       dust
       fwupd
       libcamera
       nixpkgs-review
       cryptsetup
+      xorg.xhost
+      xorg.xauth
     ];
   };
 
