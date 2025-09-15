@@ -31,7 +31,9 @@ in
         nix-direnv.enable = true;
       };
 
-      services.gnome-keyring.enable = true;
+      services = {
+        gnome-keyring.enable = true;
+      };
 
       home.username = "kronberger";
       # home.homeDirectory = "/home/kronberger";
