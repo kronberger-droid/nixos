@@ -175,6 +175,7 @@ in
       rip2
       fd
       skim
+      xcp
       dust
       fwupd
       libcamera
