@@ -1,4 +1,4 @@
-{ pkgs, host, lib, ... }:
+{ pkgs, host,  ... }:
 let
   outputName =
     if host == "intelNuc" then
@@ -39,7 +39,9 @@ in
     networkmanager.enable = true;
     wireless.enable = false;
     hostName = host;
-    firewall.allowedTCPPorts = [ 22 53317 ];
+    firewall = {
+      allowedTCPPorts = [ 22 53317 ];
+    };
   };
 
   time.timeZone = "Europe/Vienna";
