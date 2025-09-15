@@ -177,7 +177,7 @@ in
 
       focus.mouseWarping = "container";
 
-      menu = "${pkgs.rofi-wayland}/bin/rofi -show drun";
+      menu = "${pkgs.rofi}/bin/rofi -show drun";
 
       defaultWorkspace = "workspace ${ws1}";
 
