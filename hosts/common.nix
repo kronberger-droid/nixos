@@ -146,7 +146,7 @@ in
     extraGroups = [ "networkmanager" "wheel" "audio" "video" ];
     shell = pkgs.nushell;
     openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEifxmkv6w0+8SGVET8DiDIjGMsGRPfpguSGwPU+MMax"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFijJelcEDGPlu9aDnjkLa4TWNXXJGeyHgw6ucANynAW"
     ];
   };
 
