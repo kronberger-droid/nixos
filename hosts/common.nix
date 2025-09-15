@@ -13,7 +13,7 @@ in
 {
   imports = [
     ../modules/system/megasync.nix
-    ../modules/system/agenix.nix
+    # ../modules/system/agenix.nix
     ../modules/system/keyd.nix
     ../modules/system/virtualisation.nix
     ../modules/system/gnome-keyring.nix
