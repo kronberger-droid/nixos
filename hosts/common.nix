@@ -186,6 +186,7 @@ in
       cryptsetup
       xorg.xhost
       xorg.xauth
+      woeusb
     ];
   };
 
