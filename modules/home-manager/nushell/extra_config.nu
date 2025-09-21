@@ -141,9 +141,13 @@ def flake-reload [] {
 	sudo nixos-rebuild switch --flake ~/.config/nixos#(hostname)
 }
 
+def enter [] {
+	nix develop
+}
+
 def dev [project?: string] {
     if ($project == null) {
-        nix develop
+        nix develop .#dev
     } else {
         let projects_dir = $env.HOME + "/Programming"
         
@@ -172,7 +176,7 @@ def dev [project?: string] {
             $"($env.HOME)/($project)" | path expand 
         }
         cd $work_dir
-        nix develop --command 'exec nu --login'
+        nix develop .#dev
     }
 }
 
