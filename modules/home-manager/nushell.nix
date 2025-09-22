@@ -16,7 +16,7 @@
       cd = "z";
       cat = "bat";
       icat = "kitten icat";
-      rip = "rip --graveyard ($env.HOME)/.local/share/Trash/files";
+      rip = "rip --graveyard ($env.HOME)/.local/share/Trash";
       rm = "echo 'use rip instead'";
     };
   };
