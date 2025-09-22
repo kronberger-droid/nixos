@@ -1,5 +1,80 @@
 source ~/.zoxide.nu
 
+def flake-reload [] {
+	let hostname = (hostname)
+	git add .
+	sudo nixos-rebuild switch --flake ~/.config/nixos#(hostname)
+}
+
+def enter [] {
+	nix develop
+}
+
+def dev [project?: string] {
+    if ($project == null) {
+        nix develop .#dev
+    } else {
+        let projects_dir = $env.HOME + "/Programming"
+        
+        # Search for project in language subdirectories
+        let found_project = (
+            ls $projects_dir 
+            | where type == dir 
+            | get name 
+            | each { |lang_dir| 
+                let project_path = $"($lang_dir)/($project)"
+                if ($project_path | path exists) { 
+                    $project_path 
+                } else { 
+                    null 
+                }
+            } 
+            | compact 
+            | first
+        )
+        
+        let work_dir = if ($project | path exists) { 
+            $project | path expand 
+        } else if ($found_project != null) {
+            $found_project | path expand
+        } else { 
+            $"($env.HOME)/($project)" | path expand 
+        }
+        cd $work_dir
+        nix develop .#dev
+    }
+}
+
+def sim [project: string] {
+    if ($project == "nanonis") {
+        nohup quickemu --vm ~/Emulation/windows-11.conf o+e> /dev/null
+        sleep 2sec
+        exit
+    } else {
+        echo $"Unknown simulation project: ($project)"
+    }
+}
+
+def color-picker [] {
+		echo "In 1 sec you can pick a color!"
+		sleep 1sec
+
+    let geometry = (slurp -p)
+
+    let result = (grim -g $geometry -t ppm - | magick - -format '%[pixel:p{0,0}]' txt:-)
+
+    let tokens = (
+        $result 
+        | split row "\n" 
+        | compact --empty 
+        | get 1 
+        | split row " " 
+        | compact --empty
+    )
+
+    echo [[type value]; [RGB ($tokens | get 1 | str replace -ra "[()]" "")] [HEX ($tokens | get 2)] ]
+}
+
 $env.config = {
 	show_banner: false
 	edit_mode: 'vi'
@@ -133,79 +208,4 @@ $env.config = {
 			event: { edit: insertnewline }
 		}
 	]
-}
-
-def flake-reload [] {
-	let hostname = (hostname)
-	git add .
-	sudo nixos-rebuild switch --flake ~/.config/nixos#(hostname)
-}
-
-def enter [] {
-	nix develop
-}
-
-def dev [project?: string] {
-    if ($project == null) {
-        nix develop .#dev
-    } else {
-        let projects_dir = $env.HOME + "/Programming"
-        
-        # Search for project in language subdirectories
-        let found_project = (
-            ls $projects_dir 
-            | where type == dir 
-            | get name 
-            | each { |lang_dir| 
-                let project_path = $"($lang_dir)/($project)"
-                if ($project_path | path exists) { 
-                    $project_path 
-                } else { 
-                    null 
-                }
-            } 
-            | compact 
-            | first
-        )
-        
-        let work_dir = if ($project | path exists) { 
-            $project | path expand 
-        } else if ($found_project != null) {
-            $found_project | path expand
-        } else { 
-            $"($env.HOME)/($project)" | path expand 
-        }
-        cd $work_dir
-        nix develop .#dev
-    }
-}
-
-def sim [project: string] {
-    if ($project == "nanonis") {
-        nohup quickemu --vm ~/Emulation/windows-11.conf o+e> /dev/null
-        sleep 2sec
-        exit
-    } else {
-        echo $"Unknown simulation project: ($project)"
-    }
-}
-
-def color-picker [] {
-		echo "In 1 sec you can pick a color!"
-		sleep 1sec
-
-    let geometry = (slurp -p)
-
-    let result = (grim -g $geometry -t ppm - | magick - -format '%[pixel:p{0,0}]' txt:-)
-
-    let tokens = (
-        $result 
-        | split row "\n" 
-        | compact --empty 
-        | get 1 
-        | split row " " 
-        | compact --empty
-    )
-
-    echo [[type value]; [RGB ($tokens | get 1 | str replace -ra "[()]" "")] [HEX ($tokens | get 2)] ]
 }
