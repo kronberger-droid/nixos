@@ -9,9 +9,13 @@
     };
     agenix.url = "github:ryantm/agenix";
     dropkitten.url = "github:kronberger-droid/dropkitten";
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, agenix, dropkitten, ... }: {
+  outputs = inputs@{ self, nixpkgs, home-manager, agenix, dropkitten, fenix, ... }: {
     nixosConfigurations = {
 
       intelNuc = let

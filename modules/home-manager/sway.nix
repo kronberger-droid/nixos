@@ -93,6 +93,7 @@ in
 
   wayland.windowManager.sway = {
     enable = true;
+    systemd.enable = true;
     wrapperFeatures.gtk = true;
     extraConfig = builtins.readFile "${./sway/config}";
     config = rec {
