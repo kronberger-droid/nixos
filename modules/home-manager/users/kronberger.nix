@@ -1,6 +1,7 @@
 { pkgs, inputs, host, isNotebook, ... }:
 let
   dropkittenPkg = inputs.dropkitten.packages.${pkgs.system}.dropkitten;
+  rustToolchain = inputs.fenix.packages.${pkgs.system}.complete.toolchain;
 in
 {
   home-manager = {
@@ -64,6 +65,11 @@ in
           '';
         }))
         onlyoffice-desktopeditors
+
+        # Development
+        rustToolchain
+        tokei
+        cargo-generate
 
         # Music
         # lmms
