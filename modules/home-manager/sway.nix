@@ -6,15 +6,15 @@ let
   accentColor     = config.myTheme.accentColor;
 
   ws1 = "1 browser";
-  ws2 = "2 writing";
-  ws3 = "3 research";
-  ws4 = "4 coding";
-  ws5 = "5 studying";
-  ws6 = "6 homework";
+  ws2 = "2 emulation";
+  ws3 = "3 coding";
+  ws4 = "4 research";
+  ws5 = "5 writing";
+  ws6 = "6 studying";
   ws7 = "7 work";
-  ws8 = "8 nix";
-  ws9 = "9 social";
-  ws10 = "10 git";
+  ws8 = "8 messages";
+  ws9 = "9 music";
+  ws10 = "10 nixos";
 
   modKey = "Mod4";
 
