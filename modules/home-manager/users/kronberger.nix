@@ -24,17 +24,21 @@ in
         ../theme.nix
         ../colors.nix
         ../bitwarden.nix
+        ../himalaya.nix
       ];
 
-      programs.direnv = {
-        enable = true;
-        enableNushellIntegration = true;
-        nix-direnv.enable = true;
+      programs = {
+        direnv = {
+          enable = true;
+          enableNushellIntegration = true;
+          nix-direnv.enable = true;
+        };
       };
 
       services = {
         gnome-keyring.enable = true;
       };
+
 
       home.username = "kronberger";
       # home.homeDirectory = "/home/kronberger";
@@ -119,6 +123,7 @@ in
         rofi-rbw-wayland
         rbw
         openssl
+        libsecret
 
         # Social
         element-desktop
