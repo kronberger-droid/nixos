@@ -3,6 +3,7 @@
   home.packages = with pkgs; [
     bat
     zoxide
+    lazygit
     rip2
   ];
   programs.nushell = {
