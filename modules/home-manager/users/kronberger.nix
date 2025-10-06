@@ -78,6 +78,7 @@ in
         # Music
         # lmms
         spotify
+        spotify-player
         ncspot
 
         # Information
