@@ -100,15 +100,6 @@ in
       modifier = modKey;
       terminal = "${pkgs.kitty}/bin/kitty";
       output = if builtins.hasAttr host hostDispl then hostDispl.${host} else {};
-      assigns = {
-        "${ws9}" = [
-          { app_id = "thunderbird"; }
-          { class = "Spotify"; }
-        ];
-        "${ws10}" = [
-          { class = "GitHub Desktop"; }
-        ];
-      };
       window = {
         titlebar = false;
       };
