@@ -18,11 +18,36 @@ in
     ../modules/system/virtualisation.nix
     ../modules/system/gnome-keyring.nix
     ../modules/system/wireplumber-config.nix
+    ../modules/system/performance.nix
+    ../modules/system/security.nix
+    ../modules/system/power-management.nix
   ];
 
 
   nix = {
-    settings.experimental-features = [ "nix-command" "flakes" ];
+    settings = {
+      experimental-features = [ "nix-command" "flakes" ];
+      auto-optimise-store = true;
+      max-free = 1073741824; # 1GB
+      min-free = 134217728;  # 128MB
+      substituters = [
+        "https://cache.nixos.org/"
+        "https://nix-community.cachix.org"
+      ];
+      trusted-public-keys = [
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      ];
+    };
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
+    };
+    optimise = {
+      automatic = true;
+      dates = [ "03:45" ];
+    };
   };
 
   nixpkgs.overlays = [
@@ -36,12 +61,36 @@ in
   ];
 
   networking = {
-    networkmanager.enable = true;
+    networkmanager = {
+      enable = true;
+      # Faster DNS resolution
+      insertNameservers = [ "1.1.1.1" "1.0.0.1" "8.8.8.8" ];
+      # Better connection management
+      settings = {
+        main = {
+          dns = "systemd-resolved";
+          rc-manager = "symlink";
+        };
+        connection = {
+          mdns = 2;
+          "ipv6.method" = "auto";
+          "ipv6.addr-gen-mode" = "stable-privacy";
+        };
+        wifi = {
+          "scan-rand-mac-address" = "yes";
+        };
+        ethernet = {
+          "cloned-mac-address" = "random";
+        };
+      };
+    };
     wireless.enable = false;
     hostName = host;
-    firewall = {
-      allowedTCPPorts = [ 22 53317 ];
-    };
+
+    # Enable systemd-resolved for better DNS performance
+    nameservers = [ "1.1.1.1" "1.0.0.1" ];
+    # IPv6 privacy extensions
+    enableIPv6 = true;
   };
 
   time.timeZone = "Europe/Vienna";
@@ -71,6 +120,7 @@ in
     fwupd.enable = true;
     thermald.enable = true;
     flatpak.enable = true;
+    resolved.enable = true;
     
     journald.extraConfig = ''
       Storage=persistent
@@ -78,10 +128,6 @@ in
       SystemMaxUse=1G
       RuntimeMaxUse=100M
     '';
-    openssh = {
-      enable = true;
-      ports = [ 22 ];
-    };
 
     pulseaudio.enable = false;
     pipewire = {

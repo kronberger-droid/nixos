@@ -53,12 +53,9 @@
       efi.canTouchEfiVariables = true;
     };
     kernel.sysctl = {
-      "vm.swappiness" = 10;
       "kernel.sysrq" = 1;
     };
     kernelParams = [
-      "nowatchdog"
-      "nmi_watchdog=0"
       "nvme_core.default_ps_max_latency_us=0"
       "pcie_aspm=off"
       "snd_intel_dspcfg.dsp_driver=1"
@@ -68,11 +65,10 @@
       "hp_wmi"
       "v4l2loopback"
     ];
-    extraModulePackages = [ 
+    extraModulePackages = [
       config.boot.kernelPackages.v4l2loopback
     ];
     blacklistedKernelModules = [
-      "wdat_wdt"
       "iTCO_wdt"
       "watchdog"
     ];
