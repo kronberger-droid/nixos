@@ -12,8 +12,6 @@
     typst-live
     tinymist
 
-    # Rust
-
     # Markdown
     markdown-oxide
 
@@ -22,6 +20,12 @@
 
     # PDF Viewer
     zathura
+
+    #CSV
+    prettier
+
+    #General Compilers
+    gcc
   ];
 
   imports = [
@@ -82,6 +86,14 @@
             "texlab"
             "ltex"
           ];
+        }
+        {
+          name = "csv";
+          formatter = {
+            command = "${pkgs.prettier}/bin/prettier";
+            args = ["--parser" "csv"];
+          };
+          auto-format = true;
         }
         {
           name = "markdown";

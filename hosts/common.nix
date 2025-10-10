@@ -187,6 +187,7 @@ in
       xorg.xhost
       xorg.xauth
       woeusb
+      clamav
     ];
   };
 
