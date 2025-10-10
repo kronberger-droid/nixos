@@ -28,20 +28,11 @@
       systemd-boot.enable = true;
       efi.canTouchEfiVariables = true;
     };
-    kernel.sysctl = {
-      "vm.swappiness" = 10;
-    };
     kernelPackages = pkgs.linuxPackages_latest;
     kernelModules = [ "v4l2loopback" ];
     extraModulePackages = [ pkgs.linuxPackages_latest.v4l2loopback ];
     kernelParams = [
-      "nowatchdog"
-      "nmi_watchdog=0"
-      "mem_sleep_default=s2idle"
       "i915.enable_psr=0"
-    ];
-    blacklistedKernelModules = [
-      "wdat_wdt"
     ];
     extraModprobeConfig = ''
       options v4l2loopback devices=1 video_nr=42 card_label="DroidCam" exclusive_caps=1
