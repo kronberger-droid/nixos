@@ -25,6 +25,7 @@ in
         ../colors.nix
         ../bitwarden.nix
         ../himalaya.nix
+        ../quickemu.nix
       ];
 
       programs = {

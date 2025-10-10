@@ -3,10 +3,8 @@
 # Sway development layout setup
 def swayDevSetup [] {
     print "Setting up Sway development layout..."
-
     # Get current working directory
     let cwd = $env.PWD
-
     # Detect dev shell
     let dev_shell = try {
         ^nix eval --json .#devShells.x86_64-linux.dev err> /dev/null
@@ -14,29 +12,28 @@ def swayDevSetup [] {
     } catch {
         ".#default"
     }
-
     ^swaymsg layout splith
     ^swaymsg layout stacking
     
     # Open shell terminal (will stack with original)
     ^swaymsg exec $"kitty --working-directory=($cwd) -e nix develop ($dev_shell) -c nu --login"
     sleep 500ms
-
-    # Focus back to original terminal and enter dev environment
+    
+    # Focus back to original terminal
     ^swaymsg focus parent
     
-    # Open Claude terminal (will stack with others)
-    ^swaymsg exec $"kitty --working-directory=($cwd) -e nix develop ($dev_shell) -c nu --login -c claude"
+    # Open Claude terminal - enter shell and run claude
+    ^swaymsg exec $"kitty --working-directory=($cwd) -e nix develop ($dev_shell) -c sh -c 'exec claude'"
     sleep 500ms
-
+    
     # Move Claude to the right side
     ^swaymsg layout stacking
     ^swaymsg focus left
-
+    
+    # Enter dev shell in current terminal and open helix
+    ^nix develop ($dev_shell) -c sh -c 'exec hx .'
     cd $cwd
-    hx .
-
-    exec nix develop $dev_shell -c nu --login
+    nu --login
 }
 
 # Quick flake rebuild for current hostname
@@ -87,13 +84,3 @@ def dev [project?: string] {
     }
 }
 
-# Simulation management
-def sim [project: string] {
-    if ($project == "nanonis") {
-        nohup quickemu --vm ~/Emulation/windows-11.conf o+e> /dev/null
-        sleep 2sec
-        exit
-    } else {
-        echo $"Unknown simulation project: ($project)"
-    }
-}
