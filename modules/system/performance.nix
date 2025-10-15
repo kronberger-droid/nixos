@@ -43,8 +43,6 @@
 
     # Faster boot
     kernelParams = [
-      "quiet"
-      "splash"
       "nowatchdog"
       "nmi_watchdog=0"
     ] ++ (if isNotebook then [
