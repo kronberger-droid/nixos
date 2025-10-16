@@ -17,6 +17,7 @@
 
     # Spellcheck
     ltex-ls
+    harper
 
     # PDF Viewer
     zathura
@@ -99,7 +100,7 @@
           name = "markdown";
           language-servers = [
             "ltex"
-            "markdown-oxide"
+            "harper"
           ];
           formatter = {
             command = "${pkgs.dprint}/bin/dprint";
@@ -110,6 +111,7 @@
           name = "rust";
           language-servers = [
             "rust-analyzer"
+            "harper"
           ];
         }
         {
@@ -133,6 +135,10 @@
           config = {
             check.command = "clippy";
           };
+        };
+        harper = {
+          command = "${pkgs.harper}/bin/harper-ls";
+          args = ["--stdio"];
         };
         ltex = {
           command = "${pkgs.ltex-ls}/bin/ltex-ls";
