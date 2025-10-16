@@ -117,15 +117,14 @@
 
   # Laptop logind settings
   services.logind = if isNotebook then {
-    lidSwitch = "suspend-then-hibernate";
-    lidSwitchDocked = "ignore";
-    lidSwitchExternalPower = "suspend";
-    powerKey = "suspend";
-    extraConfig = ''
-      HandlePowerKey=suspend
-      IdleAction=suspend-then-hibernate
-      IdleActionSec=30m
-    '';
+      settings.Login = {
+        HandleLidSwitch = "suspend-then-hibernate";
+        HandleLidSwitchDocked = "ignore";
+        HandleLidSwitchExternalPower = "suspend";
+        HandlePowerKey = "suspend";
+        IdleAction = "suspend-then-hibernate";
+        IdleActionSec = "30m";
+      };
   } else {};
 
   # Additional power management tools for laptops
