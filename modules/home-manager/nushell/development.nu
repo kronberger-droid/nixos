@@ -44,8 +44,13 @@ def flake-reload [] {
 }
 
 # Enter nix develop shell in current terminal only
-def enter [] {
-    nix develop .#default
+def enter [shell?: string] {
+    if ($shell == null) {
+        nix develop .#default
+    } else {
+        nix develop .#($shell)
+    }
+
 }
 
 # Smart project development with automatic discovery and Sway setup
