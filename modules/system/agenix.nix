@@ -1,11 +1,20 @@
 { inputs, ... }:
 {
+  # Enable SSH for agenix
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+    };
+  };
+
   age = {
-    secrets.cms-pswd = {
-      file = "${inputs.self}/secrets/cms-pswd.age";
-      path = "/run/secrets/cms-pswd";
+    secrets.pia-credentials = {
+      file = "${inputs.self}/secrets/pia-credentials.age";
+      path = "/run/secrets/pia-credentials";
       mode = "0400";
-      owner = "kronberger";
+      owner = "root";
     };
   };
 }
