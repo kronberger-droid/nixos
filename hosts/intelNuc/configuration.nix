@@ -1,9 +1,10 @@
-{ pkgs, ... }:
+{ pkgs, config, inputs, ... }:
 
 {
   imports = [
     ./hardware-configuration.nix
     ../common.nix
+    inputs.pia.nixosModules."x86_64-linux".default
   ];
 
   environment.systemPackages = with pkgs; [
