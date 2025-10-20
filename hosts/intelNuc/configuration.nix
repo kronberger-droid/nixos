@@ -7,6 +7,35 @@
     inputs.pia.nixosModules."x86_64-linux".default
   ];
 
+  services.pia = {
+    enable = true;
+    authUserPassFile = config.age.secrets.pia-credentials.path;
+  };
+
+  # Add sudo rules for PIA VPN control (for terminal use)
+  security.sudo-rs.extraRules = [
+    {
+      users = [ "kronberger" ];
+      commands = [
+        {
+          command = "/run/current-system/sw/bin/pia";
+          options = [ "NOPASSWD" "SETENV" ];
+        }
+      ];
+    }
+  ];
+
+  # Add polkit rule for PIA VPN control (for GUI/systemd services)
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+        if (action.id == "org.freedesktop.policykit.exec" &&
+            action.lookup("program") == "/run/current-system/sw/bin/pia" &&
+            subject.user == "kronberger") {
+            return polkit.Result.YES;
+        }
+    });
+  '';
+
   environment.systemPackages = with pkgs; [
     droidcam
     android-tools
