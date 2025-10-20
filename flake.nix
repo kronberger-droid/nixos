@@ -9,13 +9,14 @@
     };
     agenix.url = "github:ryantm/agenix";
     dropkitten.url = "github:kronberger-droid/dropkitten";
+    pia.url = "github:Fuwn/pia.nix";
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, agenix, dropkitten, fenix, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, agenix, dropkitten, pia, fenix, ... }:
   let
     # Helper function to create host configurations
     mkHost = { hostname, system, isNotebook, extraModules ? [] }:

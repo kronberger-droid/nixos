@@ -20,6 +20,48 @@ in
 
   xdg.configFile."waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
 
+  xdg.configFile."waybar/vpn-status.sh" = {
+    executable = true;
+    text = ''
+      #!${pkgs.bash}/bin/bash
+
+      # Check if PIA is active by looking for OpenVPN service
+      if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
+          # VPN is connected
+          echo '{"text":" AT","alt":"connected","tooltip":"PIA Austria Connected","class":"connected"}'
+      else
+          # VPN is disconnected - always show module even if check fails
+          echo '{"text":" off","alt":"disconnected","tooltip":"Click to connect","class":"disconnected"}'
+      fi
+    '';
+  };
+
+  xdg.configFile."waybar/vpn-toggle.sh" = {
+    executable = true;
+    text = ''
+      #!${pkgs.bash}/bin/bash
+
+      # Check if PIA is currently connected via OpenVPN
+      if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
+          # VPN is connected, disconnect
+          /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia stop austria
+          ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from PIA Austria" -i network-vpn-disconnected
+      else
+          # VPN is disconnected, connect
+          ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to PIA Austria..." -i network-vpn
+          /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia start austria
+
+          # Check if connection was successful
+          sleep 3
+          if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
+              ${pkgs.libnotify}/bin/notify-send "VPN" "Connected to PIA Austria" -i network-vpn
+          else
+              ${pkgs.libnotify}/bin/notify-send "VPN" "Failed to connect to PIA Austria" -i dialog-error
+          fi
+      fi
+    '';
+  };
+
   programs.waybar = {
     enable = true;
     systemd = {
@@ -42,6 +84,7 @@ in
           "pulseaudio"
           "custom/mpris"
           "custom/separator"
+          "custom/vpn"
           "network"
           "cpu"
         ] ++ lib.optionals (!isNotebook) [
@@ -107,6 +150,19 @@ in
         exec = "${pkgs.waybar-mpris}/bin/waybar-mpris --order 'SYMBOL:PLAYER' --separator '' --autofocus --pause '' --play ''";
         on-click = "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
         on-click-right = "${pkgs.waybar-mpris}/bin/waybar-mpris --send player-next";
+        escape = true;
+      };
+
+      "custom/vpn" = {
+        return-type = "json";
+        exec = "${config.xdg.configHome}/waybar/vpn-status.sh";
+        on-click = "${config.xdg.configHome}/waybar/vpn-toggle.sh";
+        interval = 10;
+        format = "{icon}{text}";
+        format-icons = {
+          connected = "󰖂";
+          disconnected = "󰖂";
+        };
         escape = true;
       };
 

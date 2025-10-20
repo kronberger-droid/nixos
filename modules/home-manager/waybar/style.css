@@ -19,11 +19,12 @@ window#waybar {
 #idle_inhibitor,
 #network,
 #pulseaudio,
-#backlight, 
+#backlight,
 #temperature,
 #bluetooth,
 #language,
-#tray {
+#tray,
+#custom-vpn {
   padding: 0px 5px;
   margin: 0px 5px;
 }
