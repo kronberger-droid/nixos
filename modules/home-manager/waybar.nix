@@ -84,8 +84,8 @@ in
           "pulseaudio"
           "custom/mpris"
           "custom/separator"
-          "custom/vpn"
           "network"
+          "custom/vpn"
           "cpu"
         ] ++ lib.optionals (!isNotebook) [
           "memory"
