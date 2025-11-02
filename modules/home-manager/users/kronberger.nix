@@ -34,6 +34,12 @@ in
           enableNushellIntegration = true;
           nix-direnv.enable = true;
         };
+        btop = {
+          enable = true;
+          settings = {
+            color_theme = "TTY";
+          };
+        };
       };
 
       services = {
@@ -98,7 +104,6 @@ in
         ncspot
 
         # Information
-        btop
         fastfetch
         fzf
         serpl
