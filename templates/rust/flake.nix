@@ -4,10 +4,10 @@
 
   inputs = {
     # Follow nixpkgs unstable for latest packages
-    nixpkgs.url     = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     # Fenix for Rust toolchains
-    fenix.url        = "github:nix-community/fenix";
+    fenix.url = "github:nix-community/fenix";
     # Optional: rust-overlay for extra targets
     rust-overlay.url = "github:oxalica/rust-overlay";
   };
@@ -20,12 +20,13 @@
           inherit system;
           overlays = [ fenix.overlays.default rust-overlay.overlays.default ];
         };
-        lib = pkgs.lib;
+        inherit (pkgs) lib;
 
         # Define Rust toolchain and analyzer from Fenix
         stableToolchain = fenix.packages.${system}.complete.toolchain;
-        rustAnalyzer    = fenix.packages.${system}.latest.rust-analyzer;
-      in {
+        rustAnalyzer = fenix.packages.${system}.latest.rust-analyzer;
+      in
+      {
         # Default devShell for project development
         devShells.default = pkgs.mkShell {
           name = "<project-name>-dev-shell";

@@ -47,7 +47,7 @@
       "nmi_watchdog=0"
     ] ++ (if isNotebook then [
       "mem_sleep_default=s2idle"
-    ] else []);
+    ] else [ ]);
 
     blacklistedKernelModules = [
       "wdat_wdt"

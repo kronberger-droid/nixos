@@ -1,8 +1,8 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, ... }:
 
 {
   home.packages = with pkgs; [
-    imagemagick    
+    imagemagick
   ];
 
   xdg.configFile."kitty/cwd.sh".source = ./kitty/cwd.sh;

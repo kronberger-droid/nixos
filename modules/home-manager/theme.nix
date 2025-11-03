@@ -8,7 +8,7 @@
     name = "Quintom_Ink";
     size = 22;
   };
-  
+
   gtk = {
     enable = true;
     theme = {

@@ -1,4 +1,4 @@
-{ ... }:
+_:
 {
   home.file = {
     # QuickEMU VM configurations

@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
     keyd
@@ -42,7 +42,7 @@
       };
       # Default config for non-Apple keyboards
       default = {
-        ids = [ "*"];
+        ids = [ "*" ];
         settings = {
           main = {
             leftalt = "leftmeta";

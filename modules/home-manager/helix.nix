@@ -72,10 +72,12 @@
       };
       keys.normal = {
         space.space = "file_picker";
-        ret.ret = ":w";
-        ret.q = ":q";
-        ret.w = ":wq";
-        ret.r = ":reload-all";
+        ret = {
+          ret = ":w";
+          q = ":q";
+          w = ":wq";
+          r = ":reload-all";
+        };
       };
     };
 
@@ -92,7 +94,7 @@
           name = "csv";
           formatter = {
             command = "${pkgs.prettier}/bin/prettier";
-            args = ["--parser" "csv"];
+            args = [ "--parser" "csv" ];
           };
           auto-format = true;
         }
@@ -104,7 +106,7 @@
           ];
           formatter = {
             command = "${pkgs.dprint}/bin/dprint";
-            args = [ "fmt" "--stdin" "md"];
+            args = [ "fmt" "--stdin" "md" ];
           };
         }
         {
@@ -138,7 +140,7 @@
         };
         harper = {
           command = "${pkgs.harper}/bin/harper-ls";
-          args = ["--stdio"];
+          args = [ "--stdio" ];
         };
         ltex = {
           command = "${pkgs.ltex-ls}/bin/ltex-ls";
@@ -146,14 +148,16 @@
           config = {
             ltex.dictionary = {
               "en-US" = [
-                "isentropic" "Isentropic"
-                "microfluidics" "Microfluidics"
+                "isentropic"
+                "Isentropic"
+                "microfluidics"
+                "Microfluidics"
                 "Kronberger"
               ];
-            }; 
+            };
           };
         };
-      
+
         texlab = {
           command = "${pkgs.texlab}/bin/texlab";
           file-types = [ "latex" ];

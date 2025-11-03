@@ -18,48 +18,50 @@ in
     rofi
   ];
 
-  xdg.configFile."waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
+  xdg.configFile = {
+    "waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
 
-  xdg.configFile."waybar/vpn-status.sh" = {
-    executable = true;
-    text = ''
-      #!${pkgs.bash}/bin/bash
+    "waybar/vpn-status.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
 
-      # Check if PIA is active by looking for OpenVPN service
-      if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
-          # VPN is connected
-          echo '{"text":" AT","alt":"connected","tooltip":"PIA Austria Connected","class":"connected"}'
-      else
-          # VPN is disconnected - always show module even if check fails
-          echo '{"text":" off","alt":"disconnected","tooltip":"Click to connect","class":"disconnected"}'
-      fi
-    '';
-  };
+        # Check if PIA is active by looking for OpenVPN service
+        if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
+            # VPN is connected
+            echo '{"text":" AT","alt":"connected","tooltip":"PIA Austria Connected","class":"connected"}'
+        else
+            # VPN is disconnected - always show module even if check fails
+            echo '{"text":" off","alt":"disconnected","tooltip":"Click to connect","class":"disconnected"}'
+        fi
+      '';
+    };
 
-  xdg.configFile."waybar/vpn-toggle.sh" = {
-    executable = true;
-    text = ''
-      #!${pkgs.bash}/bin/bash
+    "waybar/vpn-toggle.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
 
-      # Check if PIA is currently connected via OpenVPN
-      if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
-          # VPN is connected, disconnect
-          /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia stop austria
-          ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from PIA Austria" -i network-vpn-disconnected
-      else
-          # VPN is disconnected, connect
-          ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to PIA Austria..." -i network-vpn
-          /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia start austria
+        # Check if PIA is currently connected via OpenVPN
+        if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
+            # VPN is connected, disconnect
+            /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia stop austria
+            ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from PIA Austria" -i network-vpn-disconnected
+        else
+            # VPN is disconnected, connect
+            ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to PIA Austria..." -i network-vpn
+            /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia start austria
 
-          # Check if connection was successful
-          sleep 3
-          if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
-              ${pkgs.libnotify}/bin/notify-send "VPN" "Connected to PIA Austria" -i network-vpn
-          else
-              ${pkgs.libnotify}/bin/notify-send "VPN" "Failed to connect to PIA Austria" -i dialog-error
-          fi
-      fi
-    '';
+            # Check if connection was successful
+            sleep 3
+            if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
+                ${pkgs.libnotify}/bin/notify-send "VPN" "Connected to PIA Austria" -i network-vpn
+            else
+                ${pkgs.libnotify}/bin/notify-send "VPN" "Failed to connect to PIA Austria" -i dialog-error
+            fi
+        fi
+      '';
+    };
   };
 
   programs.waybar = {
@@ -77,27 +79,27 @@ in
         spacing = 10;
         icon-size = 14;
       };
-      modules-left = ["custom/menu" "sway/workspaces" "sway/scratchpad" "sway/mode" ];
-        modules-right = [
-          "idle_inhibitor"
-          "bluetooth"
-          "pulseaudio"
-          "custom/mpris"
-          "custom/separator"
-          "network"
-          "custom/vpn"
-          "cpu"
-        ] ++ lib.optionals (!isNotebook) [
-          "memory"
-          "temperature"
-        ] ++ lib.optionals (isNotebook) [
-          "battery"
-          "backlight"
-        ] ++ [
-          "tray"
-          "clock"
-          "custom/power"
-        ];      
+      modules-left = [ "custom/menu" "sway/workspaces" "sway/scratchpad" "sway/mode" ];
+      modules-right = [
+        "idle_inhibitor"
+        "bluetooth"
+        "pulseaudio"
+        "custom/mpris"
+        "custom/separator"
+        "network"
+        "custom/vpn"
+        "cpu"
+      ] ++ lib.optionals (!isNotebook) [
+        "memory"
+        "temperature"
+      ] ++ lib.optionals isNotebook [
+        "battery"
+        "backlight"
+      ] ++ [
+        "tray"
+        "clock"
+        "custom/power"
+      ];
 
       "sway/language" = {
         format = "{} ";
@@ -105,12 +107,12 @@ in
       };
 
       "sway/scratchpad" = {
-      	format = "{icon} {count}";
-      	show-empty = false;
-      	format-icons = ["" ""];
+        format = "{icon} {count}";
+        show-empty = false;
+        format-icons = [ "" "" ];
         on-click = "${pkgs.sway}/bin/swaymsg 'scratchpad show'";
-      	tooltip = true;
-      	tooltip-format = "{app} = {title}";
+        tooltip = true;
+        tooltip-format = "{app} = {title}";
       };
 
       "custom/separator" = {
@@ -119,30 +121,30 @@ in
 
       clock = {
         interval = 60;
-        format = "{:%e %b %Y %H:%M}";      
+        format = "{:%e %b %Y %H:%M}";
         tooltip = true;
         tooltip-format = "<big>{:%B %Y}</big>\n<tt>{calendar}</tt>";
-        on-click = "${dropkitten_command} ${pkgs.calcurse}/bin/calcurse"; 
+        on-click = "${dropkitten_command} ${pkgs.calcurse}/bin/calcurse";
       };
-      
+
       cpu = {
         on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
         format = "{usage}% ";
         tooltip = false;
       };
-      
+
       "custom/menu" = {
         format = "";
         on-click = "${pkgs.rofi}/bin/rofi -show drun";
         tooltip = false;
       };
-      
+
       "custom/power" = {
         format = "";
         on-click = "${pkgs.sway}/bin/swaymsg exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
         tooltip = false;
       };
-      
+
       memory = { format = "{}% "; };
 
       "custom/mpris" = {
@@ -212,17 +214,17 @@ in
         format-source = "\ ";
         format-source-muted = "\ ";
       };
-      
+
       idle_inhibitor = {
-          format = "{icon}";
-          format-icons = {
-              activated = "";
-              deactivated = "";
-          };
+        format = "{icon}";
+        format-icons = {
+          activated = "";
+          deactivated = "";
+        };
       };
-      
+
       "sway/mode" = { format = ''<span style="italic">{}</span>''; };
-      
+
       battery = {
         interval = 30;
         states = {
@@ -233,7 +235,7 @@ in
         format = "{capacity}% {icon}";
         format-icons = [ "󱃍" "󰁺" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
       };
-      
+
       temperature = {
         critical-threshold = 80;
         format = "{temperatureC}°C {icon}";
@@ -241,7 +243,7 @@ in
       };
       backlight = {
         format = "{percent}% {icon}";
-        format-icons = ["󰃞" "󰃟" "󰃠"];
+        format-icons = [ "󰃞" "󰃟" "󰃠" ];
         on-scroll-up = "${pkgs.brightnessctl}/bin/brightnessctl set +50";
         on-scroll-down = "${pkgs.brightnessctl}/bin/brightnessctl set 50-";
       };
