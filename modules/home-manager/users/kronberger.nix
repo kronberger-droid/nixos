@@ -61,10 +61,10 @@ in
         gnome-keyring.enable = true;
       };
 
-
-      home.username = "kronberger";
-      # home.homeDirectory = "/home/kronberger";
-      home.packages = with pkgs; [
+      home = {
+        username = "kronberger";
+        homeDirectory = "/home/kronberger";
+        packages = with pkgs; [
         # Browsers
         brave
         nyxt
@@ -160,51 +160,52 @@ in
         claude-code
         gemini-cli
 
-      ];
+        ];
+
+        file = {
+          ".config/swappy/config".text = ''
+            [Default]
+            save_dir=$HOME/Pictures/Screenshots
+            save_filename_format=swappy-%Y-%m-%d-%H-%M-%S.png
+            show_panel=false
+            line_size=5
+            text_size=15
+            text_font=monospace
+            paint_mode=rectangle
+            early_exit=true
+            fill_shape=false
+          '';
+
+          ".local/share/fonts/Futura_PT".source = ../fonts/Futura_PT;
+
+          ".local/share/fonts/gfsneohellenicmath".source = ../fonts/gfsneohellenicmath;
+        };
+
+        stateVersion = "24.11";
+      };
 
       xdg = {
         enable = true;
         mimeApps = {
           enable = true;
           defaultApplications = {
-            "application/pdf" = "org.pwmt.zathura.desktop";  
+            "application/pdf" = "org.pwmt.zathura.desktop";
             "x-scheme-handler/mailto" = "thunderbird.desktop";
             "x-scheme-handler/http" = "firefox.desktop";
             "x-scheme-handler/https" = "firefox.desktop";
             "text/html" = "firefox.desktop";
             "application/xhtml+xml" = "firefox.desktop";
-            "image/png"       = "swayimg.desktop";
-            "image/jpeg"      = "swayimg.desktop";
-            "image/gif"       = "swayimg.desktop";
-            "image/webp"      = "swayimg.desktop";
-            "image/svg+xml"   = "swayimg.desktop";
-            "image/tiff"      = "swayimg.desktop";
+            "image/png" = "swayimg.desktop";
+            "image/jpeg" = "swayimg.desktop";
+            "image/gif" = "swayimg.desktop";
+            "image/webp" = "swayimg.desktop";
+            "image/svg+xml" = "swayimg.desktop";
+            "image/tiff" = "swayimg.desktop";
           };
         };
       };
 
-      home.file = {
-        ".config/swappy/config".text = ''
-          [Default]
-          save_dir=$HOME/Pictures/Screenshots
-          save_filename_format=swappy-%Y-%m-%d-%H-%M-%S.png
-          show_panel=false
-          line_size=5
-          text_size=15
-          text_font=monospace
-          paint_mode=rectangle
-          early_exit=true
-          fill_shape=false
-        '';
-
-        ".local/share/fonts/Futura_PT".source = ../fonts/Futura_PT;
-
-        ".local/share/fonts/gfsneohellenicmath".source = ../fonts/gfsneohellenicmath;
-      };
-
       fonts.fontconfig.enable = true;
-
-      home.stateVersion = "24.11";
     };
   };
 }

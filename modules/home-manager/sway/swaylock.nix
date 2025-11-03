@@ -1,7 +1,6 @@
 { config, pkgs, ... }:
 let
-  backgroundColor = config.myTheme.backgroundColor;
-  accentColor = config.myTheme.accentColor;
+  inherit (config.myTheme) backgroundColor accentColor;
 in
 {
   home.packages = with pkgs; [

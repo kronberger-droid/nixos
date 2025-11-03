@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:{
+{ pkgs, ... }: {
   programs.yazi = {
     enable = true;
     flavors = {
@@ -9,7 +9,7 @@
       opener = {
         "detached-pdf" = [
           {
-            run    = ''setsid ${pkgs.zathura}/bin/zathura "$@"'';
+            run = ''setsid ${pkgs.zathura}/bin/zathura "$@"'';
             orphan = true;
           }
         ];
@@ -26,28 +26,28 @@
           # send pdfs to detached zathura
           {
             name = "*.pdf";
-            use  = "detached-pdf";
+            use = "detached-pdf";
           }
           # send images to detaced swayimg
           {
             name = "*.png";
-            use  = "detached-image";
+            use = "detached-image";
           }
           {
             name = "*.jpg";
-            use  = "detached-image";
+            use = "detached-image";
           }
           {
             name = "*.jpeg";
-            use  = "detached-image";
+            use = "detached-image";
           }
           {
             name = "*.gif";
-            use  = "detached-image";
+            use = "detached-image";
           }
           {
             name = "*.svg";
-            use  = "detached-image";
+            use = "detached-image";
           }
         ];
       };

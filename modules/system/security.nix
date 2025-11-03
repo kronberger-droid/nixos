@@ -39,34 +39,36 @@
     '';
   };
 
-  # Fail2ban for SSH protection
-  services.fail2ban = {
-    enable = true;
-    maxretry = 3;
-    bantime = "1h";
-    bantime-increment = {
+  # Security services
+  services = {
+    # Fail2ban for SSH protection
+    fail2ban = {
       enable = true;
-      maxtime = "168h"; # 1 week
-      factor = "4";
-    };
+      maxretry = 3;
+      bantime = "1h";
+      bantime-increment = {
+        enable = true;
+        maxtime = "168h"; # 1 week
+        factor = "4";
+      };
 
-    jails = {
-      ssh = {
-        settings = {
-          enabled = true;
-          port = "ssh";
-          filter = "sshd";
-          logpath = "/var/log/auth.log";
-          maxretry = 3;
-          findtime = "10m";
-          bantime = "1h";
+      jails = {
+        ssh = {
+          settings = {
+            enabled = true;
+            port = "ssh";
+            filter = "sshd";
+            logpath = "/var/log/auth.log";
+            maxretry = 3;
+            findtime = "10m";
+            bantime = "1h";
+          };
         };
       };
     };
-  };
 
-  # Enhanced SSH security
-  services.openssh = {
+    # Enhanced SSH security
+    openssh = {
     settings = {
       # Disable password authentication
       PasswordAuthentication = false;
@@ -100,6 +102,31 @@
       Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
       MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com
     '';
+    };
+
+    # Configure log rotation for audit logs
+    logrotate = {
+      enable = true;
+      settings = {
+        "/var/log/audit/audit.log" = {
+          frequency = "weekly";
+          rotate = 4;
+          compress = true;
+          delaycompress = true;
+          missingok = true;
+          notifempty = true;
+          postrotate = "systemctl kill -s USR1 auditd.service || true";
+        };
+        "/var/log/sudo.log" = {
+          frequency = "weekly";
+          rotate = 4;
+          compress = true;
+          delaycompress = true;
+          missingok = true;
+          notifempty = true;
+        };
+      };
+    };
   };
 
   # Kernel security hardening

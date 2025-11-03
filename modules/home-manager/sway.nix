@@ -1,9 +1,6 @@
 { config, pkgs, lib, host, isNotebook, ... }:
 let
-  palette         = config.myTheme.palette;
-  backgroundColor = config.myTheme.backgroundColor;
-  textColor       = config.myTheme.textColor;
-  accentColor     = config.myTheme.accentColor;
+  inherit (config.myTheme) palette backgroundColor textColor accentColor;
 
   ws1 = "1 browser";
   ws2 = "2 emulation";
@@ -28,8 +25,8 @@ let
         bg = "${backgroundImage} fill";
       };
       "HDMI-A-1" = {
-        mode  = "2560x1440@119.998Hz";
-        pos   = "0 0";
+        mode = "2560x1440@119.998Hz";
+        pos = "0 0";
         scale = "1";
         bg = "${backgroundImage} fill";
         adaptive_sync = "on";
@@ -99,7 +96,7 @@ in
     config = rec {
       modifier = modKey;
       terminal = "${pkgs.kitty}/bin/kitty";
-      output = if builtins.hasAttr host hostDispl then hostDispl.${host} else {};
+      output = if builtins.hasAttr host hostDispl then hostDispl.${host} else { };
       window = {
         titlebar = false;
       };
@@ -131,38 +128,38 @@ in
         background = backgroundColor;
 
         focused = {
-          border       = accentColor;
-          background   = accentColor;
-          text         = backgroundColor;
-          indicator    = textColor;
-          childBorder  = accentColor;
+          border = accentColor;
+          background = accentColor;
+          text = backgroundColor;
+          indicator = textColor;
+          childBorder = accentColor;
         };
         focusedInactive = {
-          border      = palette.color1;
-          background  = palette.color1;
-          text        = palette.color5;
-          indicator   = palette.color3;
+          border = palette.color1;
+          background = palette.color1;
+          text = palette.color5;
+          indicator = palette.color3;
           childBorder = palette.color1;
         };
         unfocused = {
-          border      = palette.color1;
-          background  = backgroundColor;
-          text        = palette.color5;
-          indicator   = textColor;
+          border = palette.color1;
+          background = backgroundColor;
+          text = palette.color5;
+          indicator = textColor;
           childBorder = palette.color1;
         };
         urgent = {
-          border      = palette.color8;
-          background  = palette.color8;
-          text        = backgroundColor;
-          indicator   = palette.color9;
+          border = palette.color8;
+          background = palette.color8;
+          text = backgroundColor;
+          indicator = palette.color9;
           childBorder = palette.color8;
         };
         placeholder = {
-          border      = backgroundColor;
-          background  = backgroundColor;
-          text        = palette.color5;
-          indicator   = backgroundColor;
+          border = backgroundColor;
+          background = backgroundColor;
+          text = palette.color5;
+          indicator = backgroundColor;
           childBorder = backgroundColor;
         };
       };
@@ -275,9 +272,9 @@ in
             tap = "enabled";
             pointer_accel = "0.3";
           };
-        } else {}
+        } else { }
       );
-      bars = [];
+      bars = [ ];
     };
   };
 }

@@ -64,7 +64,7 @@
             return polkit.Result.YES;
         }
     });
-  '';  
+  '';
 
   hardware = {
     enableRedistributableFirmware = true;

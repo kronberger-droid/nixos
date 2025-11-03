@@ -16,6 +16,7 @@
   # Laptop-specific power optimizations
   services = {
     # Enable TLP for advanced power management on laptops
+    # Note: TLP and auto-cpufreq conflict, so we use TLP only
     tlp = {
       enable = isNotebook;
       settings = {
@@ -77,46 +78,34 @@
       };
     };
 
-    # Auto CPU frequency scaling
-    auto-cpufreq = {
-      enable = isNotebook;
-      settings = {
-        battery = {
-          governor = "powersave";
-          turbo = "never";
-        };
-        charger = {
-          governor = "performance";
-          turbo = "auto";
-        };
-      };
-    };
-
     # Thermal management
     thermald.enable = true;
   };
 
   # Laptop-specific systemd settings
   systemd = {
-    sleep.extraConfig = if isNotebook then ''
-      SuspendState=mem
-      HibernateDelaySec=90m
-      HybridSleepState=disk
-      HybridSleepMode=suspend
-    '' else "";
+    sleep.extraConfig =
+      if isNotebook then ''
+        SuspendState=mem
+        HibernateDelaySec=90m
+        HybridSleepState=disk
+        HybridSleepMode=suspend
+      '' else "";
 
     # Power-efficient service settings for laptops
     services = {
       # Reduce log verbosity to save power
-      systemd-journald.serviceConfig = if isNotebook then {
-        SystemMaxUse = "100M";
-        RuntimeMaxUse = "50M";
-      } else {};
+      systemd-journald.serviceConfig =
+        if isNotebook then {
+          SystemMaxUse = "100M";
+          RuntimeMaxUse = "50M";
+        } else { };
     };
   };
 
   # Laptop logind settings
-  services.logind = if isNotebook then {
+  services.logind =
+    if isNotebook then {
       settings.Login = {
         HandleLidSwitch = "suspend-then-hibernate";
         HandleLidSwitchDocked = "ignore";
@@ -125,24 +114,24 @@
         IdleAction = "suspend-then-hibernate";
         IdleActionSec = "30m";
       };
-  } else {};
+    } else { };
 
   # Additional power management tools for laptops
-  environment.systemPackages = with pkgs; [] ++
+  environment.systemPackages = with pkgs;
     (if isNotebook then [
       powertop
       acpi
       tlp
-      auto-cpufreq
       brightnessctl
       light
-    ] else []);
+    ] else [ ]);
 
   # Kernel parameters for power efficiency on laptops
-  boot.kernelParams = if isNotebook then [
-    "intel_pstate=active"
-    "i915.enable_fbc=1"
-    "i915.enable_psr=1"
-    "i915.disable_power_well=0"
-  ] else [];
+  boot.kernelParams =
+    if isNotebook then [
+      "intel_pstate=active"
+      "i915.enable_fbc=1"
+      "i915.enable_psr=1"
+      "i915.disable_power_well=0"
+    ] else [ ];
 }

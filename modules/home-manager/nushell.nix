@@ -22,7 +22,7 @@
       rm = "echo 'use rip instead'";
     };
   };
-  
+
   programs.starship = {
     enable = true;
     enableNushellIntegration = true;

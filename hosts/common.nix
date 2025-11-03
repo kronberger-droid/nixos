@@ -1,14 +1,13 @@
-{ pkgs, host,  ... }:
+{ pkgs, host, ... }:
 let
-  outputName =
-    if host == "intelNuc" then
-      "HDMI-A-1"
-    else if host == "t480s" || host == "spectre" then
-      "eDP-1"
-    else if host == "portable" then
-      "*"
-    else
-      throw "Unknown hostname: ${host}";
+  # Display output mapping per host
+  outputNames = {
+    intelNuc = "HDMI-A-1";
+    t480s = "eDP-1";
+    spectre = "eDP-1";
+    portable = "*";
+  };
+  outputName = outputNames.${host} or (throw "Unknown hostname: ${host}");
 in
 {
   imports = [
@@ -29,7 +28,7 @@ in
       experimental-features = [ "nix-command" "flakes" ];
       auto-optimise-store = true;
       max-free = 1073741824; # 1GB
-      min-free = 134217728;  # 128MB
+      min-free = 134217728; # 128MB
       substituters = [
         "https://cache.nixos.org/"
         "https://nix-community.cachix.org"
@@ -51,7 +50,7 @@ in
   };
 
   nixpkgs.overlays = [
-    (final: prev: {
+    (_: prev: {
       brave = prev.brave.override {
         commandLineArgs = [
           "--password-store=gnome-keyring"
@@ -118,10 +117,9 @@ in
 
   services = {
     fwupd.enable = true;
-    thermald.enable = true;
     flatpak.enable = true;
     resolved.enable = true;
-    
+
     journald.extraConfig = ''
       Storage=persistent
       Compress=yes
@@ -160,7 +158,7 @@ in
       enable32Bit = true;
     };
   };
-  
+
   xdg.portal = {
     enable = true;
     extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
@@ -249,11 +247,4 @@ in
   ];
 
   nixpkgs.config.allowUnfree = true;
-
-  powerManagement = {
-    enable = true;
-    resumeCommands = ''
-      systemctl restart thermald || true
-    '';
-  };
 }

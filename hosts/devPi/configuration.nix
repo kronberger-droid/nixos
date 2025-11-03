@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -60,6 +60,6 @@
     nerd-fonts.jetbrains-mono
     nerd-fonts.symbols-only
   ];
-  
+
   system.stateVersion = "25.05";
 }
