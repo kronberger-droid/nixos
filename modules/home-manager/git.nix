@@ -10,12 +10,13 @@
   };
   programs.git = {
     enable = true;
-    userName = "kronberger-droid";
-    userEmail = "kronberger@proton.me";
-
     lfs.enable = true;
 
-    extraConfig = {
+    settings = {
+      user = {
+        name = "kronberger-droid";
+        email = "kronberger@proton.me";
+      };
       init = {
         defaultBranch = "main";
       };
