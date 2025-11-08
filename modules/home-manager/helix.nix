@@ -7,7 +7,6 @@
 
     # Typst
     typst
-    typstfmt
     typstyle
     typst-live
     tinymist

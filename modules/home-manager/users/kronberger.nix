@@ -1,7 +1,7 @@
 { pkgs, inputs, host, isNotebook, ... }:
 let
-  dropkittenPkg = inputs.dropkitten.packages.${pkgs.system}.dropkitten;
-  rustToolchain = inputs.fenix.packages.${pkgs.system}.complete.toolchain;
+  dropkittenPkg = inputs.dropkitten.packages.${pkgs.stdenv.hostPlatform.system}.dropkitten;
+  rustToolchain = inputs.fenix.packages.${pkgs.stdenv.hostPlatform.system}.complete.toolchain;
 in
 {
   home-manager = {
@@ -130,7 +130,7 @@ in
 
         # System
         ltunify
-        rpi-imager
+        # rpi-imager
         bluetuith
 
         # Math

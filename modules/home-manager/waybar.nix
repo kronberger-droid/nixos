@@ -1,6 +1,6 @@
 { inputs, config, pkgs, isNotebook, lib, ... }:
 let
-  dropkittenPkg = inputs.dropkitten.packages.${pkgs.system}.dropkitten;
+  dropkittenPkg = inputs.dropkitten.packages.${pkgs.stdenv.hostPlatform.system}.dropkitten;
 
   dropkitten_size = {
     width = "0.3";
