@@ -5,6 +5,7 @@
       ./hardware-configuration.nix
       ../common.nix
       ../../modules/system/firmware/vbt.nix
+      ../../modules/system/tuwien-vpn.nix
       inputs.pia.nixosModules."x86_64-linux".default
     ];
 
@@ -17,6 +18,11 @@
     pia = {
       enable = true;
       authUserPassFile = config.age.secrets.pia-credentials.path;
+    };
+
+    tuwien-vpn = {
+      enable = true;
+      passwordFile = config.age.secrets.tuwien-vpn-password.path;
     };
 
     logind.settings.Login = {
@@ -41,6 +47,64 @@
       ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.coreutils}/bin/chmod g+w /sys/class/leds/%k/brightness"
     '';
   };
+
+  # Workaround for PIA OpenVPN CRL certificate issue
+  # See: https://github.com/Fuwn/pia.nix/issues/2
+  # The PIA configs from pia.nix include a crl-verify section with malformed CRL that OpenSSL 3.x rejects
+  # Solution: Create a generic wrapper that filters CRL at runtime for any region
+  systemd.services = let
+    # Create a wrapper script generator that works for any region
+    makeOpenvpnWrapper = region: pkgs.writeShellScript "openvpn-${region}-wrapper" ''
+      # Find the most recent config using glob pattern (sorted by modification time)
+      WRAPPER_CONFIG=$(${pkgs.coreutils}/bin/ls -t /nix/store/*-openvpn-config-${region} 2>/dev/null | ${pkgs.coreutils}/bin/head -1)
+
+      if [ -z "$WRAPPER_CONFIG" ] || [ ! -f "$WRAPPER_CONFIG" ]; then
+        echo "ERROR: Could not find openvpn-config-${region} in /nix/store" >&2
+        exit 1
+      fi
+
+      ACTUAL_CONFIG=$(${pkgs.gnugrep}/bin/grep -oP 'config \K.*' "$WRAPPER_CONFIG" 2>/dev/null | ${pkgs.coreutils}/bin/head -1)
+
+      if [ -z "$ACTUAL_CONFIG" ] || [ ! -f "$ACTUAL_CONFIG" ]; then
+        echo "ERROR: Could not find PIA ${region} config at $ACTUAL_CONFIG" >&2
+        exit 1
+      fi
+
+      # Create filtered config in /tmp without CRL section
+      FILTERED="/tmp/${region}-filtered.ovpn"
+      ${pkgs.gnused}/bin/sed '/<crl-verify>/,/<\/crl-verify>/d' "$ACTUAL_CONFIG" > "$FILTERED"
+
+      # Run OpenVPN with filtered config
+      exec ${pkgs.openvpn}/sbin/openvpn \
+        --suppress-timestamps \
+        --errors-to-stderr \
+        --script-security 2 \
+        --config "$FILTERED" \
+        --auth-nocache \
+        --auth-user-pass ${config.age.secrets.pia-credentials.path}
+    '';
+
+    # List of commonly used regions (add more as needed)
+    piaRegions = [
+      "austria" "australia" "au-melbourne" "au-sydney" "au-perth"
+      "belgium" "brazil" "canada" "ca-toronto" "ca-montreal" "ca-vancouver"
+      "denmark" "finland" "france" "germany" "italy" "japan"
+      "netherlands" "norway" "poland" "spain" "sweden" "switzerland"
+      "uk-london" "uk-manchester" "uk-southampton"
+      "us-east" "us-west" "us-chicago" "us-texas" "us-california"
+    ];
+
+    # Generate service overrides for all regions
+    serviceOverrides = pkgs.lib.genAttrs
+      (map (r: "openvpn-${r}") piaRegions)
+      (serviceName:
+        let region = pkgs.lib.removePrefix "openvpn-" serviceName;
+        in {
+          serviceConfig.ExecStart = pkgs.lib.mkForce "@${makeOpenvpnWrapper region} openvpn";
+          wantedBy = pkgs.lib.mkForce []; # Don't auto-start on boot
+        }
+      );
+  in serviceOverrides;
 
   # Add sudo rules for PIA VPN control (for terminal use)
   security.sudo-rs.extraRules = [

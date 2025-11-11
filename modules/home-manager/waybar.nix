@@ -26,13 +26,28 @@ in
       text = ''
         #!${pkgs.bash}/bin/bash
 
-        # Check if PIA is active by looking for OpenVPN service
-        if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
-            # VPN is connected
-            echo '{"text":" AT","alt":"connected","tooltip":"PIA Austria Connected","class":"connected"}'
+        # Check if TU Wien VPN is active
+        if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
+            echo '{"text":" TU","alt":"connected","tooltip":"TU Wien VPN Connected","class":"connected"}'
+            exit 0
+        fi
+
+        # Check if any PIA VPN is active
+        ACTIVE_VPN=$(${pkgs.systemd}/bin/systemctl list-units --state=active --no-pager "openvpn-*" 2>/dev/null | ${pkgs.gnugrep}/bin/grep -oP 'openvpn-\K[^.]+' | ${pkgs.coreutils}/bin/head -1)
+
+        if [ -n "$ACTIVE_VPN" ]; then
+            # PIA VPN is connected - format region name for display
+            REGION_DISPLAY=$(echo "$ACTIVE_VPN" | ${pkgs.gnused}/bin/sed 's/-/ /g' | ${pkgs.gawk}/bin/awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
+            # Map region names to proper ISO country codes
+            case "$ACTIVE_VPN" in
+                austria) SHORT="AT" ;;
+                australia) SHORT="AU" ;;
+                *) SHORT=$(echo "$ACTIVE_VPN" | ${pkgs.coreutils}/bin/cut -c1-2 | ${pkgs.coreutils}/bin/tr '[:lower:]' '[:upper:]') ;;
+            esac
+            echo "{\"text\":\" $SHORT\",\"alt\":\"connected\",\"tooltip\":\"PIA $REGION_DISPLAY Connected\",\"class\":\"connected\"}"
         else
-            # VPN is disconnected - always show module even if check fails
-            echo '{"text":" off","alt":"disconnected","tooltip":"Click to connect","class":"disconnected"}'
+            # No VPN is connected
+            echo '{"text":" off","alt":"disconnected","tooltip":"Click to toggle last VPN, right-click to choose","class":"disconnected"}'
         fi
       '';
     };
@@ -42,23 +57,164 @@ in
       text = ''
         #!${pkgs.bash}/bin/bash
 
-        # Check if PIA is currently connected via OpenVPN
-        if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
-            # VPN is connected, disconnect
-            /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia stop austria
-            ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from PIA Austria" -i network-vpn-disconnected
-        else
-            # VPN is disconnected, connect
-            ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to PIA Austria..." -i network-vpn
-            /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia start austria
+        # File to store last used VPN
+        LAST_VPN_FILE="$HOME/.cache/last-vpn-region"
+        DEFAULT_VPN="austria"
+
+        # Check if TU Wien VPN is active
+        if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
+            # TU Wien VPN is connected, disconnect it
+            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop openconnect-tuwien.service
+            ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from TU Wien VPN" -i network-vpn-disconnected
+            ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
+            exit 0
+        fi
+
+        # Check if any PIA VPN is currently active
+        ACTIVE_PIA=$(${pkgs.systemd}/bin/systemctl list-units --state=active --no-pager "openvpn-*" 2>/dev/null | ${pkgs.gnugrep}/bin/grep -oP 'openvpn-\K[^.]+' | ${pkgs.coreutils}/bin/head -1)
+
+        if [ -n "$ACTIVE_PIA" ]; then
+            # PIA VPN is connected, disconnect it
+            REGION_NAME=$(echo "$ACTIVE_PIA" | ${pkgs.gnused}/bin/sed 's/-/ /g' | ${pkgs.gawk}/bin/awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
+            /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia stop "$ACTIVE_PIA"
+            ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from PIA $REGION_NAME" -i network-vpn-disconnected
+            ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
+            exit 0
+        fi
+
+        # No VPN is connected, connect to last used VPN
+        LAST_VPN="$DEFAULT_VPN"
+        if [ -f "$LAST_VPN_FILE" ]; then
+            LAST_VPN=$(${pkgs.coreutils}/bin/cat "$LAST_VPN_FILE")
+        fi
+
+        # Check if last VPN was TU Wien
+        if [ "$LAST_VPN" = "tuwien" ]; then
+            ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to TU Wien VPN..." -i network-vpn
+            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl start openconnect-tuwien.service
 
             # Check if connection was successful
-            sleep 3
-            if ${pkgs.systemd}/bin/systemctl is-active openvpn-austria.service >/dev/null 2>&1; then
-                ${pkgs.libnotify}/bin/notify-send "VPN" "Connected to PIA Austria" -i network-vpn
+            ${pkgs.coreutils}/bin/sleep 3
+            if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
+                ${pkgs.libnotify}/bin/notify-send "VPN" "Connected to TU Wien VPN" -i network-vpn
             else
-                ${pkgs.libnotify}/bin/notify-send "VPN" "Failed to connect to PIA Austria" -i dialog-error
+                ${pkgs.libnotify}/bin/notify-send "VPN" "Failed to connect to TU Wien VPN" -i dialog-error
             fi
+            ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
+        else
+            # Connect to PIA region
+            REGION_NAME=$(echo "$LAST_VPN" | ${pkgs.gnused}/bin/sed 's/-/ /g' | ${pkgs.gawk}/bin/awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
+            ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to PIA $REGION_NAME..." -i network-vpn
+            /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia start "$LAST_VPN"
+
+            # Check if connection was successful
+            ${pkgs.coreutils}/bin/sleep 3
+            if ${pkgs.systemd}/bin/systemctl is-active "openvpn-$LAST_VPN.service" >/dev/null 2>&1; then
+                ${pkgs.libnotify}/bin/notify-send "VPN" "Connected to PIA $REGION_NAME" -i network-vpn
+            else
+                ${pkgs.libnotify}/bin/notify-send "VPN" "Failed to connect to PIA $REGION_NAME" -i dialog-error
+            fi
+            ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
+        fi
+      '';
+    };
+
+    "waybar/vpn-picker.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+
+        # File to store last selected VPN
+        LAST_VPN_FILE="$HOME/.cache/last-vpn-region"
+
+        # Check if TU Wien VPN is active
+        TUWIEN_ACTIVE=$(${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1 && echo "yes" || echo "no")
+
+        # Check if any PIA VPN is active
+        ACTIVE_PIA=$(${pkgs.systemd}/bin/systemctl list-units --state=active --no-pager "openvpn-*" 2>/dev/null | ${pkgs.gnugrep}/bin/grep -oP 'openvpn-\K[^.]+' | ${pkgs.coreutils}/bin/head -1)
+
+        # Get list of all available PIA regions
+        PIA_REGIONS=$(${pkgs.findutils}/bin/find /etc/systemd/system/ -name 'openvpn-*.service' -exec ${pkgs.coreutils}/bin/basename {} .service \; 2>/dev/null | ${pkgs.gnused}/bin/sed 's/openvpn-//' | ${pkgs.coreutils}/bin/sort)
+
+        # Build menu
+        MENU=""
+
+        # Add disconnect option if any VPN is active
+        if [ "$TUWIEN_ACTIVE" = "yes" ]; then
+            MENU="🔴 Disconnect from TU Wien VPN\n"
+        elif [ -n "$ACTIVE_PIA" ]; then
+            REGION_NAME=$(echo "$ACTIVE_PIA" | ${pkgs.gnused}/bin/sed 's/-/ /g' | ${pkgs.gawk}/bin/awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
+            MENU="🔴 Disconnect from PIA $REGION_NAME\n"
+        fi
+
+        # Add university VPN option
+        MENU="$MENU🎓 TU Wien VPN\n---\n"
+
+        # Add PIA regions
+        MENU="$MENU$PIA_REGIONS"
+
+        # Show rofi menu and get selection
+        SELECTED=$(echo -e "$MENU" | ${pkgs.rofi}/bin/rofi -dmenu -i -p "Select VPN" -theme-str 'window {width: 400px;} listview {lines: 15;}')
+
+        # Exit if no selection
+        if [ -z "$SELECTED" ]; then
+            exit 0
+        fi
+
+        # Handle disconnect options
+        if [[ "$SELECTED" == "🔴 Disconnect from TU Wien VPN" ]]; then
+            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop openconnect-tuwien.service
+            ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from TU Wien VPN" -i network-vpn-disconnected
+            ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
+            exit 0
+        elif [[ "$SELECTED" == "🔴 Disconnect"* ]]; then
+            /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia stop "$ACTIVE_PIA"
+            ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from PIA" -i network-vpn-disconnected
+            ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
+            exit 0
+        fi
+
+        # Skip separator
+        if [[ "$SELECTED" == "---" ]]; then
+            exit 0
+        fi
+
+        # Disconnect any active VPN first
+        if [ "$TUWIEN_ACTIVE" = "yes" ]; then
+            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop openconnect-tuwien.service 2>/dev/null
+        fi
+        if [ -n "$ACTIVE_PIA" ]; then
+            /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia stop "$ACTIVE_PIA" 2>/dev/null
+        fi
+
+        # Handle TU Wien VPN selection
+        if [[ "$SELECTED" == "🎓 TU Wien VPN" ]]; then
+            ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to TU Wien VPN..." -i network-vpn
+            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl start openconnect-tuwien.service
+
+            # Check if connection was successful
+            ${pkgs.coreutils}/bin/sleep 3
+            if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
+                ${pkgs.libnotify}/bin/notify-send "VPN" "Connected to TU Wien VPN" -i network-vpn
+                echo "tuwien" > "$LAST_VPN_FILE"
+            else
+                ${pkgs.libnotify}/bin/notify-send "VPN" "Failed to connect to TU Wien VPN" -i dialog-error
+            fi
+            exit 0
+        fi
+
+        # Handle PIA VPN selection
+        REGION_NAME=$(echo "$SELECTED" | ${pkgs.gnused}/bin/sed 's/-/ /g' | ${pkgs.gawk}/bin/awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
+        ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to PIA $REGION_NAME..." -i network-vpn
+        /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia start "$SELECTED"
+
+        # Check if connection was successful
+        ${pkgs.coreutils}/bin/sleep 3
+        if ${pkgs.systemd}/bin/systemctl is-active "openvpn-$SELECTED.service" >/dev/null 2>&1; then
+            ${pkgs.libnotify}/bin/notify-send "VPN" "Connected to PIA $REGION_NAME" -i network-vpn
+            echo "$SELECTED" > "$LAST_VPN_FILE"
+        else
+            ${pkgs.libnotify}/bin/notify-send "VPN" "Failed to connect to PIA $REGION_NAME" -i dialog-error
         fi
       '';
     };
@@ -159,7 +315,8 @@ in
         return-type = "json";
         exec = "${config.xdg.configHome}/waybar/vpn-status.sh";
         on-click = "${config.xdg.configHome}/waybar/vpn-toggle.sh";
-        interval = 10;
+        on-click-right = "${config.xdg.configHome}/waybar/vpn-picker.sh";
+        interval = 3;
         format = "{icon}{text}";
         format-icons = {
           connected = "󰖂";
