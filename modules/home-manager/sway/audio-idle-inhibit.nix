@@ -8,13 +8,11 @@
     Unit = {
       Description = "audio-idle-inhibit service";
       After = [ "sway-session.target" "graphical-session.target" ];
-      Wants = [ "sway-session.target" ];
+      PartOf = [ "sway-session.target" ];
     };
 
     Service = {
       ExecStart = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
-      Restart = "on-failure";
-      RestartSec = 5;
     };
 
     Install = {
