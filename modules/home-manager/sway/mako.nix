@@ -17,7 +17,8 @@
 
   systemd.user.services.poweralertd = {
     Unit = {
-      After = [ "mako.service" ];
+      After = [ "mako.service" "sway-session.target" ];
+      PartOf = [ "sway-session.target" ];
     };
   };
 }
