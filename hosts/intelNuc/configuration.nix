@@ -4,12 +4,43 @@
   imports = [
     ./hardware-configuration.nix
     ../common.nix
+    ../../modules/system/tuwien-vpn.nix
     inputs.pia.nixosModules."x86_64-linux".default
   ];
 
   services.pia = {
     enable = true;
     authUserPassFile = config.age.secrets.pia-credentials.path;
+  };
+
+  services.tuwien-vpn = {
+    enable = true;
+    passwordFile = config.age.secrets.tuwien-vpn-password.path;
+  };
+
+  # Workaround for PIA OpenVPN CRL certificate issue
+  # See: https://github.com/Fuwn/pia.nix/issues/2
+  # See: https://github.com/openssl/openssl/discussions/24301
+  # Remove crl-verify from OpenVPN configs due to malformed CRL dates
+  systemd.services.fix-pia-crl = {
+    description = "Remove CRL verification from PIA OpenVPN configs";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "openvpn@.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      # Remove crl-verify lines from all OpenVPN configs in /etc/openvpn/
+      if [ -d /etc/openvpn ]; then
+        for conf in /etc/openvpn/*.conf; do
+          if [ -f "$conf" ]; then
+            ${pkgs.gnused}/bin/sed -i '/crl-verify/d' "$conf"
+          fi
+        done
+        echo "Patched PIA OpenVPN configs to remove CRL verification"
+      fi
+    '';
   };
 
   # Add sudo rules for PIA VPN control (for terminal use)
@@ -75,14 +106,14 @@
 
     extraPackages = with pkgs; [
       intel-media-driver
-      vaapiIntel
-      vaapiVdpau
+      intel-vaapi-driver
+      libva-vdpau-driver
       libvdpau-va-gl
     ];
 
     extraPackages32 = with pkgs.pkgsi686Linux; [
       intel-media-driver
-      vaapiIntel
+      intel-vaapi-driver
     ];
   };
 

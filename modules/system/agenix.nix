@@ -16,5 +16,12 @@
       mode = "0400";
       owner = "root";
     };
+
+    secrets.tuwien-vpn-password = {
+      file = "${inputs.self}/secrets/tuwien-vpn-password.age";
+      path = "/run/secrets/tuwien-vpn-password";
+      mode = "0400";
+      owner = "root";
+    };
   };
 }
