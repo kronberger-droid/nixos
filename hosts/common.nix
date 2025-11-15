@@ -232,6 +232,7 @@ in
       xorg.xauth
       woeusb
       clamav
+      apptainer-overriden-nixos
     ];
   };
 
