@@ -5,6 +5,7 @@
     quickemu
     qemu
     samba
+    apptainer
   ];
 
   # Enable KVM for better performance

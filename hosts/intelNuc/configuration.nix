@@ -5,6 +5,7 @@
     ./hardware-configuration.nix
     ../common.nix
     ../../modules/system/tuwien-vpn.nix
+    # ../../modules/system/copyparty.nix  # Disabled for now
     inputs.pia.nixosModules."x86_64-linux".default
   ];
 

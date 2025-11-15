@@ -14,6 +14,7 @@
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    copyparty.url = "github:9001/copyparty";
   };
 
   outputs = inputs@{ nixpkgs, home-manager, agenix, ... }:
