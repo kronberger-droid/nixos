@@ -5,4 +5,5 @@ in
 {
   "pia-credentials.age".publicKeys = [ intelNuc spectre ];
   "tuwien-vpn-password.age".publicKeys = [ intelNuc spectre ];
+  "copyparty-admin-password.age".publicKeys = [ intelNuc ];
 }

@@ -23,5 +23,12 @@
       mode = "0400";
       owner = "root";
     };
+
+    secrets.copyparty-admin-password = {
+      file = "${inputs.self}/secrets/copyparty-admin-password.age";
+      path = "/run/secrets/copyparty-admin-password";
+      mode = "0444";
+      owner = "root";
+    };
   };
 }
