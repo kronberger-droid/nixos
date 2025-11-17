@@ -64,4 +64,5 @@ def emu [config?: string] {
     print $"Starting Windows 11 with ($config) config..."
     cd $emulation_dir
     quickemu --vm $config_file
+    swaymsg floating enable
 }
