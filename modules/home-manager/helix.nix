@@ -21,11 +21,15 @@
     # PDF Viewer
     zathura
 
-    #CSV
+    # CSV
     prettier
 
-    #General Compilers
+    # General Compilers
     gcc
+
+    # Python
+    ruff
+    pyright
   ];
 
   imports = [
@@ -125,6 +129,15 @@
           };
           auto-format = true;
         }
+        {
+          name = "python";
+          language-servers = [ "pyright" ];
+          formatter = {
+            command = "${pkgs.ruff}/bin/ruff";
+            args = [ "format" "-" ];
+          };
+          auto-format = true;
+        }
       ];
       language-server = {
         nil = {
@@ -193,6 +206,16 @@
                 onOpenAndSave = true;
                 onEdit = true;
               };
+            };
+          };
+        };
+
+        pyright = {
+          command = "${pkgs.pyright}/bin/pyright-langserver";
+          args = [ "--stdio" ];
+          config = {
+            python.analysis = {
+              typeCheckingMode = "basic";
             };
           };
         };
