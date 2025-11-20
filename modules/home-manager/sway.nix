@@ -53,9 +53,8 @@ in
     ./rofi.nix
     ./sway/audio-idle-inhibit.nix
     ./sway/swaylock.nix
-    ./sway/mako.nix
-  ] ++ lib.optionals isNotebook [
-    ./way-displays.nix
+    ./swaync.nix
+    ./kanshi.nix
   ];
 
   home.packages = with pkgs; [
@@ -173,6 +172,8 @@ in
       keybindings = lib.mkOptionDefault {
         # browser
         "${modifier}+Shift+s" = "exec ${defaultBrowser}";
+        # notification center
+        "${modifier}+Shift+d" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client -t -sw";
         # take a screenshot
         "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
         # reload sway

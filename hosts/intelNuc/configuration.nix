@@ -5,6 +5,7 @@
     ./hardware-configuration.nix
     ../common.nix
     ../../modules/system/tuwien-vpn.nix
+    ../../modules/system/scx-schedulers.nix
     # ../../modules/system/copyparty.nix  # Disabled for now
     inputs.pia.nixosModules."x86_64-linux".default
   ];
@@ -85,9 +86,33 @@
     gamescopeSession.enable = true;
   };
 
+  programs.gamemode = {
+    enable = true;
+    settings = {
+      general = {
+        renice = 10;
+        inhibit_screensaver = 1;
+      };
+      gpu = {
+        apply_gpu_optimisations = "accept-responsibility";
+        gpu_device = 0;
+      };
+      cpu = {
+        park_cores = "no";
+        pin_policy = "prefer-high-performance";
+      };
+    };
+  };
+
   boot = {
+    initrd.systemd.enable = true; # Faster boot with systemd in initrd
     loader = {
-      systemd-boot.enable = true;
+      systemd-boot = {
+        enable = true;
+        editor = false; # Disable boot menu editor for security
+        configurationLimit = 20; # Limit number of stored generations
+      };
+      timeout = 1; # Fast boot menu timeout
       efi.canTouchEfiVariables = true;
     };
     kernelPackages = pkgs.linuxPackages_latest;
