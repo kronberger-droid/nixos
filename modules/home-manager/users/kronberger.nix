@@ -26,6 +26,7 @@ in
         ../bitwarden.nix
         ../himalaya.nix
         ../quickemu.nix
+        ../udiskie.nix
       ];
 
       programs = {

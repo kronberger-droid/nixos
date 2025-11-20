@@ -18,11 +18,13 @@
       "wdat_wdt"
     ];
     loader = {
+      timeout = 1; # Fast boot menu timeout
       grub = {
         enable = true;
         efiSupport = true;
         efiInstallAsRemovable = true;
         device = "nodev";
+        configurationLimit = 20; # Limit number of stored generations
       };
       efi.canTouchEfiVariables = false;
     };

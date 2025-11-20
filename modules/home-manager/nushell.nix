@@ -5,6 +5,9 @@
     zoxide
     lazygit
     rip2
+    navi
+    tealdeer
+    zellij
   ];
   programs.nushell = {
     enable = true;
@@ -20,6 +23,7 @@
       ssh = "kitty +kitten ssh";
       rip = "rip --graveyard ($env.HOME)/.local/share/Trash";
       rm = "echo 'use rip instead'";
+      tldr = "tealdeer";
     };
   };
 

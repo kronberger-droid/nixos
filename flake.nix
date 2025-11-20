@@ -15,6 +15,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     copyparty.url = "github:9001/copyparty";
+    # impermanence.url = "github:nix-community/impermanence";  # Disabled for now - test later
   };
 
   outputs = inputs@{ nixpkgs, home-manager, agenix, ... }:

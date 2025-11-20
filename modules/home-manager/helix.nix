@@ -4,6 +4,9 @@
   home.packages = with pkgs; [
     # Nix
     nil
+    statix
+    deadnix
+    alejandra
 
     # Typst
     typst
@@ -26,6 +29,9 @@
 
     # General Compilers
     gcc
+
+    # Rust
+    bacon
 
     # Python
     ruff
@@ -135,6 +141,15 @@
           formatter = {
             command = "${pkgs.ruff}/bin/ruff";
             args = [ "format" "-" ];
+          };
+          auto-format = true;
+        }
+        {
+          name = "nix";
+          language-servers = [ "nil" ];
+          formatter = {
+            command = "${pkgs.alejandra}/bin/alejandra";
+            args = [ "--quiet" ];
           };
           auto-format = true;
         }

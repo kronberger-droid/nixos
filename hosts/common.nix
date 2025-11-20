@@ -11,6 +11,7 @@ let
 in
 {
   imports = [
+    # ../modules/system/impermanence.nix  # Disabled for now - test later with more time
     ../modules/system/megasync.nix
     ../modules/system/agenix.nix
     ../modules/system/keyd.nix
@@ -37,6 +38,17 @@ in
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       ];
+
+      # Build optimization
+      max-jobs = "auto";
+      cores = 0; # Use all available cores
+
+      # Faster evaluation
+      keep-derivations = true;
+      keep-outputs = true;
+
+      # Security
+      sandbox = true;
     };
     gc = {
       automatic = true;
@@ -246,6 +258,17 @@ in
     liberation_ttf
     cm_unicode
   ];
+
+  # Documentation settings
+  documentation = {
+    enable = true;
+    doc.enable = true;
+    man = {
+      enable = true;
+      generateCaches = true; # Faster man -k search
+    };
+    info.enable = true;
+  };
 
   nixpkgs.config.allowUnfree = true;
 }
