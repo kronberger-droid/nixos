@@ -24,32 +24,6 @@
   backgroundImage = ./sway/deathpaper.jpg;
 
   defaultBrowser = "${pkgs.firefox}/bin/firefox";
-
-  hostDispl = {
-    intelNuc = {
-      "*" = {
-        bg = "${backgroundImage} fill";
-      };
-      "HDMI-A-1" = {
-        mode = "2560x1440@119.998Hz";
-        pos = "0 0";
-        scale = "1";
-        bg = "${backgroundImage} fill";
-        adaptive_sync = "on";
-        allow_tearing = "yes";
-      };
-    };
-    spectre = {
-      "*" = {
-        bg = "${backgroundImage} fill";
-      };
-    };
-    portable = {
-      "*" = {
-        bg = "${backgroundImage} fill";
-      };
-    };
-  };
 in {
   imports = [
     ./sway/swayidle.nix
@@ -96,14 +70,45 @@ in {
     enable = true;
     systemd.enable = true;
     wrapperFeatures.gtk = true;
-    extraConfig = builtins.readFile "${./sway/config}";
+    extraConfig =
+      ''
+        # Window rules with sizing
+        for_window [app_id="nemo"] floating enable, sticky enable, resize set 1200 800
+        for_window [app_id="floating_shell"] floating enable, border pixel 1, sticky enable, resize set 50ppt 60ppt
+        for_window [app_id="localsend_app"] floating enable, sticky enable, resize set 1200 800
+        for_window [instance="bitwarden"] floating enable, sticky enable, resize set 1200 800
+        for_window [app_id="org.speedcrunch"] floating enable, sticky enable, resize set 800 600
+        for_window [instance="gpartedbin"] floating enable
+        for_window [title="Authentication Required"] floating enable
+
+        # File dialogs with sizing
+        for_window [title="(?:Open|Save) (?:File|Folder|As)"] floating enable, resize set 60 ppt 55 ppt
+        for_window [title="(?:open|save) (?:file|folder|as)"] floating enable, resize set 60 ppt 55 ppt
+
+        # Generic dialog types
+        for_window [window_role="bubble"] floating enable
+        for_window [window_role="task_dialog"] floating enable
+        for_window [window_role="Preferences"] floating enable
+        for_window [window_type="dialog"] floating enable
+        for_window [window_type="menu"] floating enable
+      ''
+      + (
+        if isNotebook
+        then ''
+          # Touchpad gestures for notebooks
+          bindgesture swipe:3:right workspace next
+          bindgesture swipe:3:left workspace prev
+        ''
+        else ""
+      );
     config = rec {
       modifier = modKey;
       terminal = "${pkgs.kitty}/bin/kitty";
-      output =
-        if builtins.hasAttr host hostDispl
-        then hostDispl.${host}
-        else {};
+      output = {
+        "*" = {
+          bg = "${backgroundImage} fill";
+        };
+      };
       window = {
         titlebar = false;
       };
@@ -111,6 +116,20 @@ in {
         border = 0;
         criteria = [
           {app_id = "nemo";}
+          {app_id = "floating_shell";}
+          {app_id = "pavucontrol";}
+          {app_id = "nm-connection-editor";}
+          {app_id = "blueman-manager";}
+          {app_id = "imv";}
+          {app_id = "mpv";}
+          {title = "^Open File$";}
+          {title = "^Save File$";}
+          {title = "^Open Folder$";}
+          {title = "^File Upload";}
+          {title = "^Picture-in-Picture$";}
+          {window_role = "pop-up";}
+          {window_role = "dialog";}
+          {window_type = "dialog";}
         ];
       };
       startup = [
@@ -180,8 +199,8 @@ in {
       keybindings = lib.mkOptionDefault {
         # browser
         "${modifier}+Shift+s" = "exec ${defaultBrowser}";
-        # notification center
-        "${modifier}+Shift+d" = "exec ${pkgs.swaynotificationcenter}/bin/swaync-client -t -sw";
+        # dismiss notifications
+        "${modifier}+Shift+d" = "exec ${pkgs.mako}/bin/makoctl dismiss -a";
         # take a screenshot
         "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
         # reload sway

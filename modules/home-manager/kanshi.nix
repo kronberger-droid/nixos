@@ -6,7 +6,7 @@
 
   services.kanshi = {
     enable = true;
-    systemdTarget = "sway-session.target";
+    systemdTarget = "graphical-session.target";
 
     settings =
       if host == "intelNuc" then [

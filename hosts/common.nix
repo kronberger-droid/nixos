@@ -1,5 +1,8 @@
-{ pkgs, host, ... }:
-let
+{
+  pkgs,
+  host,
+  ...
+}: let
   # Display output mapping per host
   outputNames = {
     intelNuc = "HDMI-A-1";
@@ -8,8 +11,7 @@ let
     portable = "*";
   };
   outputName = outputNames.${host} or (throw "Unknown hostname: ${host}");
-in
-{
+in {
   imports = [
     # ../modules/system/impermanence.nix  # Disabled for now - test later with more time
     ../modules/system/megasync.nix
@@ -21,12 +23,13 @@ in
     ../modules/system/performance.nix
     ../modules/system/security.nix
     ../modules/system/power-management.nix
+    ../modules/system/pia.nix
+    ../modules/system/tuwien-vpn.nix
   ];
-
 
   nix = {
     settings = {
-      experimental-features = [ "nix-command" "flakes" ];
+      experimental-features = ["nix-command" "flakes"];
       auto-optimise-store = true;
       max-free = 1073741824; # 1GB
       min-free = 134217728; # 128MB
@@ -57,7 +60,7 @@ in
     };
     optimise = {
       automatic = true;
-      dates = [ "03:45" ];
+      dates = ["03:45"];
     };
   };
 
@@ -75,7 +78,7 @@ in
     networkmanager = {
       enable = true;
       # Faster DNS resolution
-      insertNameservers = [ "1.1.1.1" "1.0.0.1" "8.8.8.8" ];
+      insertNameservers = ["1.1.1.1" "1.0.0.1" "8.8.8.8"];
       # Better connection management
       settings = {
         main = {
@@ -99,7 +102,7 @@ in
     hostName = host;
 
     # Enable systemd-resolved for better DNS performance
-    nameservers = [ "1.1.1.1" "1.0.0.1" ];
+    nameservers = ["1.1.1.1" "1.0.0.1"];
     # IPv6 privacy extensions
     enableIPv6 = true;
   };
@@ -164,7 +167,7 @@ in
       enable = true;
       powerOnBoot = true;
     };
-    firmware = [ pkgs.linux-firmware ];
+    firmware = [pkgs.linux-firmware];
     graphics = {
       enable = true;
       enable32Bit = true;
@@ -173,9 +176,9 @@ in
 
   xdg.portal = {
     enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+    extraPortals = [pkgs.xdg-desktop-portal-gtk];
     config = {
-      common.default = [ "wlr" "gtk" ];
+      common.default = ["wlr" "gtk"];
     };
     wlr = {
       enable = true;
@@ -201,7 +204,7 @@ in
     createHome = true;
     isNormalUser = true;
     description = "Kronberger";
-    extraGroups = [ "networkmanager" "wheel" "audio" "video" ];
+    extraGroups = ["networkmanager" "wheel" "audio" "video"];
     shell = pkgs.nushell;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFijJelcEDGPlu9aDnjkLa4TWNXXJGeyHgw6ucANynAW"
@@ -210,7 +213,7 @@ in
   };
 
   environment = {
-    shells = [ pkgs.nushell ];
+    shells = [pkgs.nushell];
     variables = {
       EDITOR = "hx";
     };
@@ -220,6 +223,7 @@ in
       curl
       gparted
       bat
+      bat-extras.core
       zoxide
       nmap
       usbutils
@@ -263,10 +267,7 @@ in
   documentation = {
     enable = true;
     doc.enable = true;
-    man = {
-      enable = true;
-      generateCaches = true; # Faster man -k search
-    };
+    man.enable = true;
     info.enable = true;
   };
 
