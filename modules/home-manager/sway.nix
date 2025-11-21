@@ -1,5 +1,11 @@
-{ config, pkgs, lib, host, isNotebook, ... }:
-let
+{
+  config,
+  pkgs,
+  lib,
+  host,
+  isNotebook,
+  ...
+}: let
   inherit (config.myTheme) palette backgroundColor textColor accentColor;
 
   ws1 = "1 browser";
@@ -44,8 +50,7 @@ let
       };
     };
   };
-in
-{
+in {
   imports = [
     ./sway/swayidle.nix
     ./waybar.nix
@@ -53,7 +58,7 @@ in
     ./rofi.nix
     ./sway/audio-idle-inhibit.nix
     ./sway/swaylock.nix
-    ./swaync.nix
+    ./sway/mako.nix
     ./kanshi.nix
   ];
 
@@ -95,14 +100,17 @@ in
     config = rec {
       modifier = modKey;
       terminal = "${pkgs.kitty}/bin/kitty";
-      output = if builtins.hasAttr host hostDispl then hostDispl.${host} else { };
+      output =
+        if builtins.hasAttr host hostDispl
+        then hostDispl.${host}
+        else {};
       window = {
         titlebar = false;
       };
       floating = {
         border = 0;
         criteria = [
-          { app_id = "nemo"; }
+          {app_id = "nemo";}
         ];
       };
       startup = [
@@ -255,27 +263,33 @@ in
         smartGaps = true;
         smartBorders = "no_gaps";
       };
-      input = {
-        "*" = {
-          xkb_options = "compose:menu";
-          xkb_layout = "us";
-          xkb_variant = ",";
-        };
-      } // (
-        if host == "t480s" then {
-          "1267:32:Elan_Touchpad" = {
-            natural_scroll = "enabled";
-            tap = "enabled";
+      input =
+        {
+          "*" = {
+            xkb_options = "compose:menu";
+            xkb_layout = "us";
+            xkb_variant = ",";
           };
-        } else if host == "spectre" || host == "portable" then {
-          "1739:52912:SYNA32BF:00_06CB:CEB0_Touchpad" = {
-            natural_scroll = "enabled";
-            tap = "enabled";
-            pointer_accel = "0.3";
-          };
-        } else { }
-      );
-      bars = [ ];
+        }
+        // (
+          if host == "t480s"
+          then {
+            "1267:32:Elan_Touchpad" = {
+              natural_scroll = "enabled";
+              tap = "enabled";
+            };
+          }
+          else if host == "spectre" || host == "portable"
+          then {
+            "1739:52912:SYNA32BF:00_06CB:CEB0_Touchpad" = {
+              natural_scroll = "enabled";
+              tap = "enabled";
+              pointer_accel = "0.3";
+            };
+          }
+          else {}
+        );
+      bars = [];
     };
   };
 }
