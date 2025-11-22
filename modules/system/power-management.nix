@@ -91,16 +91,6 @@
         HybridSleepState=disk
         HybridSleepMode=suspend
       '' else "";
-
-    # Power-efficient service settings for laptops
-    services = {
-      # Reduce log verbosity to save power
-      systemd-journald.serviceConfig =
-        if isNotebook then {
-          SystemMaxUse = "100M";
-          RuntimeMaxUse = "50M";
-        } else { };
-    };
   };
 
   # Laptop logind settings

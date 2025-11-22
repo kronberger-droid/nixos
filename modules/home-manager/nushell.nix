@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   home.packages = with pkgs; [
     bat
     zoxide
@@ -31,13 +30,15 @@
     enable = true;
     enableNushellIntegration = true;
 
-    settings = (with builtins; fromTOML (readFile "${pkgs.starship}/share/starship/presets/nerd-font-symbols.toml")) // {
-      command_timeout = 2000;
-      git_branch.symbol = " ";
-      time = {
-        disabled = false;
-        format = "[$time]($style) ";
+    settings =
+      (with builtins; fromTOML (readFile "${pkgs.starship}/share/starship/presets/nerd-font-symbols.toml"))
+      // {
+        command_timeout = 2000;
+        git_branch.symbol = " ";
+        time = {
+          disabled = false;
+          format = "[$time]($style) ";
+        };
       };
-    };
   };
 }

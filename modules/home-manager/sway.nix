@@ -59,11 +59,7 @@ in {
     sway-scratch
     libinput
 
-    # xdg desktop portal
     xdg-user-dirs
-    xdg-desktop-portal-wlr
-    xdg-desktop-portal
-    xdg-desktop-portal-gtk
   ];
 
   wayland.windowManager.sway = {

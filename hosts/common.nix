@@ -85,16 +85,10 @@ in {
           dns = "systemd-resolved";
           rc-manager = "symlink";
         };
-        connection = {
-          mdns = 2;
-          "ipv6.method" = "auto";
-          "ipv6.addr-gen-mode" = "stable-privacy";
-        };
-        wifi = {
-          "scan-rand-mac-address" = "yes";
-        };
-        ethernet = {
-          "cloned-mac-address" = "random";
+        device = {
+          "wifi.scan-rand-mac-address" = "yes";
+          "wifi.cloned-mac-address" = "stable";
+          "ethernet.cloned-mac-address" = "stable";
         };
       };
     };
