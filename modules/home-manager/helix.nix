@@ -1,6 +1,5 @@
 # /etc/nixos/modules/home-manager/helix.nix
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   home.packages = with pkgs; [
     # Nix
     nil
@@ -22,6 +21,7 @@
     harper
 
     # PDF Viewer
+    presenterm
     zathura
 
     # CSV
@@ -32,6 +32,7 @@
 
     # Rust
     bacon
+    rust-script
 
     # Python
     ruff
@@ -103,7 +104,7 @@
           name = "csv";
           formatter = {
             command = "${pkgs.prettier}/bin/prettier";
-            args = [ "--parser" "csv" ];
+            args = ["--parser" "csv"];
           };
           auto-format = true;
         }
@@ -115,7 +116,7 @@
           ];
           formatter = {
             command = "${pkgs.dprint}/bin/dprint";
-            args = [ "fmt" "--stdin" "md" ];
+            args = ["fmt" "--stdin" "md"];
           };
         }
         {
@@ -137,19 +138,19 @@
         }
         {
           name = "python";
-          language-servers = [ "pyright" ];
+          language-servers = ["pyright"];
           formatter = {
             command = "${pkgs.ruff}/bin/ruff";
-            args = [ "format" "-" ];
+            args = ["format" "-"];
           };
           auto-format = true;
         }
         {
           name = "nix";
-          language-servers = [ "nil" ];
+          language-servers = ["nil"];
           formatter = {
             command = "${pkgs.alejandra}/bin/alejandra";
-            args = [ "--quiet" ];
+            args = ["--quiet"];
           };
           auto-format = true;
         }
@@ -157,7 +158,7 @@
       language-server = {
         nil = {
           command = "${pkgs.nil}/bin/nil";
-          file-types = [ "nix" ];
+          file-types = ["nix"];
         };
         rust-analyzer = {
           command = "${pkgs.rust-analyzer-unwrapped}/bin/rust-analyzer";
@@ -167,11 +168,11 @@
         };
         harper = {
           command = "${pkgs.harper}/bin/harper-ls";
-          args = [ "--stdio" ];
+          args = ["--stdio"];
         };
         ltex = {
           command = "${pkgs.ltex-ls}/bin/ltex-ls";
-          file-types = [ "latex" ];
+          file-types = ["latex"];
           config = {
             ltex.dictionary = {
               "en-US" = [
@@ -187,7 +188,7 @@
 
         texlab = {
           command = "${pkgs.texlab}/bin/texlab";
-          file-types = [ "latex" ];
+          file-types = ["latex"];
           config = {
             texlab = {
               latexindent = {
@@ -227,7 +228,7 @@
 
         pyright = {
           command = "${pkgs.pyright}/bin/pyright-langserver";
-          args = [ "--stdio" ];
+          args = ["--stdio"];
           config = {
             python.analysis = {
               typeCheckingMode = "basic";
