@@ -1,22 +1,24 @@
 { pkgs, ... }:
 {
   home.packages = with pkgs; [
-    sway-audio-idle-inhibit
+    wayland-pipewire-idle-inhibit
   ];
 
-  systemd.user.services.audio-idle-inhibit = {
+  systemd.user.services.wayland-pipewire-idle-inhibit = {
     Unit = {
-      Description = "audio-idle-inhibit service";
-      After = [ "sway-session.target" "graphical-session.target" ];
-      PartOf = [ "sway-session.target" ];
+      Description = "Inhibit idle when audio is playing";
+      After = [ "pipewire.service" "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
     };
 
     Service = {
-      ExecStart = "${pkgs.sway-audio-idle-inhibit}/bin/sway-audio-idle-inhibit";
+      ExecStart = "${pkgs.wayland-pipewire-idle-inhibit}/bin/wayland-pipewire-idle-inhibit";
+      Restart = "on-failure";
+      RestartSec = 5;
     };
 
     Install = {
-      WantedBy = [ "sway-session.target" ];
+      WantedBy = [ "graphical-session.target" ];
     };
   };
 }

@@ -21,6 +21,33 @@ def color-picker [] {
     echo [[type value]; [RGB ($tokens | get 1 | str replace -ra "[()]" "")] [HEX ($tokens | get 2)] ]
 }
 
+# SSH connection shortcuts
+def connect [host: string] {
+    # Define your SSH connections here
+    let connections = {
+        datalab: "user@datalab.example.com",
+        asc4: "user@asc4.example.com",
+        asc5: "user@asc5.example.com"
+    }
+
+    # Check if the host exists in our connections
+    if ($host in $connections) {
+        let ssh_target = ($connections | get $host)
+        print $"Connecting to ($host) \(($ssh_target)\)..."
+        if $host == datalab {
+            ssh cluster.datalab.tuwien.ac.at -l martin.kronberger
+        } else if $host == "asc4" {
+            ^ssh sumo_mk@vsc4.vsc.ac.at
+        } else if $host == "asc5" {
+            ^ssh sumo_mk@vsc5.vsc.ac.at
+        } 
+    } else {
+        print $"Error: Unknown host '($host)'"
+        print "Available hosts:"
+        $connections | columns | each { |h| print $"  - ($h)" }
+    }
+}
+
 # QuickEMU VM management
 def emu [config?: string] {
     let emulation_dir = ($env.HOME | path join "Emulation")
