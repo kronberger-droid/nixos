@@ -1,9 +1,13 @@
-{ pkgs, inputs, host, isNotebook, ... }:
-let
+{
+  pkgs,
+  inputs,
+  host,
+  isNotebook,
+  ...
+}: let
   dropkittenPkg = inputs.dropkitten.packages.${pkgs.stdenv.hostPlatform.system}.dropkitten;
   rustToolchain = inputs.fenix.packages.${pkgs.stdenv.hostPlatform.system}.complete.toolchain;
-in
-{
+in {
   home-manager = {
     extraSpecialArgs = {
       inherit inputs host isNotebook dropkittenPkg;
@@ -66,101 +70,111 @@ in
         username = "kronberger";
         homeDirectory = "/home/kronberger";
         packages = with pkgs; [
-        # Browsers
-        brave
-        nyxt
-        firefox
+          # Browsers
+          brave
+          nyxt
+          firefox
 
-        # Custom Packages
-        dropkittenPkg
+          # Custom Packages
+          dropkittenPkg
 
-        # Mail
-        thunderbird
+          # Mail
+          thunderbird
 
-        # Filemanagers
-        nemo-with-extensions
-        glib
-        yazi
-        zotero-beta
-        serpl
+          # Filemanagers
+          nemo-with-extensions
+          glib
+          yazi
+          zotero-beta
+          serpl
 
-        # Editors
-        (pkgs.obsidian.overrideAttrs (oldAttrs: {
-          postInstall = (oldAttrs.postInstall or "") + ''
-            substituteInPlace $out/share/applications/obsidian.desktop \
-              --replace "Exec=obsidian" "Exec=obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland"
-          '';
-        }))
-        onlyoffice-desktopeditors
+          # Editors
+          (pkgs.obsidian.overrideAttrs (oldAttrs: {
+            postInstall =
+              (oldAttrs.postInstall or "")
+              + ''
+                substituteInPlace $out/share/applications/obsidian.desktop \
+                  --replace "Exec=obsidian" "Exec=obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland"
+              '';
+          }))
+          onlyoffice-desktopeditors
 
-        # Development
-        rustToolchain
-        tokei
-        cargo-generate
+          # Development
+          rustToolchain
+          tokei
+          cargo-generate
 
-        # Music
-        # lmms
-        spotify
-        spotify-player
-        ncspot
+          # Music
+          # lmms
+          spotify
+          spotify-player
+          ncspot
 
-        # Information
-        fastfetch
-        fzf
-        serpl
-        translate-shell
-        wiki-tui
+          # Information
+          fastfetch
+          fzf
+          serpl
+          translate-shell
+          wiki-tui
 
-        # Images
-        drawio
-        inkscape
-        gthumb
-        ipe
-        gimp
-        ffmpeg_6
+          # Images
+          drawio
+          inkscape
+          gthumb
+          ipe
+          gimp
+          ffmpeg_6
 
-        # PDF
-        ghostscript
-        mupdf
-        pdfarranger
-        kdePackages.okular
-        zathura
+          # PDF
+          ghostscript
+          mupdf
+          pdfarranger
+          kdePackages.okular
+          zathura
 
-        # Remote
-        localsend
+          # Remote
+          localsend
 
-        # System
-        ltunify
-        # rpi-imager
-        bluetuith
+          # System
+          ltunify
+          # rpi-imager
+          bluetuith
 
-        # Math
-        speedcrunch
+          # Math
+          speedcrunch
 
-        # CAD
-        freecad-wayland
+          # CAD
+          freecad-wayland
 
-        # Safety
-        seahorse
-        bitwarden-desktop
-        rofi-rbw-wayland
-        rbw
-        openssl
-        libsecret
+          # Safety
+          seahorse
+          bitwarden-desktop
+          rofi-rbw-wayland
+          rbw
+          openssl
+          libsecret
 
-        # Social
-        element-desktop
-        zapzap
+          # Social
+          element-desktop
+          zapzap
 
-        # Video
-        vlc
-        obs-studio
+          # Video
+          vlc
+          obs-studio
 
-        # AI
-        ollama
-        claude-code
-        gemini-cli
+          # AI
+          ollama
+          claude-code
+          gemini-cli
 
+          # Python
+          (python3.withPackages (ps:
+            with ps; [
+              pip
+              numpy
+              scipy
+              h5py
+            ]))
         ];
 
         file = {

@@ -63,7 +63,7 @@
         configurationLimit = 20;
       };
       timeout = 1;
-      efi.canTouchEfiVariables = true;
+      efi.canTouchEfiVariables = false;
     };
     kernel.sysctl = {
       "kernel.sysrq" = 1;

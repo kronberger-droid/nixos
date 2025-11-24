@@ -1,6 +1,8 @@
-{ pkgs, host, ... }:
-
 {
+  pkgs,
+  host,
+  ...
+}: {
   # Kanshi - Automatic display configuration for Wayland
   # Profile-based approach with predictable behavior
 
@@ -9,7 +11,8 @@
     systemdTarget = "graphical-session.target";
 
     settings =
-      if host == "intelNuc" then [
+      if host == "intelNuc"
+      then [
         {
           profile.name = "desktop";
           profile.outputs = [
@@ -23,7 +26,8 @@
           ];
         }
       ]
-      else if host == "t480s" then [
+      else if host == "t480s"
+      then [
         # Laptop only profile
         {
           profile.name = "laptop";
@@ -54,7 +58,8 @@
           ];
         }
       ]
-      else if host == "spectre" then [
+      else if host == "spectre"
+      then [
         # Laptop only profile
         {
           profile.name = "laptop";
@@ -77,7 +82,22 @@
             }
             {
               criteria = "DP-*|HDMI-*";
-              position = "1536,0"; # Adjusted for 1.25 scale (1920/1.25)
+              position = "1536,0";
+            }
+          ];
+        }
+        {
+          profile.name = "uni-desk";
+          profile.outputs = [
+            {
+              criteria = "eDP-1";
+              position = "0,1080";
+              scale = 1.25;
+            }
+            {
+              criteria = "Iiyama North America PL2475HD 11098M2205863";
+              position = "0,0";
+              scale = 1.0;
             }
           ];
         }

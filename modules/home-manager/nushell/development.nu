@@ -45,7 +45,12 @@ def flake-reload [] {
 
 # Enter nix develop shell in current terminal only
 def enter [shell?: string] {
-    if ($shell == "nu") {
+    # Check if .envrc exists - if so, direnv will handle it
+    if ('.envrc' | path exists) {
+        print "Using direnv environment (found .envrc)"
+        # direnv will auto-load when we spawn a new shell
+        nu --login
+    } else if ($shell == "nu") {
         ^nix develop .#default -c nu --login
     } else if ($shell == null) {
         nix develop .#default
