@@ -15,6 +15,7 @@
 
     # Markdown
     markdown-oxide
+    mermaid-cli
 
     # Spellcheck
     ltex-ls
@@ -42,6 +43,8 @@
   imports = [
     ./helix/dprint.nix
   ];
+
+  home.file.".config/presenterm/config".source = ./presenterm/config.yaml;
 
   home.file.".config/helix/ignore".source = ./helix/ignore;
 
