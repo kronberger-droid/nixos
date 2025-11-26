@@ -174,6 +174,7 @@ in {
               numpy
               scipy
               h5py
+              matplotlib
             ]))
         ];
 
