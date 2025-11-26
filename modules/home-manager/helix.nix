@@ -48,6 +48,8 @@
 
   home.file.".config/helix/ignore".source = ./helix/ignore;
 
+  home.file.".config/harper/dictionary.txt".source = ./helix/harper_dict.txt;
+
   programs.helix = {
     enable = true;
     defaultEditor = true;
@@ -172,6 +174,11 @@
         harper = {
           command = "${pkgs.harper}/bin/harper-ls";
           args = ["--stdio"];
+          config = {
+            harper-ls = {
+              userDictPath = "~/.config/harper/dictionary.txt";
+            };
+          };
         };
         ltex = {
           command = "${pkgs.ltex-ls}/bin/ltex-ls";
