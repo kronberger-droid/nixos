@@ -1,5 +1,11 @@
-{ inputs, config, pkgs, isNotebook, lib, ... }:
-let
+{
+  inputs,
+  config,
+  pkgs,
+  isNotebook,
+  lib,
+  ...
+}: let
   dropkittenPkg = inputs.dropkitten.packages.${pkgs.stdenv.hostPlatform.system}.dropkitten;
 
   dropkitten_size = {
@@ -12,8 +18,7 @@ let
 
   # nmtui color scheme matching kitty theme
   nmtui_colors = "root=white,black:window=white,black:border=blue,black:listbox=white,black:actlistbox=black,blue:label=white,black:title=brightblue,black:button=white,black:actbutton=black,blue:compactbutton=white,black:checkbox=white,black:actcheckbox=black,blue:entry=white,black:textbox=white,black";
-in
-{
+in {
   home.packages = with pkgs; [
     waybar-mpris
     calcurse
@@ -144,10 +149,10 @@ in
 
         # Add disconnect option if any VPN is active
         if [ "$TUWIEN_ACTIVE" = "yes" ]; then
-            MENU="🔴 Disconnect from TU Wien VPN\n"
+            MENU="Disconnect from TU Wien VPN\n"
         elif [ -n "$ACTIVE_PIA" ]; then
             REGION_NAME=$(echo "$ACTIVE_PIA" | ${pkgs.gnused}/bin/sed 's/-/ /g' | ${pkgs.gawk}/bin/awk '{for(i=1;i<=NF;i++)sub(/./,toupper(substr($i,1,1)),$i)}1')
-            MENU="🔴 Disconnect from PIA $REGION_NAME\n"
+            MENU="Disconnect from PIA $REGION_NAME\n"
         fi
 
         # Add university VPN option
@@ -165,12 +170,12 @@ in
         fi
 
         # Handle disconnect options
-        if [[ "$SELECTED" == "🔴 Disconnect from TU Wien VPN" ]]; then
+        if [[ "$SELECTED" == "Disconnect from TU Wien VPN" ]]; then
             /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop openconnect-tuwien.service
             ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from TU Wien VPN" -i network-vpn-disconnected
             ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
             exit 0
-        elif [[ "$SELECTED" == "🔴 Disconnect"* ]]; then
+        elif [[ "$SELECTED" == "Disconnect"* ]]; then
             /run/wrappers/bin/pkexec /run/current-system/sw/bin/pia stop "$ACTIVE_PIA"
             ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from PIA" -i network-vpn-disconnected
             ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
@@ -191,7 +196,7 @@ in
         fi
 
         # Handle TU Wien VPN selection
-        if [[ "$SELECTED" == "🎓 TU Wien VPN" ]]; then
+        if [[ "$SELECTED" == "TU Wien VPN" ]]; then
             ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to TU Wien VPN..." -i network-vpn
             /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl start openconnect-tuwien.service
 
@@ -230,183 +235,192 @@ in
       target = "sway-session.target";
     };
     style = "${./waybar/style.css}";
-    settings = [{
-      height = 30;
-      layer = "top";
-      position = "top";
-      tray = {
-        spacing = 10;
-        icon-size = 14;
-      };
-      modules-left = [ "custom/menu" "sway/workspaces" "sway/scratchpad" "sway/mode" ];
-      modules-right = [
-        "idle_inhibitor"
-        "bluetooth"
-        "pulseaudio"
-        "custom/mpris"
-        "custom/separator"
-        "network"
-        "custom/vpn"
-        "cpu"
-      ] ++ lib.optionals (!isNotebook) [
-        "memory"
-        "temperature"
-      ] ++ lib.optionals isNotebook [
-        "battery"
-        "backlight"
-      ] ++ [
-        "tray"
-        "clock"
-        "custom/power"
-      ];
-
-      "sway/language" = {
-        format = "{} ";
-        on-click = "${pkgs.sway}/bin/swaymsg input type:keyboard xkb_switch_layout next";
-      };
-
-      "sway/scratchpad" = {
-        format = "{icon} {count}";
-        show-empty = false;
-        format-icons = [ "" "" ];
-        on-click = "${pkgs.sway}/bin/swaymsg 'scratchpad show'";
-        tooltip = true;
-        tooltip-format = "{app} = {title}";
-      };
-
-      "custom/separator" = {
-        format = "|";
-      };
-
-      clock = {
-        interval = 60;
-        format = "{:%e %b %Y %H:%M}";
-        tooltip = true;
-        tooltip-format = "<big>{:%B %Y}</big>\n<tt>{calendar}</tt>";
-        on-click = "${dropkitten_command} ${pkgs.calcurse}/bin/calcurse";
-      };
-
-      cpu = {
-        on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
-        format = "{usage}% ";
-        tooltip = false;
-      };
-
-      "custom/menu" = {
-        format = "";
-        on-click = "${pkgs.rofi}/bin/rofi -show drun";
-        tooltip = false;
-      };
-
-      "custom/power" = {
-        format = "";
-        on-click = "${pkgs.sway}/bin/swaymsg exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
-        tooltip = false;
-      };
-
-      memory = { format = "{}% "; };
-
-      "custom/mpris" = {
-        return-type = "json";
-        exec = "${pkgs.waybar-mpris}/bin/waybar-mpris --order 'SYMBOL:PLAYER' --separator '' --autofocus --pause '' --play ''";
-        on-click = "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
-        on-click-right = "${pkgs.waybar-mpris}/bin/waybar-mpris --send player-next";
-        escape = true;
-      };
-
-      "custom/vpn" = {
-        return-type = "json";
-        exec = "${config.xdg.configHome}/waybar/vpn-status.sh";
-        on-click = "${config.xdg.configHome}/waybar/vpn-toggle.sh";
-        on-click-right = "${config.xdg.configHome}/waybar/vpn-picker.sh";
-        interval = 3;
-        format = "{icon}{text}";
-        format-icons = {
-          connected = "󰖂";
-          disconnected = "󰖂";
+    settings = [
+      {
+        height = 30;
+        layer = "top";
+        position = "top";
+        tray = {
+          spacing = 10;
+          icon-size = 14;
         };
-        escape = true;
-      };
+        modules-left = ["custom/menu" "sway/workspaces" "sway/scratchpad" "sway/mode"];
+        modules-right =
+          [
+            "idle_inhibitor"
+            "bluetooth"
+            "pulseaudio"
+            "custom/mpris"
+            "custom/separator"
+            "network"
+            "custom/vpn"
+            "cpu"
+          ]
+          ++ lib.optionals (!isNotebook) [
+            "memory"
+            "temperature"
+          ]
+          ++ lib.optionals isNotebook [
+            "battery"
+            "backlight"
+          ]
+          ++ [
+            "tray"
+            "clock"
+            "custom/power"
+          ];
 
-      bluetooth = {
-        format = "󰂯";
-        format-disabled = "󰂲 off";
-        on-click = "${dropkitten_command} ${pkgs.bluetuith}/bin/bluetuith";
-        on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
-      };
-
-      network = {
-        interval = 5;
-        format-wifi = "{icon}";
-        format-ethernet = if isNotebook then "" else "{ifname} ";
-        format-disconnected = "󰖪";
-        format-disabled = "󰀝";
-        format-icons = [
-          "󰤯"
-          "󰤟"
-          "󰤢"
-          "󰤥"
-          "󰤨"
-        ];
-        tooltip-format = "{icon} {ifname}: {ipaddr}";
-        tooltip-format-ethernet = "{icon} {ifname}: {ipaddr}";
-        tooltip-format-wifi = "{icon} {ifname} ({essid}): {ipaddr}";
-        tooltip-format-disconnected = "{icon} disconnected";
-        tooltip-format-disabled = "{icon} disabled";
-        on-click = "${dropkitten_command} ${pkgs.bash}/bin/bash -c 'NEWT_COLORS=\"${nmtui_colors}\" ${pkgs.networkmanager}/bin/nmtui connect'";
-      };
-
-      pulseaudio = {
-        on-click = "${dropkitten_command} ${pkgs.pulsemixer}/bin/pulsemixer";
-        format = "{volume}% {icon} {format_source}";
-        format-bluetooth = "{volume}% {icon} {format_source}";
-        format-bluetooth-muted = " {icon} {format_source}";
-        format-icons = {
-          car = "";
-          default = [ "" "" "" ];
-          handsfree = " ";
-          headphones = " ";
-          headset = " ";
-          phone = "";
-          portable = "";
+        "sway/language" = {
+          format = "{} ";
+          on-click = "${pkgs.sway}/bin/swaymsg input type:keyboard xkb_switch_layout next";
         };
-        format-muted = " {format_source}";
-        format-source = "\ ";
-        format-source-muted = "\ ";
-      };
 
-      idle_inhibitor = {
-        format = "{icon}";
-        format-icons = {
-          activated = "";
-          deactivated = "";
+        "sway/scratchpad" = {
+          format = "{icon} {count}";
+          show-empty = false;
+          format-icons = ["" ""];
+          on-click = "${pkgs.sway}/bin/swaymsg 'scratchpad show'";
+          tooltip = true;
+          tooltip-format = "{app} = {title}";
         };
-      };
 
-      "sway/mode" = { format = ''<span style="italic">{}</span>''; };
-
-      battery = {
-        interval = 30;
-        states = {
-          warning = 30;
-          critical = 15;
+        "custom/separator" = {
+          format = "|";
         };
-        format-charging = "{capacity}% 󰂄";
-        format = "{capacity}% {icon}";
-        format-icons = [ "󱃍" "󰁺" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
-      };
 
-      temperature = {
-        critical-threshold = 80;
-        format = "{temperatureC}°C {icon}";
-        format-icons = "";
-      };
-      backlight = {
-        format = "{percent}% {icon}";
-        format-icons = [ "󰃞" "󰃟" "󰃠" ];
-        on-scroll-up = "${pkgs.brightnessctl}/bin/brightnessctl set +50";
-        on-scroll-down = "${pkgs.brightnessctl}/bin/brightnessctl set 50-";
-      };
-    }];
+        clock = {
+          interval = 60;
+          format = "{:%e %b %Y %H:%M}";
+          tooltip = true;
+          tooltip-format = "<big>{:%B %Y}</big>\n<tt>{calendar}</tt>";
+          on-click = "${dropkitten_command} ${pkgs.calcurse}/bin/calcurse";
+        };
+
+        cpu = {
+          on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
+          format = "{usage}% ";
+          tooltip = false;
+        };
+
+        "custom/menu" = {
+          format = "";
+          on-click = "${pkgs.rofi}/bin/rofi -show drun";
+          tooltip = false;
+        };
+
+        "custom/power" = {
+          format = "";
+          on-click = "${pkgs.sway}/bin/swaymsg exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
+          tooltip = false;
+        };
+
+        memory = {format = "{}% ";};
+
+        "custom/mpris" = {
+          return-type = "json";
+          exec = "${pkgs.waybar-mpris}/bin/waybar-mpris --order 'SYMBOL:PLAYER' --separator '' --autofocus --pause '' --play ''";
+          on-click = "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
+          on-click-right = "${pkgs.waybar-mpris}/bin/waybar-mpris --send player-next";
+          escape = true;
+        };
+
+        "custom/vpn" = {
+          return-type = "json";
+          exec = "${config.xdg.configHome}/waybar/vpn-status.sh";
+          on-click = "${config.xdg.configHome}/waybar/vpn-toggle.sh";
+          on-click-right = "${config.xdg.configHome}/waybar/vpn-picker.sh";
+          interval = 3;
+          format = "{icon}{text}";
+          format-icons = {
+            connected = "󰖂";
+            disconnected = "󰖂";
+          };
+          escape = true;
+        };
+
+        bluetooth = {
+          format = "󰂯";
+          format-disabled = "󰂲 off";
+          on-click = "${dropkitten_command} ${pkgs.bluetuith}/bin/bluetuith";
+          on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
+        };
+
+        network = {
+          interval = 5;
+          format-wifi = "{icon}";
+          format-ethernet =
+            if isNotebook
+            then ""
+            else "{ifname} ";
+          format-disconnected = "󰖪";
+          format-disabled = "󰀝";
+          format-icons = [
+            "󰤯"
+            "󰤟"
+            "󰤢"
+            "󰤥"
+            "󰤨"
+          ];
+          tooltip-format = "{icon} {ifname}: {ipaddr}";
+          tooltip-format-ethernet = "{icon} {ifname}: {ipaddr}";
+          tooltip-format-wifi = "{icon} {ifname} ({essid}): {ipaddr}";
+          tooltip-format-disconnected = "{icon} disconnected";
+          tooltip-format-disabled = "{icon} disabled";
+          on-click = "${dropkitten_command} ${pkgs.bash}/bin/bash -c 'NEWT_COLORS=\"${nmtui_colors}\" ${pkgs.networkmanager}/bin/nmtui connect'";
+        };
+
+        pulseaudio = {
+          on-click = "${dropkitten_command} ${pkgs.pulsemixer}/bin/pulsemixer";
+          format = "{volume}% {icon} {format_source}";
+          format-bluetooth = "{volume}% {icon} {format_source}";
+          format-bluetooth-muted = " {icon} {format_source}";
+          format-icons = {
+            car = "";
+            default = ["" "" ""];
+            handsfree = " ";
+            headphones = " ";
+            headset = " ";
+            phone = "";
+            portable = "";
+          };
+          format-muted = " {format_source}";
+          format-source = "\ ";
+          format-source-muted = "\ ";
+        };
+
+        idle_inhibitor = {
+          format = "{icon}";
+          format-icons = {
+            activated = "";
+            deactivated = "";
+          };
+        };
+
+        "sway/mode" = {format = ''<span style="italic">{}</span>'';};
+
+        battery = {
+          interval = 30;
+          states = {
+            warning = 30;
+            critical = 15;
+          };
+          format-charging = "{capacity}% 󰂄";
+          format = "{capacity}% {icon}";
+          format-icons = ["󱃍" "󰁺" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
+        };
+
+        temperature = {
+          critical-threshold = 80;
+          format = "{temperatureC}°C {icon}";
+          format-icons = "";
+        };
+        backlight = {
+          format = "{percent}% {icon}";
+          format-icons = ["󰃞" "󰃟" "󰃠"];
+          on-scroll-up = "${pkgs.brightnessctl}/bin/brightnessctl set +50";
+          on-scroll-down = "${pkgs.brightnessctl}/bin/brightnessctl set 50-";
+        };
+      }
+    ];
   };
 }
