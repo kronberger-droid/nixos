@@ -129,8 +129,8 @@ in {
           ghostscript
           mupdf
           pdfarranger
-          kdePackages.okular
           zathura
+          pdfpc
 
           # Remote
           localsend
@@ -175,6 +175,7 @@ in {
               scipy
               h5py
               matplotlib
+              touying
             ]))
         ];
 
