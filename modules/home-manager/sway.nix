@@ -58,9 +58,41 @@ in {
     lsof
     sway-scratch
     libinput
+    rot8
 
     xdg-user-dirs
   ];
+
+  xdg.configFile."rot8/rot8.toml" = lib.mkIf (host == "spectre" || host == "portable") {
+    text = ''
+      # rot8 configuration for HP Spectre x360
+      # Auto-rotation daemon for Sway
+
+      # Touchscreen device to rotate
+      [[touch-device]]
+      name = "ELAN2513:00 04F3:2E2D"
+
+      # Tablet/stylus device to rotate
+      [[tablet-device]]
+      name = "ELAN2513:00 04F3:2E2D Stylus"
+
+      # Display to rotate
+      [[display]]
+      name = "eDP-1"
+
+      # Threshold for rotation (degrees from horizontal)
+      # Lower values make rotation more sensitive
+      threshold = 0.5
+
+      # Polling interval in milliseconds
+      # How often to check the accelerometer
+      poll-interval = 500
+
+      # Allow all orientations (normal, left, right, inverted)
+      # Set to false to disable upside-down rotation
+      invert-mode = true
+    '';
+  };
 
   wayland.windowManager.sway = {
     enable = true;
@@ -104,7 +136,16 @@ in {
         "*" = {
           bg = "${backgroundImage} fill";
         };
-      };
+      }
+      // (
+        if host == "spectre"
+        then {
+          "eDP-1" = {
+            scale = "1.25";
+          };
+        }
+        else {}
+      );
       window = {
         titlebar = false;
       };
@@ -145,7 +186,18 @@ in {
           command = "${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4";
           always = false;
         }
-      ];
+      ]
+      ++ (
+        if host == "spectre" || host == "portable"
+        then [
+          {
+            # Start rot8 only if rotation is not disabled (state file doesn't exist)
+            command = "${pkgs.bash}/bin/bash -c 'if [ ! -f $HOME/.cache/rotation-state ]; then ${pkgs.rot8}/bin/rot8; fi'";
+            always = false;
+          }
+        ]
+        else []
+      );
       colors = {
         background = backgroundColor;
 
@@ -300,6 +352,9 @@ in {
               natural_scroll = "enabled";
               tap = "enabled";
               pointer_accel = "0.3";
+            };
+            "1267:11821:ELAN2513:00_04F3:2E2D_Stylus" = {
+              map_to_output = "eDP-1";
             };
           }
           else {}
