@@ -60,7 +60,7 @@
       ]
       else if host == "spectre"
       then [
-        # Laptop only profile
+        # Standard laptop profile
         {
           profile.name = "laptop";
           profile.outputs = [
@@ -71,37 +71,7 @@
             }
           ];
         }
-        # Docked profile with external display
-        {
-          profile.name = "docked";
-          profile.outputs = [
-            {
-              criteria = "eDP-1";
-              position = "0,0";
-              scale = 1.25;
-            }
-            {
-              criteria = "DP-*|HDMI-*";
-              position = "1536,0";
-            }
-          ];
-        }
-        # Presentation profile to clone main display
-        {
-          profile.name = "presentation";
-          profile.outputs = [
-            {
-              criteria = "eDP-1";
-              mode = "1920x1080";
-              position = "0,0";
-              scale = 1.5;
-            }
-            {
-              criteria = "HDMI-*";
-              position = "0,0";
-            }
-          ];
-        }
+        # University desk with Iiyama monitor
         {
           profile.name = "uni-desk";
           profile.outputs = [
