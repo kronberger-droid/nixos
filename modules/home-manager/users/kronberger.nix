@@ -28,9 +28,10 @@ in {
         ../theme.nix
         ../colors.nix
         ../bitwarden.nix
-        ../himalaya.nix
+        ../aerc.nix
         ../quickemu.nix
         ../udiskie.nix
+        ../firefox.nix
       ];
 
       programs = {
@@ -72,8 +73,6 @@ in {
         packages = with pkgs; [
           # Browsers
           brave
-          nyxt
-          firefox
 
           # Custom Packages
           dropkittenPkg
@@ -105,15 +104,11 @@ in {
           cargo-generate
 
           # Music
-          # lmms
           spotify
-          spotify-player
-          ncspot
 
           # Information
           fastfetch
           fzf
-          serpl
           translate-shell
           wiki-tui
 
@@ -127,7 +122,6 @@ in {
 
           # PDF
           ghostscript
-          mupdf
           pdfarranger
           zathura
           pdfpc
@@ -137,7 +131,6 @@ in {
 
           # System
           ltunify
-          # rpi-imager
           bluetuith
 
           # Math
