@@ -7,14 +7,26 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    agenix.url = "github:ryantm/agenix";
-    dropkitten.url = "github:kronberger-droid/dropkitten";
-    pia.url = "github:Fuwn/pia.nix";
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    dropkitten = {
+      url = "github:kronberger-droid/dropkitten";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    pia = {
+      url = "github:Fuwn/pia.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    copyparty.url = "github:9001/copyparty";
+    copyparty = {
+      url = "github:9001/copyparty";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # impermanence.url = "github:nix-community/impermanence";  # Disabled for now - test later
   };
 

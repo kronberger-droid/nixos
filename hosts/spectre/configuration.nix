@@ -77,6 +77,10 @@
     kernelModules = [
       "hp_wmi"
       "v4l2loopback"
+      "ip_tables"
+      "iptable_filter"
+      "iptable_nat"
+      "iptable_mangle"
     ];
     extraModulePackages = [
       config.boot.kernelPackages.v4l2loopback
