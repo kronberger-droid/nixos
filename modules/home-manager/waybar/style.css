@@ -101,12 +101,3 @@ window#waybar {
   animation-direction       : alternate;
 }
 
-#custom-rotation.disabled {
-  color: rgba(138, 129, 119, 0.5);
-  opacity: 0.5;
-}
-
-#custom-rotation.enabled {
-  color: rgba(223, 225, 232, 1);
-  opacity: 1.0;
-}
