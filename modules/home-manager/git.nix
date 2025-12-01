@@ -20,6 +20,9 @@
       init = {
         defaultBranch = "main";
       };
+      pull = {
+        rebase = true;
+      };
       filter.lfs = {
         required = true;
         clean = "git-lfs clean -- %f";
