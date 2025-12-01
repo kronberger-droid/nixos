@@ -29,6 +29,45 @@ in {
   xdg.configFile = {
     "waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
 
+    "waybar/rotation-status.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+
+        # Check if rotation is disabled (state file exists)
+        if [ -f "$HOME/.cache/rotation-state" ]; then
+            echo '{"icon":"disabled","alt":"disabled","tooltip":"Auto-rotation Disabled","class":"disabled"}'
+        else
+            echo '{"icon":"enabled","alt":"enabled","tooltip":"Auto-rotation Enabled","class":"enabled"}'
+        fi
+      '';
+    };
+
+    "waybar/rotation-toggle.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+
+        STATE_FILE="$HOME/.cache/rotation-state"
+
+        # Toggle rotation state
+        if [ -f "$STATE_FILE" ]; then
+            # Enable rotation
+            ${pkgs.coreutils}/bin/rm -f "$STATE_FILE"
+            ${pkgs.rot8}/bin/rot8 &
+            ${pkgs.libnotify}/bin/notify-send "Auto-rotation" "Screen auto-rotation enabled" -i display-brightness
+        else
+            # Disable rotation
+            ${pkgs.coreutils}/bin/touch "$STATE_FILE"
+            ${pkgs.procps}/bin/pkill rot8
+            ${pkgs.libnotify}/bin/notify-send "Auto-rotation" "Screen auto-rotation disabled" -i display-brightness
+        fi
+
+        # Refresh waybar
+        ${pkgs.procps}/bin/pkill -RTMIN+9 waybar 2>/dev/null || true
+      '';
+    };
+
     "waybar/vpn-status.sh" = {
       executable = true;
       text = ''
@@ -196,7 +235,7 @@ in {
         fi
 
         # Handle TU Wien VPN selection
-        if [[ "$SELECTED" == "TU Wien VPN" ]]; then
+        if [[ "$SELECTED" == "🎓 TU Wien VPN" ]]; then
             ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to TU Wien VPN..." -i network-vpn
             /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl start openconnect-tuwien.service
 
@@ -248,6 +287,11 @@ in {
         modules-right =
           [
             "idle_inhibitor"
+          ]
+          ++ lib.optionals isNotebook [
+            "custom/rotation"
+          ]
+          ++ [
             "bluetooth"
             "pulseaudio"
             "custom/mpris"
@@ -334,6 +378,20 @@ in {
           format-icons = {
             connected = "󰖂";
             disconnected = "󰖂";
+          };
+          escape = true;
+        };
+
+        "custom/rotation" = {
+          return-type = "json";
+          exec = "${config.xdg.configHome}/waybar/rotation-status.sh";
+          on-click = "${config.xdg.configHome}/waybar/rotation-toggle.sh";
+          interval = 3;
+          signal = 9;
+          format = "{icon}";
+          format-icons = {
+            enabled = "";
+            disabled = "";
           };
           escape = true;
         };
