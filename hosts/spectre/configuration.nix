@@ -54,7 +54,7 @@
   };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages;
     initrd.systemd.enable = true;
     loader = {
       systemd-boot = {

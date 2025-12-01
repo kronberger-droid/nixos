@@ -1,6 +1,8 @@
-{ pkgs, config, ... }:
-
 {
+  pkgs,
+  config,
+  ...
+}: {
   imports = [
     ./hardware-configuration.nix
     ../common.nix
@@ -64,9 +66,7 @@
       timeout = 1; # Fast boot menu timeout
       efi.canTouchEfiVariables = true;
     };
-    kernelPackages = pkgs.linuxPackages_latest;
-    kernelModules = [ "v4l2loopback" ];
-    extraModulePackages = [ pkgs.linuxPackages_latest.v4l2loopback ];
+    kernelPackages = pkgs.linuxPackages;
     kernelParams = [
       "i915.enable_psr=0"
     ];
