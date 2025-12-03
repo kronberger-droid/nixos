@@ -212,32 +212,42 @@ in {
       EDITOR = "hx";
     };
     systemPackages = with pkgs; [
+      # Essentials
       helix
       git
       curl
       gparted
+
+      # Basic cli tools
       bat
       bat-extras.core
+      less
       zoxide
-      nmap
-      usbutils
-      exfat
-      libsecret
-      busybox
       tree
-      wirelesstools
-      popsicle
-      eza
       ripgrep
       rip2
       fd
       skim
       xcp
+      busybox
       dust
-      fwupd
-      libcamera
-      nixpkgs-review
+
+      # Network cli
+      nmap
+      wirelesstools
+
+      # Data cli
+      usbutils
+      exfat
+      popsicle
+
+      # Secrets
+      libsecret
       cryptsetup
+
+      # Others
+      fwupd
+      nixpkgs-review
       xorg.xhost
       xorg.xauth
       woeusb

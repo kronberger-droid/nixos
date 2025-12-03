@@ -77,8 +77,9 @@ in {
           # Custom Packages
           dropkittenPkg
 
-          # Mail
+          # messages
           thunderbird
+          gurk-rs
 
           # Filemanagers
           nemo-with-extensions
