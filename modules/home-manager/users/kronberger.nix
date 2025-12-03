@@ -14,7 +14,7 @@ in {
     };
     useGlobalPkgs = true;
     useUserPackages = true;
-    backupFileExtension = "bak";
+    backupFileExtension = "backup-$(date +%Y%m%d-%H%M%S)";
     users.kronberger = {
       imports = [
         ../taskwarrior.nix
