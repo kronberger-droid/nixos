@@ -33,6 +33,10 @@
         event = "before-sleep";
         command = "${pkgs.swaylock-effects}/bin/swaylock -f &";
       }
+      {
+        event = "after-resume";
+        command = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
+      }
     ];
   };
 }
