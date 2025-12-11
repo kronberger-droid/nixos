@@ -63,15 +63,6 @@
         from = "Kronberger Industries <kronberger.industries@gmail.com>";
         cache-headers = true;
       };
-      Schrack = {
-        source = "imaps+xoauth2://m.kronberger%40schrack.com@outlook.office365.com:993";
-        source-cred-cmd = "oama access m.kronberger@schrack.com";
-        outgoing = "smtp+xoauth2://m.kronberger%40schrack.com@smtp.office365.com:587";
-        outgoing-cred-cmd = "oama access m.kronberger@schrack.com";
-        default = "INBOX";
-        from = "Martin Kronberger <m.kronberger@schrack.com>";
-        cache-headers = true;
-      };
       TUWien = {
         source = "imaps+xoauth2://e12202316%40student.tuwien.ac.at@outlook.office365.com:993";
         source-cred-cmd = "oama access e12202316@student.tuwien.ac.at";
@@ -79,6 +70,15 @@
         outgoing-cred-cmd = "oama access e12202316@student.tuwien.ac.at";
         default = "INBOX";
         from = "Martin Kronberger <e12202316@student.tuwien.ac.at>";
+        cache-headers = true;
+      };
+      upTUdate = {
+        source = "imaps://mkronber%40intern.tuwien.ac.at@mail.intern.tuwien.ac.at:993";
+        source-cred-cmd = "secret-tool lookup application aerc account upTUdate service email";
+        outgoing = "smtp://kronber%40intern.tuwien.ac.at@mail.intern.tuwien.ac.at:587";
+        outgoing-cred-cmd = "secret-tool lookup application aerc account upTUdate service email";
+        default = "INBOX";
+        from = "Martin Kronberger <kronberger@iap.tuwien.ac.at>";
         cache-headers = true;
       };
     };
