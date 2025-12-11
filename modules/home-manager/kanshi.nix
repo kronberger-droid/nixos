@@ -7,7 +7,7 @@
   # Profile-based approach with predictable behavior
 
   services.kanshi = {
-    enable = true;
+    enable = (host != "intelNuc");  # Disable for Intel NUC - single static display
     systemdTarget = "graphical-session.target";
 
     settings =

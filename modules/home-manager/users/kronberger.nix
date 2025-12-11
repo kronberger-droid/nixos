@@ -32,6 +32,7 @@ in {
         ../quickemu.nix
         ../udiskie.nix
         ../firefox.nix
+        ../nchat.nix
       ];
 
       programs = {
@@ -214,6 +215,7 @@ in {
             "image/tiff" = "swayimg.desktop";
           };
         };
+        desktopEntries = {};
       };
 
       fonts.fontconfig.enable = true;
