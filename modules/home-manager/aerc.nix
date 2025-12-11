@@ -2,9 +2,9 @@
   # Add oama for OAuth2 authentication with Gmail and packages for viewing emails
   home.packages = with pkgs; [
     oama
-    dante # HTML to text converter
     catimg # Image viewer for terminal
     w3m # Alternative HTML viewer
+    html2text # HTML to text converter
   ];
 
   # Configure oama with OAuth credentials
@@ -40,7 +40,7 @@
       };
       filters = {
         "text/plain" = "cat";
-        "text/html" = "${pkgs.dante}/bin/html2text";
+        "text/html" = "${pkgs.html2text}/bin/html2text";
         "image/*" = "${pkgs.catimg}/bin/catimg -w \${WIDTH} -";
       };
     };

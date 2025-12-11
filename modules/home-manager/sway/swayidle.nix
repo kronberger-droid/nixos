@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   home.packages = with pkgs; [
     swayidle
     libnotify
@@ -28,15 +26,9 @@
         command = "${pkgs.systemd}/bin/systemctl suspend";
       }
     ];
-    events = [
-      {
-        event = "before-sleep";
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f &";
-      }
-      {
-        event = "after-resume";
-        command = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
-      }
-    ];
+    events = {
+      "before-sleep" = "${pkgs.swaylock-effects}/bin/swaylock -f &";
+      "after-resume" = "${pkgs.sway}/bin/swaymsg 'output * dpms on'";
+    };
   };
 }
