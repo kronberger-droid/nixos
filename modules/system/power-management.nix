@@ -3,7 +3,7 @@
   # Power management configuration optimized for laptops
   powerManagement = {
     enable = true;
-    cpuFreqGovernor = if isNotebook then "powersave" else "performance";
+    cpuFreqGovernor = if isNotebook then "powersave" else "schedutil";
     powertop.enable = isNotebook;
 
     # Resume commands to ensure services restart properly

@@ -23,6 +23,7 @@
   environment.systemPackages = with pkgs; [
     droidcam
     android-tools
+    lm_sensors  # Temperature monitoring
   ];
 
   environment.sessionVariables = {
@@ -68,9 +69,10 @@
     };
     kernelPackages = pkgs.linuxPackages;
     kernelParams = [
-      "i915.enable_psr=0"
-      "i915.enable_dc=0"  # Disable display power-saving states
-      "i915.enable_fbc=0"  # Disable framebuffer compression
+      # Commented out for testing - may have caused sleep issues
+      # "i915.enable_psr=0"
+      # "i915.enable_dc=0"  # Disable display power-saving states
+      # "i915.enable_fbc=0"  # Disable framebuffer compression
     ];
     extraModprobeConfig = ''
       options v4l2loopback devices=1 video_nr=42 card_label="DroidCam" exclusive_caps=1
