@@ -137,7 +137,7 @@ in {
           bluetuith
 
           # Math
-          speedcrunch
+          numbat
 
           # CAD
           freecad-wayland
