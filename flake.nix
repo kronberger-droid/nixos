@@ -27,6 +27,13 @@
       url = "github:9001/copyparty";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    base16 = {
+      url = "github:SenchoPens/base16.nix";
+    };
+    tt-schemes = {
+      url = "github:tinted-theming/schemes";
+      flake = false;
+    };
   };
 
   outputs = inputs @ {
@@ -54,6 +61,11 @@
             ./hosts/${hostname}/configuration.nix
             ./modules/system/greetd.nix
             home-manager.nixosModules.home-manager
+            {
+              home-manager.sharedModules = [
+                inputs.base16.homeManagerModule
+              ];
+            }
             ./modules/home-manager/users/kronberger.nix
             agenix.nixosModules.default
             {
