@@ -7,7 +7,7 @@
   # Profile-based approach with predictable behavior
 
   services.kanshi = {
-    enable = (host != "intelNuc");  # Disable for Intel NUC - single static display
+    enable = host != "intelNuc"; # Disable for Intel NUC - single static display
     systemdTarget = "graphical-session.target";
 
     settings =
@@ -68,6 +68,17 @@
               criteria = "eDP-1";
               position = "0,0";
               scale = 1.25;
+            }
+          ];
+        }
+
+        {
+          profile.name = "uni-desk-aoc";
+          profile.outputs = [
+            {
+              criteria = "AOC U3277WB 0x0000061F";
+              position = "0,0";
+              scale = 1.5;
             }
           ];
         }

@@ -50,11 +50,13 @@
 
   home.file.".config/harper/dictionary.txt".source = ./helix/harper_dict.txt;
 
+  home.file.".config/helix/themes/custom-base16.toml".source = ./helix/custom-base16.toml;
+
   programs.helix = {
     enable = true;
     defaultEditor = true;
     settings = {
-      theme = "base16_transparent";
+      theme = "custom-base16";
       editor = {
         soft-wrap.enable = true;
         line-number = "relative";

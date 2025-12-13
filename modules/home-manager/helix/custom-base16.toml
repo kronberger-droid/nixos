@@ -1,0 +1,109 @@
+# Custom base16 theme with varied colors for Nix
+# Better syntax highlighting with more color variety
+# Transparent background like base16_transparent
+
+# UI elements - transparent background
+"ui.background" = {}
+"ui.text" = { fg = "base05" }
+"ui.selection" = { bg = "base02" }
+"ui.cursor" = { fg = "base05", modifiers = ["reversed"] }
+"ui.cursor.match" = { fg = "base0A", modifiers = ["underlined"] }
+"ui.linenr" = { fg = "base03" }
+"ui.linenr.selected" = { fg = "base04" }
+"ui.statusline" = { fg = "base05" }
+"ui.statusline.inactive" = { fg = "base04" }
+"ui.popup" = {}
+"ui.window" = {}
+"ui.help" = { fg = "base05" }
+"ui.menu" = { fg = "base05" }
+"ui.menu.selected" = { bg = "base02" }
+
+# Syntax highlighting - general
+"comment" = { fg = "base04", modifiers = ["italic"] }
+"constant" = { fg = "base09" }
+"constant.builtin" = { fg = "base09" }
+"constant.character.escape" = { fg = "base0C" }
+"string" = { fg = "base0B" }
+"string.regexp" = { fg = "base0C" }
+"number" = { fg = "base09" }
+"boolean" = { fg = "base09" }
+
+# Variables and parameters
+"variable" = { fg = "base08" }
+"variable.builtin" = { fg = "base0E" }
+"variable.parameter" = { fg = "base08" }
+"variable.other.member" = { fg = "base08" }
+
+# Keywords and operators
+"keyword" = { fg = "base0E" }
+"keyword.control" = { fg = "base0E" }
+"keyword.operator" = { fg = "base05" }
+"operator" = { fg = "base05" }
+
+# Functions
+"function" = { fg = "base0D" }
+"function.builtin" = { fg = "base0D" }
+"function.method" = { fg = "base0D" }
+"function.macro" = { fg = "base0D" }
+
+# Types and constructors
+"type" = { fg = "base0A" }
+"type.builtin" = { fg = "base0A" }
+"constructor" = { fg = "base0A" }
+
+# Attributes and properties
+"attribute" = { fg = "base0C" }
+"property" = { fg = "base0C" }
+
+# Namespaces and modules
+"namespace" = { fg = "base0D" }
+"module" = { fg = "base0D" }
+
+# Tags (for markup languages)
+"tag" = { fg = "base08" }
+"label" = { fg = "base0A" }
+
+# Special
+"special" = { fg = "base0C" }
+"punctuation" = { fg = "base05" }
+"punctuation.bracket" = { fg = "base05" }
+"punctuation.delimiter" = { fg = "base05" }
+
+# Diagnostics
+"error" = { fg = "base08" }
+"warning" = { fg = "base0A" }
+"info" = { fg = "base0D" }
+"hint" = { fg = "base0C" }
+
+# Diff
+"diff.plus" = { fg = "base0B" }
+"diff.minus" = { fg = "base08" }
+"diff.delta" = { fg = "base0A" }
+
+# Markup
+"markup.heading" = { fg = "base0D", modifiers = ["bold"] }
+"markup.list" = { fg = "base08" }
+"markup.bold" = { modifiers = ["bold"] }
+"markup.italic" = { modifiers = ["italic"] }
+"markup.link.url" = { fg = "base0C" }
+"markup.link.text" = { fg = "base0D" }
+"markup.quote" = { fg = "base0C" }
+"markup.raw" = { fg = "base0B" }
+
+[palette]
+base00 = "#1e1e1e"
+base01 = "#2c2f33"
+base02 = "#373c45"
+base03 = "#555555"
+base04 = "#c0c5ce"
+base05 = "#dfe1e8"
+base06 = "#eff0f1"
+base07 = "#f5f5f5"
+base08 = "#ac4142"
+base09 = "#ac4142"
+base0A = "#e5b566"
+base0B = "#7e8d50"
+base0C = "#7dd5cf"
+base0D = "#6c99ba"
+base0E = "#9e4e85"
+base0F = "#8a8177"
