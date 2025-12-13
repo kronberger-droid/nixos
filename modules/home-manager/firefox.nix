@@ -1,9 +1,18 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: let
+  c = config.scheme;
+in {
   programs.firefox = {
     enable = true;
 
     profiles.default = {
       settings = {
+        # Enable userChrome.css and userContent.css
+        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+        "svg.context-properties.content.enabled" = true;
         # ==================== PERFORMANCE ====================
         # Hardware acceleration
         "gfx.webrender.all" = true;
@@ -110,6 +119,238 @@
         # Type-ahead find
         "accessibility.typeaheadfind.flashBar" = 0;
       };
+
+      userChrome = ''
+        /* Base16 Theme - UI Elements */
+        :root {
+          --base00: #${c.base00}; /* Default Background */
+          --base01: #${c.base01}; /* Lighter Background */
+          --base02: #${c.base02}; /* Selection Background */
+          --base03: #${c.base03}; /* Comments */
+          --base04: #${c.base04}; /* Dark Foreground */
+          --base05: #${c.base05}; /* Default Foreground */
+          --base06: #${c.base06}; /* Light Foreground */
+          --base07: #${c.base07}; /* Light Background */
+          --base08: #${c.base08}; /* Red */
+          --base09: #${c.base09}; /* Orange */
+          --base0A: #${c.base0A}; /* Yellow */
+          --base0B: #${c.base0B}; /* Green */
+          --base0C: #${c.base0C}; /* Cyan */
+          --base0D: #${c.base0D}; /* Blue */
+          --base0E: #${c.base0E}; /* Magenta */
+          --base0F: #${c.base0F}; /* Brown */
+        }
+
+        /* Remove all rounded corners */
+        * {
+          border-radius: 0 !important;
+        }
+
+        /* Main browser chrome */
+        #navigator-toolbox {
+          background-color: var(--base00) !important;
+          border-color: var(--base01) !important;
+        }
+
+        /* Toolbars */
+        toolbar {
+          background-color: var(--base00) !important;
+          color: var(--base05) !important;
+        }
+
+        /* URL bar */
+        #urlbar {
+          background-color: var(--base01) !important;
+          color: var(--base05) !important;
+          border: 1px solid var(--base02) !important;
+        }
+
+        #urlbar-background {
+          background-color: var(--base01) !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+
+        #urlbar[focused="true"] {
+          background-color: var(--base02) !important;
+          border-color: var(--base0D) !important;
+        }
+
+        #urlbar[focused="true"] #urlbar-background {
+          background-color: var(--base02) !important;
+        }
+
+        /* Search bar */
+        #searchbar {
+          background-color: var(--base01) !important;
+          color: var(--base05) !important;
+        }
+
+        /* Tabs */
+        .tabbrowser-tab {
+          color: var(--base04) !important;
+        }
+
+        .tabbrowser-tab[selected] {
+          background-color: var(--base01) !important;
+          color: var(--base05) !important;
+        }
+
+        .tab-background {
+          background-color: var(--base00) !important;
+          border-color: var(--base01) !important;
+        }
+
+        .tab-background[selected] {
+          background-color: var(--base01) !important;
+          border-color: var(--base02) !important;
+        }
+
+        /* Sidebar */
+        #sidebar-box {
+          background-color: var(--base00) !important;
+          border-color: var(--base01) !important;
+          max-width: 300px !important;
+        }
+
+        #sidebar-header {
+          background-color: var(--base00) !important;
+          color: var(--base05) !important;
+          border-color: var(--base01) !important;
+        }
+
+        #sidebar-main {
+          background-color: var(--base00) !important;
+          color: var(--base05) !important;
+        }
+
+        /* Sidebar splitter */
+        #sidebar-splitter {
+          background-color: var(--base01) !important;
+          border-color: var(--base02) !important;
+          width: 1px !important;
+        }
+
+        /* Menus and panels */
+        menupopup,
+        panel {
+          background-color: var(--base01) !important;
+          color: var(--base05) !important;
+          border-color: var(--base02) !important;
+        }
+
+        menuitem:hover,
+        menu:hover {
+          background-color: var(--base02) !important;
+          color: var(--base06) !important;
+        }
+
+        /* Context menus */
+        #contentAreaContextMenu {
+          background-color: var(--base01) !important;
+          color: var(--base05) !important;
+        }
+
+        /* Buttons */
+        toolbarbutton {
+          color: var(--base05) !important;
+        }
+
+        toolbarbutton:hover {
+          background-color: var(--base01) !important;
+        }
+
+        toolbarbutton:active,
+        toolbarbutton[open] {
+          background-color: var(--base02) !important;
+        }
+
+        /* Accent colors for active elements */
+        .urlbarView-row[selected],
+        .urlbarView-row:hover {
+          background-color: var(--base02) !important;
+        }
+
+        /* Bookmarks bar */
+        #PersonalToolbar {
+          background-color: var(--base00) !important;
+        }
+
+        .bookmark-item {
+          color: var(--base05) !important;
+        }
+
+        .bookmark-item:hover {
+          background-color: var(--base01) !important;
+        }
+
+        /* Findbar */
+        .findbar-textbox {
+          background-color: var(--base01) !important;
+          color: var(--base05) !important;
+          border-color: var(--base02) !important;
+        }
+      '';
+
+      userContent = ''
+        /* Base16 Theme - Web Content */
+        @-moz-document url-prefix(about:) {
+          :root {
+            --base00: #${c.base00};
+            --base01: #${c.base01};
+            --base02: #${c.base02};
+            --base03: #${c.base03};
+            --base04: #${c.base04};
+            --base05: #${c.base05};
+            --base06: #${c.base06};
+            --base07: #${c.base07};
+            --base08: #${c.base08};
+            --base09: #${c.base09};
+            --base0A: #${c.base0A};
+            --base0B: #${c.base0B};
+            --base0C: #${c.base0C};
+            --base0D: #${c.base0D};
+            --base0E: #${c.base0E};
+            --base0F: #${c.base0F};
+          }
+
+          /* Apply to about: pages */
+          body {
+            background-color: var(--base00) !important;
+            color: var(--base05) !important;
+          }
+
+          a {
+            color: var(--base0D) !important;
+          }
+
+          a:visited {
+            color: var(--base0E) !important;
+          }
+
+          a:hover {
+            color: var(--base0C) !important;
+          }
+
+          input,
+          textarea,
+          select {
+            background-color: var(--base01) !important;
+            color: var(--base05) !important;
+            border-color: var(--base02) !important;
+          }
+
+          button {
+            background-color: var(--base02) !important;
+            color: var(--base05) !important;
+            border-color: var(--base03) !important;
+          }
+
+          button:hover {
+            background-color: var(--base03) !important;
+          }
+        }
+      '';
     };
   };
 }
