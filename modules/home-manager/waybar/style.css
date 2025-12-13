@@ -7,9 +7,9 @@
 
 window#waybar {
   background: transparent;
-  color: rgba(223, 225, 232, 1);
-  font-family: "Symbols Nerd Font", "JetBrainsMono NF";
-  font-size: 13px;
+  color: @base05;
+  font-family: "Symbols Nerd Font Mono", "JetBrainsMono Nerd Font Mono";
+  font-size: 14px;
 }
 
 #battery,
@@ -36,61 +36,63 @@ window#waybar {
   padding: 0px 0px;
 }
 
+/* Desktop Helper widgets - brown accent with white text like original */
 #mode,
 #custom-menu,
 #custom-power {
-  color: rgba(223, 225, 232, 1);
-  background-color: rgba(138, 129, 119, 0.9);
+  color: @base05; /* White text on brown background */
+  background-color: @base0FE6; /* Brown accent (base0F) with 90% opacity */
   border-radius: 15px;
   padding: 0px 10px;
   margin: 0px 5px;
 }
 
 #clock {
-  background-color: rgba(138, 129, 119, 0.9);
+  color: @base05; /* White text on brown background */
+  background-color: @base0FE6; /* Brown accent (base0F) with 90% opacity */
   border-radius: 15px;
   padding: 0px 10px;
   margin: 0px 5px;
 }
 
 #scratchpad {
-  color: rgba(223, 225, 232, 1);
-  background-color: rgba(138, 129, 119, 0.9);
+  color: @base05; /* White text on brown background */
+  background-color: @base0FE6; /* Brown accent (base0F) with 90% opacity */
   border-radius: 15px;
   padding: 0px 10px;
   margin: 0px 10px;
 }
 
 #workspaces {
-  background: rgba(30, 30, 30, 0.9);
+  background: @base00E6; /* Default background with 90% opacity */
   border-radius: 15px;
   margin: 0px 5px;
 }
 
 #workspaces button {
-  color: rgba(223, 225, 232, 1);
+  color: @base05; /* White text for dark background */
   border-radius: 15px;
   padding: 0px 10px;
 }
 
 #workspaces button.focused {
-  color: rgba(223, 225, 232, 1);
-  background-color: rgba(138, 129, 119, 0.9);
+  color: @base05; /* White text on brown background */
+  background-color: @base0FE6; /* Brown accent (base0F) with 90% opacity */
   border-radius: 15px;
 }
 
 #workspaces button.urgent {
-  border-color: rgba(66, 60, 56, 0.9);
-  color: rgba(66, 60, 56, 0.9);
+  border-color: @base08; /* Error/urgent: base08 */
+  color: @base08;
 }
 
 @keyframes blink-critical {
-  0% { color: @text; }
-  100% { color: red; }
+  0% { color: @base05; }
+  100% { color: @base08; }
 }
 
 #battery.warning {
-  color : orange;
+  color: @base0A;
 }
 
 #battery.critical:not(.charging) {

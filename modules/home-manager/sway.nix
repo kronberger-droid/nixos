@@ -148,6 +148,7 @@ in {
       );
       window = {
         titlebar = false;
+        border = 1;
       };
       floating = {
         border = 0;
@@ -198,43 +199,48 @@ in {
         ]
         else []
       );
+      # Base16 colors with custom brown accent for focused windows
       colors = {
-        background = backgroundColor;
+        background = "#${config.scheme.base00}";
 
+        # Focused window border: custom brown accent, text: base05
         focused = {
-          border = accentColor;
-          background = accentColor;
-          text = backgroundColor;
-          indicator = textColor;
-          childBorder = accentColor;
+          border = "#${config.scheme.base0F}"; # Brown accent - matches background
+          background = "#${config.scheme.base0F}"; # Brown accent
+          text = "#${config.scheme.base05}";
+          indicator = "#${config.scheme.base0F}";
+          childBorder = "#${config.scheme.base0F}"; # Brown accent
         };
+        # Unfocused window border in group: border matches background
         focusedInactive = {
-          border = palette.color1;
-          background = palette.color1;
-          text = palette.color5;
-          indicator = palette.color3;
-          childBorder = palette.color1;
+          border = "#${config.scheme.base00}";
+          background = "#${config.scheme.base00}";
+          text = "#${config.scheme.base05}";
+          indicator = "#${config.scheme.base00}";
+          childBorder = "#${config.scheme.base00}";
         };
+        # Unfocused window border: border matches background
         unfocused = {
-          border = palette.color1;
-          background = backgroundColor;
-          text = palette.color5;
-          indicator = textColor;
-          childBorder = palette.color1;
+          border = "#${config.scheme.base00}";
+          background = "#${config.scheme.base00}";
+          text = "#${config.scheme.base05}";
+          indicator = "#${config.scheme.base00}";
+          childBorder = "#${config.scheme.base00}";
         };
+        # Urgent window border: base08, text: base05
         urgent = {
-          border = palette.color8;
-          background = palette.color8;
-          text = backgroundColor;
-          indicator = palette.color9;
-          childBorder = palette.color8;
+          border = "#${config.scheme.base08}";
+          background = "#${config.scheme.base08}";
+          text = "#${config.scheme.base00}";
+          indicator = "#${config.scheme.base08}";
+          childBorder = "#${config.scheme.base08}";
         };
         placeholder = {
-          border = backgroundColor;
-          background = backgroundColor;
-          text = palette.color5;
-          indicator = backgroundColor;
-          childBorder = backgroundColor;
+          border = "#${config.scheme.base00}";
+          background = "#${config.scheme.base00}";
+          text = "#${config.scheme.base05}";
+          indicator = "#${config.scheme.base00}";
+          childBorder = "#${config.scheme.base00}";
         };
       };
 

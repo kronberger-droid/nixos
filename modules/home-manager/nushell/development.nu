@@ -5,35 +5,59 @@ def swayDevSetup [] {
     print "Setting up Sway development layout..."
     # Get current working directory
     let cwd = $env.PWD
-    # Detect dev shell
-    let dev_shell = try {
-        ^nix eval --json .#devShells.x86_64-linux.dev err> /dev/null
-        ".#dev"
-    } catch {
-        ".#default"
+
+    # Check if direnv is active
+    let has_direnv = ('.envrc' | path exists)
+
+    # Detect dev shell (only if not using direnv)
+    let dev_shell = if not $has_direnv {
+        try {
+            ^nix eval --json .#devShells.x86_64-linux.dev err> /dev/null
+            ".#dev"
+        } catch {
+            ".#default"
+        }
+    } else {
+        ""
     }
+
     ^swaymsg layout splith
     ^swaymsg layout stacking
-    
+
     # Open shell terminal (will stack with original)
-    ^swaymsg exec $"kitty --working-directory=($cwd) -e nix develop ($dev_shell) -c nu --login"
+    if $has_direnv {
+        print "Using direnv environment (found .envrc)"
+        ^swaymsg exec $"kitty --working-directory=($cwd) -e nu --login"
+    } else {
+        ^swaymsg exec $"kitty --working-directory=($cwd) -e nix develop ($dev_shell) -c nu --login"
+    }
     sleep 500ms
-    
+
     # Focus back to original terminal
     ^swaymsg focus parent
-    
+
     # Open Claude terminal - enter shell and run claude
-    ^swaymsg exec $"kitty --working-directory=($cwd) -e nix develop ($dev_shell) -c sh -c 'exec claude'"
+    if $has_direnv {
+        ^swaymsg exec $"kitty --working-directory=($cwd) -e sh -c 'exec claude'"
+    } else {
+        ^swaymsg exec $"kitty --working-directory=($cwd) -e nix develop ($dev_shell) -c sh -c 'exec claude'"
+    }
     sleep 500ms
-    
+
     # Move Claude to the right side
     ^swaymsg layout stacking
     ^swaymsg focus left
-    
+
     # Enter dev shell in current terminal and open helix
-    ^nix develop ($dev_shell) -c sh -c 'exec hx .'
-    cd $cwd
-    nu --login
+    if $has_direnv {
+        ^sh -c 'exec hx .'
+        cd $cwd
+        nu --login
+    } else {
+        ^nix develop ($dev_shell) -c sh -c 'exec hx .'
+        cd $cwd
+        nu --login
+    }
 }
 
 # Quick flake rebuild for current hostname

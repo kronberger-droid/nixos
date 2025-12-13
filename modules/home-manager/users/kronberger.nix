@@ -17,6 +17,7 @@ in {
     backupFileExtension = "backup-$(date +%Y%m%d-%H%M%S)";
     users.kronberger = {
       imports = [
+        ../base16-scheme.nix
         ../taskwarrior.nix
         ../sway.nix
         ../kitty.nix
@@ -136,7 +137,7 @@ in {
           bluetuith
 
           # Math
-          speedcrunch
+          numbat
 
           # CAD
           freecad-wayland
