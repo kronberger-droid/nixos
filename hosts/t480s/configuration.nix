@@ -7,6 +7,7 @@
 
   boot = {
     initrd.systemd.enable = true; # Faster boot with systemd in initrd
+    kernelParams = ["console=tty1"];
     loader = {
       systemd-boot = {
         enable = true;

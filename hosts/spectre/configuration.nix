@@ -77,6 +77,7 @@
       "snd_intel_dspcfg.dsp_driver=1"
       "intel_iommu=off"
       "i2c_hid.polling_mode=1"
+      "console=tty1"
     ];
     kernelModules = [
       "hp_wmi"
