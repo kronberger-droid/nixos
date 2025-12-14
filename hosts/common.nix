@@ -101,6 +101,30 @@ in {
     enableIPv6 = true;
   };
 
+  # Boot optimizations
+  systemd.services.NetworkManager-wait-online = {
+    enable = false;
+  };
+
+  systemd.network.wait-online = {
+    enable = false;
+  };
+
+  # Disable systemd-udev-settle for faster boot
+  systemd.services.systemd-udev-settle.enable = false;
+
+  # Remove fwupd from critical boot path - start it after boot completes
+  systemd.services.fwupd = {
+    before = pkgs.lib.mkForce [];
+    after = ["multi-user.target"];
+  };
+
+  # Disable serial console services
+  systemd.services."serial-getty@ttyS0".enable = false;
+  systemd.services."serial-getty@ttyS1".enable = false;
+  systemd.services."serial-getty@ttyS2".enable = false;
+  systemd.services."serial-getty@ttyS3".enable = false;
+
   time.timeZone = "Europe/Vienna";
 
   i18n = {
@@ -125,7 +149,9 @@ in {
   };
 
   services = {
-    fwupd.enable = true;
+    fwupd = {
+      enable = true;
+    };
     flatpak.enable = true;
     resolved.enable = true;
 
@@ -159,7 +185,7 @@ in {
   hardware = {
     bluetooth = {
       enable = true;
-      powerOnBoot = true;
+      powerOnBoot = false;
     };
     firmware = [pkgs.linux-firmware];
     graphics = {

@@ -13,6 +13,7 @@
     kernelParams = [
       "nowatchdog"
       "nmi_watchdog=0"
+      "console=tty1"
     ];
     blacklistedKernelModules = [
       "wdat_wdt"
