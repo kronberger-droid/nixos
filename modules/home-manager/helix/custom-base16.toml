@@ -3,20 +3,41 @@
 # Transparent background like base16_transparent
 
 # UI elements - transparent background
-"ui.background" = {}
-"ui.text" = { fg = "base05" }
+"ui.background" = { fg = "base05" }
+"ui.background.separator" = { fg = "base03" }
+"ui.text" = { fg = "base04" }
+"ui.text.focus" = { fg = "base05" }
 "ui.selection" = { bg = "base02" }
-"ui.cursor" = { fg = "base05", modifiers = ["reversed"] }
-"ui.cursor.match" = { fg = "base0A", modifiers = ["underlined"] }
-"ui.linenr" = { fg = "base03" }
-"ui.linenr.selected" = { fg = "base04" }
+"ui.cursor" = { modifiers = ["reversed"] }
+"ui.cursor.match" = { fg = "base0A", underline = { color = "base0A", style = "line" } }
+"ui.cursor.primary" = { modifiers = ["reversed", "slow_blink"] }
+"ui.cursor.secondary" = { modifiers = ["reversed"] }
+"ui.cursorline.primary" = { underline = { color = "base04", style = "line" } }
+"ui.cursorline.secondary" = { underline = { color = "base04", style = "line" } }
+"ui.cursorcolumn.primary" = { bg = "base02" }
+"ui.cursorcolumn.secondary" = { bg = "base02" }
+"ui.linenr" = { fg = "base03", modifiers = ["dim"] }
+"ui.linenr.selected" = { fg = "base05", modifiers = ["bold"] }
 "ui.statusline" = { fg = "base05" }
-"ui.statusline.inactive" = { fg = "base04" }
-"ui.popup" = {}
-"ui.window" = {}
-"ui.help" = { fg = "base05" }
+"ui.statusline.inactive" = { fg = "base03" }
+"ui.statusline.normal" = { fg = "base00", bg = "base0D" }
+"ui.statusline.insert" = { fg = "base00", bg = "base0B" }
+"ui.statusline.select" = { fg = "base00", bg = "base0E" }
+"ui.popup" = { fg = "base05" }
+"ui.window" = { fg = "base03" }
+"ui.help" = { fg = "base04" }
 "ui.menu" = { fg = "base05" }
-"ui.menu.selected" = { bg = "base02" }
+"ui.menu.selected" = { modifiers = ["reversed"] }
+"ui.menu.scroll" = { fg = "base04" }
+"ui.virtual.ruler" = { bg = "base02" }
+"ui.virtual.whitespace" = "base03"
+"ui.virtual.indent-guide" = "base03"
+"ui.virtual.inlay-hint" = { fg = "base05", bg = "base02" }
+"ui.virtual.inlay-hint.parameter" = { fg = "base05", bg = "base02" }
+"ui.virtual.inlay-hint.type" = { fg = "base05", bg = "base02" }
+"ui.virtual.wrap" = "base03"
+"ui.virtual.jump-label" = { fg = "base0D", modifiers = ["bold", "underlined"] }
+"ui.gutter" = "base03"
 
 # Syntax highlighting - general
 "comment" = { fg = "base04", modifiers = ["italic"] }
@@ -73,7 +94,13 @@
 "error" = { fg = "base08" }
 "warning" = { fg = "base0A" }
 "info" = { fg = "base0D" }
-"hint" = { fg = "base0C" }
+"hint" = { fg = "base04" }
+"debug" = { fg = "base04" }
+"diagnostic.info" = { underline = { color = "base0D", style = "dotted" } }
+"diagnostic.hint" = { underline = { color = "base04", style = "double_line" } }
+"diagnostic.debug" = { underline = { color = "base04", style = "dashed" } }
+"diagnostic.warning" = { underline = { color = "base0A", style = "curl" } }
+"diagnostic.error" = { underline = { color = "base08", style = "curl" } }
 
 # Diff
 "diff.plus" = { fg = "base0B" }

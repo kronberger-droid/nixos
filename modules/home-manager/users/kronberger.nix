@@ -34,6 +34,7 @@ in {
         ../udiskie.nix
         ../firefox.nix
         ../nchat.nix
+        ../qutebrowser.nix
       ];
 
       programs = {

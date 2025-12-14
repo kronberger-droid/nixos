@@ -141,11 +141,6 @@ in {
           --base0F: #${c.base0F}; /* Brown */
         }
 
-        /* Remove all rounded corners */
-        * {
-          border-radius: 0 !important;
-        }
-
         /* Main browser chrome */
         #navigator-toolbox {
           background-color: var(--base00) !important;
@@ -210,7 +205,6 @@ in {
         #sidebar-box {
           background-color: var(--base00) !important;
           border-color: var(--base01) !important;
-          max-width: 300px !important;
         }
 
         #sidebar-header {
@@ -228,7 +222,6 @@ in {
         #sidebar-splitter {
           background-color: var(--base01) !important;
           border-color: var(--base02) !important;
-          width: 1px !important;
         }
 
         /* Menus and panels */
