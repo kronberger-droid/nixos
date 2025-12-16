@@ -78,7 +78,11 @@
             {
               criteria = "AOC U3277WB 0x0000061F";
               position = "0,0";
-              scale = 1.5;
+              scale = 2.0;
+            }
+            {
+              criteria = "eDP-1";
+              status = "disable";
             }
           ];
         }
