@@ -6,8 +6,6 @@
   isNotebook,
   ...
 }: let
-  inherit (config.myTheme) palette backgroundColor textColor accentColor;
-
   ws1 = "1 browser";
   ws2 = "2 emulation";
   ws3 = "3 coding";
@@ -132,20 +130,21 @@ in {
     config = rec {
       modifier = modKey;
       terminal = "${pkgs.kitty}/bin/kitty";
-      output = {
-        "*" = {
-          bg = "${backgroundImage} fill";
-        };
-      }
-      // (
-        if host == "spectre"
-        then {
-          "eDP-1" = {
-            scale = "1.25";
+      output =
+        {
+          "*" = {
+            bg = "${backgroundImage} fill";
           };
         }
-        else {}
-      );
+        // (
+          if host == "spectre"
+          then {
+            "eDP-1" = {
+              scale = "1.25";
+            };
+          }
+          else {}
+        );
       window = {
         titlebar = false;
         border = 1;
@@ -170,35 +169,36 @@ in {
           {window_type = "dialog";}
         ];
       };
-      startup = [
-        {
-          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.95 --focused 1.0";
-          always = false;
-        }
-        {
-          command = "${pkgs.autotiling}/bin/autotiling";
-          always = false;
-        }
-        {
-          command = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";
-          always = false;
-        }
-        {
-          command = "${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4";
-          always = false;
-        }
-      ]
-      ++ (
-        if host == "spectre" || host == "portable"
-        then [
+      startup =
+        [
           {
-            # Start rot8 only if rotation is not disabled (state file doesn't exist)
-            command = "${pkgs.bash}/bin/bash -c 'if [ ! -f $HOME/.cache/rotation-state ]; then ${pkgs.rot8}/bin/rot8; fi'";
+            command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.95 --focused 1.0";
+            always = false;
+          }
+          {
+            command = "${pkgs.autotiling}/bin/autotiling";
+            always = false;
+          }
+          {
+            command = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";
+            always = false;
+          }
+          {
+            command = "${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4";
             always = false;
           }
         ]
-        else []
-      );
+        ++ (
+          if host == "spectre" || host == "portable"
+          then [
+            {
+              # Start rot8 only if rotation is not disabled (state file doesn't exist)
+              command = "${pkgs.bash}/bin/bash -c 'if [ ! -f $HOME/.cache/rotation-state ]; then ${pkgs.rot8}/bin/rot8; fi'";
+              always = false;
+            }
+          ]
+          else []
+        );
       # Base16 colors with custom brown accent for focused windows
       colors = {
         background = "#${config.scheme.base00}";
@@ -206,7 +206,7 @@ in {
         # Focused window border: custom brown accent, text: base05
         focused = {
           border = "#${config.scheme.base0F}"; # Brown accent - matches background
-          background = "#${config.scheme.base0F}"; # Brown accent
+          background = "#${config.scheme.base00}"; # Brown accent
           text = "#${config.scheme.base05}";
           indicator = "#${config.scheme.base0F}";
           childBorder = "#${config.scheme.base0F}"; # Brown accent
