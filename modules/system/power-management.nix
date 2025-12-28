@@ -97,7 +97,7 @@
   services.logind =
     if isNotebook then {
       settings.Login = {
-        HandleLidSwitch = "suspend-then-hibernate";
+        HandleLidSwitch = "suspend";
         HandleLidSwitchDocked = "ignore";
         HandleLidSwitchExternalPower = "suspend";
         HandlePowerKey = "suspend";

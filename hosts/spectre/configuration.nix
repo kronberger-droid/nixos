@@ -26,12 +26,6 @@
       passwordFile = config.age.secrets.tuwien-vpn-password.path;
     };
 
-    logind.settings.Login = {
-      HandleLidSwitch = "suspend-then-hibernate";
-      HandleLidSwitchDocked = "ignore";
-      HandleLidSwitchExternalPower = "suspend";
-    };
-
     journald = {
       storage = "persistent";
       forwardToSyslog = true;
