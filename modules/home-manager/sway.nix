@@ -124,6 +124,12 @@ in {
           # Touchpad gestures for notebooks
           bindgesture swipe:3:right workspace next
           bindgesture swipe:3:left workspace prev
+
+          # Lid switch handling - disable/enable internal display
+          # logind handles suspend based on docking state
+          # Note: lid:on means lid is closed, lid:off means lid is open
+          bindswitch --reload --locked lid:on output eDP-1 disable
+          bindswitch --reload --locked lid:off output eDP-1 enable
         ''
         else ""
       );
