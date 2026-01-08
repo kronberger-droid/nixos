@@ -1,13 +1,10 @@
-{ pkgs, ... }:
-
-{
-  imports =
-    [
-      # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      ../common.nix
-    ];
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+{pkgs, ...}: {
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    ../common.nix
+  ];
+  nix.settings.experimental-features = ["nix-command" "flakes"];
 
   boot = {
     kernelParams = [
@@ -34,7 +31,7 @@
   fileSystems."/mnt/data" = {
     device = "/dev/disk/by-uuid/18d5e6e0-05b6-4496-b056-47a3fafd9acb";
     fsType = "ext4";
-    options = [ "defaults" ];
+    options = ["defaults"];
   };
 
   systemd.tmpfiles.rules = [
@@ -52,4 +49,3 @@
 
   system.stateVersion = "25.11"; # Did you read the comment?
 }
-

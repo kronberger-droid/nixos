@@ -1,5 +1,4 @@
-{ pkgs, config, ... }:
-{
+{config, ...}: {
   services.copyparty = {
     enable = true;
     user = "copyparty";
@@ -51,5 +50,5 @@
   };
 
   # Open firewall for copyparty
-  networking.firewall.allowedTCPPorts = [ 3923 ];
+  networking.firewall.allowedTCPPorts = [3923];
 }

@@ -1,8 +1,4 @@
-{
-  config,
-  inputs,
-  ...
-}: {
+_: {
   # Custom base16 color scheme
   # Base16 format (Standard usage):
   # base00 - Default Background

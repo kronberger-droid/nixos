@@ -1,4 +1,4 @@
-{ config, ... }: {
+{config, ...}: {
   programs.zathura = {
     enable = true;
     options = {

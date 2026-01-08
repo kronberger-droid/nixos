@@ -1,6 +1,4 @@
-{ config, lib, inputs, ... }:
-
-{
+{inputs, ...}: {
   imports = [
     inputs.impermanence.nixosModules.impermanence
   ];
@@ -66,8 +64,14 @@
         # Application specific
         ".mozilla"
         ".thunderbird"
-        { directory = ".gnupg"; mode = "0700"; }
-        { directory = ".password-store"; mode = "0700"; }
+        {
+          directory = ".gnupg";
+          mode = "0700";
+        }
+        {
+          directory = ".password-store";
+          mode = "0700";
+        }
 
         # Trash (used by rip command)
         ".local/share/Trash"

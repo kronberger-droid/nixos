@@ -1,6 +1,4 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   # Auto-mount removable drives with notifications
   services.udiskie = {
     enable = true;

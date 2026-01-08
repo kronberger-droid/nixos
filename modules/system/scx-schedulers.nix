@@ -1,6 +1,4 @@
-{ pkgs, lib, config, ... }:
-
-{
+{pkgs, ...}: {
   # SCX (Sched-Ext) Schedulers for improved desktop responsiveness
   # Requires kernel 6.12+ (currently using 6.17.8)
 
@@ -13,8 +11,8 @@
   # scx_rusty is optimized for desktop workloads with better responsiveness
   systemd.services.scx-rusty = {
     description = "SCX Rusty Scheduler for Desktop Performance";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "basic.target" ];
+    wantedBy = ["multi-user.target"];
+    after = ["basic.target"];
     serviceConfig = {
       Type = "simple";
       ExecStart = "${pkgs.scx.rustscheds}/bin/scx_rusty";

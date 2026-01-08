@@ -1,11 +1,12 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
-  cfg = config.services.tuwien-vpn;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
+  cfg = config.services.tuwien-vpn;
+in {
   options.services.tuwien-vpn = {
     enable = mkEnableOption "TU Wien OpenConnect VPN";
 
@@ -42,8 +43,8 @@ in
     # Create systemd service for TU Wien VPN
     systemd.services.openconnect-tuwien = {
       description = "TU Wien OpenConnect VPN";
-      after = [ "network-online.target" ];
-      wants = [ "network-online.target" ];
+      after = ["network-online.target"];
+      wants = ["network-online.target"];
 
       serviceConfig = {
         Type = "simple";
@@ -64,11 +65,11 @@ in
         NoNewPrivileges = false;
         ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = [ "/etc/resolv.conf" ];
+        ReadWritePaths = ["/etc/resolv.conf"];
 
         # Network capabilities
-        AmbientCapabilities = [ "CAP_NET_ADMIN" ];
-        CapabilityBoundingSet = [ "CAP_NET_ADMIN" ];
+        AmbientCapabilities = ["CAP_NET_ADMIN"];
+        CapabilityBoundingSet = ["CAP_NET_ADMIN"];
       };
     };
 
@@ -99,19 +100,19 @@ in
     # Add sudo rules for VPN control
     security.sudo-rs.extraRules = [
       {
-        users = [ "kronberger" ];
+        users = ["kronberger"];
         commands = [
           {
             command = "/run/current-system/sw/bin/systemctl start openconnect-tuwien.service";
-            options = [ "NOPASSWD" ];
+            options = ["NOPASSWD"];
           }
           {
             command = "/run/current-system/sw/bin/systemctl stop openconnect-tuwien.service";
-            options = [ "NOPASSWD" ];
+            options = ["NOPASSWD"];
           }
           {
             command = "/run/current-system/sw/bin/systemctl restart openconnect-tuwien.service";
-            options = [ "NOPASSWD" ];
+            options = ["NOPASSWD"];
           }
         ];
       }

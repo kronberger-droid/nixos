@@ -1,9 +1,15 @@
-{ pkgs, isNotebook ? false, ... }:
 {
+  pkgs,
+  isNotebook ? false,
+  ...
+}: {
   # Power management configuration optimized for laptops
   powerManagement = {
     enable = true;
-    cpuFreqGovernor = if isNotebook then "powersave" else "schedutil";
+    cpuFreqGovernor =
+      if isNotebook
+      then "powersave"
+      else "schedutil";
     powertop.enable = isNotebook;
 
     # Resume commands to ensure services restart properly
@@ -85,17 +91,20 @@
   # Laptop-specific systemd settings
   systemd = {
     sleep.extraConfig =
-      if isNotebook then ''
+      if isNotebook
+      then ''
         SuspendState=mem
         HibernateDelaySec=90m
         HybridSleepState=disk
         HybridSleepMode=suspend
-      '' else "";
+      ''
+      else "";
   };
 
   # Laptop logind settings
   services.logind =
-    if isNotebook then {
+    if isNotebook
+    then {
       settings.Login = {
         HandleLidSwitch = "suspend";
         HandleLidSwitchDocked = "ignore";
@@ -104,24 +113,30 @@
         IdleAction = "suspend-then-hibernate";
         IdleActionSec = "30m";
       };
-    } else { };
+    }
+    else {};
 
   # Additional power management tools for laptops
-  environment.systemPackages = with pkgs;
-    (if isNotebook then [
+  environment.systemPackages = with pkgs; (
+    if isNotebook
+    then [
       powertop
       acpi
       tlp
       brightnessctl
       light
-    ] else [ ]);
+    ]
+    else []
+  );
 
   # Kernel parameters for power efficiency on laptops
   boot.kernelParams =
-    if isNotebook then [
+    if isNotebook
+    then [
       "intel_pstate=active"
       "i915.enable_fbc=1"
       "i915.enable_psr=1"
       "i915.disable_power_well=0"
-    ] else [ ];
+    ]
+    else [];
 }

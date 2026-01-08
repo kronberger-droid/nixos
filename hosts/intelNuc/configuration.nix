@@ -23,7 +23,7 @@
   environment.systemPackages = with pkgs; [
     droidcam
     android-tools
-    lm_sensors  # Temperature monitoring
+    lm_sensors # Temperature monitoring
   ];
 
   environment.sessionVariables = {
@@ -42,20 +42,20 @@
     enable = true;
     settings = {
       general = {
-        renice = -10;  # Higher priority for games (lower value = higher priority)
+        renice = -10; # Higher priority for games (lower value = higher priority)
         inhibit_screensaver = 1;
-        desiredgov = "performance";  # Switch to performance CPU governor
-        defaultgov = "schedutil";  # Return to balanced governor when done
+        desiredgov = "performance"; # Switch to performance CPU governor
+        defaultgov = "schedutil"; # Return to balanced governor when done
       };
       gpu = {
         apply_gpu_optimisations = "accept-responsibility";
         gpu_device = 0;
-        nv_powermizer_mode = 1;  # Prefer maximum performance
-        amd_performance_level = "high";  # AMD GPU performance mode
+        nv_powermizer_mode = 1; # Prefer maximum performance
+        amd_performance_level = "high"; # AMD GPU performance mode
       };
       cpu = {
-        park_cores = "no";  # Keep all cores active
-        pin_policy = "prefer-high-performance";  # Pin to high-performance cores
+        park_cores = "no"; # Keep all cores active
+        pin_policy = "prefer-high-performance"; # Pin to high-performance cores
       };
       custom = {
         start = "${pkgs.writeShellScript "gamemode-start" ''

@@ -1,11 +1,12 @@
-{ config, lib, pkgs, ... }:
-
-with lib;
-
-let
-  cfg = config.services.pia-vpn;
-in
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+with lib; let
+  cfg = config.services.pia-vpn;
+in {
   options.services.pia-vpn = {
     enable = mkEnableOption "Private Internet Access VPN with NetworkManager integration";
 
@@ -173,19 +174,19 @@ in
     # Add sudo rules for VPN control without passwords
     security.sudo.extraRules = [
       {
-        users = [ "kronberger" ];
+        users = ["kronberger"];
         commands = [
           {
             command = "/etc/pia-vpn/pia-connect.sh";
-            options = [ "NOPASSWD" ];
+            options = ["NOPASSWD"];
           }
           {
             command = "/etc/pia-vpn/pia-disconnect.sh";
-            options = [ "NOPASSWD" ];
+            options = ["NOPASSWD"];
           }
           {
             command = "/etc/pia-vpn/pia-toggle.sh";
-            options = [ "NOPASSWD" ];
+            options = ["NOPASSWD"];
           }
         ];
       }

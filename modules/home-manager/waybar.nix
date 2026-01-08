@@ -297,9 +297,10 @@ in {
         @define-color base0FE6 rgba(138, 129, 119, 0.9);
 
       '';
-    in pkgs.writeText "waybar-style.css" ''
-${colors}${builtins.readFile ./waybar/style.css}
-    '';
+    in
+      pkgs.writeText "waybar-style.css" ''
+        ${colors}${builtins.readFile ./waybar/style.css}
+      '';
     settings = [
       {
         height = 30;

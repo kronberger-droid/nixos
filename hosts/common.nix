@@ -92,7 +92,6 @@ in {
         };
       };
     };
-    wireless.enable = false;
     hostName = host;
 
     # Enable systemd-resolved for better DNS performance
@@ -101,29 +100,24 @@ in {
     enableIPv6 = true;
   };
 
-  # Boot optimizations
-  systemd.services.NetworkManager-wait-online = {
-    enable = false;
+  # Boot optimizations and systemd configuration
+  systemd = {
+    services = {
+      NetworkManager-wait-online.enable = false;
+      systemd-udev-settle.enable = false;
+      # Remove fwupd from critical boot path - start it after boot completes
+      fwupd = {
+        before = pkgs.lib.mkForce [];
+        after = ["multi-user.target"];
+      };
+      # Disable serial console services
+      "serial-getty@ttyS0".enable = false;
+      "serial-getty@ttyS1".enable = false;
+      "serial-getty@ttyS2".enable = false;
+      "serial-getty@ttyS3".enable = false;
+    };
+    network.wait-online.enable = false;
   };
-
-  systemd.network.wait-online = {
-    enable = false;
-  };
-
-  # Disable systemd-udev-settle for faster boot
-  systemd.services.systemd-udev-settle.enable = false;
-
-  # Remove fwupd from critical boot path - start it after boot completes
-  systemd.services.fwupd = {
-    before = pkgs.lib.mkForce [];
-    after = ["multi-user.target"];
-  };
-
-  # Disable serial console services
-  systemd.services."serial-getty@ttyS0".enable = false;
-  systemd.services."serial-getty@ttyS1".enable = false;
-  systemd.services."serial-getty@ttyS2".enable = false;
-  systemd.services."serial-getty@ttyS3".enable = false;
 
   time.timeZone = "Europe/Vienna";
 

@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     keyd
   ];
@@ -9,7 +8,7 @@
     keyboards = {
       # Apple config MUST come first to override wildcard
       apple = {
-        ids = [ "05ac:020c" ];
+        ids = ["05ac:020c"];
         settings = {
           main = {
             leftalt = "leftalt";
@@ -42,7 +41,7 @@
       };
       # Default config for non-Apple keyboards
       default = {
-        ids = [ "*" ];
+        ids = ["*"];
         settings = {
           main = {
             leftalt = "leftmeta";

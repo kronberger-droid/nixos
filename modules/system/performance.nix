@@ -1,10 +1,16 @@
-{ pkgs, isNotebook ? false, ... }:
 {
+  pkgs,
+  isNotebook ? false,
+  ...
+}: {
   # Zram configuration for better memory management
   zramSwap = {
     enable = true;
     algorithm = "zstd";
-    memoryPercent = if isNotebook then 50 else 25;
+    memoryPercent =
+      if isNotebook
+      then 50
+      else 25;
     priority = 10;
   };
 
@@ -42,12 +48,18 @@
     tmp.cleanOnBoot = true;
 
     # Faster boot
-    kernelParams = [
-      "nowatchdog"
-      "nmi_watchdog=0"
-    ] ++ (if isNotebook then [
-      "mem_sleep_default=s2idle"
-    ] else [ ]);
+    kernelParams =
+      [
+        "nowatchdog"
+        "nmi_watchdog=0"
+      ]
+      ++ (
+        if isNotebook
+        then [
+          "mem_sleep_default=s2idle"
+        ]
+        else []
+      );
 
     blacklistedKernelModules = [
       "wdat_wdt"
@@ -74,7 +86,7 @@
   # Improved file system mount options
   fileSystems = {
     "/" = {
-      options = [ "noatime" ];
+      options = ["noatime"];
     };
   };
 }

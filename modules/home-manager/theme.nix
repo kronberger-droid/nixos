@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   qt.enable = true;
 
   home.pointerCursor = {
@@ -14,10 +13,10 @@
     theme = {
       name = "Fluent-round-Dark-compact";
       package = pkgs.fluent-gtk-theme.override {
-        themeVariants = [ "default" ];
-        colorVariants = [ "dark" ];
-        sizeVariants = [ "compact" ];
-        tweaks = [ "round" ];
+        themeVariants = ["default"];
+        colorVariants = ["dark"];
+        sizeVariants = ["compact"];
+        tweaks = ["round"];
       };
     };
     iconTheme = {
