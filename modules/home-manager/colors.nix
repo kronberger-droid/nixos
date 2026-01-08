@@ -1,9 +1,7 @@
-{ lib, ... }:
-let
+{lib, ...}: let
   mk = lib.mkOption;
   inherit (lib) types;
-in
-{
+in {
   options.myTheme = {
     palette = mk {
       type = types.attrsOf types.str;

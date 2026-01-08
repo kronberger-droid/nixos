@@ -23,16 +23,8 @@
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    copyparty = {
-      url = "github:9001/copyparty";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     base16 = {
       url = "github:SenchoPens/base16.nix";
-    };
-    tt-schemes = {
-      url = "github:tinted-theming/schemes";
-      flake = false;
     };
   };
 

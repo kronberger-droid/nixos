@@ -1,10 +1,4 @@
-{
-  pkgs,
-  config,
-  ...
-}: let
-  c = config.scheme;
-in {
+_: {
   programs.firefox = {
     enable = true;
 

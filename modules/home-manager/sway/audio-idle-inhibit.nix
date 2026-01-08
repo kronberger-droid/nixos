@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   home.packages = with pkgs; [
     wayland-pipewire-idle-inhibit
   ];
@@ -7,8 +6,8 @@
   systemd.user.services.wayland-pipewire-idle-inhibit = {
     Unit = {
       Description = "Inhibit idle when audio is playing";
-      After = [ "pipewire.service" "graphical-session.target" ];
-      PartOf = [ "graphical-session.target" ];
+      After = ["pipewire.service" "graphical-session.target"];
+      PartOf = ["graphical-session.target"];
     };
 
     Service = {
@@ -18,7 +17,7 @@
     };
 
     Install = {
-      WantedBy = [ "graphical-session.target" ];
+      WantedBy = ["graphical-session.target"];
     };
   };
 }

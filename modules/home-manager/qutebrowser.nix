@@ -1,8 +1,4 @@
-{
-  pkgs,
-  config,
-  ...
-}: let
+{config, ...}: let
   c = config.scheme;
 in {
   programs.qutebrowser = {

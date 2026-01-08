@@ -1,21 +1,23 @@
-{ pkgs, ... }:
-{
+{pkgs, ...}: {
   # Enhanced firewall configuration
   networking.firewall = {
     enable = true;
     allowPing = false;
 
     # Only allow essential services
-    allowedTCPPorts = [ 22 ]; # SSH only by default
+    allowedTCPPorts = [22]; # SSH only by default
 
     # Allow specific applications through the firewall
     allowedTCPPortRanges = [
       # LocalSend port range
-      { from = 53317; to = 53317; }
+      {
+        from = 53317;
+        to = 53317;
+      }
     ];
 
     # Block unnecessary protocols
-    allowedUDPPorts = [ ];
+    allowedUDPPorts = [];
 
     # Additional firewall rules for better security
     extraCommands = ''
@@ -69,39 +71,39 @@
 
     # Enhanced SSH security
     openssh = {
-    settings = {
-      # Disable password authentication
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
+      settings = {
+        # Disable password authentication
+        PasswordAuthentication = false;
+        PermitRootLogin = "no";
 
-      # Protocol and cipher security
-      KbdInteractiveAuthentication = false;
-      PubkeyAuthentication = true;
-      X11Forwarding = false;
+        # Protocol and cipher security
+        KbdInteractiveAuthentication = false;
+        PubkeyAuthentication = true;
+        X11Forwarding = false;
 
-      # Connection limits
-      MaxAuthTries = 3;
-      MaxSessions = 10;
-      MaxStartups = "10:30:60";
+        # Connection limits
+        MaxAuthTries = 3;
+        MaxSessions = 10;
+        MaxStartups = "10:30:60";
 
-      # Timeout settings
-      ClientAliveInterval = 300;
-      ClientAliveCountMax = 2;
-      LoginGraceTime = 30;
+        # Timeout settings
+        ClientAliveInterval = 300;
+        ClientAliveCountMax = 2;
+        LoginGraceTime = 30;
 
-      # Only allow specific users
-      AllowUsers = [ "kronberger" ];
-    };
+        # Only allow specific users
+        AllowUsers = ["kronberger"];
+      };
 
-    # Use strong key exchange algorithms
-    extraConfig = ''
-      Protocol 2
-      HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-256,rsa-sha2-512
-      PubkeyAcceptedKeyTypes ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-256,rsa-sha2-512
-      KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
-      Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
-      MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com
-    '';
+      # Use strong key exchange algorithms
+      extraConfig = ''
+        Protocol 2
+        HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-256,rsa-sha2-512
+        PubkeyAcceptedKeyTypes ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-256,rsa-sha2-512
+        KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
+        Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+        MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com
+      '';
     };
 
     # Configure log rotation for audit logs

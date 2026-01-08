@@ -1,7 +1,5 @@
-{ pkgs, ... }:
-
-{
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+{pkgs, ...}: {
+  nix.settings.experimental-features = ["nix-command" "flakes"];
 
   imports = [
     ./hardware-configuration.nix
@@ -19,7 +17,7 @@
 
   users.users.devPi = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" ];
+    extraGroups = ["wheel" "networkmanager"];
     shell = pkgs.nushell;
     packages = with pkgs; [
       tree
@@ -27,7 +25,7 @@
   };
 
   environment = {
-    shells = [ pkgs.nushell ];
+    shells = [pkgs.nushell];
     variables = {
       EDITOR = "hx";
       VISUAL = "hx";
@@ -45,7 +43,7 @@
   services = {
     openssh = {
       enable = true;
-      ports = [ 22 ];
+      ports = [22];
       # settings = {
       #   PasswordAuthentication = false;
       #   AllowUsers = null;

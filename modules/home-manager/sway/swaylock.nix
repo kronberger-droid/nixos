@@ -1,8 +1,10 @@
-{ config, pkgs, ... }:
-let
-  inherit (config.myTheme) backgroundColor accentColor;
-in
 {
+  config,
+  pkgs,
+  ...
+}: let
+  inherit (config.myTheme) backgroundColor accentColor;
+in {
   home.packages = with pkgs; [
     swaylock
   ];

@@ -1,5 +1,8 @@
-{ config, host, ... }:
 {
+  config,
+  host,
+  ...
+}: {
   services = {
     mako = {
       enable = true;
@@ -21,14 +24,17 @@
       };
     };
     poweralertd = {
-      enable = if host == "spectre" then true else false;
+      enable =
+        if host == "spectre"
+        then true
+        else false;
     };
   };
 
   systemd.user.services.poweralertd = {
     Unit = {
-      After = [ "mako.service" "sway-session.target" ];
-      PartOf = [ "sway-session.target" ];
+      After = ["mako.service" "sway-session.target"];
+      PartOf = ["sway-session.target"];
     };
   };
 }
