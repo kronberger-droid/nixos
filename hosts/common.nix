@@ -215,11 +215,14 @@ in {
 
   virtualisation.spiceUSBRedirection.enable = true;
 
+  services.tailscale.enable = true;
+
   programs = {
     xwayland.enable = true;
     dconf.enable = true;
     seahorse.enable = true;
   };
+
   users.users.kronberger = {
     createHome = true;
     isNormalUser = true;
