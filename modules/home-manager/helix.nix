@@ -38,6 +38,9 @@
     # Python
     ruff
     pyright
+
+    # OpenGL
+    glsl_analyzer
   ];
 
   imports = [

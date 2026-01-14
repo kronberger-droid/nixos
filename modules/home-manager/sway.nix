@@ -182,6 +182,10 @@ in {
             always = false;
           }
           {
+            command = "${pkgs.systemd}/bin/systemctl --user import-environment";
+            always = false;
+          }
+          {
             command = "${pkgs.autotiling}/bin/autotiling";
             always = false;
           }

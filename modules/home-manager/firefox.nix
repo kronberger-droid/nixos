@@ -1,12 +1,15 @@
 _: {
+  home.sessionVariables = {
+    XDG_CURRENT_DESKTOP = "sway";
+  };
   programs.firefox = {
     enable = true;
 
     profiles.default = {
       settings = {
         # Enable userChrome.css and userContent.css
-        # "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-        # "svg.context-properties.content.enabled" = true;
+        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+        "svg.context-properties.content.enabled" = true;
         # ==================== PERFORMANCE ====================
         # Hardware acceleration
         "gfx.webrender.all" = true;
@@ -107,6 +110,14 @@ _: {
         # Type-ahead find
         "accessibility.typeaheadfind.flashBar" = 0;
       };
+
+      # Custom CSS to hide window controls
+      userChrome = ''
+        /* Hide close button */
+        .titlebar-buttonbox-container > .titlebar-buttonbox > .titlebar-close {
+          display: none !important;
+        }
+      '';
     };
   };
 }
