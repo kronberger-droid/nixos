@@ -74,6 +74,9 @@ in {
         username = "kronberger";
         homeDirectory = "/home/kronberger";
         packages = with pkgs; [
+          # Temp
+          niri
+
           # Browsers
           brave
 
@@ -111,6 +114,7 @@ in {
           spotify
 
           # Information
+          timr-tui
           fastfetch
           fzf
           translate-shell

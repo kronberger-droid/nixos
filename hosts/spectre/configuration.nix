@@ -10,6 +10,10 @@
     ../../modules/system/scx-schedulers.nix
   ];
 
+  programs.steam = {
+    enable = true;
+    gamescopeSession.enable = true;
+  };
   services = {
     printing = {
       enable = true;
@@ -70,7 +74,7 @@
       "pcie_aspm=off"
       "snd_intel_dspcfg.dsp_driver=1"
       "intel_iommu=off"
-      "i2c_hid.polling_mode=1"
+      # "i2c_hid.polling_mode=1"  # Disabled: breaks left/right arrow keys
       "console=tty1"
     ];
     kernelModules = [
