@@ -18,7 +18,6 @@
     mermaid-cli
 
     # Spellcheck
-    ltex-ls
     harper
 
     # PDF Viewer
@@ -107,7 +106,6 @@
           name = "latex";
           language-servers = [
             "texlab"
-            "ltex"
           ];
         }
         {
@@ -121,7 +119,6 @@
         {
           name = "markdown";
           language-servers = [
-            "ltex"
             "harper"
           ];
           formatter = {
@@ -182,21 +179,6 @@
           config = {
             harper-ls = {
               userDictPath = "~/.config/harper/dictionary.txt";
-            };
-          };
-        };
-        ltex = {
-          command = "${pkgs.ltex-ls}/bin/ltex-ls";
-          file-types = ["latex"];
-          config = {
-            ltex.dictionary = {
-              "en-US" = [
-                "isentropic"
-                "Isentropic"
-                "microfluidics"
-                "Microfluidics"
-                "Kronberger"
-              ];
             };
           };
         };
