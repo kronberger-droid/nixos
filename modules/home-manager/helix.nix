@@ -14,6 +14,7 @@
     tinymist
 
     # Markdown
+    rumdl
     markdown-oxide
     mermaid-cli
 
@@ -60,7 +61,11 @@
     settings = {
       theme = "custom-base16";
       editor = {
-        soft-wrap.enable = true;
+        text-width = 80;
+        soft-wrap = {
+          enable = true;
+          wrap-at-text-width = true;
+        };
         line-number = "relative";
         cursor-shape = {
           insert = "bar";
@@ -119,12 +124,13 @@
         {
           name = "markdown";
           language-servers = [
-            "harper"
+            "rumdl"
           ];
           formatter = {
-            command = "${pkgs.dprint}/bin/dprint";
-            args = ["fmt" "--stdin" "md"];
+            command = "${pkgs.rumdl}/bin/rumdl";
+            args = ["fmt" "-"];
           };
+          auto-format = true;
         }
         {
           name = "rust";
@@ -181,6 +187,11 @@
               userDictPath = "~/.config/harper/dictionary.txt";
             };
           };
+        };
+
+        rumdl = {
+          command = "${pkgs.rumdl}/bin/rumdl";
+          args = ["server" "--stdio"];
         };
 
         texlab = {
