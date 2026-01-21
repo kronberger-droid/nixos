@@ -53,6 +53,8 @@
 
   home.file.".config/harper/dictionary.txt".source = ./helix/harper_dict.txt;
 
+  home.file.".config/rumdl/rumdl.toml".source = ./helix/rumdl.toml;
+
   home.file.".config/helix/themes/custom-base16.toml".source = ./helix/custom-base16.toml;
 
   programs.helix = {

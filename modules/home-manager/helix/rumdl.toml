@@ -1,0 +1,35 @@
+[global]
+line-length = 80
+respect-gitignore = true
+cache = true
+flavor = "standard"
+
+[MD013]
+line-length = 80
+code-blocks = true
+headings = true
+paragraphs = true
+tables = false
+strict = false
+reflow = false
+
+[MD033]
+allowed-elements = []
+
+[MD041]
+front-matter-title = "title"
+level = 1
+
+[MD045]
+placeholder-text = "TODO: Add image description"
+
+[MD059]
+prohibited-texts = [
+    "click here",
+    "here",
+    "link",
+    "more",
+]
+
+[MD063]
+enabled = false
