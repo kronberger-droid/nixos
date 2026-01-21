@@ -63,7 +63,7 @@ def swayDevSetup [] {
 # Quick flake rebuild for current hostname
 def flake-reload [] {
     let hostname = (hostname)
-    git add .
+    print "Make sure you have run git add for files you want to include in the rebuild!"
     sudo nixos-rebuild switch --flake ~/.config/nixos#($hostname)
 }
 
