@@ -51,7 +51,7 @@ def connect [host: string] {
 # QuickEMU VM management
 def emu [config?: string] {
     let emulation_dir = ($env.HOME | path join "Emulation")
-    let windows_dir = ($emulation_dir | path join "windows-11")
+    let windows_dir = ($emulation_dir | path join "windows-10")
 
     # Check if windows-11 directory exists
     if not ($windows_dir | path exists) {
@@ -63,16 +63,16 @@ def emu [config?: string] {
     # Check if disk image exists
     let disk_path = ($windows_dir | path join "disk.qcow2")
     if not ($disk_path | path exists) {
-        print $"Error: Windows 11 disk image not found at: ($disk_path)"
+        print $"Error: Windows 10 disk image not found at: ($disk_path)"
         print "Initialize the VM by running 'quickget windows 11' in the Emulation directory."
         return
     }
 
     # Determine which config to use
     let config_file = match $config {
-        "default" => "windows-11-default.conf"
-        "nanonis" => "windows-11-spm.conf"
-        null => "windows-11-default.conf"
+        "default" => "windows-10-default.conf"
+        "nanonis" => "windows-10-spm.conf"
+        null => "windows-10-default.conf"
         _ => {
             print $"Error: Unknown config '($config)'. Available options: default, nanonis"
             return
@@ -88,7 +88,7 @@ def emu [config?: string] {
         return
     }
 
-    print $"Starting Windows 11 with ($config) config..."
+    print $"Starting Windows 10 with ($config) config..."
     cd $emulation_dir
     quickemu --vm $config_file
 }

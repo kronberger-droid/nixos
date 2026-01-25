@@ -141,6 +141,10 @@ in {
           ltunify
           bluetuith
 
+          # Wine
+          wine
+          winetricks
+
           # Math
           numbat
 
