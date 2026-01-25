@@ -74,9 +74,6 @@ in {
         username = "kronberger";
         homeDirectory = "/home/kronberger";
         packages = with pkgs; [
-          # Temp
-          niri
-
           # Browsers
           brave
 
