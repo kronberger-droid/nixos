@@ -254,6 +254,9 @@ in {
       xcp
       busybox
       dust
+      ouch
+      skim
+      tealdeer
 
       # Network cli
       nmap
