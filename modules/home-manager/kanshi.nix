@@ -73,6 +73,35 @@
         }
 
         {
+          profile.name = "uni-desk-aoc-dual";
+          profile.outputs = [
+            {
+              criteria = "eDP-1";
+              position = "0,1080";
+              scale = 1.5;
+            }
+            {
+              criteria = "AOC U3277WB 0x0000061F";
+              position = "0,0";
+              scale = 2.0;
+            }
+          ];
+        }
+        {
+          profile.name = "uni-desk-aoc-only";
+          profile.outputs = [
+            {
+              criteria = "eDP-1";
+              status = "disable";
+            }
+            {
+              criteria = "AOC U3277WB 0x0000061F";
+              position = "0,0";
+              scale = 2.0;
+            }
+          ];
+        }
+        {
           profile.name = "uni-desk-aoc";
           profile.outputs = [
             {
