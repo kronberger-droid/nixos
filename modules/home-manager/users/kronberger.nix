@@ -21,7 +21,6 @@ in {
         ../taskwarrior.nix
         ../sway.nix
         ../kitty.nix
-        ../alacritty.nix
         ../helix.nix
         ../nushell.nix
         ../git.nix
