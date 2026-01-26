@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: {
   home.packages = with pkgs; [
     nchat
   ];
@@ -9,7 +13,7 @@
         name = "nchat";
         genericName = "Terminal-based Chat Client";
         comment = "nchat - terminal-based multi-protocol chat client";
-        exec = "kitty nchat";
+        exec = "${config.terminal.bin} ${config.terminal.execFlag} nchat";
         terminal = false;
         categories = ["Network" "InstantMessaging"];
         icon = "utilities-terminal";

@@ -135,7 +135,7 @@ in {
       );
     config = rec {
       modifier = modKey;
-      terminal = "${pkgs.kitty}/bin/kitty";
+      terminal = config.terminal.bin;
       output =
         {
           "*" = {
@@ -278,15 +278,24 @@ in {
         # open bitwarden GUI
         "${modifier}+Shift+p" = "exec ${pkgs.bitwarden-desktop}/bin/bitwarden";
         # open floating btop shell
-        "${modifier}+Shift+t" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
+        "${modifier}+Shift+t" =
+          if config.terminal.floatingAppId != null
+          then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"
+          else "exec ${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop";
         # zooming and highlighting for screen share
         "${modifier}+Shift+y" = "exec ${pkgs.woomer}/bin/woomer";
         # open file managers
-        "${modifier}+Shift+x" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)";
+        "${modifier}+Shift+x" =
+          if config.terminal.floatingAppId != null
+          then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)"
+          else "exec ${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)";
         "${modifier}+Shift+n" = "exec ${pkgs.nemo-with-extensions}/bin/nemo $(${config.xdg.configHome}/kitty/cwd.sh)";
         # open terminals
-        "${modifier}+Shift+Return" = "exec ${pkgs.kitty}/bin/kitty --app-id floating_shell --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)";
-        "${modifier}+Return" = "exec '${pkgs.kitty}/bin/kitty --working-directory $(${config.xdg.configHome}/kitty/cwd.sh)'";
+        "${modifier}+Shift+Return" =
+          if config.terminal.floatingAppId != null
+          then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)"
+          else "exec ${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)";
+        "${modifier}+Return" = "exec '${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)'";
 
         # Toggle waybar
         "${modifier}+Shift+b" = "exec ${config.xdg.configHome}/waybar/toggle-waybar.sh";

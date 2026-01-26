@@ -22,7 +22,6 @@ in {
   home.packages = with pkgs; [
     waybar-mpris
     calcurse
-    kitty
     rofi
   ];
 
@@ -368,7 +367,10 @@ in {
         };
 
         cpu = {
-          on-click = "${pkgs.kitty}/bin/kitty --app-id floating_shell -e ${pkgs.btop}/bin/btop";
+          on-click =
+            if config.terminal.floatingAppId != null
+            then "${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"
+            else "${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop";
           format = "{usage}% ";
           tooltip = false;
         };

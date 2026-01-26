@@ -18,9 +18,11 @@ in {
     users.kronberger = {
       imports = [
         ../base16-scheme.nix
+        ../terminal.nix
         ../taskwarrior.nix
         ../sway.nix
         ../kitty.nix
+        ../rio.nix
         ../helix.nix
         ../nushell.nix
         ../git.nix
@@ -36,6 +38,9 @@ in {
         ../nchat.nix
         ../qutebrowser.nix
       ];
+
+      # Set default terminal emulator
+      terminal.emulator = "kitty";
 
       programs = {
         direnv = {
