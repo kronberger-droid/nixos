@@ -14,7 +14,7 @@
     yshift = "35";
   };
 
-  dropkitten_command = "${dropkittenPkg}/bin/dropkitten -W ${dropkitten_size.width} -H ${dropkitten_size.height} -y ${dropkitten_size.yshift} --";
+  dropkitten_command = "${dropkittenPkg}/bin/dropkitten -t ${config.terminal.emulator} -w ${dropkitten_size.width} -h ${dropkitten_size.height} -y ${dropkitten_size.yshift} --";
 
   # nmtui color scheme matching kitty theme
   nmtui_colors = "root=white,black:window=white,black:border=blue,black:listbox=white,black:actlistbox=black,blue:label=white,black:title=brightblue,black:button=white,black:actbutton=black,blue:compactbutton=white,black:checkbox=white,black:actcheckbox=black,blue:entry=white,black:textbox=white,black";
