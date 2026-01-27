@@ -15,7 +15,7 @@
   ];
 
   # Generate development.nu with dynamic terminal configuration
-  xdg.configFile."nixos/modules/home-manager/nushell/development.nu".text = ''
+  xdg.configFile."nushell/development.nu".text = ''
     # Development environment setup and utilities
 
     # Sway development layout setup
