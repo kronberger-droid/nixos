@@ -1,7 +1,7 @@
 source ~/.zoxide.nu
 
 # Import modular configuration files
-source ~/.config/nixos/modules/home-manager/nushell/development.nu
+source ~/.config/nushell/development.nu
 source ~/.config/nixos/modules/home-manager/nushell/utilities.nu
 source ~/.config/nixos/modules/home-manager/nushell/keybindings.nu
 

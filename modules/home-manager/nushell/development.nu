@@ -1,1 +1,0 @@
-/nix/store/6cck1djaxmm8ga28jgy858lb8zbrd4ap-home-manager-files/.config/nixos/modules/home-manager/nushell/development.nu
