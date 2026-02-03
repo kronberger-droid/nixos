@@ -11,7 +11,10 @@
   programs.git = {
     enable = true;
     lfs.enable = true;
-
+    ignores = [
+      ".rumdl_cache"
+      ".claude/settings.local.json"
+    ];
     settings = {
       user = {
         name = "kronberger-droid";

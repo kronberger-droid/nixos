@@ -124,6 +124,7 @@
           name = "markdown";
           language-servers = [
             "rumdl"
+            "harper"
           ];
           formatter = {
             command = "${pkgs.rumdl}/bin/rumdl";
