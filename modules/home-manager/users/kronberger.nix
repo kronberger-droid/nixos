@@ -172,7 +172,7 @@ in {
 
           # AI
           ollama
-          claude-code-bin
+          claude-code
           gemini-cli
 
           # Python
