@@ -13,6 +13,7 @@
   programs.steam = {
     enable = true;
     gamescopeSession.enable = true;
+    extraPackages = [pkgs.sdl3];
   };
   services = {
     printing = {
