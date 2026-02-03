@@ -78,11 +78,40 @@
         }
     }
 
-    # Quick flake rebuild for current hostname
-    def flake-reload [] {
+    # NixOS flake management
+    def flake [
+        action: string = "switch"                          # switch, boot, test, build, dry, update, rollback
+        --update (-u)                                      # update flake inputs first
+        --dir (-d): string = "~/.config/nixos"             # flake directory
+    ] {
+        let flake_dir = ($dir | path expand)
         let hostname = (hostname)
-        print "Make sure you have run git add for files you want to include in the rebuild!"
-        sudo nixos-rebuild switch --flake ~/.config/nixos#($hostname)
+
+        # Check for unstaged changes
+        let unstaged = (git -C $flake_dir status --porcelain | lines | where {|l| ($l | str length) > 0 and not ($l | str starts-with "A ") and not ($l | str starts-with "M ")})
+        if ($unstaged | length) > 0 {
+            print $"(ansi yellow_bold)Warning:(ansi reset) Untracked/unstaged files:"
+            $unstaged | each {|f| print $"  (ansi dark_gray)($f)(ansi reset)"}
+            print ""
+        }
+
+        if $update or $action == "update" {
+            print $"(ansi cyan)Updating flake inputs...(ansi reset)"
+            nix flake update --flake $flake_dir
+            if $action == "update" {
+                return
+            }
+        }
+
+        if $action == "rollback" {
+            print $"(ansi yellow)Rolling back to previous generation...(ansi reset)"
+            sudo nixos-rebuild switch --rollback
+            return
+        }
+
+        let cmd = if $action == "dry" { "dry-activate" } else { $action }
+        print $"(ansi green_bold)Rebuilding:(ansi reset) ($hostname) [($cmd)]"
+        sudo nixos-rebuild $cmd --flake $"($flake_dir)#($hostname)"
     }
 
     # Enter nix develop shell in current terminal only
