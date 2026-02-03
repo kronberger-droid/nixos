@@ -188,8 +188,8 @@ in {
         ];
 
         file = {
-          # Ensure ~/.local/bin exists for tools that expect it
-          ".local/bin/.keep".text = "";
+          # Symlink claude to ~/.local/bin for native installation check
+          ".local/bin/claude".source = "${pkgs.claude-code-bin}/bin/claude";
 
           ".config/swappy/config".text = ''
             [Default]
