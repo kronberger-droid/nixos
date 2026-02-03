@@ -135,6 +135,7 @@ in {
           pdfarranger
           zathura
           pdfpc
+          inlyne
 
           # Remote
           localsend
@@ -171,7 +172,7 @@ in {
 
           # AI
           ollama
-          claude-code
+          claude-code-bin
           gemini-cli
 
           # Python
@@ -187,6 +188,9 @@ in {
         ];
 
         file = {
+          # Ensure ~/.local/bin exists for tools that expect it
+          ".local/bin/.keep".text = "";
+
           ".config/swappy/config".text = ''
             [Default]
             save_dir=$HOME/Pictures/Screenshots
