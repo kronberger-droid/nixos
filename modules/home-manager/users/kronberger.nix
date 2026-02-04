@@ -37,7 +37,11 @@ in {
         ../firefox.nix
         ../nchat.nix
         ../qutebrowser.nix
+        ../claude.nix
       ];
+
+      # Claude Code statusline
+      claude.statusline.enable = true;
 
       # Set default terminal emulator
       terminal.emulator = "kitty";
