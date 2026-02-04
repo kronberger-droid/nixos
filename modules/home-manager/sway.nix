@@ -102,7 +102,7 @@ in {
         for_window [app_id="nemo"] floating enable, sticky enable, resize set 1200 800
         for_window [app_id="floating_shell"] floating enable, border pixel 1, sticky enable, resize set 50ppt 60ppt
         for_window [app_id="localsend_app"] floating enable, sticky enable, resize set 1200 800
-        for_window [instance="bitwarden"] floating enable, sticky enable, resize set 1200 800
+        for_window [app_id="Bitwarden"] floating enable, sticky enable, resize set 1200 800
         for_window [app_id="org.speedcrunch"] floating enable, sticky enable, resize set 800 600
         for_window [instance="gpartedbin"] floating enable
         for_window [title="Authentication Required"] floating enable
