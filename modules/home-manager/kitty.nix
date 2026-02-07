@@ -11,7 +11,15 @@
 
   programs.kitty = {
     enable = true;
+    keybindings = {
+      "ctrl+shift+o" = "show_scrollback";
+      # Copy last command output to clipboard
+      "ctrl+shift+y" = "launch --stdin-source=@last_cmd_output --type=background wl-copy";
+      # Copy entire scrollback to clipboard
+      "ctrl+shift+u" = "launch --stdin-source=@screen_scrollback --type=background wl-copy";
+    };
     settings = {
+      # scrollback_pager = "hx";
       # No confirmation
       confirm_os_window_close = 0;
 
