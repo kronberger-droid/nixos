@@ -242,6 +242,7 @@ in {
       gparted
 
       # Basic cli tools
+      eza
       bat
       bat-extras.core
       less
