@@ -99,7 +99,6 @@
       timeout = 1; # Fast boot menu timeout
       efi.canTouchEfiVariables = true;
     };
-    kernelPackages = pkgs.linuxPackages;
     kernelParams = [
       # Commented out for testing - may have caused sleep issues
       # "i915.enable_psr=0"

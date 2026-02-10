@@ -302,5 +302,7 @@ in {
     info.enable = true;
   };
 
+  boot.kernelPackages = pkgs.linuxPackages_6_18;
+
   nixpkgs.config.allowUnfree = true;
 }
