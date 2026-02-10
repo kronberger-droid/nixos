@@ -275,8 +275,8 @@ in {
       # Others
       fwupd
       nixpkgs-review
-      xorg.xhost
-      xorg.xauth
+      xhost
+      xauth
       woeusb
       clamav
       apptainer-overriden-nixos
