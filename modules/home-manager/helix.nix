@@ -143,6 +143,7 @@
           name = "typst";
           language-servers = [
             "tinymist"
+            "harper"
           ];
           formatter = {
             command = "${pkgs.typstyle}/bin/typstyle";
