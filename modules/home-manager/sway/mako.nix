@@ -14,11 +14,11 @@
         background-color = "#${config.scheme.base00}";
         text-color = "#${config.scheme.base05}";
         # High urgency: border base08
-        "[urgency=high]" = {
+        "urgency=high" = {
           border-color = "#${config.scheme.base08}";
         };
         # Low urgency: border base03
-        "[urgency=low]" = {
+        "urgency=low" = {
           border-color = "#${config.scheme.base03}";
         };
       };
