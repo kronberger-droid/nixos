@@ -4,4 +4,5 @@ let
 in {
   "pia-credentials.age".publicKeys = [intelNuc spectre];
   "tuwien-vpn-password.age".publicKeys = [intelNuc spectre];
+  "openclaw-anthropic-api-key.age".publicKeys = [intelNuc spectre];
 }

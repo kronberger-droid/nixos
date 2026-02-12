@@ -22,5 +22,12 @@
       mode = "0400";
       owner = "root";
     };
+
+    secrets.openclaw-anthropic-api-key = {
+      file = "${inputs.self}/secrets/openclaw-anthropic-api-key.age";
+      path = "/run/secrets/openclaw-anthropic-api-key";
+      mode = "0400";
+      owner = "kronberger";
+    };
   };
 }
