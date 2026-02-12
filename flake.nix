@@ -26,6 +26,10 @@
     base16 = {
       url = "github:SenchoPens/base16.nix";
     };
+    nix-openclaw = {
+      url = "github:openclaw/nix-openclaw";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
@@ -56,6 +60,7 @@
             {
               home-manager.sharedModules = [
                 inputs.base16.homeManagerModule
+                inputs.nix-openclaw.homeManagerModules.openclaw
               ];
             }
             ./modules/home-manager/users/kronberger.nix

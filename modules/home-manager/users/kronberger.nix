@@ -38,6 +38,7 @@ in {
         ../nchat.nix
         ../qutebrowser.nix
         ../claude.nix
+        ../openclaw.nix
       ];
 
       # Claude Code statusline
