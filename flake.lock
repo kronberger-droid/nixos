@@ -23,6 +23,26 @@
         "type": "github"
       }
     },
+    "arrabbiata-tui": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770883979,
+        "narHash": "sha256-VitM68Inscpnl87AlEpl07sRaUTNZEOcLljHL40A0vs=",
+        "owner": "kronberger-droid",
+        "repo": "arrabbiata-tui",
+        "rev": "6db7b8f09e40088acc0b83d59db585d230695b37",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kronberger-droid",
+        "repo": "arrabbiata-tui",
+        "type": "github"
+      }
+    },
     "base16": {
       "inputs": {
         "fromYaml": "fromYaml"
@@ -219,6 +239,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "arrabbiata-tui": "arrabbiata-tui",
         "base16": "base16",
         "dropkitten": "dropkitten",
         "fenix": "fenix",

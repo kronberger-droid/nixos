@@ -22,5 +22,12 @@
       mode = "0400";
       owner = "root";
     };
+
+    secrets.arrabbiata-config = {
+      file = "${inputs.self}/secrets/arrabbiata-config.age";
+      path = "/run/secrets/arrabbiata-config";
+      mode = "0400";
+      owner = "kronberger";
+    };
   };
 }

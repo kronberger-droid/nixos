@@ -23,6 +23,10 @@
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    arrabbiata-tui = {
+      url = "github:kronberger-droid/arrabbiata-tui";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     base16 = {
       url = "github:SenchoPens/base16.nix";
     };

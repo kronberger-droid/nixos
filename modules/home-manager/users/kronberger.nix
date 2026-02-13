@@ -38,10 +38,16 @@ in {
         ../nchat.nix
         ../qutebrowser.nix
         ../claude.nix
+        ../arrabbiata-tui.nix
       ];
 
       # Claude Code statusline
       claude.statusline.enable = true;
+
+      programs.arrabbiata-tui = {
+        enable = true;
+        configFile = "/run/secrets/arrabbiata-config";
+      };
 
       # Set default terminal emulator
       terminal.emulator = "kitty";
