@@ -22,3 +22,6 @@ out/
 
 # Ignore rumdl cache
 .rumdl_cache
+
+.envrc
+.direnv
