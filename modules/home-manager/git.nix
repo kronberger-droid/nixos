@@ -14,6 +14,8 @@
     ignores = [
       ".rumdl_cache"
       ".claude/settings.local.json"
+      ".direnv"
+      ".envrc"
     ];
     settings = {
       user = {
