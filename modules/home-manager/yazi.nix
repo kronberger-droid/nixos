@@ -1,6 +1,7 @@
 {pkgs, ...}: {
   programs.yazi = {
     enable = true;
+    shellWrapperName = "y";
     flavors = {
       "base16-transparent" = ./yazi/base16-transparent.toml;
     };
