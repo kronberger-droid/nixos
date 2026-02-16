@@ -5,4 +5,5 @@ in {
   "pia-credentials.age".publicKeys = [intelNuc spectre];
   "tuwien-vpn-password.age".publicKeys = [intelNuc spectre];
   "arrabbiata-config.age".publicKeys = [intelNuc spectre];
+  "github-token.age".publicKeys = [intelNuc spectre];
 }
