@@ -83,6 +83,7 @@
         action: string = "switch"                          # switch, boot, test, build, dry, update, rollback
         --update (-u)                                      # update flake inputs first
         --dir (-d): string = "~/.config/nixos"             # flake directory
+        --yes (-y)                                         # skip confirmation on dirty tree
     ] {
         let flake_dir = ($dir | path expand)
         let hostname = (hostname)
@@ -93,6 +94,13 @@
             print $"(ansi yellow_bold)Warning:(ansi reset) Untracked/unstaged files:"
             $unstaged | each {|f| print $"  (ansi dark_gray)($f)(ansi reset)"}
             print ""
+            if not $yes {
+                let answer = (input $"(ansi yellow)Continue anyway? [y/N] (ansi reset)")
+                if ($answer | str downcase) != "y" {
+                    print "Aborted."
+                    return
+                }
+            }
         }
 
         if $update or $action == "update" {
@@ -111,7 +119,11 @@
 
         let cmd = if $action == "dry" { "dry-activate" } else { $action }
         print $"(ansi green_bold)Rebuilding:(ansi reset) ($hostname) [($cmd)]"
-        sudo nixos-rebuild $cmd --flake $"($flake_dir)#($hostname)"
+        try {
+            sudo nixos-rebuild $cmd --flake $"($flake_dir)#($hostname)"
+        } catch {
+            print $"\n(ansi yellow)Build interrupted or failed.(ansi reset)"
+        }
     }
 
     # Enter nix develop shell in current terminal only

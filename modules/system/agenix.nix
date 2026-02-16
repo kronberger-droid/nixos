@@ -29,5 +29,12 @@
       mode = "0400";
       owner = "kronberger";
     };
+
+    secrets.github-token = {
+      file = "${inputs.self}/secrets/github-token.age";
+      path = "/run/secrets/github-token";
+      mode = "0400";
+      owner = "kronberger";
+    };
   };
 }
