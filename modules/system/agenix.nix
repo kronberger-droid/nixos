@@ -9,6 +9,7 @@
   };
 
   age = {
+    # Format: PIA_USER=pXXXXXXX\nPIA_PASS=your_password
     secrets.pia-credentials = {
       file = "${inputs.self}/secrets/pia-credentials.age";
       path = "/run/secrets/pia-credentials";
