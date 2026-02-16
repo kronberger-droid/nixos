@@ -15,8 +15,8 @@
       url = "github:kronberger-droid/dropkitten";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    pia = {
-      url = "github:Fuwn/pia.nix";
+    nix-pia-vpn = {
+      url = "github:rcambrj/nix-pia-vpn";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     fenix = {
