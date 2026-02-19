@@ -257,7 +257,6 @@ in {
       busybox
       dust
       ouch
-      skim
       tealdeer
 
       # Network cli
