@@ -131,6 +131,11 @@ in {
           fzf
           translate-shell
           wiki-tui
+          bluetui
+          impala
+          wiremix
+          lynx
+          lazygit
 
           # Images
           drawio
@@ -152,7 +157,7 @@ in {
 
           # System
           ltunify
-          bluetuith
+          bluetui
 
           # Wine
           wine
