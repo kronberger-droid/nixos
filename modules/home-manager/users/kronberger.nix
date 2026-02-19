@@ -6,7 +6,7 @@
   ...
 }: let
   dropkittenPkg = inputs.dropkitten.packages.${pkgs.stdenv.hostPlatform.system}.dropkitten;
-  rustToolchain = inputs.fenix.packages.${pkgs.stdenv.hostPlatform.system}.complete.toolchain;
+  rustToolchain = inputs.fenix.packages.${pkgs.stdenv.hostPlatform.system}.stable.toolchain;
 in {
   home-manager = {
     extraSpecialArgs = {
