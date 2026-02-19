@@ -43,7 +43,8 @@ in {
     wlsunset
     grim
     slurp
-    pulsemixer
+    wiremix
+    impala
     autotiling
     swappy
     sway-contrib.grimshot
@@ -307,10 +308,10 @@ in {
         "XF86MonBrightnessDown" = "exec ${pkgs.light}/bin/light -U 10";
         "XF86MonBrightnessUp" = "exec ${pkgs.light}/bin/light -A 10";
 
-        # Volume control using pulsemixer
-        "XF86AudioRaiseVolume" = "exec ${pkgs.pulsemixer}/bin/pulsemixer --change-volume +1";
-        "XF86AudioLowerVolume" = "exec ${pkgs.pulsemixer}/bin/pulsemixer --change-volume -1";
-        "XF86AudioMute" = "exec ${pkgs.pulsemixer}/bin/pulsemixer --toggle-mute";
+        # Volume control using wpctl (WirePlumber)
+        "XF86AudioRaiseVolume" = "exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%+";
+        "XF86AudioLowerVolume" = "exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-";
+        "XF86AudioMute" = "exec ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
 
         # Music control using waybar-mpris
         "XF86AudioNext" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send next";

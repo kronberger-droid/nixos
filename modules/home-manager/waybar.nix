@@ -16,8 +16,13 @@
 
   dropkitten_command = "${dropkittenPkg}/bin/dropkitten -t ${config.terminal.emulator} -w ${dropkitten_size.width} -h ${dropkitten_size.height} -y ${dropkitten_size.yshift} --";
 
-  # nmtui color scheme matching kitty theme
-  nmtui_colors = "root=white,black:window=white,black:border=blue,black:listbox=white,black:actlistbox=black,blue:label=white,black:title=brightblue,black:button=white,black:actbutton=black,blue:compactbutton=white,black:checkbox=white,black:actcheckbox=black,blue:entry=white,black:textbox=white,black";
+  tui = {
+    bluetooth = "${pkgs.bluetui}/bin/bluetui";
+    wifi = "${pkgs.impala}/bin/impala";
+    audio = "${pkgs.wiremix}/bin/wiremix";
+    calendar = "${pkgs.calcurse}/bin/calcurse";
+    monitor = "${pkgs.btop}/bin/btop";
+  };
 in {
   home.packages = with pkgs; [
     waybar-mpris
@@ -299,14 +304,14 @@ in {
           format = "{:%e %b %Y %H:%M}";
           tooltip = true;
           tooltip-format = "<big>{:%B %Y}</big>\n<tt>{calendar}</tt>";
-          on-click = "${dropkitten_command} ${pkgs.calcurse}/bin/calcurse";
+          on-click = "${dropkitten_command} ${tui.calendar}";
         };
 
         cpu = {
           on-click =
             if config.terminal.floatingAppId != null
-            then "${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"
-            else "${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop";
+            then "${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${tui.monitor}"
+            else "${config.terminal.bin} ${config.terminal.execFlag} ${tui.monitor}";
           format = "{usage}% ";
           tooltip = false;
         };
@@ -364,7 +369,7 @@ in {
         bluetooth = {
           format = "󰂯";
           format-disabled = "󰂲 off";
-          on-click = "${dropkitten_command} ${pkgs.bluetuith}/bin/bluetuith";
+          on-click = "${dropkitten_command} ${tui.bluetooth}";
           on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
         };
 
@@ -389,11 +394,11 @@ in {
           tooltip-format-wifi = "{icon} {ifname} ({essid}): {ipaddr}";
           tooltip-format-disconnected = "{icon} disconnected";
           tooltip-format-disabled = "{icon} disabled";
-          on-click = "${dropkitten_command} ${pkgs.bash}/bin/bash -c 'NEWT_COLORS=\"${nmtui_colors}\" ${pkgs.networkmanager}/bin/nmtui connect'";
+          on-click = "${dropkitten_command} ${tui.wifi}";
         };
 
         pulseaudio = {
-          on-click = "${dropkitten_command} ${pkgs.pulsemixer}/bin/pulsemixer";
+          on-click = "${dropkitten_command} ${tui.audio}";
           format = "{volume}% {icon} {format_source}";
           format-bluetooth = "{volume}% {icon} {format_source}";
           format-bluetooth-muted = " {icon} {format_source}";
