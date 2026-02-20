@@ -16,9 +16,12 @@
 
   dropkitten_command = "${dropkittenPkg}/bin/dropkitten -t ${config.terminal.emulator} -w ${dropkitten_size.width} -h ${dropkitten_size.height} -y ${dropkitten_size.yshift} --";
 
+  # nmtui color scheme matching kitty theme
+  nmtui_colors = "root=white,black:window=white,black:border=blue,black:listbox=white,black:actlistbox=black,blue:label=white,black:title=brightblue,black:button=white,black:actbutton=black,blue:compactbutton=white,black:checkbox=white,black:actcheckbox=black,blue:entry=white,black:textbox=white,black";
+
   tui = {
     bluetooth = "${pkgs.bluetui}/bin/bluetui";
-    wifi = "${pkgs.impala}/bin/impala";
+    wifi = "${pkgs.bash}/bin/bash -c 'NEWT_COLORS=\"${nmtui_colors}\" ${pkgs.networkmanager}/bin/nmtui connect'";
     audio = "${pkgs.wiremix}/bin/wiremix";
     calendar = "${pkgs.calcurse}/bin/calcurse";
     monitor = "${pkgs.btop}/bin/btop";

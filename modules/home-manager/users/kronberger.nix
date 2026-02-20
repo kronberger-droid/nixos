@@ -107,6 +107,7 @@ in {
           serpl
 
           # Editors
+          neovim
           (pkgs.obsidian.overrideAttrs (oldAttrs: {
             postInstall =
               (oldAttrs.postInstall or "")
@@ -132,7 +133,6 @@ in {
           translate-shell
           wiki-tui
           bluetui
-          impala
           wiremix
           lynx
           lazygit

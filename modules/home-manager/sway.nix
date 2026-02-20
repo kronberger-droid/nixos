@@ -44,7 +44,6 @@ in {
     grim
     slurp
     wiremix
-    impala
     autotiling
     swappy
     sway-contrib.grimshot
