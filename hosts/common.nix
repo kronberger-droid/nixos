@@ -77,7 +77,7 @@ in {
   networking = {
     networkmanager = {
       enable = true;
-      wifi.backend = "iwd";
+      # wifi.backend = "iwd";
       # Faster DNS resolution
       insertNameservers = ["1.1.1.1" "1.0.0.1" "8.8.8.8"];
       # Better connection management
