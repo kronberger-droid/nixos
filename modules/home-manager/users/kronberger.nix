@@ -132,7 +132,7 @@ in {
           fzf
           translate-shell
           wiki-tui
-          bluetui
+          bluetuith
           wiremix
           lynx
           lazygit
@@ -157,7 +157,7 @@ in {
 
           # System
           ltunify
-          bluetui
+          bluetuith
 
           # Wine
           wine
