@@ -214,7 +214,7 @@ in {
     enable = true;
     systemd = {
       enable = true;
-      target = "sway-session.target";
+      target = "graphical-session.target";
     };
     style = let
       # Define base16 color variables with opacity variants
@@ -253,7 +253,7 @@ in {
           spacing = 10;
           icon-size = 14;
         };
-        modules-left = ["custom/menu" "sway/workspaces" "sway/scratchpad" "sway/mode"];
+        modules-left = ["custom/menu" "sway/workspaces" "niri/workspaces" "sway/scratchpad" "sway/mode"];
         modules-right =
           [
             "idle_inhibitor"
@@ -327,7 +327,7 @@ in {
 
         "custom/power" = {
           format = "";
-          on-click = "${pkgs.sway}/bin/swaymsg exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
+          on-click = "${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
           tooltip = false;
         };
 
