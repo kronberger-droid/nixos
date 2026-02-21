@@ -9,22 +9,7 @@
   modifier = "Mod";
   terminal = config.terminal.bin;
 in {
-  imports = [
-    ./waybar.nix
-    ./theme.nix
-    ./rofi.nix
-    ./sway/mako.nix
-    ./kanshi.nix
-  ];
-
   home.packages = with pkgs; [
-    wl-clipboard
-    brightnessctl
-    grim
-    slurp
-    swappy
-    swaybg
-    libnotify
     xwayland-satellite
     fuzzel
     niri
@@ -87,7 +72,7 @@ in {
     // Spawn processes at startup
     spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-m" "fill" "-i" "${./sway/deathpaper.jpg}"
     spawn-at-startup "${pkgs.xwayland-satellite}/bin/xwayland-satellite"
-    spawn-at-startup "${pkgs.mako}/bin/mako"
+    // Mako is started via systemd (services.nix)
 
     prefer-no-csd
 
@@ -103,24 +88,24 @@ in {
         ${modifier}+D { spawn "${pkgs.rofi}/bin/rofi" "-show" "drun"; }
         ${modifier}+Shift+S { spawn "${pkgs.firefox}/bin/firefox"; }
         ${
-          if config.terminal.floatingAppId != null
-          then ''${modifier}+Shift+Return { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)"; }''
-          else ''${modifier}+Shift+Return { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)"; }''
-        }
+      if config.terminal.floatingAppId != null
+      then ''${modifier}+Shift+Return { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)"; }''
+      else ''${modifier}+Shift+Return { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)"; }''
+    }
         ${
-          if config.terminal.floatingAppId != null
-          then ''${modifier}+Shift+T { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"; }''
-          else ''${modifier}+Shift+T { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"; }''
-        }
+      if config.terminal.floatingAppId != null
+      then ''${modifier}+Shift+T { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"; }''
+      else ''${modifier}+Shift+T { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"; }''
+    }
         ${
-          if config.terminal.floatingAppId != null
-          then ''${modifier}+Shift+X { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)"; }''
-          else ''${modifier}+Shift+X { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)"; }''
-        }
+      if config.terminal.floatingAppId != null
+      then ''${modifier}+Shift+X { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)"; }''
+      else ''${modifier}+Shift+X { spawn "${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)"; }''
+    }
         ${modifier}+Shift+N { spawn "${pkgs.bash}/bin/bash" "-c" "${pkgs.nemo-with-extensions}/bin/nemo $(${config.xdg.configHome}/kitty/cwd.sh)"; }
 
         // ── Session ───────────────────────────────────────────
-        ${modifier}+Q { close-window; }
+        ${modifier}+Shift+Q { close-window; }
         ${modifier}+Shift+E { quit; }
         Ctrl+Alt+Delete { quit; }
         ${modifier}+Shift+P { power-off-monitors; }
@@ -320,6 +305,12 @@ in {
     window-rule {
         match title=r#"(?i)(open|save) (file|folder|as)"#
         open-floating true
+    }
+
+    // Inactive window opacity (equivalent to sway's inactive-windows-transparency)
+    window-rule {
+        match is-focused=false
+        opacity 0.95
     }
   '';
 }
