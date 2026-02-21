@@ -44,13 +44,14 @@
       hostname,
       system,
       isNotebook,
+      primaryCompositor ? "niri",
       extraModules ? [],
     }:
       nixpkgs.lib.nixosSystem {
         inherit system;
         specialArgs = {
           host = hostname;
-          inherit isNotebook inputs;
+          inherit isNotebook inputs primaryCompositor;
         };
         modules =
           [
