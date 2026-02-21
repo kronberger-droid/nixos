@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  primaryCompositor,
+  ...
+}: {
   services.greetd = {
     enable = true;
     settings = {
@@ -8,7 +12,7 @@
           --time \
           --asterisks \
           --user-menu \
-          --cmd sway \
+          --cmd ${primaryCompositor} \
           --remember \
           --remember-user-session \
         '';

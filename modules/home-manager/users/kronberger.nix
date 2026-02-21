@@ -3,6 +3,7 @@
   inputs,
   host,
   isNotebook,
+  primaryCompositor,
   ...
 }: let
   dropkittenPkg = inputs.dropkitten.packages.${pkgs.stdenv.hostPlatform.system}.dropkitten;
@@ -10,7 +11,7 @@
 in {
   home-manager = {
     extraSpecialArgs = {
-      inherit inputs host isNotebook dropkittenPkg;
+      inherit inputs host isNotebook dropkittenPkg primaryCompositor;
     };
     useGlobalPkgs = true;
     useUserPackages = true;
@@ -18,9 +19,14 @@ in {
     users.kronberger = {
       imports = [
         ../base16-scheme.nix
+        ../compositor.nix
         ../terminal.nix
         ../taskwarrior.nix
         ../sway.nix
+        ../niri.nix
+        ../waybar.nix
+        ../rofi.nix
+        ../kanshi.nix
         ../kitty.nix
         ../rio.nix
         ../helix.nix
@@ -39,7 +45,7 @@ in {
         ../qutebrowser.nix
         ../claude.nix
         ../arrabbiata-tui.nix
-        ../niri.nix
+        ../services.nix
       ];
 
       # Claude Code statusline
@@ -52,6 +58,9 @@ in {
 
       # Set default terminal emulator
       terminal.emulator = "kitty";
+
+      # Set primary compositor (both are always available via greetd)
+      compositor.primary = primaryCompositor;
 
       programs = {
         direnv = {
