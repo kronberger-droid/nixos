@@ -216,6 +216,7 @@ in {
     xwayland.enable = true;
     dconf.enable = true;
     seahorse.enable = true;
+    niri.enable = true;
   };
 
   users.users.kronberger = {

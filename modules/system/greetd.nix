@@ -18,5 +18,6 @@
 
   environment.etc."greetd/environments".text = ''
     sway
+    niri
   '';
 }

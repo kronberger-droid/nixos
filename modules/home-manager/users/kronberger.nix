@@ -39,6 +39,7 @@ in {
         ../qutebrowser.nix
         ../claude.nix
         ../arrabbiata-tui.nix
+        ../niri.nix
       ];
 
       # Claude Code statusline
