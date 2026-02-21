@@ -23,74 +23,16 @@
 
   defaultBrowser = "${pkgs.firefox}/bin/firefox";
 in {
-  imports = [
-    ./sway/swayidle.nix
-    ./waybar.nix
-    ./theme.nix
-    ./rofi.nix
-    ./sway/audio-idle-inhibit.nix
-    ./sway/swaylock.nix
-    ./sway/mako.nix
-    ./kanshi.nix
-  ];
-
   home.packages = with pkgs; [
     swaylock
     swayidle
     swayimg
-    wl-clipboard
-    brightnessctl
-    wlsunset
-    grim
-    slurp
-    wiremix
     autotiling
-    swappy
     sway-contrib.grimshot
     sway-contrib.inactive-windows-transparency
     swaycwd
-    jq
-    gron
-    libnotify
-    swaybg
-    lsof
     sway-scratch
-    libinput
-    rot8
-
-    xdg-user-dirs
   ];
-
-  xdg.configFile."rot8/rot8.toml" = lib.mkIf (host == "spectre" || host == "portable") {
-    text = ''
-      # rot8 configuration for HP Spectre x360
-      # Auto-rotation daemon for Sway
-
-      # Touchscreen device to rotate
-      [[touch-device]]
-      name = "ELAN2513:00 04F3:2E2D"
-
-      # Tablet/stylus device to rotate
-      [[tablet-device]]
-      name = "ELAN2513:00 04F3:2E2D Stylus"
-
-      # Display to rotate
-      [[display]]
-      name = "eDP-1"
-
-      # Threshold for rotation (degrees from horizontal)
-      # Lower values make rotation more sensitive
-      threshold = 0.5
-
-      # Polling interval in milliseconds
-      # How often to check the accelerometer
-      poll-interval = 500
-
-      # Allow all orientations (normal, left, right, inverted)
-      # Set to false to disable upside-down rotation
-      invert-mode = true
-    '';
-  };
 
   wayland.windowManager.sway = {
     enable = true;
@@ -178,40 +120,16 @@ in {
           {window_type = "dialog";}
         ];
       };
-      startup =
-        [
+      startup = [
           {
             command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.95 --focused 1.0";
-            always = false;
-          }
-          {
-            command = "${pkgs.systemd}/bin/systemctl --user import-environment";
             always = false;
           }
           {
             command = "${pkgs.autotiling}/bin/autotiling";
             always = false;
           }
-          {
-            command = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";
-            always = false;
-          }
-          {
-            command = "${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4";
-            always = false;
-          }
-        ]
-        ++ (
-          if host == "spectre" || host == "portable"
-          then [
-            {
-              # Start rot8 only if rotation is not disabled (state file doesn't exist)
-              command = "${pkgs.bash}/bin/bash -c 'if [ ! -f $HOME/.cache/rotation-state ]; then ${pkgs.rot8}/bin/rot8; fi'";
-              always = false;
-            }
-          ]
-          else []
-        );
+        ];
       # Base16 colors with custom brown accent for focused windows
       colors = {
         background = "#${config.scheme.base00}";
