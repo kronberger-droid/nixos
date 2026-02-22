@@ -1,7 +1,4 @@
 _: {
-  home.sessionVariables = {
-    XDG_CURRENT_DESKTOP = "sway";
-  };
   programs.firefox = {
     enable = true;
 
