@@ -8,15 +8,9 @@
 }: let
   modifier = "Mod";
   terminal = config.terminal.bin;
-in {
-  home.packages = with pkgs; [
-    xwayland-satellite
-    fuzzel
-    niri
-  ];
 
-  xdg.configFile."niri/config.kdl".text = ''
-    // Niri minimal config for testing
+  niriConfigText = ''
+    // Niri configuration
     // See: https://github.com/YaLTeR/niri/wiki/Configuration:-Overview
 
     input {
@@ -69,10 +63,9 @@ in {
         }
     }
 
-    // Spawn processes at startup
+    // niri-session (launched by greetd) handles systemd graphical-session.target
     spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-m" "fill" "-i" "${./sway/deathpaper.jpg}"
     spawn-at-startup "${pkgs.xwayland-satellite}/bin/xwayland-satellite"
-    // Mako is started via systemd (services.nix)
 
     prefer-no-csd
 
@@ -106,9 +99,9 @@ in {
 
         // ── Session ───────────────────────────────────────────
         ${modifier}+Shift+Q { close-window; }
-        ${modifier}+Shift+E { quit; }
-        Ctrl+Alt+Delete { quit; }
+        ${modifier}+Shift+E { spawn "${config.xdg.configHome}/rofi/powermenu/powermenu.sh"; }
         ${modifier}+Shift+P { spawn "${pkgs.bitwarden-desktop}/bin/bitwarden"; }
+        ${modifier}+Shift+W { spawn "${pkgs.rofi-rbw-wayland}/bin/rofi-rbw"; }
 
         // ── Notifications ─────────────────────────────────────
         ${modifier}+Shift+D { spawn "${pkgs.mako}/bin/makoctl" "dismiss" "-a"; }
@@ -189,8 +182,8 @@ in {
         ${modifier}+W { toggle-column-tabbed-display; }
 
         // ── Floating ──────────────────────────────────────────
-        ${modifier}+V       { toggle-window-floating; }
-        ${modifier}+Shift+V { switch-focus-between-floating-and-tiling; }
+        ${modifier}+Space       { toggle-window-floating; }
+        ${modifier}+Shift+Space { switch-focus-between-floating-and-tiling; }
 
         // ── Workspaces (focus) ────────────────────────────────
         ${modifier}+1 { focus-workspace 1; }
@@ -281,8 +274,8 @@ in {
     window-rule {
         match app-id=r#"^nemo$"#
         open-floating true
-        default-column-width { fixed 1200; }
-        default-window-height { fixed 800; }
+        default-column-width { proportion 0.5; }
+        default-window-height { proportion 0.6; }
     }
 
     window-rule {
@@ -298,13 +291,6 @@ in {
     }
 
     window-rule {
-        match app-id=r#"^org\.speedcrunch$"#
-        open-floating true
-        default-column-width { fixed 800; }
-        default-window-height { fixed 600; }
-    }
-
-    window-rule {
         match title=r#"(?i)(open|save) (file|folder|as)"#
         open-floating true
     }
@@ -315,4 +301,19 @@ in {
         opacity 0.95
     }
   '';
+
+  # Build-time validation: if niri config has a syntax/semantic error, the build fails.
+  niriConfigFile = pkgs.writeText "niri-config.kdl" niriConfigText;
+  niriConfigChecked = pkgs.runCommand "niri-config-checked" {} ''
+    ${pkgs.niri}/bin/niri validate -c ${niriConfigFile} 2>&1
+    cp ${niriConfigFile} $out
+  '';
+in {
+  home.packages = with pkgs; [
+    xwayland-satellite
+    fuzzel
+    niri
+  ];
+
+  xdg.configFile."niri/config.kdl".source = niriConfigChecked;
 }

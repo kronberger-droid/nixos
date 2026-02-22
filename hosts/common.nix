@@ -191,9 +191,13 @@ in {
 
   xdg.portal = {
     enable = true;
-    extraPortals = [pkgs.xdg-desktop-portal-gtk];
+    extraPortals = [
+      pkgs.xdg-desktop-portal-gtk
+      pkgs.xdg-desktop-portal-gnome
+    ];
     config = {
-      common.default = ["wlr" "gtk"];
+      sway.default = ["wlr" "gtk"];
+      niri.default = ["gnome" "gtk"];
     };
     wlr = {
       enable = true;
