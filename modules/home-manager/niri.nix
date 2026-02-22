@@ -108,7 +108,7 @@ in {
         ${modifier}+Shift+Q { close-window; }
         ${modifier}+Shift+E { quit; }
         Ctrl+Alt+Delete { quit; }
-        ${modifier}+Shift+P { power-off-monitors; }
+        ${modifier}+Shift+P { spawn "${pkgs.bitwarden-desktop}/bin/bitwarden"; }
 
         // ── Notifications ─────────────────────────────────────
         ${modifier}+Shift+D { spawn "${pkgs.mako}/bin/makoctl" "dismiss" "-a"; }
@@ -268,10 +268,14 @@ in {
     }
 
     window-rule {
-        match app-id=r#"^floating_shell$"#
-        open-floating true
+        match is-floating=true
         default-column-width { proportion 0.5; }
         default-window-height { proportion 0.6; }
+    }
+
+    window-rule {
+        match app-id=r#"^floating_shell$"#
+        open-floating true
     }
 
     window-rule {
@@ -291,8 +295,6 @@ in {
     window-rule {
         match app-id=r#"^Bitwarden$"#
         open-floating true
-        default-column-width { fixed 1200; }
-        default-window-height { fixed 800; }
     }
 
     window-rule {
