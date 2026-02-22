@@ -14,6 +14,9 @@
     enable = true;
     gamescopeSession.enable = true;
     extraPackages = [pkgs.sdl3];
+    package = pkgs.steam.override {
+      extraArgs = "-system-composer";
+    };
   };
   services = {
     printing = {
