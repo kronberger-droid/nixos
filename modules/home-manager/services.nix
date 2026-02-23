@@ -8,17 +8,17 @@
 }: let
   # Compositor-agnostic DPMS control script
   dpmsOff = pkgs.writeShellScript "dpms-off" ''
-    if [ -n "$SWAYSOCK" ]; then
-      ${pkgs.sway}/bin/swaymsg 'output * dpms off'
-    elif [ -n "$NIRI_SOCKET" ]; then
+    if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
       ${pkgs.niri}/bin/niri msg action power-off-monitors
+    elif [ -n "$SWAYSOCK" ] && [ -S "$SWAYSOCK" ]; then
+      ${pkgs.sway}/bin/swaymsg 'output * dpms off'
     fi
   '';
   dpmsOn = pkgs.writeShellScript "dpms-on" ''
-    if [ -n "$SWAYSOCK" ]; then
-      ${pkgs.sway}/bin/swaymsg 'output * dpms on'
-    elif [ -n "$NIRI_SOCKET" ]; then
+    if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
       ${pkgs.niri}/bin/niri msg action power-on-monitors
+    elif [ -n "$SWAYSOCK" ] && [ -S "$SWAYSOCK" ]; then
+      ${pkgs.sway}/bin/swaymsg 'output * dpms on'
     fi
   '';
 in {
@@ -91,7 +91,7 @@ in {
       }
       {
         timeout = 400;
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f &";
+        command = "${pkgs.swaylock-effects}/bin/swaylock -f";
       }
       {
         timeout = 460;
@@ -104,7 +104,7 @@ in {
       }
     ];
     events = {
-      "before-sleep" = "${pkgs.swaylock-effects}/bin/swaylock -f &";
+      "before-sleep" = "${pkgs.swaylock-effects}/bin/swaylock -f";
       "after-resume" = "${dpmsOn}";
     };
   };
@@ -119,25 +119,6 @@ in {
 
     Service = {
       ExecStart = "${pkgs.wayland-pipewire-idle-inhibit}/bin/wayland-pipewire-idle-inhibit";
-      Restart = "on-failure";
-      RestartSec = 5;
-    };
-
-    Install = {
-      WantedBy = ["graphical-session.target"];
-    };
-  };
-
-  # ── Polkit agent ────────────────────────────────────────────────
-  systemd.user.services.polkit-kde-agent = {
-    Unit = {
-      Description = "PolicyKit Authentication Agent";
-      After = ["graphical-session.target"];
-      PartOf = ["graphical-session.target"];
-    };
-
-    Service = {
-      ExecStart = "${pkgs.kdePackages.polkit-kde-agent-1}/libexec/polkit-kde-authentication-agent-1";
       Restart = "on-failure";
       RestartSec = 5;
     };

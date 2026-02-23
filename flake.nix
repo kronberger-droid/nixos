@@ -30,6 +30,9 @@
     base16 = {
       url = "github:SenchoPens/base16.nix";
     };
+    niri = {
+      url = "github:sodiboo/niri-flake";
+    };
   };
 
   outputs = inputs @ {
@@ -57,6 +60,7 @@
           [
             ./hosts/${hostname}/configuration.nix
             ./modules/system/greetd.nix
+            inputs.niri.nixosModules.niri
             home-manager.nixosModules.home-manager
             {
               home-manager.sharedModules = [
