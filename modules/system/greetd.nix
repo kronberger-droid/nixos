@@ -20,6 +20,7 @@
     if primaryCompositor == "niri"
     then
       pkgs.writeShellScript "niri-session-quiet" ''
+        . "/etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh"
         exec ${sessionBin} >/dev/null 2>&1
       ''
     else sessionBin;
