@@ -18,17 +18,11 @@
   xdg.configFile."nushell/development.nu".text = ''
     # Development environment setup and utilities
 
-    # Sway development layout setup
-    def swayDevSetup [] {
-        print "Setting up Sway development layout..."
-        # Get current working directory
-        let cwd = $env.PWD
-
-        # Check if direnv is active
+    # Detect dev shell and direnv
+    def detectDevEnv [] {
         let has_direnv = ('.envrc' | path exists)
-
-        # Detect dev shell (only if not using direnv)
-        let dev_shell = if not $has_direnv {
+        let has_flake = ('flake.nix' | path exists)
+        let dev_shell = if $has_flake and not $has_direnv {
             try {
                 ^nix eval --json .#devShells.x86_64-linux.dev err> /dev/null
                 ".#dev"
@@ -38,41 +32,108 @@
         } else {
             ""
         }
+        { has_direnv: $has_direnv, has_flake: $has_flake, dev_shell: $dev_shell }
+    }
+
+    # Build a terminal command string with optional dev shell wrapping
+    def termCmd [cwd: string, dev_env: record, exec_args: string] {
+        if $dev_env.has_direnv or not $dev_env.has_flake {
+            $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} ($exec_args)"
+        } else {
+            $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} nix develop ($dev_env.dev_shell) -c ($exec_args)"
+        }
+    }
+
+    # Build a claude terminal command string
+    def claudeCmd [cwd: string, dev_env: record] {
+        if $dev_env.has_direnv or not $dev_env.has_flake {
+            $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} sh -c 'exec claude'"
+        } else {
+            $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} nix develop ($dev_env.dev_shell) -c sh -c 'exec claude'"
+        }
+    }
+
+    # Sway development layout setup
+    def swayDevSetup [] {
+        print "Setting up Sway development layout..."
+        let cwd = $env.PWD
+        let dev_env = detectDevEnv
 
         ^swaymsg layout splith
         ^swaymsg layout stacking
 
-        # Open shell terminal (will stack with original)
-        if $has_direnv {
-            print "Using direnv environment (found .envrc)"
-            ^swaymsg exec $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} nu --login"
-        } else {
-            ^swaymsg exec $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} nix develop ($dev_shell) -c nu --login"
-        }
+        ^swaymsg exec (termCmd $cwd $dev_env "nu --login")
         sleep 500ms
 
-        # Focus back to original terminal
         ^swaymsg focus parent
-
-        # Open Claude terminal - enter shell and run claude
-        if $has_direnv {
-            ^swaymsg exec $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} sh -c 'exec claude'"
-        } else {
-            ^swaymsg exec $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} nix develop ($dev_shell) -c sh -c 'exec claude'"
-        }
+        ^swaymsg exec (claudeCmd $cwd $dev_env)
         sleep 500ms
 
-        # Move Claude to the right side
         ^swaymsg layout stacking
         ^swaymsg focus left
 
-        # Enter dev shell in current terminal and open helix
-        if $has_direnv {
+        if $dev_env.has_direnv or not $dev_env.has_flake {
             ^sh -c 'exec hx .'
             cd $cwd
             nu --login
         } else {
-            ^nix develop ($dev_shell) -c sh -c 'exec hx .'
+            ^nix develop ($dev_env.dev_shell) -c sh -c 'exec hx .'
+            cd $cwd
+            nu --login
+        }
+    }
+
+    # Niri development layout setup
+    # Layout: left tabbed column = helix + shell, right column = claude
+    # Typst: left tabbed column = helix + typst watch, right column = zathura
+    def niriDevSetup [] {
+        let cwd = $env.PWD
+        let dev_env = detectDevEnv
+        let is_typst = (glob *.typ | length) > 0
+
+        if $is_typst {
+            print "Setting up Niri typst layout..."
+        } else {
+            print "Setting up Niri development layout..."
+        }
+
+        # Enable tabbed display on the original terminal's column
+        ^niri msg action toggle-column-tabbed-display
+
+        if $is_typst {
+            # Spawn typst watch terminal (receives focus)
+            ^niri msg action spawn -- sh -c (termCmd $cwd $dev_env $"typst watch ($cwd)/main.typ ($cwd)/main.pdf")
+            sleep 500ms
+
+            # Move typst watch into the tabbed column
+            ^niri msg action consume-or-expel-window-left
+
+            # Spawn zathura as the right column
+            ^niri msg action spawn -- zathura ($cwd + "/main.pdf")
+            sleep 500ms
+        } else {
+            # Spawn shell terminal (receives focus)
+            ^niri msg action spawn -- sh -c (termCmd $cwd $dev_env "nu --login")
+            sleep 500ms
+
+            # Move shell into the tabbed column
+            ^niri msg action consume-or-expel-window-left
+
+            # Spawn Claude terminal as the right column
+            ^niri msg action spawn -- sh -c (claudeCmd $cwd $dev_env)
+            sleep 500ms
+        }
+
+        # Focus back to left column, top window (original terminal for helix)
+        ^niri msg action focus-column-left
+        ^niri msg action focus-window-up
+
+        if $dev_env.has_direnv or not $dev_env.has_flake {
+            ^sh -c 'exec hx .'
+            cd $cwd
+            nu --login
+        } else {
+            ^nix develop ($dev_env.dev_shell) -c sh -c 'exec hx .'
             cd $cwd
             nu --login
         }
@@ -142,10 +203,21 @@
         }
     }
 
-    # Smart project development with automatic discovery and Sway setup
+    # Detect compositor and run the appropriate dev setup
+    def compositorDevSetup [] {
+        if ("NIRI_SOCKET" in $env) {
+            niriDevSetup
+        } else if ("SWAYSOCK" in $env) {
+            swayDevSetup
+        } else {
+            print "No supported compositor detected (checked NIRI_SOCKET, SWAYSOCK)"
+        }
+    }
+
+    # Smart project development with automatic discovery
     def dev [project?: string] {
         if ($project == null) {
-            swayDevSetup
+            compositorDevSetup
         } else {
             let projects_dir = $env.HOME + "/Programming"
 
@@ -174,7 +246,7 @@
                 $"($env.HOME)/($project)" | path expand
             }
             cd $work_dir
-            swayDevSetup
+            compositorDevSetup
         }
     }
   '';
