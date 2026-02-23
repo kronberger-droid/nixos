@@ -152,7 +152,9 @@ in {
           inkscape
           gthumb
           ipe
-          gimp
+          (pkgs.gimp-with-plugins.override {
+            plugins = [pkgs.gimpPlugins.resynthesizer];
+          })
           ffmpeg_6
 
           # PDF
