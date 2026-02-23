@@ -14,6 +14,10 @@ in {
   ];
 
   programs.niri.settings = {
+    environment = {
+      DISPLAY = ":0";
+    };
+
     # Input configuration
     input = {
       keyboard = {
