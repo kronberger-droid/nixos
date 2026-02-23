@@ -3,13 +3,13 @@
 # Only uses cwd for terminals and file managers, not browsers/other apps.
 # Supports both sway and niri.
 
-if [ -n "$SWAYSOCK" ]; then
-    focused=$(swaymsg -t get_tree | jq -r \
-          '.. | select(.type?) | select(.type=="con") | select(.focused==true)')
+if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
+    focused=$(niri msg -j focused-window)
     app_id=$(echo "$focused" | jq -r '.app_id // empty')
     pid=$(echo "$focused" | jq -r '.pid')
-elif [ -n "$NIRI_SOCKET" ]; then
-    focused=$(niri msg -j focused-window)
+elif [ -n "$SWAYSOCK" ] && [ -S "$SWAYSOCK" ]; then
+    focused=$(swaymsg -t get_tree | jq -r \
+          '.. | select(.type?) | select(.type=="con") | select(.focused==true)')
     app_id=$(echo "$focused" | jq -r '.app_id // empty')
     pid=$(echo "$focused" | jq -r '.pid')
 else
