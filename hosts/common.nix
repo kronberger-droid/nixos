@@ -199,7 +199,10 @@ in {
     ];
     config = {
       sway.default = ["wlr" "gtk"];
-      niri.default = ["gnome" "gtk"];
+      niri = {
+        default = ["gnome" "gtk"];
+        "org.freedesktop.impl.portal.FileChooser" = ["gtk"];
+      };
     };
     wlr = {
       enable = true;
@@ -299,6 +302,8 @@ in {
     noto-fonts-color-emoji
     liberation_ttf
     cm_unicode
+    stix-two
+    source-serif-pro
   ];
 
   # Documentation settings
