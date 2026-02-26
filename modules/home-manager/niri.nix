@@ -224,8 +224,8 @@ in {
       "${modifier}+W".action.toggle-column-tabbed-display = [];
 
       # Floating
-      "${modifier}+Space".action.toggle-window-floating = [];
-      "${modifier}+Shift+Space".action.switch-focus-between-floating-and-tiling = [];
+      "${modifier}+Space".action.switch-focus-between-floating-and-tiling = [];
+      "${modifier}+Shift+Space".action.toggle-window-floating = [];
 
       # Workspaces (focus)
       "${modifier}+1".action.focus-workspace = 1;
