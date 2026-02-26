@@ -39,6 +39,10 @@ in {
     layout = {
       gaps = 4;
       center-focused-column = "never";
+      struts = {
+        left = 2;
+        right = 2;
+      };
 
       preset-column-widths = [
         {proportion = 0.33333;}
