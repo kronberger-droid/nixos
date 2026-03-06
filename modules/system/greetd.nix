@@ -12,18 +12,6 @@
       sway = "sway";
     }
     .${primaryCompositor};
-
-  # Wrap niri-session to suppress TTY output (env import messages) that
-  # otherwise flashes between tuigreet exiting and the compositor rendering.
-  # sway doesn't need this because it starts directly as the compositor.
-  sessionCommand =
-    if primaryCompositor == "niri"
-    then
-      pkgs.writeShellScript "niri-session-quiet" ''
-        . "/etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh"
-        exec ${sessionBin} >/dev/null 2>&1
-      ''
-    else sessionBin;
 in {
   services.greetd = {
     enable = true;
@@ -34,9 +22,10 @@ in {
           --time \
           --asterisks \
           --user-menu \
-          --cmd ${sessionCommand} \
+          --cmd ${sessionBin} \
           --remember \
           --remember-user-session \
+          --sessions ${pkgs.niri}/share/wayland-sessions:${pkgs.sway}/share/wayland-sessions
         '';
       };
     };
