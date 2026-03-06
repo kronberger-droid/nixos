@@ -28,6 +28,8 @@
     };
   };
 
+  systemd.services.virt-secret-init-encryption.enable = false;
+
   programs.virt-manager.enable = true;
 
   # Ensure OpenGL/DRI access
