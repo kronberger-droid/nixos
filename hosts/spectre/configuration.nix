@@ -98,14 +98,13 @@
     crashDump.enable = true;
   };
 
-  systemd.sleep.extraConfig = ''
-    SuspendState=mem
-    HibernateDelaySec=90m
-  '';
+  systemd.sleep.settings.Sleep = {
+    SuspendState = "mem";
+    HibernateDelaySec = "90m";
+  };
 
   environment.systemPackages = with pkgs; [
     brightnessctl
-    light
     dmidecode
   ];
 

@@ -90,15 +90,15 @@
 
   # Laptop-specific systemd settings
   systemd = {
-    sleep.extraConfig =
+    sleep.settings.Sleep =
       if isNotebook
-      then ''
-        SuspendState=mem
-        HibernateDelaySec=90m
-        HybridSleepState=disk
-        HybridSleepMode=suspend
-      ''
-      else "";
+      then {
+        SuspendState = "mem";
+        HibernateDelaySec = "90m";
+        HybridSleepState = "disk";
+        HybridSleepMode = "suspend";
+      }
+      else {};
   };
 
   # Laptop logind settings
@@ -124,7 +124,6 @@
       acpi
       tlp
       brightnessctl
-      light
     ]
     else []
   );
