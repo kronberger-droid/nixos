@@ -79,7 +79,11 @@ run_cmd() {
 			amixer set Master mute
 			systemctl suspend
 		elif [[ $1 == '--logout' ]]; then
-			swaymsg exit
+			if [[ -n "$NIRI_SOCKET" ]]; then
+				niri msg action quit
+			elif [[ -n "$SWAYSOCK" ]]; then
+				swaymsg exit
+			fi
 		fi
 	else
 		exit 0
