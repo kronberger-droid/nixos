@@ -148,6 +148,7 @@ in {
           lazygit
 
           # Images
+          gwyddion
           drawio
           inkscape
           gthumb
@@ -192,6 +193,7 @@ in {
           # Social
           element-desktop
           zapzap
+          signal-desktop
 
           # Video
           vlc
