@@ -33,17 +33,14 @@ in {
       };
 
       mouse = {};
+
+      focus-follows-mouse.enable = true;
     };
 
     # Layout configuration
     layout = {
       gaps = 4;
       center-focused-column = "never";
-      struts = {
-        left = 2;
-        right = 2;
-      };
-
       preset-column-widths = [
         {proportion = 0.33333;}
         {proportion = 0.5;}
@@ -55,13 +52,14 @@ in {
       };
 
       focus-ring = {
-        width = 2;
-        active.color = "#${config.scheme.base0F}";
-        inactive.color = "#${config.scheme.base00}";
+        enable = false;
       };
 
       border = {
-        enable = false;
+        enable = true;
+        width = 2;
+        active.color = "#${config.scheme.base0F}";
+        inactive.color = "#${config.scheme.base00}";
       };
 
       tab-indicator = {
@@ -382,8 +380,8 @@ in {
       {
         matches = [{app-id = "^Bitwarden$";}];
         open-floating = true;
-        default-column-width = {proportion = 0.5;};
-        default-window-height = {proportion = 0.6;};
+        default-column-width = {proportion = 0.6;};
+        default-window-height = {proportion = 0.7;};
       }
 
       # File dialogs
