@@ -2,6 +2,15 @@
   home.packages = with pkgs; [
     github-desktop
   ];
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+    options = {
+      line-numbers = true;
+      side-by-side = true;
+      syntax-theme = "base16";
+    };
+  };
   programs.gh = {
     enable = true;
     settings = {
