@@ -2,8 +2,11 @@
   pkgs,
   config,
   lib,
+  options,
   ...
-}: {
+}: let
+  hasTerminal = options ? terminal;
+in {
   home.packages = with pkgs; [
     bat
     zoxide
@@ -14,8 +17,9 @@
     zellij
   ];
 
-  # Generate development.nu with dynamic terminal configuration
-  xdg.configFile."nushell/development.nu".text = ''
+  # Generate development.nu with dynamic terminal configuration (requires terminal module)
+  xdg.configFile."nushell/development.nu" = lib.mkIf hasTerminal {
+    text = ''
     # Development environment setup and utilities
 
     # Detect dev shell and direnv
@@ -250,6 +254,7 @@
         }
     }
   '';
+  };
 
   programs.nushell = {
     enable = true;
@@ -266,7 +271,7 @@
         rm = "echo 'use rip instead'";
         tldr = "tealdeer";
       }
-      // lib.optionalAttrs config.terminal.hasKittens {
+      // lib.optionalAttrs (hasTerminal && config.terminal.hasKittens) {
         icat = "kitten icat";
         ssh = "kitty +kitten ssh";
       };
