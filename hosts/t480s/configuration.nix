@@ -5,17 +5,9 @@
   ];
 
   boot = {
-    initrd.systemd.enable = true; # Faster boot with systemd in initrd
+    systemd-boot-defaults.enable = true;
+    loader.efi.canTouchEfiVariables = true;
     kernelParams = ["console=tty1"];
-    loader = {
-      systemd-boot = {
-        enable = true;
-        editor = false; # Disable boot menu editor for security
-        configurationLimit = 20; # Limit number of stored generations
-      };
-      timeout = 1; # Fast boot menu timeout
-      efi.canTouchEfiVariables = true;
-    };
   };
 
   services = {

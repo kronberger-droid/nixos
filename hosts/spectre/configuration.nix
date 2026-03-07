@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   config,
   ...
 }: {
@@ -8,6 +9,7 @@
     ../common.nix
     ../../modules/system/firmware/vbt.nix
     ../../modules/system/scx-schedulers.nix
+    ../../modules/profiles/vpn-workstation.nix
   ];
 
   programs.steam = {
@@ -18,31 +20,20 @@
       extraArgs = "-system-composer";
     };
   };
+
   services = {
     printing = {
       enable = true;
       drivers = [pkgs.gutenprint];
     };
 
-    pia = {
-      enable = true;
-      environmentFile = config.age.secrets.pia-credentials.path;
-    };
-
-    tuwien-vpn = {
-      enable = true;
-      passwordFile = config.age.secrets.tuwien-vpn-password.path;
-    };
-
-    journald = {
-      storage = "persistent";
-      forwardToSyslog = true;
-      extraConfig = ''
-        Compress=yes
-        SystemMaxUse=500M
-        RuntimeMaxUse=100M
-      '';
-    };
+    # Spectre uses smaller journal limit than the common 1G default
+    journald.extraConfig = lib.mkForce ''
+      Storage=persistent
+      Compress=yes
+      SystemMaxUse=500M
+      RuntimeMaxUse=100M
+    '';
 
     udev.extraRules = ''
       ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.coreutils}/bin/chgrp video /sys/class/leds/%k/brightness"
@@ -59,16 +50,8 @@
   };
 
   boot = {
-    initrd.systemd.enable = true;
-    loader = {
-      systemd-boot = {
-        enable = true;
-        editor = false;
-        configurationLimit = 20;
-      };
-      timeout = 1;
-      efi.canTouchEfiVariables = false;
-    };
+    systemd-boot-defaults.enable = true;
+    loader.efi.canTouchEfiVariables = false;
     kernel.sysctl = {
       "kernel.sysrq" = 1;
     };
@@ -77,7 +60,6 @@
       "pcie_aspm=off"
       "snd_intel_dspcfg.dsp_driver=1"
       "intel_iommu=off"
-      # "i2c_hid.polling_mode=1"  # Disabled: breaks left/right arrow keys
       "console=tty1"
     ];
     kernelModules = [
@@ -108,5 +90,5 @@
     dmidecode
   ];
 
-  system.stateVersion = "24.11"; # Did you read the comment?
+  system.stateVersion = "24.11";
 }
