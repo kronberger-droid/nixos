@@ -281,8 +281,14 @@ in {
       };
 
       # Mouse wheel (columns)
-      "${modifier}+WheelScrollRight".action.focus-column-right = [];
-      "${modifier}+WheelScrollLeft".action.focus-column-left = [];
+      "${modifier}+WheelScrollRight" = {
+        cooldown-ms = 150;
+        action.focus-column-right = [];
+      };
+      "${modifier}+WheelScrollLeft" = {
+        cooldown-ms = 150;
+        action.focus-column-left = [];
+      };
       "${modifier}+Shift+WheelScrollRight".action.move-column-right = [];
       "${modifier}+Shift+WheelScrollLeft".action.move-column-left = [];
       "${modifier}+Ctrl+WheelScrollDown".action.focus-column-right = [];
