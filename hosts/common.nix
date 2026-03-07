@@ -10,6 +10,7 @@
     ../modules/system/fonts.nix
     ../modules/system/packages.nix
     ../modules/system/kernel.nix
+    ../modules/system/boot-systemd.nix
     ../modules/system/megasync.nix
     ../modules/system/agenix.nix
     ../modules/system/keyd.nix

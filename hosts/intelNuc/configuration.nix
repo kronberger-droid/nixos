@@ -7,23 +7,24 @@
     ./hardware-configuration.nix
     ../common.nix
     ../../modules/system/scx-schedulers.nix
-    # ../../modules/system/copyparty.nix  # Disabled for now
+    ../../modules/profiles/vpn-workstation.nix
   ];
 
-  services.pia = {
-    enable = true;
-    environmentFile = config.age.secrets.pia-credentials.path;
-  };
-
-  services.tuwien-vpn = {
-    enable = true;
-    passwordFile = config.age.secrets.tuwien-vpn-password.path;
+  boot = {
+    systemd-boot-defaults.enable = true;
+    loader.efi.canTouchEfiVariables = true;
+    kernelParams = [
+      "console=tty1"
+    ];
+    extraModprobeConfig = ''
+      options v4l2loopback devices=1 video_nr=42 card_label="DroidCam" exclusive_caps=1
+    '';
   };
 
   environment.systemPackages = with pkgs; [
     droidcam
     android-tools
-    lm_sensors # Temperature monitoring
+    lm_sensors
   ];
 
   environment.sessionVariables = {
@@ -41,20 +42,20 @@
     enable = true;
     settings = {
       general = {
-        renice = -10; # Higher priority for games (lower value = higher priority)
+        renice = -10;
         inhibit_screensaver = 1;
-        desiredgov = "performance"; # Switch to performance CPU governor
-        defaultgov = "schedutil"; # Return to balanced governor when done
+        desiredgov = "performance";
+        defaultgov = "schedutil";
       };
       gpu = {
         apply_gpu_optimisations = "accept-responsibility";
         gpu_device = 0;
-        nv_powermizer_mode = 1; # Prefer maximum performance
-        amd_performance_level = "high"; # AMD GPU performance mode
+        nv_powermizer_mode = 1;
+        amd_performance_level = "high";
       };
       cpu = {
-        park_cores = "no"; # Keep all cores active
-        pin_policy = "prefer-high-performance"; # Pin to high-performance cores
+        park_cores = "no";
+        pin_policy = "prefer-high-performance";
       };
       custom = {
         start = "${pkgs.writeShellScript "gamemode-start" ''
@@ -86,29 +87,6 @@
         ''}";
       };
     };
-  };
-
-  boot = {
-    initrd.systemd.enable = true; # Faster boot with systemd in initrd
-    loader = {
-      systemd-boot = {
-        enable = true;
-        editor = false; # Disable boot menu editor for security
-        configurationLimit = 20; # Limit number of stored generations
-      };
-      timeout = 1; # Fast boot menu timeout
-      efi.canTouchEfiVariables = true;
-    };
-    kernelParams = [
-      # Commented out for testing - may have caused sleep issues
-      # "i915.enable_psr=0"
-      # "i915.enable_dc=0"  # Disable display power-saving states
-      # "i915.enable_fbc=0"  # Disable framebuffer compression
-      "console=tty1"
-    ];
-    extraModprobeConfig = ''
-      options v4l2loopback devices=1 video_nr=42 card_label="DroidCam" exclusive_caps=1
-    '';
   };
 
   hardware.graphics = {
