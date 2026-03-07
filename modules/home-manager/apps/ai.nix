@@ -3,6 +3,7 @@
     ollama
     claude-code
     gemini-cli
+    nodejs # needed for npx (MCP servers)
   ];
 
   # Symlink claude to ~/.local/bin for native installation check
