@@ -8,5 +8,6 @@
     ./kanshi.nix
     ./session-services.nix
     ./udiskie.nix
+    ./xdg.nix
   ];
 }
