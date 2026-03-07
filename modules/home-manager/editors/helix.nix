@@ -1,57 +1,58 @@
 {pkgs, ...}: {
-  home.packages = with pkgs; [
-    # Nix
-    nil
-    statix
-    deadnix
-    alejandra
-
-    # Typst
-    typst
-    typstyle
-    typst-live
-    tinymist
-
-    # Markdown
-    rumdl
-    markdown-oxide
-    mermaid-cli
-
-    # Spellcheck
-    harper
-
-    # PDF Viewer
-    zathura
-
-    # CSV
-    prettier
-
-    # General Compilers
-    gcc
-
-    # Rust
-    bacon
-    rust-script
-
-    # Python
-    ruff
-    pyright
-
-    # OpenGL
-    glsl_analyzer
-  ];
-
   imports = [
     ./helix/dprint.nix
   ];
 
-  home.file.".config/helix/ignore".source = ./helix/ignore;
+  home = {
+    packages = with pkgs; [
+      # Nix
+      nil
+      statix
+      deadnix
+      alejandra
 
-  home.file.".config/harper/dictionary.txt".source = ./helix/harper_dict.txt;
+      # Typst
+      typst
+      typstyle
+      typst-live
+      tinymist
 
-  home.file.".config/rumdl/rumdl.toml".source = ./helix/rumdl.toml;
+      # Markdown
+      rumdl
+      markdown-oxide
+      mermaid-cli
 
-  home.file.".config/helix/themes/custom-base16.toml".source = ./helix/custom-base16.toml;
+      # Spellcheck
+      harper
+
+      # PDF Viewer
+      zathura
+
+      # CSV
+      prettier
+
+      # General Compilers
+      gcc
+
+      # Rust
+      bacon
+      rust-script
+
+      # Python
+      ruff
+      pyright
+
+      # OpenGL
+      glsl_analyzer
+    ];
+
+    file = {
+      ".config/helix/ignore".source = ./helix/ignore;
+      ".config/harper/dictionary.txt".source = ./helix/harper_dict.txt;
+      ".config/rumdl/rumdl.toml".source = ./helix/rumdl.toml;
+      ".config/helix/themes/custom-base16.toml".source = ./helix/custom-base16.toml;
+    };
+  };
 
   programs.helix = {
     enable = true;
