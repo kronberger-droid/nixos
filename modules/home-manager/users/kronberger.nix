@@ -148,7 +148,6 @@ in {
           lazygit
 
           # Images
-          gwyddion
           drawio
           inkscape
           gthumb
@@ -157,6 +156,7 @@ in {
             plugins = [pkgs.gimpPlugins.resynthesizer];
           })
           ffmpeg_6
+          fiji
 
           # PDF
           ghostscript
