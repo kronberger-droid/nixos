@@ -29,7 +29,7 @@ in {
     services.pia-vpn = {
       enable = true;
       certificateFile = piaCert;
-      environmentFile = cfg.environmentFile;
+      inherit (cfg) environmentFile;
       region = "";
       interface = "pia0";
     };
