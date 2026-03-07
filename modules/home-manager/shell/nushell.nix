@@ -17,6 +17,9 @@ in {
     zellij
   ];
 
+  xdg.configFile."nushell/utilities.nu".source = ./nushell/utilities.nu;
+  xdg.configFile."nushell/keybindings.nu".source = ./nushell/keybindings.nu;
+
   # Generate development.nu with dynamic terminal configuration (requires terminal module)
   xdg.configFile."nushell/development.nu" = lib.mkIf hasTerminal {
     text = ''
