@@ -59,7 +59,6 @@
         modules =
           [
             ./hosts/${hostname}/configuration.nix
-            ./modules/system/greetd.nix
             inputs.niri.nixosModules.niri
             home-manager.nixosModules.home-manager
             {
