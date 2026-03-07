@@ -7,7 +7,7 @@
   imports = [
     ./hardware-configuration.nix
     ../common.nix
-    ../../modules/system/firmware/vbt.nix
+    ../../modules/system/hardware/firmware/vbt.nix
     ../../modules/system/scx-schedulers.nix
     ../../modules/profiles/vpn-workstation.nix
   ];

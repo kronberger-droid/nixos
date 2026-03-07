@@ -1,5 +1,5 @@
 {...}: {
   imports = [
-    ../modules/system
+    ./boot-systemd.nix
   ];
 }
