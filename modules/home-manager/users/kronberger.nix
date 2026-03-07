@@ -18,34 +18,7 @@ in {
     backupFileExtension = "backup-$(date +%Y%m%d-%H%M%S)";
     users.kronberger = {
       imports = [
-        ../base16-scheme.nix
-        ../compositor.nix
-        ../terminal.nix
-        ../taskwarrior.nix
-        ../sway.nix
-        ../niri.nix
-        ../waybar.nix
-        ../rofi.nix
-        ../kanshi.nix
-        ../kitty.nix
-        ../rio.nix
-        ../helix.nix
-        ../nushell.nix
-        ../git.nix
-        ../zathura.nix
-        ../yazi.nix
-        ../theme.nix
-        ../colors.nix
-        ../bitwarden.nix
-        ../aerc.nix
-        ../quickemu.nix
-        ../udiskie.nix
-        ../firefox.nix
-        ../nchat.nix
-        ../qutebrowser.nix
-        ../claude.nix
-        ../arrabbiata-tui.nix
-        ../services.nix
+        ../.
       ];
 
       # Claude Code statusline
@@ -233,9 +206,9 @@ in {
             fill_shape=false
           '';
 
-          ".local/share/fonts/Futura_PT".source = ../fonts/Futura_PT;
+          ".local/share/fonts/Futura_PT".source = ../theming/fonts/Futura_PT;
 
-          ".local/share/fonts/gfsneohellenicmath".source = ../fonts/gfsneohellenicmath;
+          ".local/share/fonts/gfsneohellenicmath".source = ../theming/fonts/gfsneohellenicmath;
         };
 
         stateVersion = "24.11";

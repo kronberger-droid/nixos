@@ -5,9 +5,9 @@
     backupFileExtension = "backup";
     users.devPi = {
       imports = [
-        ./nushell.nix
-        ./git.nix
-        ./helix.nix
+        ./shell/nushell.nix
+        ./shell/git.nix
+        ./editors/helix.nix
       ];
 
       home = {
