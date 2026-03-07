@@ -1,4 +1,3 @@
-# /etc/nixos/modules/home-manager/helix.nix
 {pkgs, ...}: {
   home.packages = with pkgs; [
     # Nix
