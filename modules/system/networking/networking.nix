@@ -12,6 +12,8 @@
         };
         device = {
           "wifi.scan-rand-mac-address" = "yes";
+        };
+        connection = {
           "wifi.cloned-mac-address" = "stable";
           "ethernet.cloned-mac-address" = "stable";
         };
@@ -25,6 +27,11 @@
     enableIPv6 = true;
   };
 
-  services.resolved.enable = true;
+  services.resolved = {
+    enable = true;
+    extraConfig = ''
+      MulticastDNS=no
+    '';
+  };
   services.tailscale.enable = true;
 }
