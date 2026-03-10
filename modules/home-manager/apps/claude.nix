@@ -4,6 +4,8 @@
   config,
   ...
 }: let
+  cfg = config.claude;
+
   # Statusline script with nerd font icons matching starship style
   statuslineScript = pkgs.writeShellScript "claude-statusline" ''
     input=$(cat)
@@ -27,8 +29,8 @@
 
     # Nerd font icons (matching your starship config)
     model_icon="󱙺"  # AI/robot icon
-    branch_icon=""  # git branch (from your starship)
-    folder_icon=""  # folder
+    branch_icon=""  # git branch (from your starship)
+    folder_icon=""  # folder
     ctx_icon="󰍛"   # memory (from your starship)
 
     # Build output
@@ -77,33 +79,92 @@
 
     printf "%b" "$output"
   '';
+
+  # JSON to merge into ~/.claude/settings.json (statusline config)
+  settingsToMerge = {
+    statusLine = {
+      type = "command";
+      command = "${statuslineScript}";
+    };
+  };
+  settingsJson = builtins.toJSON settingsToMerge;
+
+  # JSON to merge into ~/.claude.json (MCP servers -- user scope)
+  mcpToMerge = {
+    mcpServers = lib.mapAttrs (_: server:
+      {
+        type = "stdio";
+        command = server.command;
+      }
+      // lib.optionalAttrs (server.args != []) {args = server.args;}
+      // lib.optionalAttrs (server.env != {}) {env = server.env;})
+    cfg.mcpServers;
+  };
+  mcpJson = builtins.toJSON mcpToMerge;
+
+  hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {};
 in {
   options.claude = {
     statusline.enable = lib.mkEnableOption "Claude Code statusline";
+
+    mcpServers = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule {
+        options = {
+          command = lib.mkOption {
+            type = lib.types.str;
+            description = "Command to run the MCP server.";
+          };
+          args = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [];
+            description = "Arguments to pass to the command.";
+          };
+          env = lib.mkOption {
+            type = lib.types.attrsOf lib.types.str;
+            default = {};
+            description = "Environment variables for the MCP server.";
+          };
+        };
+      });
+      default = {};
+      description = "MCP servers to configure in Claude Code settings.json.";
+    };
   };
 
-  config = lib.mkIf config.claude.statusline.enable {
-    # Install the statusline script
-    home.file.".config/claude/statusline.sh" = {
+  config = lib.mkIf hasAnyConfig {
+    # Install the statusline script (only when statusline is enabled)
+    home.file.".config/claude/statusline.sh" = lib.mkIf cfg.statusline.enable {
       source = statuslineScript;
       executable = true;
     };
 
-    # Activation script to update settings.json without overwriting permissions
-    home.activation.claudeStatusline = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    # Activation script to merge statusline into ~/.claude/settings.json
+    home.activation.claudeStatusline = lib.mkIf cfg.statusline.enable (lib.hm.dag.entryAfter ["writeBoundary"] ''
       SETTINGS_FILE="$HOME/.claude/settings.json"
       mkdir -p "$HOME/.claude"
 
+      MERGE_JSON='${settingsJson}'
+
       if [ -f "$SETTINGS_FILE" ]; then
-        # Merge statusLine into existing settings
-        ${pkgs.jq}/bin/jq --arg cmd "${statuslineScript}" \
-          '.statusLine = {"type": "command", "command": $cmd}' \
+        ${pkgs.jq}/bin/jq --argjson merge "$MERGE_JSON" '. * $merge' \
           "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
       else
-        # Create new settings file
-        echo '{"statusLine": {"type": "command", "command": "${statuslineScript}"}}' | \
-          ${pkgs.jq}/bin/jq . > "$SETTINGS_FILE"
+        echo "$MERGE_JSON" | ${pkgs.jq}/bin/jq . > "$SETTINGS_FILE"
       fi
-    '';
+    '');
+
+    # Activation script to merge MCP servers into ~/.claude.json (user scope)
+    home.activation.claudeMcpServers = lib.mkIf (cfg.mcpServers != {}) (lib.hm.dag.entryAfter ["writeBoundary"] ''
+      CLAUDE_JSON="$HOME/.claude.json"
+
+      MERGE_JSON='${mcpJson}'
+
+      if [ -f "$CLAUDE_JSON" ]; then
+        ${pkgs.jq}/bin/jq --argjson merge "$MERGE_JSON" '. * $merge' \
+          "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
+      else
+        echo "$MERGE_JSON" | ${pkgs.jq}/bin/jq . > "$CLAUDE_JSON"
+      fi
+    '');
   };
 }

@@ -20,8 +20,12 @@ in {
         ../.
       ];
 
-      # Claude Code statusline
+      # Claude Code
       claude.statusline.enable = true;
+      claude.mcpServers.inpdf = {
+        command = "${pkgs.inpdf}/bin/inpdf";
+        args = ["mcp"];
+      };
 
       programs.arrabbiata-tui = {
         enable = true;

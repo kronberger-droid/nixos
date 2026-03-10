@@ -6,6 +6,18 @@
           "--password-store=gnome-keyring"
         ];
       };
+
+      inpdf = prev.rustPlatform.buildRustPackage {
+        pname = "inpdf";
+        version = "0-unstable-2026-02-03";
+        src = prev.fetchFromGitHub {
+          owner = "jonhoo";
+          repo = "inpdf";
+          rev = "657fa9380b27563d5cf260c90ae3506de8516de8";
+          hash = "sha256-CTvPXYOhCmkmXlLzG8gjLuvY7XgHzgKfjg3H66hrFH4=";
+        };
+        cargoHash = "sha256-q7DR0+u1p0Dkp6LhFvNHXuiZoC7am8XH+HC+suLgBY4=";
+      };
     })
   ];
 
