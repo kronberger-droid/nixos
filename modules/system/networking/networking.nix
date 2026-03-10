@@ -29,9 +29,7 @@
 
   services.resolved = {
     enable = true;
-    extraConfig = ''
-      MulticastDNS=no
-    '';
+    settings.Resolve.MulticastDNS = "no";
   };
   services.tailscale.enable = true;
 }
