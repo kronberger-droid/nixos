@@ -9,6 +9,7 @@
     element-desktop
     zapzap
     signal-desktop
+    fluffychat
 
     # Documents
     (pkgs.obsidian.overrideAttrs (oldAttrs: {
