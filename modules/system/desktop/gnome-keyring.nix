@@ -1,10 +1,10 @@
 {pkgs, ...}: {
   services = {
     gnome.gnome-keyring.enable = true;
-    gnome.gcr-ssh-agent.enable = false;
+    gnome.gcr-ssh-agent.enable = true;
   };
 
-  programs.ssh.startAgent = true;
+  programs.ssh.startAgent = false;
 
   security.pam.services = {
     swaylock.enableGnomeKeyring = true;
