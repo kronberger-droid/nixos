@@ -22,6 +22,14 @@ in {
 
       # Claude Code
       claude.statusline.enable = true;
+      claude.plugins = [
+        "context7@claude-plugins-official"
+        "github@claude-plugins-official"
+        "explanatory-output-style@claude-plugins-official"
+        "rust-analyzer-lsp@claude-plugins-official"
+      ];
+      claude.claudeMd = builtins.readFile ../apps/claude-md.md;
+
       claude.mcpServers.inpdf = {
         command = "${pkgs.inpdf}/bin/inpdf";
         args = ["mcp"];
