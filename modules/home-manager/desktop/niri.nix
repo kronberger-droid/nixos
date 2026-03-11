@@ -144,6 +144,7 @@ in {
 
       # Screenshots
       "Print".action.screenshot = [];
+      "${modifier}+Shift+A".action.screenshot = [];
       "Ctrl+Print".action.screenshot-screen = [];
       "Alt+Print".action.screenshot-window = [];
 
