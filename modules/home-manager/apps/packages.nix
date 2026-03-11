@@ -1,6 +1,8 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
     # Browsers
+    tor-browser
+    librewolf
     brave
 
     # Messaging
