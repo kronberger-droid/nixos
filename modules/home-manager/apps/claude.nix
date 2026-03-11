@@ -80,13 +80,21 @@
     printf "%b" "$output"
   '';
 
-  # JSON to merge into ~/.claude/settings.json (statusline config)
-  settingsToMerge = {
-    statusLine = {
-      type = "command";
-      command = "${statuslineScript}";
+  # JSON to merge into ~/.claude/settings.json (statusline + plugins)
+  settingsToMerge =
+    lib.optionalAttrs cfg.statusline.enable {
+      statusLine = {
+        type = "command";
+        command = "${statuslineScript}";
+      };
+    }
+    // lib.optionalAttrs (cfg.plugins != []) {
+      enabledPlugins = lib.listToAttrs (map (name: {
+          inherit name;
+          value = true;
+        })
+        cfg.plugins);
     };
-  };
   settingsJson = builtins.toJSON settingsToMerge;
 
   # JSON to merge into ~/.claude.json (MCP servers -- user scope)
@@ -102,10 +110,22 @@
   };
   mcpJson = builtins.toJSON mcpToMerge;
 
-  hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {};
+  hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {} || cfg.plugins != [] || cfg.claudeMd != "";
 in {
   options.claude = {
     statusline.enable = lib.mkEnableOption "Claude Code statusline";
+
+    plugins = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "Claude Code plugins to enable (e.g. \"context7@claude-plugins-official\").";
+    };
+
+    claudeMd = lib.mkOption {
+      type = lib.types.lines;
+      default = "";
+      description = "Content for the global ~/.claude/CLAUDE.md instructions file.";
+    };
 
     mcpServers = lib.mkOption {
       type = lib.types.attrsOf (lib.types.submodule {
@@ -132,14 +152,19 @@ in {
   };
 
   config = lib.mkIf hasAnyConfig {
+    # Global CLAUDE.md instructions
+    home.file.".claude/CLAUDE.md" = lib.mkIf (cfg.claudeMd != "") {
+      text = cfg.claudeMd;
+    };
+
     # Install the statusline script (only when statusline is enabled)
     home.file.".config/claude/statusline.sh" = lib.mkIf cfg.statusline.enable {
       source = statuslineScript;
       executable = true;
     };
 
-    # Activation script to merge statusline into ~/.claude/settings.json
-    home.activation.claudeStatusline = lib.mkIf cfg.statusline.enable (lib.hm.dag.entryAfter ["writeBoundary"] ''
+    # Activation script to merge settings (statusline + plugins) into ~/.claude/settings.json
+    home.activation.claudeSettings = lib.mkIf (cfg.statusline.enable || cfg.plugins != []) (lib.hm.dag.entryAfter ["writeBoundary"] ''
       SETTINGS_FILE="$HOME/.claude/settings.json"
       mkdir -p "$HOME/.claude"
 
