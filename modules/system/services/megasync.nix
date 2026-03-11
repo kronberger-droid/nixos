@@ -3,7 +3,7 @@
 
   systemd.user.services.mega-cmd-server = {
     description = "MEGAcmd daemon";
-    after = ["sway-session.target"];
+    after = ["graphical-session.target"];
     serviceConfig = {
       ExecStart = "${pkgs.megacmd}/bin/mega-cmd-server";
       Restart = "on-failure";
@@ -11,6 +11,6 @@
       Type = "simple";
       Environment = ["PATH=${pkgs.megacmd}/bin"];
     };
-    wantedBy = ["sway-session.target"];
+    wantedBy = ["graphical-session.target"];
   };
 }
