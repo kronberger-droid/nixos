@@ -78,19 +78,12 @@ in {
     };
   };
 
-  # ── Poweralertd ─────────────────────────────────────────────────
-  services.poweralertd = {
+  # ── Batsignal ───────────────────────────────────────────────────
+  services.batsignal = {
     enable =
       if host == "spectre"
       then true
       else false;
-  };
-
-  systemd.user.services.poweralertd = {
-    Unit = {
-      After = ["mako.service" "graphical-session.target"];
-      PartOf = ["graphical-session.target"];
-    };
   };
 
   # ── Swayidle ────────────────────────────────────────────────────
