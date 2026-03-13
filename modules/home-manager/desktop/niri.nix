@@ -31,7 +31,9 @@ in {
         natural-scroll = true;
       };
 
-      mouse = {};
+      mouse = {
+        accel-speed = 0.4;
+      };
 
       focus-follows-mouse.enable = true;
       warp-mouse-to-focus.enable = true;
