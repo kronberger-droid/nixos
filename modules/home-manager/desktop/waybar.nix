@@ -81,6 +81,39 @@ in {
       '';
     };
 
+    "waybar/screenrec-toggle.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+        if ${pkgs.procps}/bin/pidof wl-screenrec >/dev/null 2>&1; then
+          ${pkgs.procps}/bin/pkill wl-screenrec
+          ${pkgs.libnotify}/bin/notify-send "Screen Recording" "Recording stopped"
+        else
+          GEOMETRY=$(${pkgs.slurp}/bin/slurp 2>/dev/null)
+          if [ -z "$GEOMETRY" ]; then
+            exit 0
+          fi
+          FILENAME="$HOME/Videos/recording-$(${pkgs.coreutils}/bin/date +%Y-%m-%d-%H-%M-%S).mp4"
+          ${pkgs.wl-screenrec}/bin/wl-screenrec -g "$GEOMETRY" -f "$FILENAME" &
+          disown
+          ${pkgs.libnotify}/bin/notify-send "Screen Recording" "Recording started: $(${pkgs.coreutils}/bin/basename "$FILENAME")"
+        fi
+        ${pkgs.procps}/bin/pkill -RTMIN+10 waybar 2>/dev/null || true
+      '';
+    };
+
+    "waybar/screenrec-status.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+        if ${pkgs.procps}/bin/pidof wl-screenrec >/dev/null 2>&1; then
+          echo '{"text":"REC","class":"recording"}'
+        else
+          echo ""
+        fi
+      '';
+    };
+
     "waybar/vpn-status.sh" = {
       executable = true;
       text = ''
@@ -262,6 +295,7 @@ in {
         modules-left = ["custom/menu" "sway/workspaces" "niri/workspaces" "sway/scratchpad" "sway/mode"];
         modules-right =
           [
+            "custom/screenrec"
             "idle_inhibitor"
           ]
           ++ lib.optionals isNotebook [
@@ -420,6 +454,15 @@ in {
           format-muted = " {format_source}";
           format-source = "\ ";
           format-source-muted = "\ ";
+        };
+
+        "custom/screenrec" = {
+          exec = "${config.xdg.configHome}/waybar/screenrec-status.sh";
+          on-click = "${config.xdg.configHome}/waybar/screenrec-toggle.sh";
+          return-type = "json";
+          interval = 2;
+          signal = 10;
+          format = "{}";
         };
 
         idle_inhibitor = {

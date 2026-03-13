@@ -146,30 +146,13 @@ in {
         }
     }
 
-    # NixOS flake management
+    # NixOS flake management (uses nh for nice diffs and colored output)
     def flake [
         action: string = "switch"                          # switch, boot, test, build, dry, update, rollback
         --update (-u)                                      # update flake inputs first
         --dir (-d): string = "~/.config/nixos"             # flake directory
-        --yes (-y)                                         # skip confirmation on dirty tree
     ] {
         let flake_dir = ($dir | path expand)
-        let hostname = (hostname)
-
-        # Check for unstaged changes
-        let unstaged = (git -C $flake_dir status --porcelain | lines | where {|l| ($l | str length) > 0 and not ($l | str starts-with "A ") and not ($l | str starts-with "M ")})
-        if ($unstaged | length) > 0 {
-            print $"(ansi yellow_bold)Warning:(ansi reset) Untracked/unstaged files:"
-            $unstaged | each {|f| print $"  (ansi dark_gray)($f)(ansi reset)"}
-            print ""
-            if not $yes {
-                let answer = (input $"(ansi yellow)Continue anyway? [y/N] (ansi reset)")
-                if ($answer | str downcase) != "y" {
-                    print "Aborted."
-                    return
-                }
-            }
-        }
 
         if $update or $action == "update" {
             print $"(ansi cyan)Updating flake inputs...(ansi reset)"
@@ -185,10 +168,11 @@ in {
             return
         }
 
-        let cmd = if $action == "dry" { "dry-activate" } else { $action }
-        print $"(ansi green_bold)Rebuilding:(ansi reset) ($hostname) [($cmd)]"
+        let nh_action = if $action == "dry" { "build" } else { $action }
+        let nh_args = if $action == "dry" { ["--dry"] } else { [] }
+
         try {
-            sudo nixos-rebuild $cmd --flake $"($flake_dir)#($hostname)"
+            nh os $nh_action $flake_dir ...$nh_args
         } catch {
             print $"\n(ansi yellow)Build interrupted or failed.(ansi reset)"
         }
@@ -285,7 +269,7 @@ in {
     enableNushellIntegration = true;
 
     settings =
-      (with builtins; fromTOML (readFile "${pkgs.starship}/share/starship/presets/nerd-font-symbols.toml"))
+      (with builtins; fromTOML (readFile ./nerd-font-symbols.toml))
       // {
         command_timeout = 2000;
         git_branch.symbol = " ";

@@ -30,6 +30,15 @@ window#waybar {
   margin: 0px 5px;
 }
 
+#custom-screenrec {
+  padding: 0px 5px;
+  margin: 0px 5px;
+}
+
+#custom-screenrec.recording {
+  color: @base08;
+}
+
 #custom-mpris {
   margin-left: 10px;
   margin-right: 0px;

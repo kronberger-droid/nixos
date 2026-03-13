@@ -34,6 +34,7 @@ in {
       mouse = {};
 
       focus-follows-mouse.enable = true;
+      warp-mouse-to-focus.enable = true;
     };
 
     # Layout configuration
@@ -201,16 +202,17 @@ in {
 
       # Column sizing
       "${modifier}+R".action.switch-preset-column-width = [];
-      "${modifier}+Shift+R".action.switch-preset-window-height = [];
+      "${modifier}+Shift+R".action.spawn = ["${config.xdg.configHome}/waybar/screenrec-toggle.sh"];
       "${modifier}+Ctrl+R".action.reset-window-height = [];
       "${modifier}+F".action.maximize-column = [];
       "${modifier}+Shift+F".action.fullscreen-window = [];
       "${modifier}+Ctrl+F".action.expand-column-to-available-width = [];
       "${modifier}+C".action.center-column = [];
-      "${modifier}+Minus".action.set-column-width = "-10%";
-      "${modifier}+Equal".action.set-column-width = "+10%";
-      "${modifier}+Shift+Minus".action.set-window-height = "-10%";
-      "${modifier}+Shift+Equal".action.set-window-height = "+10%";
+      # Column/window resizing
+      "${modifier}+Ctrl+Minus".action.set-column-width = "-10%";
+      "${modifier}+Ctrl+Equal".action.set-column-width = "+10%";
+      "${modifier}+Ctrl+Shift+Minus".action.set-window-height = "-10%";
+      "${modifier}+Ctrl+Shift+Equal".action.set-window-height = "+10%";
 
       # Column stacking
       "${modifier}+BracketLeft".action.consume-or-expel-window-left = [];
