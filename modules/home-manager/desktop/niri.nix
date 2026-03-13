@@ -203,6 +203,7 @@ in {
       # Column sizing
       "${modifier}+R".action.switch-preset-column-width = [];
       "${modifier}+Shift+R".action.spawn = ["${config.xdg.configHome}/waybar/screenrec-toggle.sh"];
+      "${modifier}+Shift+V".action.switch-preset-window-height = [];
       "${modifier}+Ctrl+R".action.reset-window-height = [];
       "${modifier}+F".action.maximize-column = [];
       "${modifier}+Shift+F".action.fullscreen-window = [];
