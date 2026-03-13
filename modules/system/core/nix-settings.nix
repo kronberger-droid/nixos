@@ -26,6 +26,10 @@ _: {
 
       # Security
       sandbox = true;
+      allowed-users = ["root" "kronberger"];
+
+      # nh handles dirty tree warnings
+      warn-dirty = false;
     };
     gc = {
       automatic = true;

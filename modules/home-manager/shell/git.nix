@@ -17,7 +17,7 @@
     gh = {
       enable = true;
       settings = {
-        git_protocoll = "ssh";
+        git_protocol = "ssh";
       };
     };
 
