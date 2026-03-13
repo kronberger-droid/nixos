@@ -58,6 +58,10 @@
     libsecret
     cryptsetup
 
+    # Nix tooling
+    nh
+    nix-output-monitor
+
     # Others
     fwupd
     nixpkgs-review

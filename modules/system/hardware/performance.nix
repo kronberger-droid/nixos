@@ -45,7 +45,10 @@
 
   # Boot optimizations
   boot = {
-    tmp.cleanOnBoot = true;
+    tmp = {
+      useTmpfs = true;
+      tmpfsSize = "50%";
+    };
 
     # Faster boot
     kernelParams =
@@ -84,6 +87,14 @@
   };
 
   # Improved file system mount options
+  # OOM protection — kills largest process before kernel OOM freezes the system
+  services.earlyoom = {
+    enable = true;
+    freeMemThreshold = 5;
+    freeSwapThreshold = 10;
+    enableNotifications = true;
+  };
+
   fileSystems = {
     "/" = {
       options = ["noatime"];

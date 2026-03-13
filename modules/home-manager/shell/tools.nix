@@ -21,5 +21,6 @@
     wiki-tui
     lynx
     timr-tui
+    git-absorb
   ];
 }

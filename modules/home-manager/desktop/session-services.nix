@@ -58,6 +58,9 @@ in {
     swayidle
     wayland-pipewire-idle-inhibit
     wlsunset
+
+    # Screen recording
+    wl-screenrec
   ];
 
   # ── Mako ────────────────────────────────────────────────────────
