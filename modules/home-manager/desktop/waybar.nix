@@ -93,6 +93,7 @@ in {
           if [ -z "$GEOMETRY" ]; then
             exit 0
           fi
+          ${pkgs.coreutils}/bin/mkdir -p "$HOME/Videos"
           FILENAME="$HOME/Videos/recording-$(${pkgs.coreutils}/bin/date +%Y-%m-%d-%H-%M-%S).mp4"
           ${pkgs.wl-screenrec}/bin/wl-screenrec -g "$GEOMETRY" -f "$FILENAME" &
           disown

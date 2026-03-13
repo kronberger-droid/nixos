@@ -86,7 +86,6 @@
     };
   };
 
-  # Improved file system mount options
   # OOM protection — kills largest process before kernel OOM freezes the system
   services.earlyoom = {
     enable = true;
@@ -95,6 +94,7 @@
     enableNotifications = true;
   };
 
+  # Improved file system mount options
   fileSystems = {
     "/" = {
       options = ["noatime"];
