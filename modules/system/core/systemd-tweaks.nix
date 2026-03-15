@@ -19,7 +19,6 @@
 
   services = {
     fwupd.enable = true;
-    flatpak.enable = true;
     journald.extraConfig = ''
       Storage=persistent
       Compress=yes

@@ -22,11 +22,19 @@
       # Network and DNS
       "/etc/NetworkManager/system-connections"
 
+      # Tailscale
+      "/var/lib/tailscale"
+
       # Virtualization
       "/var/lib/libvirt"
 
       # Service state
       "/var/lib/fail2ban"
+      "/var/lib/fwupd"
+
+      # Printing (used on spectre, harmless on others)
+      "/var/lib/cups"
+      "/etc/cups"
     ];
 
     files = [
@@ -72,15 +80,6 @@
           directory = ".password-store";
           mode = "0700";
         }
-
-        # Trash (used by rip command)
-        ".local/share/Trash"
-      ];
-
-      files = [
-        # Shell history
-        ".bash_history"
-        ".local/share/nushell/history.txt"
       ];
     };
   };
@@ -92,4 +91,7 @@
       ".ssh"
     ];
   };
+
+  # Declarative user password - required since /etc/shadow is ephemeral
+  users.mutableUsers = false;
 }

@@ -23,7 +23,7 @@
         '';
     }))
     onlyoffice-desktopeditors
-    zotero-beta
+    zotero
     neovim
 
     # Media
@@ -61,10 +61,6 @@
     ltunify
     bluetuith
     wiremix
-
-    # Wine
-    wine
-    winetricks
 
     # CAD
     freecad-wayland
