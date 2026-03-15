@@ -9,6 +9,14 @@
   };
 
   age.secrets = {
+    # Hashed password for user login (required with impermanence since /etc/shadow is ephemeral)
+    kronberger-password = {
+      file = "${inputs.self}/secrets/kronberger-password.age";
+      path = "/run/secrets/kronberger-password";
+      mode = "0400";
+      owner = "root";
+    };
+
     # Format: PIA_USER=pXXXXXXX\nPIA_PASS=your_password
     pia-credentials = {
       file = "${inputs.self}/secrets/pia-credentials.age";

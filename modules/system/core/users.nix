@@ -1,7 +1,8 @@
-{pkgs, ...}: {
+{pkgs, config, ...}: {
   users.users.kronberger = {
     createHome = true;
     isNormalUser = true;
+    hashedPasswordFile = config.age.secrets.kronberger-password.path;
     description = "Kronberger";
     extraGroups = ["networkmanager" "wheel" "audio" "video" "dialout"];
     shell = pkgs.nushell;

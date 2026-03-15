@@ -19,6 +19,9 @@
       url = "github:rcambrj/nix-pia-vpn";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    impermanence = {
+      url = "github:nix-community/impermanence";
+    };
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -104,6 +107,7 @@
         hostname = "spectre";
         system = x86System;
         isNotebook = true;
+        extraModules = [./modules/system/impermanence.nix];
       };
 
       # ARM devices (special case without agenix and standard user config)
