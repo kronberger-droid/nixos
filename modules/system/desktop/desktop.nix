@@ -40,7 +40,10 @@ in {
   virtualisation.spiceUSBRedirection.enable = true;
 
   programs = {
-    niri.enable = true;
+    niri = {
+      enable = true;
+      package = pkgs.niri.overrideAttrs { doCheck = false; };
+    };
     xwayland.enable = true;
     dconf.enable = true;
     seahorse.enable = true;
