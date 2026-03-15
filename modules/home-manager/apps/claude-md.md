@@ -4,6 +4,12 @@
 - I use **Nushell** (`nu`) as my default shell.
 - When suggesting shell commands, write them in Nushell syntax, not Bash/POSIX.
 
+## Obsidian Notes
+- My vault is at `~/Documents/notes/general-vault/`
+- Formulas use **Typst syntax**: inline `$...$`, display `$$...$$`
+- Graphs use ` ```lilaq ... ``` ` code blocks (Typst's lilaq plotting library)
+- Standard Markdown headings (`##`, `###`), bold (`**...**`), italic, and `---` separators
+
 ## Typst Syntax Reference
 
 ### Math Mode
