@@ -107,7 +107,6 @@
         hostname = "spectre";
         system = x86System;
         isNotebook = true;
-        extraModules = [./modules/system/impermanence.nix];
       };
 
       # ARM devices (special case without agenix and standard user config)
