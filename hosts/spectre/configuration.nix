@@ -15,10 +15,7 @@
   programs.steam = {
     enable = true;
     gamescopeSession.enable = true;
-    extraPackages = [pkgs.sdl3];
-    package = pkgs.steam.override {
-      extraArgs = "-system-composer";
-    };
+    extraPackages = with pkgs; [sdl3 intel-media-driver];
   };
 
   services = {
