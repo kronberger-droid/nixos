@@ -32,6 +32,9 @@
     enable = true;
     extraPackages = [pkgs.sdl3];
     gamescopeSession.enable = true;
+    package = pkgs.steam.override {
+      extraArgs = "-cef-disable-gpu";
+    };
   };
 
   programs.gamemode = {
