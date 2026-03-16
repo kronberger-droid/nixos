@@ -9,7 +9,7 @@
   };
 
   age.secrets = {
-    # Hashed password for user login (required with impermanence since /etc/shadow is ephemeral)
+    # Hashed password for user login
     kronberger-password = {
       file = "${inputs.self}/secrets/kronberger-password.age";
       path = "/run/secrets/kronberger-password";

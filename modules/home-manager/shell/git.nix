@@ -36,6 +36,7 @@
           email = "kronberger@proton.me";
         };
         init.defaultBranch = "main";
+        url."git@github.com:".insteadOf = "https://github.com/";
         pull.rebase = true;
         filter.lfs = {
           required = true;
