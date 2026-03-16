@@ -48,6 +48,11 @@ in {
 
       services.gnome-keyring.enable = true;
 
+      programs.ssh = {
+        enable = true;
+        addKeysToAgent = "yes";
+      };
+
       home = {
         username = "kronberger";
         homeDirectory = "/home/kronberger";
