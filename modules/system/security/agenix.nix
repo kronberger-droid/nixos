@@ -45,5 +45,13 @@
       mode = "0400";
       owner = "kronberger";
     };
+
+    # Format: TUNET_USERNAME=e12202316@student.tuwien.ac.at\nTUNET_PASSWORD=your_password
+    tunet-credentials = {
+      file = "${inputs.self}/secrets/tunet-credentials.age";
+      path = "/run/secrets/tunet-credentials";
+      mode = "0400";
+      owner = "root";
+    };
   };
 }
