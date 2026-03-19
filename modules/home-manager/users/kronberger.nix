@@ -46,7 +46,10 @@ in {
       # Set primary compositor (both are always available via greetd)
       compositor.primary = primaryCompositor;
 
-      services.gnome-keyring.enable = true;
+      services.gnome-keyring = {
+        enable = true;
+        components = ["secrets"];
+      };
 
       programs.ssh = {
         enable = true;

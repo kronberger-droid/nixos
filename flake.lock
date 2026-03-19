@@ -124,6 +124,28 @@
         "type": "github"
       }
     },
+    "firefox-addons": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "pkgs/firefox-addons",
+        "lastModified": 1773892995,
+        "narHash": "sha256-kRGAztxZcaErtp4FoXnKgOX0OebUdkAIoSXRU1fybKA=",
+        "owner": "rycee",
+        "repo": "nur-expressions",
+        "rev": "394a8d49da42d2a63e8845c7262c636051f0f823",
+        "type": "gitlab"
+      },
+      "original": {
+        "dir": "pkgs/firefox-addons",
+        "owner": "rycee",
+        "repo": "nur-expressions",
+        "type": "gitlab"
+      }
+    },
     "flake-compat": {
       "locked": {
         "lastModified": 1696426674,
@@ -327,6 +349,7 @@
         "base16": "base16",
         "dropkitten": "dropkitten",
         "fenix": "fenix",
+        "firefox-addons": "firefox-addons",
         "home-manager": "home-manager_2",
         "niri": "niri",
         "nix-pia-vpn": "nix-pia-vpn",

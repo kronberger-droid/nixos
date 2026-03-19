@@ -1,9 +1,55 @@
-_: {
+{pkgs, inputs, ...}: let
+  addons = inputs.firefox-addons.packages.${pkgs.stdenv.hostPlatform.system};
+in {
   programs.firefox = {
     enable = true;
 
     profiles.default = {
+      extensions.packages = with addons; [
+        ublock-origin
+        darkreader
+        privacy-badger
+      ];
+
+      search = {
+        default = "Brave Search";
+        force = true;
+        engines = {
+          "Brave Search" = {
+            urls = [{template = "https://search.brave.com/search?q={searchTerms}";}];
+            definedAliases = ["@b"];
+          };
+          "Nix Packages" = {
+            urls = [{
+              template = "https://search.nixos.org/packages";
+              params = [
+                {name = "query"; value = "{searchTerms}";}
+              ];
+            }];
+            icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+            definedAliases = ["@np"];
+          };
+          "MyNixOS" = {
+            urls = [{template = "https://mynixos.com/search?q={searchTerms}";}];
+            icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+            definedAliases = ["@mn"];
+          };
+          "bing".metaData.hidden = true;
+          "ebay".metaData.hidden = true;
+          "amazondotcom-us".metaData.hidden = true;
+          "wikipedia".metaData.hidden = true;
+          "google".metaData.hidden = true;
+        };
+      };
+
       settings = {
+        # Auto-enable extensions installed by Nix
+        "extensions.autoDisableScopes" = 0;
+
+        # Dark mode: tell websites to use dark color scheme
+        "layout.css.prefers-color-scheme.content-override" = 0;
+        "ui.systemUsesDarkTheme" = 1;
+
         # Enable userChrome.css and userContent.css
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         "svg.context-properties.content.enabled" = true;
