@@ -14,7 +14,7 @@ in {
 
   programs.niri.settings = {
     environment = {
-      DISPLAY = ":0";
+      DISPLAY = ":11";
     };
 
     # Input configuration
@@ -73,7 +73,6 @@ in {
     # Startup commands
     spawn-at-startup = [
       {command = ["${pkgs.swaybg}/bin/swaybg" "-m" "fill" "-i" "${./sway/deathpaper.jpg}"];}
-      {command = ["${pkgs.xwayland-satellite}/bin/xwayland-satellite"];}
     ];
 
     animations = {

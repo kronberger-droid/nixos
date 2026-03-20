@@ -137,6 +137,26 @@ in {
     };
   };
 
+  # ── XWayland Satellite ──────────────────────────────────────────
+  systemd.user.services.xwayland-satellite = {
+    Unit = {
+      Description = "XWayland outside your Wayland";
+      After = ["graphical-session.target"];
+      PartOf = ["graphical-session.target"];
+    };
+
+    Service = {
+      ExecCondition = "${pkgs.bash}/bin/bash -c '[ -n \"$NIRI_SOCKET\" ]'";
+      ExecStart = "${pkgs.xwayland-satellite}/bin/xwayland-satellite :11";
+      Restart = "on-failure";
+      RestartSec = 5;
+    };
+
+    Install = {
+      WantedBy = ["graphical-session.target"];
+    };
+  };
+
   # ── Wlsunset ───────────────────────────────────────────────────
   systemd.user.services.wlsunset = {
     Unit = {
