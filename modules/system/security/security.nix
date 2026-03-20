@@ -151,11 +151,7 @@
     "net.ipv4.conf.all.rp_filter" = 1;
     "net.ipv4.conf.default.rp_filter" = 1;
 
-    # Ignore ICMP ping requests
-    "net.ipv4.icmp_echo_ignore_all" = 1;
-    "net.ipv6.icmp.echo_ignore_all" = 1;
-
-    # Ignore broadcast ping requests
+    # Ignore broadcast ping requests (keep unicast ICMP for path MTU discovery)
     "net.ipv4.icmp_echo_ignore_broadcasts" = 1;
 
     # Log Martians

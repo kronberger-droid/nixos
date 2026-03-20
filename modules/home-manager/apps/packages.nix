@@ -24,8 +24,6 @@
     }))
     onlyoffice-desktopeditors
     zotero
-    neovim
-
     # Media
     drawio
     inkscape
@@ -47,7 +45,6 @@
     zathura
 
     # Security
-    seahorse
     bitwarden-desktop
     rofi-rbw-wayland
     rbw

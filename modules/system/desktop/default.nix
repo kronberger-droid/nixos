@@ -2,7 +2,7 @@
   imports = [
     ./desktop.nix
     ./greetd.nix
-    ./gnome-keyring.nix
+    ./keyring.nix
     ./keyd.nix
   ];
 }

@@ -15,12 +15,11 @@ in {
     enable = true;
     extraPortals = [
       pkgs.xdg-desktop-portal-gtk
-      pkgs.xdg-desktop-portal-gnome
     ];
     config = {
       sway.default = ["wlr" "gtk"];
       niri = {
-        default = ["gnome" "gtk"];
+        default = ["gtk"];
         "org.freedesktop.impl.portal.FileChooser" = ["gtk"];
       };
     };

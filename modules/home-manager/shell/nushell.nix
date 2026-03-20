@@ -255,7 +255,6 @@ in {
         cd = "z";
         cat = "bat";
         rip = "rip --graveyard ($env.HOME)/.local/share/Trash";
-        rm = "echo 'use rip instead'";
         tldr = "tealdeer";
       }
       // lib.optionalAttrs (hasTerminal && config.terminal.hasKittens) {

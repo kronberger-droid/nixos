@@ -16,7 +16,6 @@
   home.packages = with pkgs; [
     fastfetch
     fzf
-    lazygit
     translate-shell
     wiki-tui
     lynx
