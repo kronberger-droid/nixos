@@ -45,7 +45,6 @@
     fd
     skim
     xcp
-    busybox
     dust
     ouch
     tealdeer
@@ -73,7 +72,6 @@
     xhost
     xauth
     woeusb
-    clamav
     apptainer-overriden-nixos
   ];
 }

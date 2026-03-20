@@ -1,8 +1,4 @@
 {pkgs, ...}: {
-  home.packages = with pkgs; [
-    github-desktop
-  ];
-
   programs = {
     delta = {
       enable = true;

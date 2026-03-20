@@ -14,9 +14,6 @@
   };
 
   environment.systemPackages = with pkgs; [
-    gnome-keyring
-    seahorse
-    gcr_4
     libsecret
   ];
 }

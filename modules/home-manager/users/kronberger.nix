@@ -65,7 +65,6 @@ in {
         packages = with pkgs; [
           dropkittenPkg
           nemo-with-extensions
-          glib
           yazi
         ];
         stateVersion = "24.11";

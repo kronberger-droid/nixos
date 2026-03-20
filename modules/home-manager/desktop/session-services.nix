@@ -95,8 +95,8 @@ in {
     systemdTarget = "graphical-session.target";
     timeouts = [
       {
-        timeout = 395;
-        command = "${pkgs.libnotify}/bin/notify-send 'Locking in 5 seconds' -t 5000";
+        timeout = 380;
+        command = "${pkgs.libnotify}/bin/notify-send -u critical 'Locking in 20 seconds' -t 18000";
       }
       {
         timeout = 400;
