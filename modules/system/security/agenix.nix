@@ -32,6 +32,13 @@
       owner = "root";
     };
 
+    tuwien-vpn-totp = {
+      file = "${inputs.self}/secrets/tuwien-vpn-totp.age";
+      path = "/run/secrets/tuwien-vpn-totp";
+      mode = "0400";
+      owner = "root";
+    };
+
     arrabbiata-config = {
       file = "${inputs.self}/secrets/arrabbiata-config.age";
       path = "/run/secrets/arrabbiata-config";
