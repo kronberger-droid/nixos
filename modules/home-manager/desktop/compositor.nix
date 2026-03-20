@@ -23,13 +23,8 @@ in {
   config = {
     compositor.primaryCommand = mkDefault cfg.primary;
 
-    home.sessionVariables =
-      {
-        XDG_CURRENT_DESKTOP = cfg.primary;
-      }
-      // lib.optionalAttrs (cfg.primary == "niri") {
-        # xwayland-satellite defaults to :0
-        DISPLAY = ":0";
-      };
+    home.sessionVariables = {
+      XDG_CURRENT_DESKTOP = cfg.primary;
+    };
   };
 }
