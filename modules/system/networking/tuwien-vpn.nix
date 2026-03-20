@@ -32,6 +32,11 @@ in {
       type = types.path;
       description = "Path to file containing VPN password";
     };
+
+    totpSecretFile = mkOption {
+      type = types.path;
+      description = "Path to file containing the TOTP secret (base32 encoded)";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -41,22 +46,28 @@ in {
     ];
 
     # Create systemd service for TU Wien VPN
-    systemd.services.openconnect-tuwien = {
+    systemd.services.openconnect-tuwien = let
+      connectScript = pkgs.writeShellScript "tuwien-vpn-connect" ''
+        PASSWORD=$(cat "${cfg.passwordFile}")
+        TOTP=$(${pkgs.oath-toolkit}/bin/oathtool --totp --base32 "$(cat "${cfg.totpSecretFile}")")
+        printf '%s\n%s\n' "$PASSWORD" "$TOTP" | \
+          ${pkgs.openconnect}/bin/openconnect \
+            --user=${cfg.username} \
+            --authgroup=${cfg.authGroup} \
+            --useragent "AnyConnect OpenConnect" \
+            --no-external-auth \
+            --passwd-on-stdin \
+            --reconnect-timeout 30 \
+            ${cfg.server}
+      '';
+    in {
       description = "TU Wien OpenConnect VPN";
       after = ["network-online.target"];
       wants = ["network-online.target"];
 
       serviceConfig = {
         Type = "simple";
-        ExecStart = ''
-          ${pkgs.openconnect}/bin/openconnect \
-            --user=${cfg.username} \
-            --authgroup=${cfg.authGroup} \
-            --passwd-on-stdin \
-            --reconnect-timeout 30 \
-            ${cfg.server}
-        '';
-        StandardInput = "file:${cfg.passwordFile}";
+        ExecStart = connectScript;
         Restart = "on-failure";
         RestartSec = "5s";
 

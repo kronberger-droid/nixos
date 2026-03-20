@@ -8,4 +8,5 @@ in {
   "arrabbiata-config.age".publicKeys = [intelNuc spectre];
   "github-token.age".publicKeys = [intelNuc spectre];
   "tunet-credentials.age".publicKeys = [intelNuc spectre];
+  "tuwien-vpn-totp.age".publicKeys = [intelNuc spectre];
 }
