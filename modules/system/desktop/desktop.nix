@@ -40,6 +40,7 @@ in {
 
   programs = {
     niri.enable = true;
+    niri.package = pkgs.niri-unstable;
     xwayland.enable = true;
     dconf.enable = true;
     seahorse.enable = true;

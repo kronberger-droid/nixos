@@ -31,7 +31,7 @@
       url = "github:SenchoPens/base16.nix";
     };
     niri = {
-      url = "github:sodiboo/niri-flake";
+      url = "github:kronberger-droid/niri-flake";
     };
     firefox-addons = {
       url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
@@ -64,6 +64,7 @@
           [
             ./hosts/${hostname}/configuration.nix
             inputs.niri.nixosModules.niri
+            {nixpkgs.overlays = [inputs.niri.overlays.niri];}
             home-manager.nixosModules.home-manager
             {
               home-manager.sharedModules = [
