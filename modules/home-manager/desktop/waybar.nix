@@ -149,13 +149,39 @@ in {
       '';
     };
 
-    "waybar/vpn-toggle.sh" = {
+    "waybar/vpn-disconnect-all.sh" = {
       executable = true;
       text = ''
         #!${pkgs.bash}/bin/bash
 
-        # Left-click opens the picker for independent VPN control
-        exec ${config.xdg.configHome}/waybar/vpn-picker.sh
+        NOTIFY="${pkgs.libnotify}/bin/notify-send"
+        ANY_ACTIVE=false
+
+        # Disconnect Tailscale
+        if ${pkgs.tailscale}/bin/tailscale status >/dev/null 2>&1; then
+            ${pkgs.tailscale}/bin/tailscale down
+            ANY_ACTIVE=true
+        fi
+
+        # Disconnect PIA
+        if ${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1; then
+            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop pia-vpn.service
+            ANY_ACTIVE=true
+        fi
+
+        # Disconnect TU Wien
+        if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
+            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop openconnect-tuwien.service
+            ANY_ACTIVE=true
+        fi
+
+        if [ "$ANY_ACTIVE" = true ]; then
+            $NOTIFY "VPN" "All VPNs disconnected" -i network-vpn-disconnected
+        else
+            $NOTIFY "VPN" "No VPNs were active" -i network-vpn-disconnected
+        fi
+
+        ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
       '';
     };
 
@@ -175,18 +201,17 @@ in {
         TU_ON=$(${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1 && echo "yes" || echo "no")
 
         # Build menu with status indicators
-        tag_on="[ON] " tag_off="[OFF]"
         MENU=""
-        [ "$TAIL_ON" = "yes" ] && MENU+="$tag_on Tailscale\n" || MENU+="$tag_off Tailscale\n"
-        [ "$PIA_ON"  = "yes" ] && MENU+="$tag_on PIA VPN\n"    || MENU+="$tag_off PIA VPN\n"
-        [ "$TU_ON"   = "yes" ] && MENU+="$tag_on TU Wien VPN"  || MENU+="$tag_off TU Wien VPN"
+        [ "$TAIL_ON" = "yes" ] && MENU+="[ON]  Tailscale\n" || MENU+="[OFF] Tailscale\n"
+        [ "$PIA_ON"  = "yes" ] && MENU+="[ON]  PIA VPN\n"   || MENU+="[OFF] PIA VPN\n"
+        [ "$TU_ON"   = "yes" ] && MENU+="[ON]  TU Wien VPN" || MENU+="[OFF] TU Wien VPN"
 
         SELECTED=$(echo -e "$MENU" | ${pkgs.rofi}/bin/rofi -dmenu -i -p "VPN" -theme-str 'window {width: 400px;} listview {lines: 3;}')
 
         [ -z "$SELECTED" ] && exit 0
 
-        # Extract VPN name (strip status prefix)
-        VPN_NAME="''${SELECTED#*] }"
+        # Extract VPN name (strip "[ON]  " or "[OFF] " prefix)
+        VPN_NAME=$(echo "$SELECTED" | ${pkgs.gnused}/bin/sed 's/^\[O[NF]*\] *//')
 
         case "$VPN_NAME" in
             Tailscale)
@@ -231,6 +256,36 @@ in {
         esac
 
         ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
+      '';
+    };
+
+    "waybar/dnd-status.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+
+        MODE=$(${pkgs.mako}/bin/makoctl mode)
+        if echo "$MODE" | ${pkgs.gnugrep}/bin/grep -q "do-not-disturb"; then
+            echo '{"text":"\uf1f6","alt":"on","tooltip":"Do Not Disturb: ON","class":"on"}'
+        else
+            echo '{"text":"\uf0f3","alt":"off","tooltip":"Do Not Disturb: OFF","class":"off"}'
+        fi
+      '';
+    };
+
+    "waybar/dnd-toggle.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+
+        MODE=$(${pkgs.mako}/bin/makoctl mode)
+        if echo "$MODE" | ${pkgs.gnugrep}/bin/grep -q "do-not-disturb"; then
+            ${pkgs.mako}/bin/makoctl mode -r do-not-disturb
+            ${pkgs.libnotify}/bin/notify-send "Do Not Disturb" "Notifications enabled" -i notification
+        else
+            ${pkgs.mako}/bin/makoctl mode -s do-not-disturb
+        fi
+        ${pkgs.procps}/bin/pkill -RTMIN+10 waybar 2>/dev/null || true
       '';
     };
   };
@@ -283,6 +338,7 @@ in {
           [
             "custom/screenrec"
             "idle_inhibitor"
+            "custom/dnd"
           ]
           ++ lib.optionals isNotebook [
             "custom/rotation"
@@ -336,6 +392,16 @@ in {
           on-click = dropkittenCmd tui.calendar;
         };
 
+        "custom/dnd" = {
+          return-type = "json";
+          exec = "${config.xdg.configHome}/waybar/dnd-status.sh";
+          on-click = "${config.xdg.configHome}/waybar/dnd-toggle.sh";
+          interval = 5;
+          signal = 10;
+          format = "{text}";
+          escape = true;
+        };
+
         cpu = {
           on-click = dropkittenCmd tui.monitor;
           format = "{usage}% ";
@@ -367,8 +433,8 @@ in {
         "custom/vpn" = {
           return-type = "json";
           exec = "${config.xdg.configHome}/waybar/vpn-status.sh";
-          on-click = "${config.xdg.configHome}/waybar/vpn-toggle.sh";
-          on-click-right = "${config.xdg.configHome}/waybar/vpn-picker.sh";
+          on-click = "${config.xdg.configHome}/waybar/vpn-picker.sh";
+          on-click-right = "${config.xdg.configHome}/waybar/vpn-disconnect-all.sh";
           interval = 3;
           signal = 8;
           format = "{icon}{text}";
@@ -394,8 +460,13 @@ in {
         };
 
         bluetooth = {
-          format = "󰂯";
+          format = "󰂯 on";
           format-disabled = "󰂲 off";
+          format-connected = "󰂱 {device_alias}";
+          format-connected-battery = "󰂱 {device_alias} {device_battery_percentage}%";
+          tooltip-format-connected = "{device_enumerate}";
+          tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
+          tooltip-format-enumerate-connected-battery = "{device_alias}\t{device_battery_percentage}%";
           on-click = dropkittenCmd tui.bluetooth;
           on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
         };
