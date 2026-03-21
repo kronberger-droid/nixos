@@ -43,6 +43,8 @@ in {
         # Limit default floating window size
         floating_maximum_size ${if isNotebook then "1000 x 650" else "1200 x 800"}
 
+        mouse_warping container
+
         # Window rules with sizing
         for_window [app_id="nemo"] floating enable, sticky enable, resize set 1200 800
         for_window [app_id="floating_shell"] floating enable, border pixel 1, sticky enable, resize set 50ppt 60ppt
@@ -281,7 +283,6 @@ in {
           "*" = {
             xkb_options = "compose:menu";
             xkb_layout = "us";
-            xkb_variant = ",";
           };
         }
         // (

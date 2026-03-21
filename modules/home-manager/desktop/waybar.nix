@@ -11,16 +11,9 @@
   dropkitten_size = {
     width = "0.35";
     height = "0.45";
-    yshift = "35";
   };
 
-  termCmd = cmd: let
-    niriCmd =
-      if config.terminal.floatingAppId != null
-      then "${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${cmd}"
-      else "${config.terminal.bin} ${config.terminal.execFlag} ${cmd}";
-    swayCmd = "${dropkittenPkg}/bin/dropkitten -t ${config.terminal.emulator} -W ${dropkitten_size.width} -H ${dropkitten_size.height} -y ${dropkitten_size.yshift} -- ${cmd}";
-  in "if [ -n \"$NIRI_SOCKET\" ]; then ${niriCmd}; else ${swayCmd}; fi";
+  dropkittenCmd = cmd: "${dropkittenPkg}/bin/dropkitten -t ${config.terminal.emulator} -W ${dropkitten_size.width} -H ${dropkitten_size.height} $(if [ -n \"$SWAYSOCK\" ]; then echo '-y 35'; fi) -- ${cmd}";
 
   # nmtui color scheme matching kitty theme
   nmtui_colors = "root=white,black:window=white,black:border=blue,black:listbox=white,black:actlistbox=black,blue:label=white,black:title=brightblue,black:button=white,black:actbutton=black,blue:compactbutton=white,black:checkbox=white,black:actcheckbox=black,blue:entry=white,black:textbox=white,black";
@@ -348,11 +341,11 @@ in {
           format = "{:%e %b %Y %H:%M}";
           tooltip = true;
           tooltip-format = "<big>{:%B %Y}</big>\n<tt>{calendar}</tt>";
-          on-click = termCmd tui.calendar;
+          on-click = dropkittenCmd tui.calendar;
         };
 
         cpu = {
-          on-click = termCmd tui.monitor;
+          on-click = dropkittenCmd tui.monitor;
           format = "{usage}% ";
           tooltip = false;
         };
@@ -410,7 +403,7 @@ in {
         bluetooth = {
           format = "󰂯";
           format-disabled = "󰂲 off";
-          on-click = termCmd tui.bluetooth;
+          on-click = dropkittenCmd tui.bluetooth;
           on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
         };
 
@@ -435,11 +428,11 @@ in {
           tooltip-format-wifi = "{icon} {ifname} ({essid}): {ipaddr}";
           tooltip-format-disconnected = "{icon} disconnected";
           tooltip-format-disabled = "{icon} disabled";
-          on-click = termCmd tui.wifi;
+          on-click = dropkittenCmd tui.wifi;
         };
 
         pulseaudio = {
-          on-click = termCmd tui.audio;
+          on-click = dropkittenCmd tui.audio;
           format = "{volume}% {icon} {format_source}";
           format-bluetooth = "{volume}% {icon} {format_source}";
           format-bluetooth-muted = " {icon} {format_source}";
