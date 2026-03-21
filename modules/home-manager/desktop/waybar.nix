@@ -113,20 +113,39 @@ in {
       text = ''
         #!${pkgs.bash}/bin/bash
 
-        # Check if TU Wien VPN is active
-        if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
-            echo '{"text":" TU","alt":"connected","tooltip":"TU Wien VPN Connected","class":"connected"}'
-            exit 0
+        ACTIVE=()
+        TOOLTIPS=()
+
+        # Check Tailscale
+        if ${pkgs.tailscale}/bin/tailscale status >/dev/null 2>&1; then
+            ACTIVE+=("TAIL")
+            TOOLTIPS+=("Tailscale: Connected")
         fi
 
-        # Check if PIA VPN is active
+        # Check PIA VPN
         if ${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1; then
-            echo '{"text":" PIA","alt":"connected","tooltip":"PIA VPN Connected","class":"connected"}'
-            exit 0
+            ACTIVE+=("PIA")
+            TOOLTIPS+=("PIA VPN: Connected")
         fi
 
-        # No VPN is connected
-        echo '{"text":" off","alt":"disconnected","tooltip":"Click to toggle, right-click to choose","class":"disconnected"}'
+        # Check TU Wien VPN
+        if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
+            ACTIVE+=("TU")
+            TOOLTIPS+=("TU Wien VPN: Connected")
+        fi
+
+        if [ ''${#ACTIVE[@]} -gt 0 ]; then
+            LABEL=$(IFS=/; echo "''${ACTIVE[*]}")
+            # Join tooltips with literal \n for waybar tooltip rendering
+            TOOLTIP=""
+            for i in "''${!TOOLTIPS[@]}"; do
+                [ -n "$TOOLTIP" ] && TOOLTIP+="\\n"
+                TOOLTIP+="''${TOOLTIPS[$i]}"
+            done
+            echo "{\"text\":\" $LABEL\",\"alt\":\"connected\",\"tooltip\":\"$TOOLTIP\",\"class\":\"connected\"}"
+        else
+            echo '{"text":" off","alt":"disconnected","tooltip":"No VPN active","class":"disconnected"}'
+        fi
       '';
     };
 
@@ -135,33 +154,8 @@ in {
       text = ''
         #!${pkgs.bash}/bin/bash
 
-        # Check if TU Wien VPN is active
-        if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
-            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop openconnect-tuwien.service
-            ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from TU Wien VPN" -i network-vpn-disconnected
-            ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
-            exit 0
-        fi
-
-        # Check if PIA VPN is active
-        if ${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1; then
-            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop pia-vpn.service
-            ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from PIA VPN" -i network-vpn-disconnected
-            ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
-            exit 0
-        fi
-
-        # No VPN is connected -- start PIA
-        ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to PIA VPN..." -i network-vpn
-        /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl start pia-vpn.service
-
-        ${pkgs.coreutils}/bin/sleep 3
-        if ${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1; then
-            ${pkgs.libnotify}/bin/notify-send "VPN" "Connected to PIA VPN" -i network-vpn
-        else
-            ${pkgs.libnotify}/bin/notify-send "VPN" "Failed to connect to PIA VPN" -i dialog-error
-        fi
-        ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
+        # Left-click opens the picker for independent VPN control
+        exec ${config.xdg.configHome}/waybar/vpn-picker.sh
       '';
     };
 
@@ -170,73 +164,71 @@ in {
       text = ''
         #!${pkgs.bash}/bin/bash
 
-        # Check current VPN state
-        TUWIEN_ACTIVE=$(${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1 && echo "yes" || echo "no")
-        PIA_ACTIVE=$(${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1 && echo "yes" || echo "no")
+        NOTIFY="${pkgs.libnotify}/bin/notify-send"
+        SIGNAL="${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true"
+        SUDO="/run/wrappers/bin/sudo"
+        SCTL="/run/current-system/sw/bin/systemctl"
 
-        # Build menu
+        # Check current state of each VPN
+        TAIL_ON=$(${pkgs.tailscale}/bin/tailscale status >/dev/null 2>&1 && echo "yes" || echo "no")
+        PIA_ON=$(${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1 && echo "yes" || echo "no")
+        TU_ON=$(${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1 && echo "yes" || echo "no")
+
+        # Build menu with status indicators
+        tag_on="[ON] " tag_off="[OFF]"
         MENU=""
+        [ "$TAIL_ON" = "yes" ] && MENU+="$tag_on Tailscale\n" || MENU+="$tag_off Tailscale\n"
+        [ "$PIA_ON"  = "yes" ] && MENU+="$tag_on PIA VPN\n"    || MENU+="$tag_off PIA VPN\n"
+        [ "$TU_ON"   = "yes" ] && MENU+="$tag_on TU Wien VPN"  || MENU+="$tag_off TU Wien VPN"
 
-        # Add disconnect option if any VPN is active
-        if [ "$TUWIEN_ACTIVE" = "yes" ]; then
-            MENU="Disconnect from TU Wien VPN\n"
-        elif [ "$PIA_ACTIVE" = "yes" ]; then
-            MENU="Disconnect from PIA VPN\n"
-        fi
+        SELECTED=$(echo -e "$MENU" | ${pkgs.rofi}/bin/rofi -dmenu -i -p "VPN" -theme-str 'window {width: 400px;} listview {lines: 3;}')
 
-        MENU="''${MENU}TU Wien VPN\nPIA VPN"
+        [ -z "$SELECTED" ] && exit 0
 
-        # Show rofi menu and get selection
-        SELECTED=$(echo -e "$MENU" | ${pkgs.rofi}/bin/rofi -dmenu -i -p "Select VPN" -theme-str 'window {width: 400px;} listview {lines: 5;}')
+        # Extract VPN name (strip status prefix)
+        VPN_NAME="''${SELECTED#*] }"
 
-        # Exit if no selection
-        if [ -z "$SELECTED" ]; then
-            exit 0
-        fi
-
-        # Handle disconnect
-        if [[ "$SELECTED" == "Disconnect from TU Wien VPN" ]]; then
-            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop openconnect-tuwien.service
-            ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from TU Wien VPN" -i network-vpn-disconnected
-            ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
-            exit 0
-        elif [[ "$SELECTED" == "Disconnect from PIA VPN" ]]; then
-            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop pia-vpn.service
-            ${pkgs.libnotify}/bin/notify-send "VPN" "Disconnected from PIA VPN" -i network-vpn-disconnected
-            ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
-            exit 0
-        fi
-
-        # Disconnect any active VPN first
-        if [ "$TUWIEN_ACTIVE" = "yes" ]; then
-            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop openconnect-tuwien.service 2>/dev/null
-        fi
-        if [ "$PIA_ACTIVE" = "yes" ]; then
-            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop pia-vpn.service 2>/dev/null
-        fi
-
-        # Connect to selected VPN
-        if [[ "$SELECTED" == "TU Wien VPN" ]]; then
-            ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to TU Wien VPN..." -i network-vpn
-            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl start openconnect-tuwien.service
-
-            ${pkgs.coreutils}/bin/sleep 3
-            if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
-                ${pkgs.libnotify}/bin/notify-send "VPN" "Connected to TU Wien VPN" -i network-vpn
-            else
-                ${pkgs.libnotify}/bin/notify-send "VPN" "Failed to connect to TU Wien VPN" -i dialog-error
-            fi
-        elif [[ "$SELECTED" == "PIA VPN" ]]; then
-            ${pkgs.libnotify}/bin/notify-send "VPN" "Connecting to PIA VPN..." -i network-vpn
-            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl start pia-vpn.service
-
-            ${pkgs.coreutils}/bin/sleep 3
-            if ${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1; then
-                ${pkgs.libnotify}/bin/notify-send "VPN" "Connected to PIA VPN" -i network-vpn
-            else
-                ${pkgs.libnotify}/bin/notify-send "VPN" "Failed to connect to PIA VPN" -i dialog-error
-            fi
-        fi
+        case "$VPN_NAME" in
+            Tailscale)
+                if [ "$TAIL_ON" = "yes" ]; then
+                    ${pkgs.tailscale}/bin/tailscale down
+                    $NOTIFY "VPN" "Tailscale disconnected" -i network-vpn-disconnected
+                else
+                    ${pkgs.tailscale}/bin/tailscale up
+                    $NOTIFY "VPN" "Tailscale connected" -i network-vpn
+                fi
+                ;;
+            "PIA VPN")
+                if [ "$PIA_ON" = "yes" ]; then
+                    $SUDO $SCTL stop pia-vpn.service
+                    $NOTIFY "VPN" "PIA VPN disconnected" -i network-vpn-disconnected
+                else
+                    $NOTIFY "VPN" "Connecting to PIA VPN..." -i network-vpn
+                    $SUDO $SCTL start pia-vpn.service
+                    ${pkgs.coreutils}/bin/sleep 3
+                    if ${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1; then
+                        $NOTIFY "VPN" "PIA VPN connected" -i network-vpn
+                    else
+                        $NOTIFY "VPN" "Failed to connect to PIA VPN" -i dialog-error
+                    fi
+                fi
+                ;;
+            "TU Wien VPN")
+                if [ "$TU_ON" = "yes" ]; then
+                    $SUDO $SCTL stop openconnect-tuwien.service
+                    $NOTIFY "VPN" "TU Wien VPN disconnected" -i network-vpn-disconnected
+                else
+                    $NOTIFY "VPN" "Connecting to TU Wien VPN..." -i network-vpn
+                    $SUDO $SCTL start openconnect-tuwien.service
+                    ${pkgs.coreutils}/bin/sleep 3
+                    if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
+                        $NOTIFY "VPN" "TU Wien VPN connected" -i network-vpn
+                    else
+                        $NOTIFY "VPN" "Failed to connect to TU Wien VPN" -i dialog-error
+                    fi
+                fi
+                ;;
+        esac
 
         ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
       '';
@@ -378,6 +370,7 @@ in {
           on-click = "${config.xdg.configHome}/waybar/vpn-toggle.sh";
           on-click-right = "${config.xdg.configHome}/waybar/vpn-picker.sh";
           interval = 3;
+          signal = 8;
           format = "{icon}{text}";
           format-icons = {
             connected = "󰖂";
