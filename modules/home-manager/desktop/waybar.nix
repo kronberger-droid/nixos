@@ -344,12 +344,14 @@ in {
             "custom/rotation"
           ]
           ++ [
+            "custom/separator"
             "bluetooth"
             "pulseaudio"
             "custom/mpris"
             "custom/separator"
             "network"
             "custom/vpn"
+            "custom/separator"
             "cpu"
           ]
           ++ lib.optionals (!isNotebook) [
