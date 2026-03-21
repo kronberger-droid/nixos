@@ -65,6 +65,7 @@
     # Nix tooling
     nh
     nix-output-monitor
+    cachix
 
     # Others
     fwupd
