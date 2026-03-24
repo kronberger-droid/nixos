@@ -1,43 +1,49 @@
 {
-  description = "A Nix-flake-based C/C++ development environment";
+  description = "C/C++ development shell with gcc";
 
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-
-  outputs = {nixpkgs}: let
-    supportedSystems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
-    forEachSupportedSystem = f:
-      nixpkgs.lib.genAttrs supportedSystems (system:
-        f {
-          pkgs = import nixpkgs {inherit system;};
-        });
-  in {
-    devShells = forEachSupportedSystem ({pkgs}: {
-      default =
-        pkgs.mkShell.override
-        {
-          # Override stdenv in order to change compiler:
-          # stdenv = pkgs.clangStdenv;
-        }
-        {
-          packages = with pkgs;
-            [
-              clang-tools
-              cmake
-              codespell
-              conan
-              cppcheck
-              doxygen
-              gtest
-              lcov
-              vcpkg
-              vcpkg-tool
-            ]
-            ++ (
-              if system == "aarch64-darwin"
-              then []
-              else [gdb]
-            );
-        };
-    });
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
   };
+
+  outputs = {
+    nixpkgs,
+    flake-utils,
+    ...
+  }:
+    flake-utils.lib.eachDefaultSystem (
+      system: let
+        pkgs = import nixpkgs {inherit system;};
+
+        # LSP and linting
+        analysisTools = with pkgs; [
+          clang-tools # clangd (LSP) + clang-tidy (linter)
+          cppcheck    # static analysis
+          bear        # generates compile_commands.json from Makefile builds
+        ];
+
+        # Build tools
+        buildTools = with pkgs; [
+          gcc
+          gnumake
+          cmake
+          pkg-config
+        ];
+
+        # Debugging
+        debugTools = with pkgs; [
+          gdb
+          valgrind
+        ];
+      in {
+        devShells.default = pkgs.mkShell {
+          name = "c-cpp dev shell";
+          buildInputs = buildTools ++ analysisTools ++ debugTools;
+          shellHook = ''
+            echo "Using GCC: $(gcc --version | head -1)"
+            echo "clangd available for LSP"
+          '';
+        };
+      }
+    );
 }

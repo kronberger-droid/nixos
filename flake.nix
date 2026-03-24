@@ -164,6 +164,11 @@
         path = ./templates/rust-package;
         description = "Rust project with naersk packaging and dual dev shells";
       };
+
+      c-cpp = {
+        path = ./templates/c-cpp;
+        description = "C/C++ dev shell with gcc, clangd, and analysis tools";
+      };
     };
 
     defaultTemplate = self.templates.rust-simple;
