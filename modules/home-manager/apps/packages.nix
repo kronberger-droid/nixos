@@ -35,7 +35,7 @@
     vlc
     obs-studio
     ipe
-    fiji
+    gwyddion
 
     # PDF
     ghostscript

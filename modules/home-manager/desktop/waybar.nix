@@ -463,6 +463,7 @@ in {
 
         bluetooth = {
           format = "󰂯 on";
+          format-off = "󰂲 off";
           format-disabled = "󰂲 off";
           format-connected = "󰂱 {device_alias}";
           format-connected-battery = "󰂱 {device_alias} {device_battery_percentage}%";
@@ -470,7 +471,7 @@ in {
           tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
           tooltip-format-enumerate-connected-battery = "{device_alias}\t{device_battery_percentage}%";
           on-click = dropkittenCmd tui.bluetooth;
-          on-click-right = "${pkgs.util-linux}/bin/rfkill toggle bluetooth";
+          on-click-right = "sh -c 'if ${pkgs.bluez}/bin/bluetoothctl show | grep -q \"Powered: yes\"; then ${pkgs.bluez}/bin/bluetoothctl power off; else ${pkgs.bluez}/bin/bluetoothctl power on; fi'";
         };
 
         network = {
