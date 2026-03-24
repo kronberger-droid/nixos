@@ -5,6 +5,85 @@
     flavors = {
       "base16-transparent" = ./yazi/base16-transparent.toml;
     };
+    plugins = {
+      inherit (pkgs.yaziPlugins) bookmarks;
+    };
+    initLua = ''
+      require("bookmarks"):setup({
+        persist = "vim",      -- uppercase (A-Z) bookmarks persist across sessions
+        desc_format = "full", -- show full path in bookmark list
+        notify = {
+          enable = true,
+          timeout = 2,
+          message = {
+            new = "Bookmark saved",
+            delete = "Bookmark deleted",
+            delete_all = "All bookmarks deleted",
+          },
+        },
+      })
+    '';
+    keymap = {
+      mgr.prepend_keymap = [
+        # Bookmarks plugin — save/jump/delete
+        {
+          on = ["m"];
+          run = "plugin bookmarks save";
+          desc = "Save bookmark";
+        }
+        {
+          on = ["'" ];
+          run = "plugin bookmarks jump";
+          desc = "Jump to bookmark";
+        }
+        {
+          on = ["b" "d"];
+          run = "plugin bookmarks delete";
+          desc = "Delete bookmark";
+        }
+        {
+          on = ["b" "D"];
+          run = "plugin bookmarks delete_all";
+          desc = "Delete all bookmarks";
+        }
+        # Quick "go to" shortcuts
+        {
+          on = ["g" "h"];
+          run = "cd ~";
+          desc = "Go to home";
+        }
+        {
+          on = ["g" "d"];
+          run = "cd ~/Downloads";
+          desc = "Go to Downloads";
+        }
+        {
+          on = ["g" "o"];
+          run = "cd ~/Documents";
+          desc = "Go to Documents";
+        }
+        {
+          on = ["g" "n"];
+          run = "cd ~/Documents/notes/general-vault";
+          desc = "Go to Obsidian vault";
+        }
+        {
+          on = ["g" "c"];
+          run = "cd ~/.config";
+          desc = "Go to .config";
+        }
+        {
+          on = ["g" "x"];
+          run = "cd ~/.config/nixos";
+          desc = "Go to NixOS config";
+        }
+        {
+          on = ["g" "u"];
+          run = "cd /run/media/kronberger";
+          desc = "Go to USB/removable media";
+        }
+      ];
+    };
     settings = {
       flavor = "base16-transparent";
       opener = {

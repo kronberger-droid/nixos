@@ -154,6 +154,20 @@ in {
     ] {
         let flake_dir = ($dir | path expand)
 
+        # Check for unstaged changes — flakes only see git-added files
+        let not_added = (git -C $flake_dir diff --name-only | str trim)
+        let untracked = (git -C $flake_dir ls-files --others --exclude-standard | str trim)
+        let unadded = ([$not_added $untracked] | where ($it | is-not-empty) | str join "\n")
+        if ($unadded | is-not-empty) {
+            print $"(ansi yellow)Warning: these files are not staged and will be invisible to the flake:(ansi reset)"
+            print ((ansi dark_gray) + $unadded + (ansi reset))
+            let answer = (input $"(ansi yellow)Continue anyway? [y/N] (ansi reset)")
+            if ($answer | str downcase) != "y" {
+                print "Aborted."
+                return
+            }
+        }
+
         if $update or $action == "update" {
             print $"(ansi cyan)Updating flake inputs...(ansi reset)"
             nix flake update --flake $flake_dir
