@@ -52,30 +52,20 @@ window#waybar {
   padding: 0px 0px;
 }
 
-/* Desktop Helper widgets - brown accent with white text like original */
+/* Accent widgets — brown background with white text */
 #mode,
 #custom-menu,
-#custom-power {
-  color: @base05; /* White text on brown background */
-  background-color: @base0FE6; /* Brown accent (base0F) with 90% opacity */
-  border-radius: 15px;
-  padding: 0px 10px;
-  margin: 0px 5px;
-}
-
-#clock {
-  color: @base05; /* White text on brown background */
-  background-color: @base0FE6; /* Brown accent (base0F) with 90% opacity */
+#custom-power,
+#clock,
+#scratchpad {
+  color: @base05;
+  background-color: @base0FE6;
   border-radius: 15px;
   padding: 0px 10px;
   margin: 0px 5px;
 }
 
 #scratchpad {
-  color: @base05; /* White text on brown background */
-  background-color: @base0FE6; /* Brown accent (base0F) with 90% opacity */
-  border-radius: 15px;
-  padding: 0px 10px;
   margin: 0px 10px;
 }
 
@@ -96,25 +86,27 @@ window#waybar {
 }
 
 #workspaces {
-  background: @base00E6; /* Default background with 90% opacity */
+  background: @base00E6;
   border-radius: 15px;
   margin: 0px 5px;
 }
 
 #workspaces button {
-  color: @base05; /* White text for dark background */
+  color: @base05;
   border-radius: 15px;
   padding: 0px 10px;
 }
 
-#workspaces button.focused {
-  color: @base05; /* White text on brown background */
-  background-color: @base0FE6; /* Brown accent (base0F) with 90% opacity */
+/* Sway uses .focused, Niri uses .active */
+#workspaces button.focused,
+#workspaces button.active {
+  color: @base05;
+  background-color: @base0FE6;
   border-radius: 15px;
 }
 
 #workspaces button.urgent {
-  border-color: @base08; /* Error/urgent: base08 */
+  border-color: @base08;
   color: @base08;
 }
 
@@ -134,4 +126,3 @@ window#waybar {
   animation-iteration-count : infinite;
   animation-direction       : alternate;
 }
-

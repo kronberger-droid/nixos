@@ -321,7 +321,7 @@ in {
         else
             ${pkgs.mako}/bin/makoctl mode -s do-not-disturb
         fi
-        ${pkgs.procps}/bin/pkill -RTMIN+10 waybar 2>/dev/null || true
+        ${pkgs.procps}/bin/pkill -RTMIN+11 waybar 2>/dev/null || true
       '';
     };
   };
@@ -443,8 +443,8 @@ in {
           return-type = "json";
           exec = "${config.xdg.configHome}/waybar/dnd-status.sh";
           on-click = "${config.xdg.configHome}/waybar/dnd-toggle.sh";
-          interval = 5;
-          signal = 10;
+          interval = 30;
+          signal = 11;
           format = "{text}";
           escape = true;
         };
@@ -471,7 +471,7 @@ in {
 
         "custom/mpris" = {
           return-type = "json";
-          exec = "${pkgs.waybar-mpris}/bin/waybar-mpris --order 'SYMBOL:PLAYER' --separator '' --autofocus --pause '' --play ''";
+          exec = "${pkgs.waybar-mpris}/bin/waybar-mpris --order 'SYMBOL:PLAYER' --separator '' --autofocus --pause '' --play '' | ${pkgs.gnused}/bin/sed -u 's/[Cc]hromium/Brave/g; s/chrome/Brave/g'";
           on-click = "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
           on-click-right = "${pkgs.waybar-mpris}/bin/waybar-mpris --send player-next";
           escape = true;
@@ -482,7 +482,7 @@ in {
           exec = "${config.xdg.configHome}/waybar/vpn-status.sh";
           on-click = "${config.xdg.configHome}/waybar/vpn-picker.sh";
           on-click-right = "${config.xdg.configHome}/waybar/vpn-disconnect-all.sh";
-          interval = 3;
+          interval = 15;
           signal = 8;
           format = "{icon}{text}";
           format-icons = {
