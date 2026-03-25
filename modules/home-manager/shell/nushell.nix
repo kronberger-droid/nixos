@@ -14,7 +14,6 @@ in {
     rip2
     navi
     tealdeer
-    zellij
   ];
 
   xdg.configFile."nushell/utilities.nu".source = ./nushell/utilities.nu;

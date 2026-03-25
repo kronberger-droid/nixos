@@ -259,6 +259,42 @@ in {
       '';
     };
 
+    "waybar/scratchpad-toggle.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+        APP_ID="scratchpad"
+        SESSION_NAME="scratchpad"
+
+        WINDOW_JSON=$(niri msg -j windows)
+        WINDOW_ID=$(echo "$WINDOW_JSON" | ${pkgs.jq}/bin/jq -r '.[] | select(.app_id == "'"$APP_ID"'") | .id // empty')
+
+        if [ -n "$WINDOW_ID" ]; then
+          FOCUSED_APP=$(niri msg -j focused-window | ${pkgs.jq}/bin/jq -r '.app_id // empty')
+          if [ "$FOCUSED_APP" = "$APP_ID" ]; then
+            niri msg action close-window --id "$WINDOW_ID"
+          else
+            niri msg action focus-window --id "$WINDOW_ID"
+          fi
+        else
+          ${config.terminal.bin} ${config.terminal.appIdFlag} "$APP_ID" ${config.terminal.execFlag} ${pkgs.zellij}/bin/zellij attach "$SESSION_NAME" --create
+        fi
+      '';
+    };
+
+    "waybar/scratchpad-status.sh" = {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+
+        if niri msg -j windows 2>/dev/null | ${pkgs.jq}/bin/jq -e '.[] | select(.app_id == "scratchpad")' >/dev/null 2>&1; then
+          echo '{"text":"\uf489","alt":"open","tooltip":"Scratchpad open","class":"open"}'
+        else
+          echo '{"text":"\uf489","alt":"closed","tooltip":"Scratchpad closed","class":"closed"}'
+        fi
+      '';
+    };
+
     "waybar/dnd-status.sh" = {
       executable = true;
       text = ''
@@ -333,7 +369,7 @@ in {
           spacing = 10;
           icon-size = 14;
         };
-        modules-left = ["custom/menu" "sway/workspaces" "niri/workspaces" "sway/scratchpad" "sway/mode"];
+        modules-left = ["custom/menu" "sway/workspaces" "niri/workspaces" "custom/scratchpad" "sway/scratchpad" "sway/mode"];
         modules-right =
           [
             "custom/screenrec"
@@ -380,6 +416,15 @@ in {
           on-click = "${pkgs.sway}/bin/swaymsg 'scratchpad show'";
           tooltip = true;
           tooltip-format = "{app} = {title}";
+        };
+
+        "custom/scratchpad" = {
+          return-type = "json";
+          exec = "${config.xdg.configHome}/waybar/scratchpad-status.sh";
+          on-click = "${config.xdg.configHome}/waybar/scratchpad-toggle.sh";
+          interval = 2;
+          format = "{text}";
+          escape = true;
         };
 
         "custom/separator" = {
