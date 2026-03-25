@@ -7,6 +7,8 @@
 }: let
   modifier = "Mod";
   terminal = config.terminal.bin;
+
+  scratchpadToggle = "${config.xdg.configHome}/waybar/scratchpad-toggle.sh";
 in {
   home.packages = with pkgs; [
     fuzzel
@@ -134,6 +136,9 @@ in {
         then ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)"]
         else ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)"];
       "${modifier}+Shift+N".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${pkgs.nemo-with-extensions}/bin/nemo $(${config.xdg.configHome}/kitty/cwd.sh)"];
+
+      # Scratchpad
+      "${modifier}+Minus".action.spawn = ["${scratchpadToggle}"];
 
       # Session
       "${modifier}+Shift+Q".action.close-window = [];
@@ -400,6 +405,19 @@ in {
         open-floating = true;
         default-column-width = {proportion = 0.5;};
         default-window-height = {proportion = 0.6;};
+      }
+
+      # Scratchpad terminal (left-side panel)
+      {
+        matches = [{app-id = "^scratchpad$";}];
+        open-floating = true;
+        default-column-width = {proportion = 0.33333;};
+        default-window-height = {proportion = 1.0;};
+        default-floating-position = {
+          x = 4;
+          y = 0;
+          relative-to = "top-left";
+        };
       }
 
       # Inactive window opacity
