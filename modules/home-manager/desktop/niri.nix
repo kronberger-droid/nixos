@@ -407,6 +407,19 @@ in {
         default-window-height = {proportion = 0.6;};
       }
 
+      # ncspot popup (right-side panel)
+      {
+        matches = [{app-id = "^ncspot_popup$";}];
+        open-floating = true;
+        default-column-width = {proportion = 0.33333;};
+        default-window-height = {proportion = 1.0;};
+        default-floating-position = {
+          x = -4;
+          y = 0;
+          relative-to = "top-right";
+        };
+      }
+
       # Scratchpad terminal (left-side panel)
       {
         matches = [{app-id = "^scratchpad$";}];

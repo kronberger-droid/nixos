@@ -61,5 +61,11 @@
       owner = "root";
     };
 
+    spotify-password = {
+      file = "${inputs.self}/secrets/spotify-password.age";
+      path = "/run/secrets/spotify-password";
+      mode = "0400";
+      owner = "kronberger";
+    };
   };
 }

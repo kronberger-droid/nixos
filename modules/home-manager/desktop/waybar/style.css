@@ -85,6 +85,12 @@ window#waybar {
   background: @base00E6;
 }
 
+#custom-ncspot {
+  padding: 0px 5px;
+  margin: 0px 5px;
+  color: @base0B;
+}
+
 #workspaces {
   background: @base00E6;
   border-radius: 15px;

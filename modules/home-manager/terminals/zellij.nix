@@ -1,6 +1,14 @@
 {config, pkgs, ...}: {
   home.packages = [pkgs.zellij];
 
+  xdg.configFile."zellij/layouts/ncspot.kdl".text = ''
+    layout {
+        tab name="ncspot" {
+            pane command="${pkgs.ncspot}/bin/ncspot"
+        }
+    }
+  '';
+
   xdg.configFile."zellij/config.kdl".text = with config.scheme; ''
     simplified_ui true
     default_layout "compact"
