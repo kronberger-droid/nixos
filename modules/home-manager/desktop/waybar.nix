@@ -297,7 +297,7 @@ in {
           await_state "open"
         fi
 
-        ${pkgs.procps}/bin/pkill -RTMIN+11 waybar 2>/dev/null || true
+        ${pkgs.procps}/bin/pkill -RTMIN+12 waybar 2>/dev/null || true
       '';
     };
 
@@ -442,7 +442,7 @@ in {
           exec = "${config.xdg.configHome}/waybar/scratchpad-status.sh";
           on-click = "${config.xdg.configHome}/waybar/scratchpad-toggle.sh";
           interval = 2;
-          signal = 11;
+          signal = 12;
           format = "{text}";
           escape = true;
         };
