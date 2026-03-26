@@ -9,4 +9,5 @@ in {
   "github-token.age".publicKeys = [intelNuc spectre];
   "tunet-credentials.age".publicKeys = [intelNuc spectre];
   "tuwien-vpn-totp.age".publicKeys = [intelNuc spectre];
+  "spotify-password.age".publicKeys = [intelNuc spectre];
 }
