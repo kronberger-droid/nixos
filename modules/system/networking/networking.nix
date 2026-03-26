@@ -21,6 +21,11 @@
     };
     hostName = host;
 
+    stevenblack = {
+      enable = true;
+      block = ["porn"];
+    };
+
     # Enable systemd-resolved for better DNS performance
     nameservers = ["1.1.1.1" "1.0.0.1"];
     # IPv6 privacy extensions
