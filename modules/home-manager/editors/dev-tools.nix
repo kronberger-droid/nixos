@@ -5,6 +5,10 @@
 }: let
   rustToolchain = inputs.fenix.packages.${pkgs.stdenv.hostPlatform.system}.stable.toolchain;
 in {
+  home.file.".rustfmt.toml".text = ''
+    max_width = 80
+  '';
+
   home.packages = with pkgs; [
     rustToolchain
     tokei
