@@ -265,20 +265,39 @@ in {
         #!${pkgs.bash}/bin/bash
         APP_ID="scratchpad"
         SESSION_NAME="scratchpad"
+        JQ="${pkgs.jq}/bin/jq"
+
+        window_exists() {
+          niri msg -j windows | $JQ -e ".[] | select(.app_id == \"$APP_ID\")" >/dev/null 2>&1
+        }
+
+        # Wait until niri's window list matches expected state
+        await_state() {
+          local want="$1"
+          for _ in $(seq 1 20); do
+            if [ "$want" = "open" ] && window_exists; then return 0; fi
+            if [ "$want" = "closed" ] && ! window_exists; then return 0; fi
+            ${pkgs.coreutils}/bin/sleep 0.05
+          done
+        }
 
         WINDOW_JSON=$(niri msg -j windows)
-        WINDOW_ID=$(echo "$WINDOW_JSON" | ${pkgs.jq}/bin/jq -r '.[] | select(.app_id == "'"$APP_ID"'") | .id // empty')
+        WINDOW_ID=$(echo "$WINDOW_JSON" | $JQ -r '.[] | select(.app_id == "'"$APP_ID"'") | .id // empty')
 
         if [ -n "$WINDOW_ID" ]; then
-          FOCUSED_APP=$(niri msg -j focused-window | ${pkgs.jq}/bin/jq -r '.app_id // empty')
+          FOCUSED_APP=$(niri msg -j focused-window | $JQ -r '.app_id // empty')
           if [ "$FOCUSED_APP" = "$APP_ID" ]; then
             niri msg action close-window --id "$WINDOW_ID"
+            await_state "closed"
           else
             niri msg action focus-window --id "$WINDOW_ID"
           fi
         else
           ${config.terminal.bin} ${config.terminal.appIdFlag} "$APP_ID" ${config.terminal.execFlag} ${pkgs.zellij}/bin/zellij attach "$SESSION_NAME" --create
+          await_state "open"
         fi
+
+        ${pkgs.procps}/bin/pkill -RTMIN+11 waybar 2>/dev/null || true
       '';
     };
 
@@ -423,6 +442,7 @@ in {
           exec = "${config.xdg.configHome}/waybar/scratchpad-status.sh";
           on-click = "${config.xdg.configHome}/waybar/scratchpad-toggle.sh";
           interval = 2;
+          signal = 11;
           format = "{text}";
           escape = true;
         };
