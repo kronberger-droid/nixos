@@ -21,5 +21,6 @@
     lynx
     timr-tui
     git-absorb
+    ouch
   ];
 }
