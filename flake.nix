@@ -27,6 +27,10 @@
       url = "github:kronberger-droid/arrabbiata-tui";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    arrabbiata = {
+      url = "github:kronberger-droid/arrabbiata";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     base16 = {
       url = "github:SenchoPens/base16.nix";
     };
@@ -111,6 +115,19 @@
         isNotebook = true;
       };
 
+      # Servers
+      homeserver = nixpkgs.lib.nixosSystem {
+        system = x86System;
+        specialArgs = {
+          host = "homeserver";
+          inherit inputs;
+          arrabbiata = inputs.arrabbiata.packages.${x86System}.default;
+        };
+        modules = [
+          ./hosts/homeserver/configuration.nix
+        ];
+      };
+
       # ARM devices (special case without agenix and standard user config)
       devPi = nixpkgs.lib.nixosSystem {
         system = armSystem;
@@ -172,5 +189,16 @@
     };
 
     defaultTemplate = self.templates.rust-simple;
+
+    # Recovery USB ISO image
+    # Build with: nix build .#recovery
+    packages.${x86System}.recovery = self.nixosConfigurations.recovery.config.system.build.isoImage;
+
+    nixosConfigurations.recovery = nixpkgs.lib.nixosSystem {
+      system = x86System;
+      modules = [
+        ./hosts/recovery/configuration.nix
+      ];
+    };
   };
 }
