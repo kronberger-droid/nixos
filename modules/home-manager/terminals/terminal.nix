@@ -42,7 +42,7 @@ in {
   options.terminal = {
     emulator = mkOption {
       type = types.enum ["rio" "kitty" "alacritty"];
-      default = "rio";
+      default = "kitty";
       description = ''
         The terminal emulator to use system-wide.
         This setting affects all terminal keybindings in Sway,

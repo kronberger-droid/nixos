@@ -77,37 +77,7 @@ in {
       {command = ["${pkgs.swaybg}/bin/swaybg" "-m" "fill" "-i" "${./sway/deathpaper.jpg}"];}
     ];
 
-    animations = {
-      workspace-switch.kind.spring = {
-        damping-ratio = 1.0;
-        stiffness = 8000;
-        epsilon = 0.001;
-      };
-      window-open.kind.easing = {
-        duration-ms = 60;
-        curve = "ease-out-expo";
-      };
-      window-close.kind.easing = {
-        duration-ms = 40;
-        curve = "ease-out-expo";
-      };
-      horizontal-view-movement.kind.spring = {
-        damping-ratio = 1.0;
-        stiffness = 8000;
-        epsilon = 0.001;
-      };
-      window-movement.kind.spring = {
-        damping-ratio = 1.0;
-        stiffness = 8000;
-        epsilon = 0.001;
-      };
-      window-resize.kind.spring = {
-        damping-ratio = 1.0;
-        stiffness = 8000;
-        epsilon = 0.001;
-      };
-      config-notification-open-close.enable = false;
-    };
+    animations.enable = false;
 
     prefer-no-csd = true;
 
@@ -186,25 +156,25 @@ in {
       "${modifier}+Shift+Home".action.move-column-to-first = [];
       "${modifier}+Shift+End".action.move-column-to-last = [];
 
-      # Monitor focus (Mod+Ctrl)
-      "${modifier}+Ctrl+H".action.focus-monitor-left = [];
-      "${modifier}+Ctrl+L".action.focus-monitor-right = [];
-      "${modifier}+Ctrl+K".action.focus-monitor-up = [];
-      "${modifier}+Ctrl+J".action.focus-monitor-down = [];
-      "${modifier}+Ctrl+Left".action.focus-monitor-left = [];
-      "${modifier}+Ctrl+Right".action.focus-monitor-right = [];
-      "${modifier}+Ctrl+Up".action.focus-monitor-up = [];
-      "${modifier}+Ctrl+Down".action.focus-monitor-down = [];
+      # Monitor focus (Mod+Alt)
+      "${modifier}+Alt+H".action.focus-monitor-left = [];
+      "${modifier}+Alt+L".action.focus-monitor-right = [];
+      "${modifier}+Alt+K".action.focus-monitor-up = [];
+      "${modifier}+Alt+J".action.focus-monitor-down = [];
+      "${modifier}+Alt+Left".action.focus-monitor-left = [];
+      "${modifier}+Alt+Right".action.focus-monitor-right = [];
+      "${modifier}+Alt+Up".action.focus-monitor-up = [];
+      "${modifier}+Alt+Down".action.focus-monitor-down = [];
 
-      # Move to monitor (Mod+Ctrl+Shift)
-      "${modifier}+Ctrl+Shift+H".action.move-column-to-monitor-left = [];
-      "${modifier}+Ctrl+Shift+L".action.move-column-to-monitor-right = [];
-      "${modifier}+Ctrl+Shift+K".action.move-column-to-monitor-up = [];
-      "${modifier}+Ctrl+Shift+J".action.move-column-to-monitor-down = [];
-      "${modifier}+Ctrl+Shift+Left".action.move-column-to-monitor-left = [];
-      "${modifier}+Ctrl+Shift+Right".action.move-column-to-monitor-right = [];
-      "${modifier}+Ctrl+Shift+Up".action.move-column-to-monitor-up = [];
-      "${modifier}+Ctrl+Shift+Down".action.move-column-to-monitor-down = [];
+      # Move to monitor (Mod+Alt+Shift)
+      "${modifier}+Alt+Shift+H".action.move-column-to-monitor-left = [];
+      "${modifier}+Alt+Shift+L".action.move-column-to-monitor-right = [];
+      "${modifier}+Alt+Shift+K".action.move-column-to-monitor-up = [];
+      "${modifier}+Alt+Shift+J".action.move-column-to-monitor-down = [];
+      "${modifier}+Alt+Shift+Left".action.move-column-to-monitor-left = [];
+      "${modifier}+Alt+Shift+Right".action.move-column-to-monitor-right = [];
+      "${modifier}+Alt+Shift+Up".action.move-column-to-monitor-up = [];
+      "${modifier}+Alt+Shift+Down".action.move-column-to-monitor-down = [];
 
       # Column sizing
       "${modifier}+R".action.switch-preset-column-width = [];
