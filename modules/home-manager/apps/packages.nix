@@ -31,7 +31,7 @@
     (pkgs.gimp-with-plugins.override {
       plugins = [pkgs.gimpPlugins.resynthesizer];
     })
-    ffmpeg_6
+    ffmpeg
     vlc
     obs-studio
     ipe
@@ -42,14 +42,12 @@
     pdfarranger
     pdfpc
     inlyne
-    zathura
 
     # Security
     bitwarden-desktop
     rofi-rbw-wayland
     rbw
     openssl
-    libsecret
 
     # Networking
     localsend

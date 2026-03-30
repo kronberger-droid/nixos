@@ -4,8 +4,41 @@
     settings = {
       # Font configuration
       fonts = {
-        family = "JetBrainsMono Nerd Font";
         size = 14;
+        hinting = true;
+        use-drawable-chars = true;
+        features = ["calt" "liga"]; # ligatures and contextual alternates
+
+        regular = {
+          family = "JetBrainsMono Nerd Font";
+          style = "Normal";
+          weight = 400;
+        };
+        bold = {
+          family = "JetBrainsMono Nerd Font";
+          style = "Normal";
+          weight = 700;
+        };
+        italic = {
+          family = "JetBrainsMono Nerd Font";
+          style = "Italic";
+          weight = 400;
+        };
+        bold-italic = {
+          family = "JetBrainsMono Nerd Font";
+          style = "Italic";
+          weight = 700;
+        };
+      };
+
+      # Text rendering
+      line-height = 1.05;
+      padding-x = 4;
+
+      # Renderer
+      renderer = {
+        backend = "Vulkan";
+        performance = "High";
       };
 
       # Window settings
@@ -19,7 +52,7 @@
 
       # Navigation
       navigation = {
-        mode = "Plain"; # No tabs UI since we want it simple
+        mode = "Plain";
       };
 
       # Theme - using base16 scheme to match Kitty

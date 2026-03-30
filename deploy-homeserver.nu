@@ -2,7 +2,7 @@
 
 # Deploy NixOS configuration to homeserver
 
-let target = "kronberger@192.168.2.54"
+let target = "kronberger@homeserver"
 let flake = ".#nixosConfigurations.homeserver.config.system.build.toplevel"
 
 print "Building configuration locally..."

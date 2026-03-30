@@ -4,7 +4,6 @@
   host,
   ...
 }: let
-  inherit (config.myTheme) backgroundColor accentColor;
   scale =
     if host == "spectre"
     then 1.25
@@ -21,10 +20,10 @@ in {
       image = "${./deathpaper.jpg}";
       font-size = builtins.ceil (24 * scale);
       indicator-idle-visible = false;
-      inside-color = backgroundColor + "CC";
+      inside-color = "#${config.scheme.base00}CC";
       indicator-radius = builtins.ceil (80 * scale);
-      ring-color = backgroundColor;
-      key-hl-color = accentColor;
+      ring-color = "#${config.scheme.base00}";
+      key-hl-color = "#${config.scheme.base0F}";
       show-failed-attempts = true;
       ignore-empty-password = true;
     };

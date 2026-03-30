@@ -19,25 +19,9 @@
     # Block unnecessary protocols
     allowedUDPPorts = [];
 
-    # Additional firewall rules for better security
+    # Log dropped packets (limited to prevent log spam)
     extraCommands = ''
-      # Rate limiting for SSH
-      iptables -A INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --set --name ssh_attempts
-      iptables -A INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name ssh_attempts -j DROP
-
-      # Log dropped packets (limited to prevent log spam)
       iptables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7
-
-      # Block common attack patterns
-      iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
-      iptables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
-      iptables -A INPUT -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP
-      iptables -A INPUT -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
-    '';
-
-    extraStopCommands = ''
-      iptables -D INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --set --name ssh_attempts 2>/dev/null || true
-      iptables -D INPUT -p tcp --dport 22 -m conntrack --ctstate NEW -m recent --update --seconds 60 --hitcount 4 --name ssh_attempts -j DROP 2>/dev/null || true
     '';
   };
 

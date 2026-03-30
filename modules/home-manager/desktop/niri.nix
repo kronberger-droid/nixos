@@ -7,6 +7,23 @@
 }: let
   modifier = "Mod";
   terminal = config.terminal.bin;
+  cwd = "${config.xdg.configHome}/kitty/cwd.sh";
+
+  # Build a terminal spawn command, optionally with floating app-id and an exec command
+  termSpawn = {floating ? false, exec ? null, cwdArg ? false}: let
+    idPart =
+      if floating && config.terminal.floatingAppId != null
+      then "${config.terminal.appIdFlag} ${config.terminal.floatingAppId} "
+      else "";
+    cwdPart =
+      if cwdArg
+      then "${config.terminal.workingDirFlag} $(${cwd}) "
+      else "";
+    execPart =
+      if exec != null
+      then "${config.terminal.execFlag} ${exec} "
+      else "";
+  in ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${idPart}${cwdPart}${execPart}"];
 
   scratchpadToggle = "${config.xdg.configHome}/waybar/scratchpad-toggle.sh";
 in {
@@ -90,22 +107,13 @@ in {
     # Keybindings
     binds = {
       # Applications
-      "${modifier}+Return".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)"];
+      "${modifier}+Return".action.spawn = termSpawn {cwdArg = true;};
       "${modifier}+D".action.spawn = ["${pkgs.rofi}/bin/rofi" "-show" "drun"];
       "${modifier}+Shift+S".action.spawn = ["${pkgs.firefox}/bin/firefox"];
-      "${modifier}+Shift+Return".action.spawn =
-        if config.terminal.floatingAppId != null
-        then ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)"]
-        else ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)"];
-      "${modifier}+Shift+T".action.spawn =
-        if config.terminal.floatingAppId != null
-        then ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"]
-        else ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"];
-      "${modifier}+Shift+X".action.spawn =
-        if config.terminal.floatingAppId != null
-        then ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)"]
-        else ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)"];
-      "${modifier}+Shift+N".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${pkgs.nemo-with-extensions}/bin/nemo $(${config.xdg.configHome}/kitty/cwd.sh)"];
+      "${modifier}+Shift+Return".action.spawn = termSpawn {floating = true; cwdArg = true;};
+      "${modifier}+Shift+T".action.spawn = termSpawn {floating = true; exec = "${pkgs.btop}/bin/btop";};
+      "${modifier}+Shift+X".action.spawn = termSpawn {floating = true; exec = "${pkgs.yazi}/bin/yazi $(${cwd})";};
+      "${modifier}+Shift+N".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${pkgs.nemo-with-extensions}/bin/nemo $(${cwd})"];
 
       # Scratchpad
       "${modifier}+Minus".action.spawn = ["${scratchpadToggle}"];

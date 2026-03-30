@@ -11,6 +11,10 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    rio = {
+      url = "github:raphamorim/rio";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     dropkitten = {
       url = "github:kronberger-droid/dropkitten";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -186,7 +190,7 @@
       };
     };
 
-    defaultTemplate = self.templates.rust-simple;
+    templates.default = self.templates.rust-simple;
 
     # Recovery USB ISO image
     # Build with: nix build .#recovery
