@@ -15,12 +15,10 @@
 
   home.packages = with pkgs; [
     fastfetch
-    fzf
     translate-shell
     wiki-tui
     lynx
     timr-tui
     git-absorb
-    ouch
   ];
 }

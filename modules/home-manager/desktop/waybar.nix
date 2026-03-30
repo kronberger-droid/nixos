@@ -211,7 +211,7 @@ in {
         [ -z "$SELECTED" ] && exit 0
 
         # Extract VPN name (strip "[ON]  " or "[OFF] " prefix)
-        VPN_NAME=$(echo "$SELECTED" | ${pkgs.gnused}/bin/sed 's/^\[O[NF]*\] *//')
+        VPN_NAME=$(echo "$SELECTED" | ${pkgs.sd}/bin/sd '^\[O[NF]*\] *' '''')
 
         case "$VPN_NAME" in
             Tailscale)
@@ -359,7 +359,7 @@ in {
         #!${pkgs.bash}/bin/bash
 
         MODE=$(${pkgs.mako}/bin/makoctl mode)
-        if echo "$MODE" | ${pkgs.gnugrep}/bin/grep -q "do-not-disturb"; then
+        if echo "$MODE" | ${pkgs.ripgrep}/bin/rg -q "do-not-disturb"; then
             echo '{"text":"\uf1f6","alt":"on","tooltip":"Do Not Disturb: ON","class":"on"}'
         else
             echo '{"text":"\uf0f3","alt":"off","tooltip":"Do Not Disturb: OFF","class":"off"}'
@@ -373,7 +373,7 @@ in {
         #!${pkgs.bash}/bin/bash
 
         MODE=$(${pkgs.mako}/bin/makoctl mode)
-        if echo "$MODE" | ${pkgs.gnugrep}/bin/grep -q "do-not-disturb"; then
+        if echo "$MODE" | ${pkgs.ripgrep}/bin/rg -q "do-not-disturb"; then
             ${pkgs.mako}/bin/makoctl mode -r do-not-disturb
             ${pkgs.libnotify}/bin/notify-send "Do Not Disturb" "Notifications enabled" -i notification
         else
@@ -540,7 +540,7 @@ in {
 
         "custom/mpris" = {
           return-type = "json";
-          exec = "${pkgs.waybar-mpris}/bin/waybar-mpris --order 'SYMBOL:PLAYER' --separator '' --autofocus --pause '' --play '' | ${pkgs.gnused}/bin/sed -u 's/[Cc]hromium/Brave/g; s/chrome/Brave/g'";
+          exec = "${pkgs.waybar-mpris}/bin/waybar-mpris --order 'SYMBOL:PLAYER' --separator '' --autofocus --pause '' --play '' | ${pkgs.sd}/bin/sd '[Cc]hromium|chrome' 'Brave'";
           on-click = "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
           on-click-right = "${pkgs.waybar-mpris}/bin/waybar-mpris --send player-next";
           escape = true;

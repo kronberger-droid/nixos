@@ -49,7 +49,6 @@ in {
     swaybg
     libnotify
     jq
-    gron
     lsof
     libinput
     xdg-user-dirs
@@ -83,10 +82,7 @@ in {
 
   # ── Batsignal ───────────────────────────────────────────────────
   services.batsignal = {
-    enable =
-      if host == "spectre"
-      then true
-      else false;
+    enable = host == "spectre";
   };
 
   # ── Swayidle ────────────────────────────────────────────────────

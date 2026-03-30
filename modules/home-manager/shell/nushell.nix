@@ -6,18 +6,111 @@
   ...
 }: let
   hasTerminal = options ? terminal;
+
+  # Centralised personal directory paths — change here, updates everywhere
+  dirs = {
+    nixosConfig = "~/.config/nixos";
+    templates = "~/.config/nix-templates";
+    projects = "~/Programming";
+    emulation = "~/Emulation";
+  };
 in {
   home.packages = with pkgs; [
-    bat
-    zoxide
     lazygit
-    rip2
     navi
-    tealdeer
   ];
 
-  xdg.configFile."nushell/utilities.nu".source = ./nushell/utilities.nu;
   xdg.configFile."nushell/keybindings.nu".source = ./nushell/keybindings.nu;
+
+  # Generated so it can use centralised path variables
+  xdg.configFile."nushell/utilities.nu".text = ''
+    # Utility functions for various tasks
+
+    # Screen color picker utility for Wayland/Sway
+    def color-picker [] {
+        echo "In 1 sec you can pick a color!"
+        sleep 1sec
+
+        let geometry = (slurp -p)
+
+        let result = (grim -g $geometry -t ppm - | magick - -format '%[pixel:p{0,0}]' txt:-)
+
+        let tokens = (
+            $result
+            | split row "\n"
+            | compact --empty
+            | get 1
+            | split row " "
+            | compact --empty
+        )
+
+        echo [[type value]; [RGB ($tokens | get 1 | str replace -ra "[()]" "")] [HEX ($tokens | get 2)] ]
+    }
+
+    # SSH connection shortcuts
+    def connect [host: string] {
+        let connections = {
+            datalab: "martin.kronberger@cluster.datalab.tuwien.ac.at",
+            asc4: "sumo_mk@vsc4.vsc.ac.at",
+            asc5: "sumo_mk@vsc5.vsc.ac.at"
+        }
+
+        if ($host in $connections) {
+            let target = ($connections | get $host)
+            print $"Connecting to ($host) \(($target)\)..."
+            ^ssh $target
+        } else {
+            print $"Error: Unknown host '($host)'"
+            print "Available hosts:"
+            $connections | columns | each { |h| print $"  - ($h)" }
+        }
+    }
+
+    # QuickEMU VM management
+    def emu [config?: string] {
+        let emulation_dir = ("${dirs.emulation}" | path expand)
+        let windows_dir = ($emulation_dir | path join "windows-10")
+
+        # Check if windows-10 directory exists
+        if not ($windows_dir | path exists) {
+            print $"Error: QuickEMU windows-10 not initialized. Expected directory: ($windows_dir)"
+            print $"Run 'quickget windows 10' in ($emulation_dir) first."
+            return
+        }
+
+        # Check if disk image exists
+        let disk_path = ($windows_dir | path join "disk.qcow2")
+        if not ($disk_path | path exists) {
+            print $"Error: Windows 10 disk image not found at: ($disk_path)"
+            print $"Initialize the VM by running 'quickget windows 10' in ($emulation_dir)."
+            return
+        }
+
+        # Determine which config to use
+        let config_file = match $config {
+            "default" => "windows-10-default.conf"
+            "nanonis" => "windows-10-spm.conf"
+            null => "windows-10-default.conf"
+            _ => {
+                print $"Error: Unknown config '($config)'. Available options: default, nanonis"
+                return
+            }
+        }
+
+        let config_path = ($emulation_dir | path join $config_file)
+
+        # Check if config file exists
+        if not ($config_path | path exists) {
+            print $"Error: Config file not found: ($config_path)"
+            print "Make sure you've run 'sudo nixos-rebuild switch --flake .' to deploy the configs."
+            return
+        }
+
+        print $"Starting Windows 10 with ($config) config..."
+        cd $emulation_dir
+        quickemu --vm $config_file
+    }
+  '';
 
   # Generate development.nu with dynamic terminal configuration (requires terminal module)
   xdg.configFile."nushell/development.nu" = lib.mkIf hasTerminal {
@@ -146,11 +239,32 @@ in {
     }
 
     # NixOS flake management (uses nh for nice diffs and colored output)
+    # Also supports: flake init <template> to scaffold a new project from ~/.config/nix-templates
     def flake [
-        action: string = "switch"                          # switch, boot, test, build, dry, update, rollback
+        action: string = "switch"                          # switch, boot, test, build, dry, update, rollback, init
+        template?: string                                  # template name for init (e.g. rust-cli, rust-gui)
         --update (-u)                                      # update flake inputs first
-        --dir (-d): string = "~/.config/nixos"             # flake directory
+        --dir (-d): string = "${dirs.nixosConfig}"           # flake directory
     ] {
+        if $action == "init" {
+            let templates_dir = ("${dirs.templates}" | path expand)
+            if ($template == null) {
+                print "Available templates:"
+                ls $templates_dir | where type == dir | get name | each { |d| print $"  - ($d | path basename)" }
+                return
+            }
+            let template_path = ($templates_dir | path join $template)
+            if not ($template_path | path exists) {
+                print $"(ansi red)Template '($template)' not found.(ansi reset)"
+                print "Available templates:"
+                ls $templates_dir | where type == dir | get name | each { |d| print $"  - ($d | path basename)" }
+                return
+            }
+            nix flake init --template $"path:($templates_dir)#($template)"
+            print $"(ansi green)Initialized flake from template '($template)'.(ansi reset)"
+            return
+        }
+
         let flake_dir = ($dir | path expand)
 
         # Check for unstaged changes — flakes only see git-added files
@@ -223,7 +337,7 @@ in {
         if ($project == null) {
             compositorDevSetup
         } else {
-            let projects_dir = $env.HOME + "/Programming"
+            let projects_dir = ("${dirs.projects}" | path expand)
 
             # Search for project in language subdirectories
             let found_project = (
@@ -247,7 +361,8 @@ in {
             } else if ($found_project != null) {
                 $found_project | path expand
             } else {
-                $"($env.HOME)/($project)" | path expand
+                let base = ("${dirs.projects}" | path expand)
+                $"($base)/($project)" | path expand
             }
             cd $work_dir
             compositorDevSetup
@@ -268,7 +383,6 @@ in {
         cd = "z";
         cat = "bat";
         rip = "rip --graveyard ($env.HOME)/.local/share/Trash";
-        tldr = "tealdeer";
       }
       // lib.optionalAttrs (hasTerminal && config.terminal.hasKittens) {
         icat = "kitten icat";

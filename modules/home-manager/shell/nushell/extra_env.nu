@@ -4,6 +4,9 @@ $env.__zoxide_hooked = true
 
 $env.SSH_AUTH_SOCK = $"($env.XDG_RUNTIME_DIR)/gcr/ssh"
 
+# Use skim instead of fzf for navi
+$env.NAVI_FINDER = "skim"
+
 # Add ~/.local/bin to PATH
 $env.PATH = ($env.PATH | prepend ($env.HOME | path join ".local" "bin"))
 

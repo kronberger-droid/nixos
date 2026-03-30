@@ -13,9 +13,9 @@ with lib; let
       bin = "${pkgs.rio}/bin/rio";
       execFlag = "-e";
       workingDirFlag = "--working-dir";
-      appIdFlag = null;
+      appIdFlag = "--app-id";
       hasKittens = false;
-      floatingAppId = null;
+      floatingAppId = "floating_shell";
     };
 
     kitty = {

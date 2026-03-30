@@ -12,6 +12,11 @@
       home = {
         username = "devPi";
         homeDirectory = "/home/devPi";
+        packages = with pkgs; [
+          yazi
+          btop
+          fastfetch
+        ];
         stateVersion = "25.05";
       };
 

@@ -40,9 +40,8 @@
     eza
     bat
     bat-extras.core
-    less
     zoxide
-    tree
+    erdtree
     ripgrep
     rip2
     fd
