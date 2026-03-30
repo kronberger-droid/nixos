@@ -13,7 +13,7 @@
     hostName = "homeserver";
     networkmanager.enable = false;
     useDHCP = false;
-    interfaces.enp2s0.ipv4.addresses = [
+    interfaces.enp86s0.ipv4.addresses = [
       {
         address = "192.168.2.54";
         prefixLength = 24;
@@ -26,6 +26,7 @@
 
   # Users
   users.users.kronberger = {
+    createHome = true;
     isNormalUser = true;
     extraGroups = ["wheel"];
     shell = pkgs.nushell;
@@ -38,6 +39,7 @@
 
   users.users.wiesinger = {
     isNormalUser = true;
+    createHome = true;
     extraGroups = ["wheel" "docker"];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDkdsU9B7+sb5ISQy9RjykK0u04VdYTFYhnSHozpBqYl dietpi"
