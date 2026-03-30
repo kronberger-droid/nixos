@@ -1,4 +1,7 @@
 {pkgs, ...}: {
+  # Allow running dynamically linked executables (non-Nix binaries)
+  programs.nix-ld.enable = true;
+
   nixpkgs.overlays = [
     (_: prev: {
       # Use prebuilt electron to avoid broken chromium source build

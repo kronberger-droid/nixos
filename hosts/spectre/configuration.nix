@@ -84,11 +84,23 @@
     HibernateDelaySec = "90m";
   };
 
+  # Docker — for testing Nextcloud instances
+  virtualisation.docker = {
+    enable = true;
+    autoPrune = {
+      enable = true;
+      dates = "weekly";
+    };
+  };
+
+  users.users.kronberger.extraGroups = ["docker"];
+
   environment.systemPackages = with pkgs; [
     brightnessctl
     dmidecode
     droidcam
     android-tools
+    docker-compose
   ];
 
   system.stateVersion = "24.11";
