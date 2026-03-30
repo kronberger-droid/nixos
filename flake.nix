@@ -72,7 +72,7 @@
           [
             ./hosts/${hostname}/configuration.nix
             inputs.niri.nixosModules.niri
-            {nixpkgs.overlays = [inputs.niri.overlays.niri];}
+            {nixpkgs.overlays = [inputs.niri.overlays.niri inputs.rio.overlays.default];}
             home-manager.nixosModules.home-manager
             {
               home-manager.sharedModules = [
