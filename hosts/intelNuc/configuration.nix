@@ -21,6 +21,7 @@
     droidcam
     android-tools
     lm_sensors
+    docker-compose
   ];
 
   environment.sessionVariables = {
@@ -102,6 +103,17 @@
       intel-vaapi-driver
     ];
   };
+
+  # Docker — for testing Nextcloud instances
+  virtualisation.docker = {
+    enable = true;
+    autoPrune = {
+      enable = true;
+      dates = "weekly";
+    };
+  };
+
+  users.users.kronberger.extraGroups = ["docker"];
 
   system.stateVersion = "24.11";
 }
