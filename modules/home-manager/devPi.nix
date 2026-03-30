@@ -7,18 +7,11 @@
       imports = [
         ./shell/nushell.nix
         ./shell/git.nix
-        ./editors/helix.nix
       ];
 
       home = {
         username = "devPi";
         homeDirectory = "/home/devPi";
-        packages = with pkgs; [
-          yazi
-          btop
-          fastfetch
-          fzf
-        ];
         stateVersion = "25.05";
       };
 

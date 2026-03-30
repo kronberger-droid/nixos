@@ -136,9 +136,7 @@
           inherit inputs;
         };
         modules = [
-          home-manager.nixosModules.home-manager
           ./hosts/devPi/configuration.nix
-          ./modules/home-manager/devPi.nix
         ];
       };
     };

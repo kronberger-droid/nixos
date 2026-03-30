@@ -21,7 +21,7 @@
     ];
     defaultGateway = "192.168.2.1";
     nameservers = ["8.8.8.8" "1.1.1.1"];
-    firewall.allowedTCPPorts = [22];
+    firewall.allowedTCPPorts = [22 9443];
   };
 
   # Users
@@ -78,6 +78,10 @@
   services.fail2ban.enable = true;
   services.tailscale.enable = true;
   services.arrabbiata.enable = true;
+
+  # Power saving
+  powerManagement.powertop.enable = true;
+  services.thermald.enable = true;
 
   # Nix settings
   nix.settings = {
