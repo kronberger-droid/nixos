@@ -45,6 +45,10 @@
       url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    oo7-nixos = {
+      url = "git+file:///home/kronberger/Programming/nix/oo7-nixos";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
@@ -83,6 +87,15 @@
             agenix.nixosModules.default
             {
               environment.systemPackages = [agenix.packages.${system}.default];
+            }
+            inputs.oo7-nixos.nixosModules.default
+            {
+              _module.args.oo7-ssh-agent =
+                inputs.oo7-nixos.packages.${system}.oo7-ssh-agent;
+              services.oo7 = {
+                daemon.enable = true;
+                sshAgent.enable = true;
+              };
             }
           ]
           ++ extraModules;
