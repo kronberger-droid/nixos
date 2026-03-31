@@ -7,7 +7,12 @@
         size = 14;
         hinting = true;
         use-drawable-chars = true;
-        features = ["calt" "liga"]; # ligatures and contextual alternates
+        features = []; # no ligatures — match kitty behavior
+
+        # Monochrome icons instead of colored emoji
+        emoji = {
+          family = "Symbols Nerd Font Mono";
+        };
 
         regular = {
           family = "JetBrainsMono Nerd Font";

@@ -41,7 +41,7 @@ in {
       };
 
       # Set default terminal emulator
-      terminal.emulator = "rio";
+      terminal.emulator = "kitty";
 
       # Set primary compositor (both are always available via greetd)
       compositor.primary = primaryCompositor;
