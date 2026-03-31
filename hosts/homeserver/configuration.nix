@@ -22,7 +22,17 @@
     ];
     defaultGateway = "192.168.2.1";
     nameservers = ["8.8.8.8" "1.1.1.1"];
-    firewall.allowedTCPPorts = [22 9443];
+
+    firewall = {
+      enable = true;
+      allowPing = false;
+      allowedTCPPorts = [22 9443];
+
+      # Log dropped packets (limited to prevent log spam)
+      extraCommands = ''
+        iptables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7
+      '';
+    };
   };
 
   # Users
@@ -71,13 +81,57 @@
   services.openssh = {
     enable = true;
     settings = {
-      PermitRootLogin = "prohibit-password";
+      PermitRootLogin = "no";
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
+      PubkeyAuthentication = true;
+      X11Forwarding = false;
+
+      # Connection limits
+      MaxAuthTries = 3;
+      MaxSessions = 10;
+      MaxStartups = "10:30:60";
+
+      # Timeout settings
+      ClientAliveInterval = 300;
+      ClientAliveCountMax = 2;
+      LoginGraceTime = 30;
+
+      # Only allow specific users
+      AllowUsers = ["kronberger" "wiesinger"];
+    };
+
+    # Strong ciphers and key exchange
+    extraConfig = ''
+      Protocol 2
+      HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-256,rsa-sha2-512
+      PubkeyAcceptedKeyTypes ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-256,rsa-sha2-512
+      KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
+      Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+      MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com
+    '';
+  };
+
+  services.fail2ban = {
+    enable = true;
+    maxretry = 3;
+    bantime = "1h";
+    bantime-increment = {
+      enable = true;
+      maxtime = "168h"; # 1 week
+      factor = "4";
+    };
+    jails.ssh.settings = {
+      enabled = true;
+      port = "ssh";
+      filter = "sshd";
+      logpath = "/var/log/auth.log";
+      maxretry = 3;
+      findtime = "10m";
+      bantime = "1h";
     };
   };
 
-  services.fail2ban.enable = true;
   services.tailscale.enable = true;
   services.arrabbiata = {
     enable = true;
@@ -87,6 +141,55 @@
   # Power saving
   powerManagement.powertop.enable = true;
   services.thermald.enable = true;
+
+  # sudo-rs hardening
+  security.sudo-rs = {
+    enable = true;
+    extraConfig = ''
+      Defaults timestamp_timeout=5
+      Defaults passwd_timeout=1
+      Defaults use_pty
+    '';
+  };
+
+  # Kernel security hardening
+  boot.kernel.sysctl = {
+    # Network security
+    "net.ipv4.conf.all.send_redirects" = 0;
+    "net.ipv4.conf.default.send_redirects" = 0;
+    "net.ipv4.conf.all.accept_redirects" = 0;
+    "net.ipv4.conf.default.accept_redirects" = 0;
+    "net.ipv4.conf.all.secure_redirects" = 0;
+    "net.ipv4.conf.default.secure_redirects" = 0;
+    "net.ipv6.conf.all.accept_redirects" = 0;
+    "net.ipv6.conf.default.accept_redirects" = 0;
+    "net.ipv4.conf.all.accept_source_route" = 0;
+    "net.ipv4.conf.default.accept_source_route" = 0;
+    "net.ipv6.conf.all.accept_source_route" = 0;
+    "net.ipv6.conf.default.accept_source_route" = 0;
+
+    # IP spoofing protection
+    "net.ipv4.conf.all.rp_filter" = 1;
+    "net.ipv4.conf.default.rp_filter" = 1;
+
+    # Ignore broadcast ping
+    "net.ipv4.icmp_echo_ignore_broadcasts" = 1;
+
+    # TCP SYN flood protection
+    "net.ipv4.tcp_syncookies" = 1;
+    "net.ipv4.tcp_max_syn_backlog" = 2048;
+    "net.ipv4.tcp_synack_retries" = 2;
+    "net.ipv4.tcp_syn_retries" = 5;
+
+    # Kernel security
+    "kernel.dmesg_restrict" = 1;
+    "kernel.kptr_restrict" = 2;
+    "kernel.yama.ptrace_scope" = 1;
+    "kernel.kexec_load_disabled" = 1;
+
+    # Disable core dumps
+    "fs.suid_dumpable" = 0;
+  };
 
   # Nix settings
   nix.settings = {

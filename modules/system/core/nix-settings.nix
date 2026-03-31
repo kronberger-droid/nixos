@@ -1,19 +1,5 @@
 _: {
   nix = {
-    # Remote building via homeserver
-    distributedBuilds = true;
-    buildMachines = [
-      {
-        hostName = "homeserver";
-        system = "x86_64-linux";
-        sshUser = "kronberger";
-        sshKey = "/root/.ssh/nix-builder";
-        maxJobs = 12;
-        speedFactor = 2;
-        supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
-      }
-    ];
-
     settings = {
       experimental-features = ["nix-command" "flakes"];
       auto-optimise-store = true;

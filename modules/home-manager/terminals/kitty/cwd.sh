@@ -18,7 +18,7 @@ else
 fi
 
 # Apps where cwd is relevant (terminals, file managers, editors)
-relevant_apps="kitty|foot|alacritty|wezterm|ghostty|nemo|nautilus|thunar|yazi|ranger|helix|nvim|vim|emacs|code|zed"
+relevant_apps="kitty|rio|foot|alacritty|wezterm|ghostty|nemo|nautilus|thunar|yazi|ranger|helix|nvim|vim|emacs|code|zed"
 
 if [[ "$app_id" =~ ^($relevant_apps) ]]; then
     ppid=$(pgrep --newest --parent "$pid")
