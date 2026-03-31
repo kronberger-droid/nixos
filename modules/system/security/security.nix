@@ -185,7 +185,7 @@
 
     # sudo-rs hardening (sudo-rs is enabled in users.nix)
     sudo-rs.extraConfig = ''
-      Defaults timestamp_timeout=0
+      Defaults timestamp_timeout=5
       Defaults passwd_timeout=1
       Defaults use_pty
     '';
