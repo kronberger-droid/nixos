@@ -138,6 +138,19 @@
     package = arrabbiata;
   };
 
+  # TODO: Miniflux RSS reader — create /etc/miniflux-admin-credentials first
+  # services.miniflux = {
+  #   enable = true;
+  #   config = {
+  #     LISTEN_ADDR = "0.0.0.0:8070";
+  #     BASE_URL = "http://100.92.46.97:8070";
+  #     POLLING_FREQUENCY = "15";
+  #     CLEANUP_ARCHIVE_UNREAD_DAYS = "-1";
+  #     CLEANUP_ARCHIVE_READ_DAYS = "60";
+  #   };
+  #   adminCredentialsFile = "/etc/miniflux-admin-credentials";
+  # };
+
   # Power saving
   powerManagement.powertop.enable = true;
   services.thermald.enable = true;
