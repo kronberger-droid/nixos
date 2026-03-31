@@ -11,7 +11,7 @@
       addresses = ["tcp://192.168.2.54:22000" "tcp://100.92.46.97:22000" "dynamic"];
     };
     spectre = {
-      id = "REPLACE-ME";
+      id = "4RZB52C-SF37CKE-IUGTFM4-HZYF76P-55RKI4G-NYAE5SZ-GVRW2DP-SGSWJAK";
       addresses = ["tcp://100.83.89.128:22000" "dynamic"];
     };
     intelNuc = {
