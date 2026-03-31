@@ -1,7 +1,7 @@
-{host, ...}: {
+{host, lib, ...}: {
   networking = {
     networkmanager = {
-      enable = true;
+      enable = lib.mkDefault true;
       settings = {
         main = {
           dns = "systemd-resolved";
