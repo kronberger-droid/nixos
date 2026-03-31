@@ -141,6 +141,8 @@
         };
         modules = [
           ./hosts/devPi/configuration.nix
+          home-manager.nixosModules.home-manager
+          ./modules/home-manager/devPi.nix
         ];
       };
     };

@@ -2,9 +2,6 @@
   networking = {
     networkmanager = {
       enable = true;
-      # Faster DNS resolution
-      insertNameservers = ["1.1.1.1" "1.0.0.1" "8.8.8.8"];
-      # Better connection management
       settings = {
         main = {
           dns = "systemd-resolved";
@@ -26,15 +23,15 @@
       block = ["porn"];
     };
 
-    # Enable systemd-resolved for better DNS performance
-    nameservers = ["1.1.1.1" "1.0.0.1"];
-    # IPv6 privacy extensions
     enableIPv6 = true;
   };
 
   services.resolved = {
     enable = true;
-    settings.Resolve.MulticastDNS = "no";
+    settings.Resolve = {
+      MulticastDNS = "no";
+      FallbackDNS = "1.1.1.1 1.0.0.1 8.8.8.8";
+    };
   };
   services.tailscale.enable = true;
 }
