@@ -20,14 +20,23 @@
     };
   };
 
+  # Mobile devices — not NixOS-managed, only added as peers
+  mobileDevices = {
+    nothing-phone = {
+      id = "EIB56A6-BLR43CP-N6243GG-NNI6S3B-OFVE2NO-BA3QYZW-YPG5CUD-CEJTXA7";
+      addresses = ["dynamic"];
+    };
+  };
+
   # Only enable on hosts that are in the devices list
   enabled = builtins.hasAttr host devices;
 
-  # Which devices each host syncs with
+  # Which NixOS devices each host syncs with
   otherDevices =
     lib.filterAttrs (name: _: name != host) devices;
 
-  isServer = host == "homeserver";
+  # All peers including mobile
+  allPeerDevices = otherDevices // mobileDevices;
 in
   lib.mkIf enabled {
     services.syncthing = {
@@ -45,13 +54,26 @@ in
       overrideFolders = false;
 
       settings = {
-        devices = otherDevices;
+        devices = allPeerDevices;
 
         folders = {
-          # Documents — synced everywhere
+          # Documents — synced across all NixOS machines
           "documents" = {
             path = "/home/kronberger/Documents";
             devices = builtins.attrNames otherDevices;
+            versioning = {
+              type = "staggered";
+              params = {
+                cleanInterval = "3600";
+                maxAge = "2592000"; # 30 days
+              };
+            };
+          };
+
+          # Obsidian vault — synced to phone too
+          "general-vault" = {
+            path = "/home/kronberger/Documents/notes/general-vault";
+            devices = builtins.attrNames otherDevices ++ builtins.attrNames mobileDevices;
             versioning = {
               type = "staggered";
               params = {
@@ -64,7 +86,7 @@ in
 
         options = {
           urAccepted = -1; # Disable usage reporting
-          relaysEnabled = !isServer;
+          relaysEnabled = true;
           localAnnounceEnabled = true;
           globalAnnounceEnabled = true;
         };
