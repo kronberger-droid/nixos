@@ -115,7 +115,7 @@
     };
   };
 
-  users.users.kronberger.extraGroups = ["docker"];
+  users.users.kronberger.extraGroups = ["docker" "gamemode"];
 
   system.stateVersion = "24.11";
 }

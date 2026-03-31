@@ -103,7 +103,6 @@
 
     # Strong ciphers and key exchange
     extraConfig = ''
-      Protocol 2
       HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-256,rsa-sha2-512
       PubkeyAcceptedKeyTypes ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-256,rsa-sha2-512
       KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
@@ -125,7 +124,7 @@
       enabled = true;
       port = "ssh";
       filter = "sshd";
-      logpath = "/var/log/auth.log";
+      backend = "systemd";
       maxretry = 3;
       findtime = "10m";
       bantime = "1h";

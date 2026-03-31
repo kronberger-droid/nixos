@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   isNotebook ? false,
   ...
 }: {
@@ -103,10 +104,6 @@
     enableNotifications = true;
   };
 
-  # Improved file system mount options
-  fileSystems = {
-    "/" = {
-      options = ["noatime"];
-    };
-  };
+  # Improved file system mount options (mkDefault so hardware-configuration.nix can override)
+  fileSystems."/".options = lib.mkDefault ["noatime"];
 }
