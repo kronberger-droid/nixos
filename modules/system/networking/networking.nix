@@ -1,4 +1,8 @@
-{host, lib, ...}: {
+{
+  host,
+  lib,
+  ...
+}: {
   networking = {
     networkmanager = {
       enable = lib.mkDefault true;
@@ -18,10 +22,10 @@
     };
     hostName = host;
 
-    stevenblack = {
-      enable = true;
-      block = ["porn"];
-    };
+    # stevenblack = {
+    #   enable = true;
+    #   block = ["porn"];
+    # };
 
     enableIPv6 = true;
   };
