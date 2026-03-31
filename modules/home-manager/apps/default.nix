@@ -12,5 +12,6 @@
     ./taskwarrior.nix
     ./music.nix
     ./ai.nix
+    ./qutebrowser.nix
   ];
 }
