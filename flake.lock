@@ -437,11 +437,11 @@
         "oo7-ssh-agent": "oo7-ssh-agent"
       },
       "locked": {
-        "lastModified": 1774971609,
-        "narHash": "sha256-ycuzgsSiP94K90wln+N2L4A168WMLE8z7i9XpQQMfvQ=",
+        "lastModified": 1774974637,
+        "narHash": "sha256-RcrYzkko3ed1IzhaRQ7vbJ94LLwPAoCoaAXlxDWFWU0=",
         "ref": "refs/heads/main",
-        "rev": "29566af6c48fdaf286ca55e01d341168cc364b5e",
-        "revCount": 2,
+        "rev": "053e5e2f86beb0657bd386524335dbbc8302cb3a",
+        "revCount": 5,
         "type": "git",
         "url": "file:///home/kronberger/Programming/nix/oo7-nixos"
       },
