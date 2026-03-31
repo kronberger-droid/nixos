@@ -103,14 +103,6 @@
           notifempty = true;
           postrotate = "systemctl kill -s USR1 auditd.service || true";
         };
-        "/var/log/sudo.log" = {
-          frequency = "weekly";
-          rotate = 4;
-          compress = true;
-          delaycompress = true;
-          missingok = true;
-          notifempty = true;
-        };
       };
     };
   };

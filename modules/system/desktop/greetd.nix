@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   primaryCompositor,
   ...
 }: let
@@ -20,11 +21,13 @@
   '';
 
   # Desktop entry so tuigreet shows a clean name instead of the Nix store path.
+  compositorName = lib.toUpper (lib.substring 0 1 primaryCompositor) + lib.substring 1 (-1) primaryCompositor;
+
   quietSessions = pkgs.runCommand "quiet-wayland-sessions" {} ''
     mkdir -p $out/share/wayland-sessions
-    cat > $out/share/wayland-sessions/niri.desktop <<EOF
+    cat > $out/share/wayland-sessions/${primaryCompositor}.desktop <<EOF
     [Desktop Entry]
-    Name=Niri
+    Name=${compositorName}
     Exec=${sessionWrapper}
     Type=Application
     EOF
