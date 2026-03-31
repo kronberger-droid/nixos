@@ -44,9 +44,6 @@
     inlyne
 
     # Security
-    bitwarden-desktop
-    rofi-rbw-wayland
-    rbw
     openssl
 
     # Networking

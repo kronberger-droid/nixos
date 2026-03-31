@@ -61,7 +61,6 @@
     popsicle
 
     # Secrets
-    libsecret
     cryptsetup
 
     # Nix tooling

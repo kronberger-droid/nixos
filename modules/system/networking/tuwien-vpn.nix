@@ -3,43 +3,41 @@
   lib,
   pkgs,
   ...
-}:
-with lib; let
+}: let
   cfg = config.services.tuwien-vpn;
 in {
   options.services.tuwien-vpn = {
-    enable = mkEnableOption "TU Wien OpenConnect VPN";
+    enable = lib.mkEnableOption "TU Wien OpenConnect VPN";
 
-    username = mkOption {
-      type = types.str;
-      default = "e12202316@student.tuwien.ac.at";
+    username = lib.mkOption {
+      type = lib.types.str;
       description = "TU Wien VPN username";
     };
 
-    authGroup = mkOption {
-      type = types.str;
+    authGroup = lib.mkOption {
+      type = lib.types.str;
       default = "1_TU_getunnelt";
       description = "TU Wien VPN auth group";
     };
 
-    server = mkOption {
-      type = types.str;
+    server = lib.mkOption {
+      type = lib.types.str;
       default = "vpn.tuwien.ac.at";
       description = "TU Wien VPN server";
     };
 
-    passwordFile = mkOption {
-      type = types.path;
+    passwordFile = lib.mkOption {
+      type = lib.types.path;
       description = "Path to file containing VPN password";
     };
 
-    totpSecretFile = mkOption {
-      type = types.path;
+    totpSecretFile = lib.mkOption {
+      type = lib.types.path;
       description = "Path to file containing the TOTP secret (base32 encoded)";
     };
   };
 
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     # Install OpenConnect
     environment.systemPackages = with pkgs; [
       openconnect
@@ -73,10 +71,7 @@ in {
 
         # Security hardening
         PrivateTmp = true;
-        NoNewPrivileges = false;
-        ProtectSystem = "strict";
         ProtectHome = true;
-        ReadWritePaths = ["/etc/resolv.conf"];
 
         # Network capabilities
         AmbientCapabilities = ["CAP_NET_ADMIN"];

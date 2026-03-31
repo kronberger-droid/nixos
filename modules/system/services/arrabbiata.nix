@@ -1,13 +1,17 @@
 {
   config,
   lib,
-  arrabbiata,
   ...
 }: let
   cfg = config.services.arrabbiata;
 in {
   options.services.arrabbiata = {
     enable = lib.mkEnableOption "arrabbiata pomodoro timer service";
+
+    package = lib.mkOption {
+      type = lib.types.package;
+      description = "The arrabbiata package to use";
+    };
 
     port = lib.mkOption {
       type = lib.types.port;
@@ -23,7 +27,7 @@ in {
       after = ["network.target"];
 
       serviceConfig = {
-        ExecStart = "${arrabbiata}/bin/arrabbiata";
+        ExecStart = "${cfg.package}/bin/arrabbiata";
         Restart = "on-failure";
         RestartSec = 5;
         DynamicUser = true;

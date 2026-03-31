@@ -11,22 +11,7 @@
     systemdTarget = "graphical-session.target";
 
     settings =
-      if host == "intelNuc"
-      then [
-        {
-          profile.name = "desktop";
-          profile.outputs = [
-            {
-              criteria = "HDMI-A-1";
-              mode = "2560x1440@119.998Hz";
-              position = "0,0";
-              scale = 1.0;
-              adaptiveSync = true;
-            }
-          ];
-        }
-      ]
-      else if host == "t480s"
+      if host == "t480s"
       then [
         # Laptop only profile
         {

@@ -71,12 +71,21 @@
 
   # System optimization services
   systemd = {
-    services = {
-      # Clear logs older than 7 days
-      systemd-journal-flush.serviceConfig.ExecStart = [
-        ""
-        "${pkgs.systemd}/bin/journalctl --vacuum-time=7d"
-      ];
+    services.journal-vacuum = {
+      description = "Vacuum old journal entries";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.systemd}/bin/journalctl --vacuum-time=7d";
+      };
+    };
+
+    timers.journal-vacuum = {
+      description = "Weekly journal vacuum";
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnCalendar = "weekly";
+        Persistent = true;
+      };
     };
 
     # Faster shutdown

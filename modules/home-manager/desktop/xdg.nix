@@ -18,6 +18,5 @@ _: {
         "image/tiff" = "swayimg.desktop";
       };
     };
-    desktopEntries = {};
   };
 }

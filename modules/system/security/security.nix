@@ -164,12 +164,6 @@
 
   # Additional security measures
   security = {
-    # Prevent users from mounting filesystems
-    wrappers = {
-      # Ensure sudo wrapper has correct permissions
-      sudo.setuid = true;
-    };
-
     # Audit system
     auditd.enable = true;
     audit = {
@@ -188,18 +182,11 @@
         "-w /var/log/btmp -p wa -k logins"
       ];
     };
-  };
 
-  # Enhanced sudo security
-  security.sudo = {
-    extraConfig = ''
-      # Require password for every sudo command
+    # sudo-rs hardening (sudo-rs is enabled in users.nix)
+    sudo-rs.extraConfig = ''
       Defaults timestamp_timeout=0
       Defaults passwd_timeout=1
-      Defaults logfile="/var/log/sudo.log"
-      Defaults log_input,log_output
-      Defaults iolog_dir="/var/log/sudo-io"
-      Defaults requiretty
       Defaults use_pty
     '';
   };
