@@ -2,6 +2,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/system/services/arrabbiata.nix
+    ../../modules/system/services/syncthing.nix
   ];
 
   # Bootloader
