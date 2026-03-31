@@ -107,12 +107,6 @@
     languages = {
       language = [
         {
-          name = "latex";
-          language-servers = [
-            "texlab"
-          ];
-        }
-        {
           name = "csv";
           formatter = {
             command = "${pkgs.prettier}/bin/prettier";
@@ -193,46 +187,6 @@
         rumdl = {
           command = "${pkgs.rumdl}/bin/rumdl";
           args = ["server" "--stdio"];
-        };
-
-        texlab = {
-          command = "${pkgs.texlab}/bin/texlab";
-          file-types = ["latex"];
-          config = {
-            texlab = {
-              latexindent = {
-                modifyLineBreaks = true;
-              };
-              rootDirectory = ".";
-              completion.matcher = "prefix";
-              build = {
-                onSave = true;
-                forwardSearchAfter = true;
-                executable = "${pkgs.tectonic}/bin/tectonic";
-                args = [
-                  "-X"
-                  "compile"
-                  "main.tex"
-                  "--synctex"
-                  "--keep-logs"
-                  "--outdir=."
-                ];
-              };
-              forwardSearch = {
-                executable = "${pkgs.zathura}/bin/zathura";
-                args = [
-                  "--synctex-forward"
-                  "--log-level=error"
-                  "%l:1:%f"
-                  "main.pdf"
-                ];
-              };
-              chktex = {
-                onOpenAndSave = true;
-                onEdit = true;
-              };
-            };
-          };
         };
 
         pyright = {
