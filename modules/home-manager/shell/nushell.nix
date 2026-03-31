@@ -10,7 +10,7 @@
   # Centralised personal directory paths — change here, updates everywhere
   dirs = {
     nixosConfig = "~/.config/nixos";
-    templates = "~/.config/nix-templates";
+    templates = "~/.config/nixos/templates";
     projects = "~/Programming";
     emulation = "~/Emulation";
   };

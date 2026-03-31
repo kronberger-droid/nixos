@@ -173,10 +173,22 @@
     });
 
     # Project templates
+    # Use: nix flake init --template .#<name>
+    # Or:  flake init <name>  (nushell alias)
     templates = {
       rust-simple = {
         path = ./templates/rust-simple;
-        description = "Simple Rust dev shell with rustup";
+        description = "Minimal Rust dev shell with rustup";
+      };
+
+      rust-cli = {
+        path = ./templates/rust-cli;
+        description = "Rust CLI project with rust-overlay and dev tools";
+      };
+
+      rust-gui = {
+        path = ./templates/rust-gui;
+        description = "Rust GUI project with Wayland/X11/OpenGL deps";
       };
 
       rust-package = {
@@ -188,9 +200,19 @@
         path = ./templates/c-cpp;
         description = "C/C++ dev shell with gcc, clangd, and analysis tools";
       };
+
+      python = {
+        path = ./templates/python;
+        description = "Python dev shell with venv and Jupyter support";
+      };
+
+      typst = {
+        path = ./templates/typst;
+        description = "Typst document dev shell";
+      };
     };
 
-    templates.default = self.templates.rust-simple;
+    templates.default = self.templates.rust-cli;
 
     # Recovery USB ISO image
     # Build with: nix build .#recovery
