@@ -14,9 +14,9 @@
     .${primaryCompositor};
 
   # Wrapper that redirects stderr so TTY stays clean on login.
-  # Warnings/errors still readable at /tmp/niri-session.log.
+  # Warnings/errors still readable at /tmp/${sessionBin}.log.
   sessionWrapper = pkgs.writeShellScript "${sessionBin}-quiet" ''
-    exec ${sessionBin} 2>/tmp/niri-session.log
+    exec ${sessionBin} 2>/tmp/${sessionBin}.log
   '';
 
   # Desktop entry so tuigreet shows a clean name instead of the Nix store path.

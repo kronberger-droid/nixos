@@ -1,4 +1,4 @@
-{pkgs, ...}: {
+{pkgs, arrabbiata, ...}: {
   imports = [
     ./hardware-configuration.nix
     ../../modules/system/services/arrabbiata.nix
@@ -78,7 +78,10 @@
 
   services.fail2ban.enable = true;
   services.tailscale.enable = true;
-  services.arrabbiata.enable = true;
+  services.arrabbiata = {
+    enable = true;
+    package = arrabbiata;
+  };
 
   # Power saving
   powerManagement.powertop.enable = true;

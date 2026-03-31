@@ -6,11 +6,6 @@
   ...
 }: let
   cfg = config.services.pia;
-
-  piaCert = pkgs.fetchurl {
-    url = "https://raw.githubusercontent.com/pia-foss/manual-connections/master/ca.rsa.4096.crt";
-    sha256 = "sha256-Mumx0UM+qXYU8qFMbjWOP1fAVwzJ9rLugSaZumlsZqs=";
-  };
 in {
   imports = [
     inputs.nix-pia-vpn.nixosModules.default
@@ -26,7 +21,12 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    services.pia-vpn = {
+    services.pia-vpn = let
+      piaCert = pkgs.fetchurl {
+        url = "https://raw.githubusercontent.com/pia-foss/manual-connections/master/ca.rsa.4096.crt";
+        sha256 = "sha256-Mumx0UM+qXYU8qFMbjWOP1fAVwzJ9rLugSaZumlsZqs=";
+      };
+    in {
       enable = true;
       certificateFile = piaCert;
       inherit (cfg) environmentFile;

@@ -2,26 +2,25 @@
   config,
   lib,
   ...
-}:
-with lib; let
+}: let
   cfg = config.compositor;
 in {
   options.compositor = {
-    primary = mkOption {
-      type = types.enum ["sway" "niri"];
+    primary = lib.mkOption {
+      type = lib.types.enum ["sway" "niri"];
       default = "niri";
       description = "Primary compositor. Drives greetd default session.";
     };
 
-    primaryCommand = mkOption {
-      type = types.str;
+    primaryCommand = lib.mkOption {
+      type = lib.types.str;
       readOnly = true;
       description = "Command to launch the primary compositor (used by greetd).";
     };
   };
 
   config = {
-    compositor.primaryCommand = mkDefault cfg.primary;
+    compositor.primaryCommand = lib.mkDefault cfg.primary;
 
     home.sessionVariables = {
       XDG_CURRENT_DESKTOP = cfg.primary;
