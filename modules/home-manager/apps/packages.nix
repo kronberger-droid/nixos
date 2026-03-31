@@ -41,7 +41,6 @@
     ghostscript
     pdfarranger
     pdfpc
-    inlyne
 
     # Security
     openssl
