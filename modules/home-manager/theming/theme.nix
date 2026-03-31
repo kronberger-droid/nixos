@@ -10,6 +10,7 @@
 
   gtk = {
     enable = true;
+    gtk4.theme = null;
     theme = {
       name = "Fluent-round-Dark-compact";
       package = pkgs.fluent-gtk-theme.override {

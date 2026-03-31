@@ -387,7 +387,7 @@ in {
     enable = true;
     systemd = {
       enable = true;
-      target = "graphical-session.target";
+      targets = ["graphical-session.target"];
     };
     style = let
       # Define base16 color variables with opacity variants
