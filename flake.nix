@@ -92,10 +92,16 @@
             {
               _module.args.oo7-ssh-agent =
                 inputs.oo7-nixos.packages.${system}.oo7-ssh-agent;
+              _module.args.oo7-pam =
+                inputs.oo7-nixos.packages.${system}.oo7-pam;
               services.oo7 = {
                 daemon.enable = true;
                 sshAgent.enable = true;
+                pam.enable = true;
               };
+            }
+            {
+              services.gnome.gnome-keyring.enable = nixpkgs.lib.mkForce false;
             }
           ]
           ++ extraModules;
