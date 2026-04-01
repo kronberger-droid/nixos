@@ -58,6 +58,7 @@ in {
         "gfx.webrender.all" = true;
         "media.ffmpeg.vaapi.enabled" = true;
         "media.hardware-video-decoding.force-enabled" = true;
+        "media.webrtc.camera.allow-pipewire" = true;
         "layers.acceleration.force-enabled" = true;
 
         # Wayland support

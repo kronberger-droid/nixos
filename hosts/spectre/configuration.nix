@@ -8,6 +8,7 @@
     ./hardware-configuration.nix
     ../common.nix
     ../../modules/system/hardware/firmware/vbt.nix
+    ../../modules/system/hardware/ipu6-camera.nix
     ../../modules/system/scx-schedulers.nix
     ../../modules/profiles/vpn-workstation.nix
   ];
