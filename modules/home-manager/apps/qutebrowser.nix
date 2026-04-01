@@ -224,22 +224,26 @@ in {
       # Scrolling
       scrolling.smooth = true;
 
-      # Search engines
+      # URL settings
       url = {
         default_page = "about:blank";
         start_pages = ["about:blank"];
-        searchengines = {
-          DEFAULT = "https://search.brave.com/search?q={}";
-          g = "https://www.google.com/search?q={}";
-          nw = "https://nixos.wiki/index.php?search={}";
-          np = "https://search.nixos.org/packages?query={}";
-          no = "https://search.nixos.org/options?query={}";
-          gh = "https://github.com/search?q={}";
-          yt = "https://www.youtube.com/results?search_query={}";
-          w = "https://en.wikipedia.org/w/index.php?search={}";
-        };
       };
     };
+
+    # Search engines (must be set as a whole dict, not individual keys)
+    extraConfig = ''
+      c.url.searchengines = {
+          "DEFAULT": "https://search.brave.com/search?q={}",
+          "b": "https://search.brave.com/search?q={}",
+          "nw": "https://nixos.wiki/index.php?search={}",
+          "np": "https://search.nixos.org/packages?query={}",
+          "no": "https://search.nixos.org/options?query={}",
+          "gh": "https://github.com/search?q={}",
+          "yt": "https://www.youtube.com/results?search_query={}",
+          "w": "https://en.wikipedia.org/w/index.php?search={}",
+      }
+    '';
 
     keyBindings = {
       normal = {

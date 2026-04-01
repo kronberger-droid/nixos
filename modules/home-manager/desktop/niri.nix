@@ -123,6 +123,7 @@ in {
       "${modifier}+Shift+E".action.spawn = ["${config.xdg.configHome}/rofi/powermenu/powermenu.sh"];
       "${modifier}+Shift+P".action.spawn = ["${pkgs.bitwarden-desktop}/bin/bitwarden"];
       "${modifier}+Shift+W".action.spawn = ["${pkgs.rofi-rbw-wayland}/bin/rofi-rbw"];
+      "${modifier}+Shift+B".action.spawn = ["qutebrowser"];
 
       # Notifications
       "${modifier}+Shift+D".action.spawn = ["${pkgs.mako}/bin/makoctl" "dismiss" "-a"];
