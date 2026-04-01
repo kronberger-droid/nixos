@@ -437,17 +437,17 @@
         "oo7-ssh-agent": "oo7-ssh-agent"
       },
       "locked": {
-        "lastModified": 1774974637,
-        "narHash": "sha256-RcrYzkko3ed1IzhaRQ7vbJ94LLwPAoCoaAXlxDWFWU0=",
-        "ref": "refs/heads/main",
-        "rev": "053e5e2f86beb0657bd386524335dbbc8302cb3a",
-        "revCount": 5,
-        "type": "git",
-        "url": "file:///home/kronberger/Programming/nix/oo7-nixos"
+        "lastModified": 1775050652,
+        "narHash": "sha256-QuryNSYaFCP+8gXKniLdPkWhKPtc40qeGCj+9tGGPPc=",
+        "owner": "kronberger-droid",
+        "repo": "oo7-nixos",
+        "rev": "bf31f310ca09d2ea9082f6c25cf65eba0b1b64f0",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/kronberger/Programming/nix/oo7-nixos"
+        "owner": "kronberger-droid",
+        "repo": "oo7-nixos",
+        "type": "github"
       }
     },
     "oo7-ssh-agent": {
@@ -460,17 +460,17 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1774971393,
-        "narHash": "sha256-f5o/gVXYwBvMNSemsXqNavvc1t2QBO729neUO3mCoGk=",
-        "ref": "refs/heads/main",
-        "rev": "c687d41a5a32bd105fd02eb436c54f925254df71",
-        "revCount": 4,
-        "type": "git",
-        "url": "file:///home/kronberger/Programming/rust/oo7-ssh-agent"
+        "lastModified": 1775046597,
+        "narHash": "sha256-Bd9s0Pgcn+B1Au0DQpFD8q67n6r/AgbiCYHegi1CUIA=",
+        "owner": "kronberger-droid",
+        "repo": "oo7-ssh-agent",
+        "rev": "46b6f173b39f96f2bb6b79befae089f248f689ad",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/kronberger/Programming/rust/oo7-ssh-agent"
+        "owner": "kronberger-droid",
+        "repo": "oo7-ssh-agent",
+        "type": "github"
       }
     },
     "rio": {
