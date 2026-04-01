@@ -30,6 +30,8 @@
     version: 1
     algorithms:
       - BlackLevel:
+          # HI556 is a 10-bit sensor; 64 at 10-bit = 4096 in 16-bit space
+          blackLevel: 4096
       - Awb:
       - Adjust:
       - Agc:
