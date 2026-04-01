@@ -46,7 +46,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     oo7-nixos = {
-      url = "git+file:///home/kronberger/Programming/nix/oo7-nixos";
+      url = "github:kronberger-droid/oo7-nixos";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -97,11 +97,16 @@
               services.oo7 = {
                 daemon.enable = true;
                 sshAgent.enable = true;
-                pam.enable = true;
+                pam = {
+                  enable = true;
+                  services = ["login" "greetd" "swaylock" "passwd"];
+                };
+                portal.enable = true;
               };
             }
             {
               services.gnome.gnome-keyring.enable = nixpkgs.lib.mkForce false;
+              services.gnome.gcr-ssh-agent.enable = nixpkgs.lib.mkForce false;
             }
           ]
           ++ extraModules;

@@ -2,7 +2,8 @@ zoxide init nushell | save -f ~/.zoxide.nu
 
 $env.__zoxide_hooked = true
 
-$env.SSH_AUTH_SOCK = $"($env.XDG_RUNTIME_DIR)/gcr/ssh"
+# SSH agent socket (oo7-ssh-agent via systemd socket activation)
+$env.SSH_AUTH_SOCK = $"($env.XDG_RUNTIME_DIR)/oo7-ssh-agent.sock"
 
 # Use skim instead of fzf for navi
 $env.NAVI_FINDER = "skim"

@@ -11,7 +11,7 @@
 
       brave = prev.brave.override {
         commandLineArgs = [
-          "--password-store=gnome-keyring"
+          "--password-store=basic"
         ];
       };
 
