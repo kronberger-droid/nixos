@@ -89,25 +89,6 @@
               environment.systemPackages = [agenix.packages.${system}.default];
             }
             inputs.oo7-nixos.nixosModules.default
-            {
-              _module.args.oo7-ssh-agent =
-                inputs.oo7-nixos.packages.${system}.oo7-ssh-agent;
-              _module.args.oo7-pam =
-                inputs.oo7-nixos.packages.${system}.oo7-pam;
-              services.oo7 = {
-                daemon.enable = true;
-                sshAgent.enable = true;
-                pam = {
-                  enable = true;
-                  services = ["login" "greetd" "swaylock" "passwd"];
-                };
-                portal.enable = true;
-              };
-            }
-            {
-              services.gnome.gnome-keyring.enable = nixpkgs.lib.mkForce false;
-              services.gnome.gcr-ssh-agent.enable = nixpkgs.lib.mkForce false;
-            }
           ]
           ++ extraModules;
       };
