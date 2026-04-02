@@ -77,17 +77,28 @@ in {
       executable = true;
       text = ''
         #!${pkgs.bash}/bin/bash
-        if ${pkgs.procps}/bin/pidof wl-screenrec >/dev/null 2>&1; then
+        if ${pkgs.procps}/bin/pgrep -x wl-screenrec >/dev/null 2>&1; then
           ${pkgs.procps}/bin/pkill wl-screenrec
           ${pkgs.libnotify}/bin/notify-send "Screen Recording" "Recording stopped"
         else
-          GEOMETRY=$(${pkgs.slurp}/bin/slurp 2>/dev/null)
-          if [ -z "$GEOMETRY" ]; then
-            exit 0
-          fi
+          # Choose: area selection or full output
+          MODE=$(printf "area\noutput" | ${pkgs.rofi}/bin/rofi -dmenu -p "Record" -theme-str 'listview {lines: 2;}')
+          case "$MODE" in
+            area)
+              GEOMETRY=$(${pkgs.slurp}/bin/slurp 2>/dev/null)
+              [ -z "$GEOMETRY" ] && exit 0
+              SELECTION="-g $GEOMETRY"
+              ;;
+            output)
+              OUTPUT=$(niri msg outputs 2>/dev/null | ${pkgs.gnugrep}/bin/grep -oP '\(\K[^)]+' | ${pkgs.rofi}/bin/rofi -dmenu -p "Output" -theme-str 'listview {lines: 3;}')
+              [ -z "$OUTPUT" ] && exit 0
+              SELECTION="-o $OUTPUT"
+              ;;
+            *) exit 0 ;;
+          esac
           ${pkgs.coreutils}/bin/mkdir -p "$HOME/Videos"
           FILENAME="$HOME/Videos/recording-$(${pkgs.coreutils}/bin/date +%Y-%m-%d-%H-%M-%S).mp4"
-          ${pkgs.wl-screenrec}/bin/wl-screenrec -g "$GEOMETRY" -f "$FILENAME" &
+          ${pkgs.wl-screenrec}/bin/wl-screenrec $SELECTION -f "$FILENAME" &
           disown
           ${pkgs.libnotify}/bin/notify-send "Screen Recording" "Recording started: $(${pkgs.coreutils}/bin/basename "$FILENAME")"
         fi
@@ -99,7 +110,7 @@ in {
       executable = true;
       text = ''
         #!${pkgs.bash}/bin/bash
-        if ${pkgs.procps}/bin/pidof wl-screenrec >/dev/null 2>&1; then
+        if ${pkgs.procps}/bin/pgrep -x wl-screenrec >/dev/null 2>&1; then
           echo '{"text":"REC","class":"recording"}'
         else
           echo ""
