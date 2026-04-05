@@ -40,6 +40,7 @@
     };
     niri = {
       url = "github:kronberger-droid/niri-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     firefox-addons = {
       url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
@@ -47,6 +48,10 @@
     };
     oo7-nixos = {
       url = "github:kronberger-droid/oo7-nixos";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    lix-module = {
+      url = "git+https://git.lix.systems/lix-project/nixos-module?ref=release-2.93";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -89,6 +94,7 @@
               environment.systemPackages = [agenix.packages.${system}.default];
             }
             inputs.oo7-nixos.nixosModules.default
+            inputs.lix-module.nixosModules.default
           ]
           ++ extraModules;
       };
@@ -134,6 +140,7 @@
         };
         modules = [
           ./hosts/homeserver/configuration.nix
+          inputs.lix-module.nixosModules.default
         ];
       };
 
@@ -148,6 +155,7 @@
           ./hosts/devPi/configuration.nix
           home-manager.nixosModules.home-manager
           ./modules/home-manager/devPi.nix
+          inputs.lix-module.nixosModules.default
         ];
       };
     };
@@ -229,6 +237,7 @@
       system = x86System;
       modules = [
         ./hosts/recovery/configuration.nix
+        inputs.lix-module.nixosModules.default
       ];
     };
   };
