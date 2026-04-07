@@ -1,20 +1,12 @@
 _: {
+  imports = [./nix-caches.nix];
+
   nix = {
     settings = {
       experimental-features = ["nix-command" "flakes"];
       auto-optimise-store = true;
       max-free = 1073741824; # 1GB
       min-free = 134217728; # 128MB
-      substituters = [
-        "https://cache.nixos.org/"
-        "https://nix-community.cachix.org"
-        "https://kronberger-niri.cachix.org"
-      ];
-      trusted-public-keys = [
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        "kronberger-niri.cachix.org-1:GwmMCxswXvFn9PwMw32DFPaREyBBdkw1RLpW+7pfarI="
-      ];
 
       # Build optimization
       max-jobs = "auto";
@@ -27,10 +19,24 @@ _: {
       # Security
       sandbox = true;
       allowed-users = ["root" "kronberger"];
+      trusted-users = ["root" "kronberger"];
 
       # nh handles dirty tree warnings
       warn-dirty = false;
     };
+    buildMachines = [
+      {
+        hostName = "homeserver";
+        sshUser = "kronberger";
+        sshKey = "/root/.ssh/nix-builder";
+        system = "x86_64-linux";
+        maxJobs = 12;
+        speedFactor = 1;
+        supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
+      }
+    ];
+    # Use remote builders only when explicitly requested via --builders
+    distributedBuilds = false;
     gc = {
       automatic = true;
       dates = "weekly";

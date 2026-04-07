@@ -299,6 +299,7 @@ in {
         let nh_args = if $action == "dry" { ["--dry"] } else { [] }
 
         try {
+            $env.GIT_LFS_SKIP_SMUDGE = "1"
             nh os $nh_action $flake_dir ...$nh_args
         } catch {
             print $"\n(ansi yellow)Build interrupted or failed.(ansi reset)"

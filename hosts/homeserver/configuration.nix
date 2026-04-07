@@ -1,6 +1,7 @@
 {pkgs, arrabbiata, ...}: {
   imports = [
     ./hardware-configuration.nix
+    ../../modules/system/core/nix-caches.nix
     ../../modules/system/services/arrabbiata.nix
     ../../modules/system/services/syncthing.nix
   ];
