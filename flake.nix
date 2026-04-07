@@ -54,6 +54,10 @@
       url = "git+https://git.lix.systems/lix-project/nixos-module?ref=release-2.93";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {
@@ -160,6 +164,20 @@
       };
     };
 
+    # Remote deployment (deploy-rs)
+    deploy.nodes.homeserver = {
+      hostname = "homeserver";
+      sshUser = "kronberger";
+      user = "root";
+      profiles.system.path =
+        inputs.deploy-rs.lib.${x86System}.activate.nixos
+          self.nixosConfigurations.homeserver;
+    };
+
+    checks = nixpkgs.lib.genAttrs [x86System] (system:
+      inputs.deploy-rs.lib.${system}.deployChecks self.deploy
+    );
+
     # Development shell for configuration management
     devShells = nixpkgs.lib.genAttrs [x86System armSystem] (system: let
       pkgs = nixpkgs.legacyPackages.${system};
@@ -173,6 +191,7 @@
           nix-tree
           nix-output-monitor
           nvd
+          inputs.deploy-rs.packages.${system}.default
         ];
         shellHook = ''
           echo "NixOS Configuration Development Environment"
