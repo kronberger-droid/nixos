@@ -77,6 +77,9 @@
     nix-output-monitor
     cachix
 
+    # Git tooling
+    gita
+
     # Others
     fwupd
     nixpkgs-review
