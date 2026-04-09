@@ -115,6 +115,12 @@
     };
   };
 
+  # Limit build parallelism to keep the system responsive
+  nix.settings = {
+    cores = 12; # Leave 4 threads free for desktop responsiveness
+    max-jobs = 2; # Max parallel derivation builds
+  };
+
   users.users.kronberger.extraGroups = ["docker" "gamemode"];
 
   system.stateVersion = "24.11";
