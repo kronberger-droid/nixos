@@ -4,11 +4,6 @@
 
   nixpkgs.overlays = [
     (_: prev: {
-      # Use prebuilt electron to avoid broken chromium source build
-      bitwarden-desktop = prev.bitwarden-desktop.override {
-        electron_39 = prev.electron_39-bin;
-      };
-
       brave = prev.brave.override {
         commandLineArgs = [
           "--password-store=basic"
