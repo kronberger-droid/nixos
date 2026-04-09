@@ -27,7 +27,7 @@
     firewall = {
       enable = true;
       allowPing = false;
-      allowedTCPPorts = [22 53 3000 9443];
+      allowedTCPPorts = [22 53 3080 9443];
       allowedUDPPorts = [53];
 
       # Log dropped packets (limited to prevent log spam)
@@ -136,12 +136,12 @@
 
   services.tailscale.enable = true;
 
-  # DNS + ad blocking — accessible on LAN (:53) and web UI (:3000)
+  # DNS + ad blocking — accessible on LAN (:53) and web UI (:3080)
   services.adguardhome = {
     enable = true;
-    mutableSettings = true; # configure via web UI first, lock down later
+    mutableSettings = false;
+    port = 3080;
     settings = {
-      http.address = "0.0.0.0:3000";
       dns = {
         bind_hosts = ["0.0.0.0"];
         port = 53;
@@ -183,6 +183,13 @@
   # sudo-rs hardening
   security.sudo-rs = {
     enable = true;
+    extraRules = [{
+      users = ["kronberger"];
+      commands = [{
+        command = "ALL";
+        options = ["NOPASSWD"];
+      }];
+    }];
     extraConfig = ''
       Defaults timestamp_timeout=5
       Defaults passwd_timeout=1
