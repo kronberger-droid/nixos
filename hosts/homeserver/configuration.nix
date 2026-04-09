@@ -27,7 +27,8 @@
     firewall = {
       enable = true;
       allowPing = false;
-      allowedTCPPorts = [22 9443];
+      allowedTCPPorts = [22 53 3000 9443];
+      allowedUDPPorts = [53];
 
       # Log dropped packets (limited to prevent log spam)
       extraCommands = ''
@@ -134,6 +135,29 @@
   };
 
   services.tailscale.enable = true;
+
+  # DNS + ad blocking — accessible on LAN (:53) and web UI (:3000)
+  services.adguardhome = {
+    enable = true;
+    mutableSettings = true; # configure via web UI first, lock down later
+    settings = {
+      http.address = "0.0.0.0:3000";
+      dns = {
+        bind_hosts = ["0.0.0.0"];
+        port = 53;
+        upstream_dns = [
+          "https://dns.cloudflare.com/dns-query"
+          "https://dns.google/dns-query"
+        ];
+        bootstrap_dns = ["1.1.1.1" "8.8.8.8"];
+      };
+      filtering.rewrites = [
+        # Local DNS — add your services here
+        {domain = "adguard.home.lan"; answer = "192.168.2.54";}
+        {domain = "rss.home.lan"; answer = "192.168.2.54";}
+      ];
+    };
+  };
   services.arrabbiata = {
     enable = true;
     package = arrabbiata;
