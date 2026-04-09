@@ -29,10 +29,16 @@ in {
         "rust-analyzer-lsp@claude-plugins-official"
       ];
       claude.claudeMd = builtins.readFile ../apps/claude-md.md;
+      claude.disableAutoMemory = true;
 
       claude.mcpServers.inpdf = {
         command = "${pkgs.inpdf}/bin/inpdf";
         args = ["mcp"];
+      };
+
+      claude.mcpServers.notal = {
+        command = "${pkgs.notal}/bin/notal";
+        args = ["--vault-path" "/home/kronberger/Documents/notes/general-vault/"];
       };
 
       programs.arrabbiata-tui = {
@@ -66,6 +72,13 @@ in {
           dropkittenPkg
           nemo-with-extensions
           yazi
+          # Nix tooling (was in devShell)
+          nixpkgs-fmt
+          deadnix
+          statix
+          nix-tree
+          nvd
+          deploy-rs
         ];
         stateVersion = "24.11";
       };

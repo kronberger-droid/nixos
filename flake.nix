@@ -11,9 +11,8 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    rio = {
-      url = "github:raphamorim/rio";
-      inputs.nixpkgs.follows = "nixpkgs";
+    nixpkgs-rio = {
+      url = "github:kronberger-droid/nixpkgs/rio-0.3.1";
     };
     dropkitten = {
       url = "github:kronberger-droid/dropkitten";
@@ -54,9 +53,17 @@
       url = "git+https://git.lix.systems/lix-project/nixos-module?ref=release-2.93";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    notal = {
+      url = "github:kronberger-droid/notal";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     deploy-rs = {
       url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
+    };
+    starship-nerd-fonts = {
+      url = "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml";
+      flake = false;
     };
   };
 
@@ -85,7 +92,7 @@
           [
             ./hosts/${hostname}/configuration.nix
             inputs.niri.nixosModules.niri
-            {nixpkgs.overlays = [inputs.niri.overlays.niri inputs.rio.overlays.default];}
+            {nixpkgs.overlays = [inputs.niri.overlays.niri (_: _: {rio = inputs.nixpkgs-rio.legacyPackages.${system}.rio; notal = inputs.notal.packages.${system}.default; deploy-rs = inputs.deploy-rs.packages.${system}.default;})];}
             home-manager.nixosModules.home-manager
             {
               home-manager.sharedModules = [
@@ -144,6 +151,8 @@
         };
         modules = [
           ./hosts/homeserver/configuration.nix
+          agenix.nixosModules.default
+          {environment.systemPackages = [agenix.packages.${x86System}.default];}
           inputs.lix-module.nixosModules.default
         ];
       };
@@ -178,24 +187,6 @@
       system:
         inputs.deploy-rs.lib.${system}.deployChecks self.deploy
     );
-
-    # Development shell for configuration management
-    devShells = nixpkgs.lib.genAttrs [x86System armSystem] (system: let
-      pkgs = nixpkgs.legacyPackages.${system};
-    in {
-      default = pkgs.mkShell {
-        name = "nixos-config";
-        packages = with pkgs; [
-          nixpkgs-fmt
-          deadnix
-          statix
-          nix-tree
-          nix-output-monitor
-          nvd
-          inputs.deploy-rs.packages.${system}.default
-        ];
-      };
-    });
 
     # Project templates
     # Use: nix flake init --template .#<name>
