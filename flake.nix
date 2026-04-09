@@ -171,11 +171,12 @@
       user = "root";
       profiles.system.path =
         inputs.deploy-rs.lib.${x86System}.activate.nixos
-          self.nixosConfigurations.homeserver;
+        self.nixosConfigurations.homeserver;
     };
 
-    checks = nixpkgs.lib.genAttrs [x86System] (system:
-      inputs.deploy-rs.lib.${system}.deployChecks self.deploy
+    checks = nixpkgs.lib.genAttrs [x86System] (
+      system:
+        inputs.deploy-rs.lib.${system}.deployChecks self.deploy
     );
 
     # Development shell for configuration management
@@ -193,16 +194,6 @@
           nvd
           inputs.deploy-rs.packages.${system}.default
         ];
-        shellHook = ''
-          echo "NixOS Configuration Development Environment"
-          echo "Available tools:"
-          echo "  - nixpkgs-fmt: Format .nix files"
-          echo "  - deadnix: Find dead/unused code"
-          echo "  - statix: Linting and suggestions"
-          echo "  - nix-tree: Explore dependencies"
-          echo "  - nix-output-monitor: Better build output"
-          echo "  - nvd: Compare derivations"
-        '';
       };
     });
 
