@@ -6,7 +6,7 @@
 }: let
   cfg = config.claude;
 
-  # Statusline script with nerd font icons matching starship style
+  # Statusline script using word-based labels (like starship's "in/on/via" style)
   statuslineScript = pkgs.writeShellScript "claude-statusline" ''
     input=$(cat)
 
@@ -19,37 +19,31 @@
 
     # Colors (ANSI)
     reset='\033[0m'
-    bold='\033[1m'
     cyan='\033[36m'
     magenta='\033[35m'
     green='\033[32m'
     red='\033[31m'
     yellow='\033[33m'
+    white='\033[37m'
     dim='\033[2m'
-
-    # Nerd font icons (matching your starship config)
-    model_icon="󱙺"  # AI/robot icon
-    branch_icon=""  # git branch (from your starship)
-    folder_icon=""  # folder
-    ctx_icon="󰍛"   # memory (from your starship)
 
     # Build output
     output=""
 
-    # Model with icon
-    output+="''${magenta}''${model_icon} ''${model}''${reset}"
+    # Model
+    output+="''${magenta}''${model}''${reset}"
 
     # Directory (basename)
     if [ -n "$cwd" ]; then
       dir_name=$(basename "$cwd")
-      output+=" ''${dim}│''${reset} ''${cyan}''${folder_icon} ''${dir_name}''${reset}"
+      output+=" ''${white}in''${reset} ''${cyan}''${dir_name}''${reset}"
     fi
 
     # Git branch
     if [ -n "$cwd" ]; then
       branch=$(${pkgs.git}/bin/git -C "$cwd" rev-parse --abbrev-ref HEAD 2>/dev/null)
       if [ -n "$branch" ]; then
-        output+=" ''${dim}│''${reset} ''${green}''${branch_icon} ''${branch}''${reset}"
+        output+=" ''${white}on''${reset} ''${green}''${branch}''${reset}"
       fi
     fi
 
@@ -74,7 +68,7 @@
       else
         ctx_color=$dim
       fi
-      output+=" ''${dim}│''${reset} ''${ctx_color}''${ctx_icon} ''${ctx_int}%''${reset}"
+      output+=" ''${dim}│''${reset} ''${ctx_color}ctx ''${ctx_int}%''${reset}"
     fi
 
     printf "%b" "$output"
@@ -94,6 +88,9 @@
           value = true;
         })
         cfg.plugins);
+    }
+    // lib.optionalAttrs cfg.disableAutoMemory {
+      autoMemoryEnabled = false;
     };
   settingsJson = builtins.toJSON settingsToMerge;
 
@@ -110,10 +107,12 @@
   };
   mcpJson = builtins.toJSON mcpToMerge;
 
-  hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {} || cfg.plugins != [] || cfg.claudeMd != "";
+  hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {} || cfg.plugins != [] || cfg.claudeMd != "" || cfg.disableAutoMemory;
 in {
   options.claude = {
     statusline.enable = lib.mkEnableOption "Claude Code statusline";
+
+    disableAutoMemory = lib.mkEnableOption "disable Claude Code auto-memory (use Obsidian vault via notal instead)";
 
     plugins = lib.mkOption {
       type = lib.types.listOf lib.types.str;
@@ -164,7 +163,7 @@ in {
     };
 
     # Activation script to merge settings (statusline + plugins) into ~/.claude/settings.json
-    home.activation.claudeSettings = lib.mkIf (cfg.statusline.enable || cfg.plugins != []) (lib.hm.dag.entryAfter ["writeBoundary"] ''
+    home.activation.claudeSettings = lib.mkIf (cfg.statusline.enable || cfg.plugins != [] || cfg.disableAutoMemory) (lib.hm.dag.entryAfter ["writeBoundary"] ''
       SETTINGS_FILE="$HOME/.claude/settings.json"
       mkdir -p "$HOME/.claude"
 
