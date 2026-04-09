@@ -1,87 +1,39 @@
 {
-  description = "Rust development shell with GUI support";
+  description = "Rust GUI project";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-    rust-overlay.url = "github:oxalica/rust-overlay";
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-    rust-overlay,
-    ...
-  }:
-    flake-utils.lib.eachDefaultSystem (
-      system: let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [rust-overlay.overlays.default];
-        };
+  outputs = {nixpkgs, fenix, ...}: let
+    forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux"];
+  in {
+    devShells = forAllSystems (system: let
+      pkgs = nixpkgs.legacyPackages.${system};
+      toolchain = fenix.packages.${system}.stable.withComponents [
+        "cargo" "clippy" "rust-src" "rustc" "rustfmt"
+      ];
+      guiDeps = with pkgs; [
+        wayland wayland-protocols libxkbcommon
+        xorg.libX11 xorg.libXcursor xorg.libXrandr xorg.libXi
+        libGL libGLU gtk3 dbus dbus.lib zenity
+      ];
+    in {
+      default = pkgs.mkShell {
+        nativeBuildInputs = [
+          toolchain
+          fenix.packages.${system}.rust-analyzer
+          pkgs.pkg-config
+          pkgs.gcc
+          pkgs.cargo-expand
+        ] ++ guiDeps;
 
-        rustTools = {
-          stable = pkgs.rust-bin.stable.latest.default.override {
-            extensions = ["rust-src"];
-          };
-          analyzer = pkgs.rust-bin.stable.latest.rust-analyzer;
-        };
-
-        devTools = with pkgs; [
-          cargo-expand
-          cargo-dist
-          pkg-config
-          gcc
-        ];
-
-        guiDeps = with pkgs; [
-          # Wayland
-          wayland
-          wayland-protocols
-          libxkbcommon
-
-          # X11 fallback
-          xorg.libX11
-          xorg.libXcursor
-          xorg.libXrandr
-          xorg.libXi
-
-          # OpenGL
-          libGL
-          libGLU
-
-          # GTK for file dialogs (rfd)
-          gtk3
-
-          # D-Bus for portal file dialogs
-          dbus
-          dbus.lib
-
-          # Zenity fallback for file dialogs
-          zenity
-        ];
-
-        rustDeps =
-          [
-            rustTools.stable
-            rustTools.analyzer
-          ]
-          ++ devTools;
-
-        shellHook = ''
-          echo "Using Rust toolchain: $(rustc --version)"
-          export CARGO_HOME="$HOME/.cargo"
-          export RUSTUP_HOME="$HOME/.rustup"
-          mkdir -p "$CARGO_HOME" "$RUSTUP_HOME"
-          export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath guiDeps}:$LD_LIBRARY_PATH"
-        '';
-      in {
-        devShells.default = pkgs.mkShell {
-          name = "rust-gui-dev";
-          buildInputs = rustDeps ++ guiDeps;
-          inherit shellHook;
-        };
-      }
-    );
+        LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath guiDeps;
+      };
+    });
+  };
 }
