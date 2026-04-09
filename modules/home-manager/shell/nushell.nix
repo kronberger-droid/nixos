@@ -3,6 +3,7 @@
   config,
   lib,
   options,
+  inputs,
   ...
 }: let
   hasTerminal = options ? terminal;
@@ -395,11 +396,15 @@ in {
     enable = true;
     enableNushellIntegration = true;
 
-    settings =
-      (with builtins; fromTOML (readFile ./nerd-font-symbols.toml))
-      // {
+    settings = lib.recursiveUpdate
+      (builtins.removeAttrs (builtins.fromTOML (builtins.readFile inputs.starship-nerd-fonts)) ["maven"])
+      {
         command_timeout = 2000;
-        git_branch.symbol = " ";
+        nix_shell = {
+          impure_msg = "";
+          pure_msg = "pure";
+          format = "via [$symbol$state( $name)](bold blue) ";
+        };
         time = {
           disabled = false;
           format = "[$time]($style) ";
