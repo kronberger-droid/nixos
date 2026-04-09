@@ -1,4 +1,4 @@
-_: {
+{lib, ...}: {
   imports = [./nix-caches.nix];
 
   nix = {
@@ -8,9 +8,9 @@ _: {
       max-free = 1073741824; # 1GB
       min-free = 134217728; # 128MB
 
-      # Build optimization
-      max-jobs = "auto";
-      cores = 0; # Use all available cores
+      # Build optimization (hosts can override these)
+      max-jobs = lib.mkDefault "auto";
+      cores = lib.mkDefault 0;
 
       # Faster evaluation
       keep-derivations = true;
