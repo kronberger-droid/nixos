@@ -1,10 +1,18 @@
-{pkgs, arrabbiata, ...}: {
+{pkgs, arrabbiata, inputs, ...}: {
   imports = [
     ./hardware-configuration.nix
     ../../modules/system/core/nix-caches.nix
     ../../modules/system/services/arrabbiata.nix
     ../../modules/system/services/syncthing.nix
   ];
+
+  # Secrets (homeserver-specific — shared agenix.nix has desktop-only secrets)
+  age.secrets.miniflux-credentials = {
+    file = "${inputs.self}/secrets/miniflux-credentials.age";
+    path = "/run/secrets/miniflux-credentials";
+    mode = "0400";
+    owner = "root";
+  };
 
   # Bootloader
   boot.loader.systemd-boot.enable = true;
@@ -27,7 +35,7 @@
     firewall = {
       enable = true;
       allowPing = false;
-      allowedTCPPorts = [22 53 3080 9443];
+      allowedTCPPorts = [22 53 3080 8070 9443];
       allowedUDPPorts = [53];
 
       # Log dropped packets (limited to prevent log spam)
@@ -153,8 +161,8 @@
       };
       filtering.rewrites = [
         # Local DNS — add your services here
-        {domain = "adguard.home.lan"; answer = "192.168.2.54";}
-        {domain = "rss.home.lan"; answer = "192.168.2.54";}
+        {domain = "adguard.home.lan"; answer = "192.168.2.54"; enabled = true;}
+        {domain = "rss.home.lan"; answer = "192.168.2.54"; enabled = true;}
       ];
     };
   };
@@ -163,18 +171,18 @@
     package = arrabbiata;
   };
 
-  # TODO: Miniflux RSS reader — create /etc/miniflux-admin-credentials first
-  # services.miniflux = {
-  #   enable = true;
-  #   config = {
-  #     LISTEN_ADDR = "0.0.0.0:8070";
-  #     BASE_URL = "http://100.92.46.97:8070";
-  #     POLLING_FREQUENCY = "15";
-  #     CLEANUP_ARCHIVE_UNREAD_DAYS = "-1";
-  #     CLEANUP_ARCHIVE_READ_DAYS = "60";
-  #   };
-  #   adminCredentialsFile = "/etc/miniflux-admin-credentials";
-  # };
+  # RSS reader — backed by PostgreSQL (auto-provisioned by the module)
+  services.miniflux = {
+    enable = true;
+    config = {
+      LISTEN_ADDR = "0.0.0.0:8070";
+      BASE_URL = "http://rss.home.lan:8070";
+      POLLING_FREQUENCY = "15";
+      CLEANUP_ARCHIVE_UNREAD_DAYS = "-1";
+      CLEANUP_ARCHIVE_READ_DAYS = "60";
+    };
+    adminCredentialsFile = "/run/secrets/miniflux-credentials";
+  };
 
   # Power saving
   powerManagement.powertop.enable = true;
