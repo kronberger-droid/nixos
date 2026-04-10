@@ -400,6 +400,7 @@ in {
       (builtins.removeAttrs (builtins.fromTOML (builtins.readFile inputs.starship-nerd-fonts)) ["maven"])
       {
         command_timeout = 2000;
+        git_branch.symbol = " ";
         nix_shell = {
           impure_msg = "";
           pure_msg = "pure";
