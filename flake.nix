@@ -244,13 +244,13 @@
 
     templates.default = self.templates.rust-cli;
 
-    # SD card image for mediaPi (Raspberry Pi 4)
-    # Build with: nix build .#mediaPi-sd
-    packages.${x86System}.mediaPi-sd = self.nixosConfigurations.mediaPi.config.system.build.sdImage;
-
-    # Recovery USB ISO image
-    # Build with: nix build .#recovery
-    packages.${x86System}.recovery = self.nixosConfigurations.recovery.config.system.build.isoImage;
+    # Build images
+    # nix build .#recovery    — USB ISO
+    # nix build .#mediaPi-sd  — Raspberry Pi 4 SD card
+    packages.${x86System} = {
+      recovery = self.nixosConfigurations.recovery.config.system.build.isoImage;
+      mediaPi-sd = self.nixosConfigurations.mediaPi.config.system.build.sdImage;
+    };
 
     nixosConfigurations.recovery = nixpkgs.lib.nixosSystem {
       system = x86System;
