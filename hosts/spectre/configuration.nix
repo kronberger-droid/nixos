@@ -42,6 +42,9 @@
 
       # Allow access to IIO devices for screen rotation
       SUBSYSTEM=="iio", KERNEL=="iio:device*", MODE="0666"
+
+      # Prevent Realtek SD card reader from runtime suspending
+      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10ec", ATTR{device}=="0x525a", ATTR{power/control}="on"
     '';
   };
 

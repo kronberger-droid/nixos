@@ -65,25 +65,18 @@
     enable = true;
     user = "mediaPi";
     program = toString (pkgs.writeShellScript "kiosk-launch" ''
-      ${pkgs.chromium}/bin/chromium \
+      ${pkgs.firefox}/bin/firefox \
         --kiosk \
-        --enable-features=UseOzonePlatform \
-        --ozone-platform=wayland \
-        --enable-gpu-rasterization \
-        --enable-zero-copy \
-        --noerrdialogs \
-        --disable-infobars \
-        --no-first-run \
         file:///home/mediaPi/.local/share/kiosk/start.html
     '');
   };
 
   nixpkgs.config.allowUnfree = true;
-  programs.chromium = {
+  programs.firefox = {
     enable = true;
-    extensions = [
-      "cjpalhdlnbpafiamejdnhcphjbkeiagm" # uBlock Origin
-    ];
+    preferences = {
+      "media.eme.enabled" = true; # Enable DRM (Widevine) for Netflix
+    };
   };
 
   # ── Audio ─────────────────────────────────────────────

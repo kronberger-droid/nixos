@@ -61,6 +61,9 @@
       url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware";
+    };
     starship-nerd-fonts = {
       url = "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml";
       flake = false;
@@ -173,13 +176,17 @@
       };
 
       mediaPi = nixpkgs.lib.nixosSystem {
-        system = armSystem;
         specialArgs = {
           host = "mediaPi";
           inherit inputs;
         };
         modules = [
+          {
+            nixpkgs.buildPlatform = x86System;
+            nixpkgs.hostPlatform = armSystem;
+          }
           ./hosts/mediaPi/configuration.nix
+          inputs.nixos-hardware.nixosModules.raspberry-pi-4
           home-manager.nixosModules.home-manager
           ./modules/home-manager/mediaPi.nix
           inputs.lix-module.nixosModules.default
