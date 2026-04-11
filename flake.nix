@@ -171,6 +171,20 @@
           inputs.lix-module.nixosModules.default
         ];
       };
+
+      mediaPi = nixpkgs.lib.nixosSystem {
+        system = armSystem;
+        specialArgs = {
+          host = "mediaPi";
+          inherit inputs;
+        };
+        modules = [
+          ./hosts/mediaPi/configuration.nix
+          home-manager.nixosModules.home-manager
+          ./modules/home-manager/mediaPi.nix
+          inputs.lix-module.nixosModules.default
+        ];
+      };
     };
 
     # Remote deployment (deploy-rs)
@@ -229,6 +243,10 @@
     };
 
     templates.default = self.templates.rust-cli;
+
+    # SD card image for mediaPi (Raspberry Pi 4)
+    # Build with: nix build .#mediaPi-sd
+    packages.${x86System}.mediaPi-sd = self.nixosConfigurations.mediaPi.config.system.build.sdImage;
 
     # Recovery USB ISO image
     # Build with: nix build .#recovery

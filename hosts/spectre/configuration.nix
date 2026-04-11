@@ -52,6 +52,7 @@
   };
 
   boot = {
+    binfmt.emulatedSystems = ["aarch64-linux"];
     systemd-boot-defaults.enable = true;
     loader.efi.canTouchEfiVariables = false;
     kernel.sysctl = {
