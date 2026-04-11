@@ -4,15 +4,11 @@
     useUserPackages = true;
     backupFileExtension = "backup";
     users.mediaPi = {
-      imports = [
-        ./shell/nushell.nix
-        ./shell/git.nix
-      ];
-
       home = {
         username = "mediaPi";
         homeDirectory = "/home/mediaPi";
         packages = with pkgs; [
+          nushell
           btop
           fastfetch
         ];
