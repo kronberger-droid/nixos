@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mediaPi</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0f;
+      color: #e0e0e0;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 900px;
+    }
+    a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 600;
+      padding: 3rem 2rem;
+      border-radius: 1rem;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    a:hover, a:focus {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(255,255,255,0.1);
+      outline: none;
+    }
+    .netflix    { background: #e50914; }
+    .youtube    { background: #ff0000; }
+    .disney     { background: #113ccf; }
+    .twitch     { background: #9146ff; }
+    .spotify    { background: #1db954; }
+    .prime      { background: #00a8e1; }
+    .movies2w   { background: #b8860b; }
+  </style>
+</head>
+<body>
+  <div class="grid">
+    <a href="https://www.netflix.com" class="netflix">Netflix</a>
+    <a href="https://www.youtube.com" class="youtube">YouTube</a>
+    <a href="https://www.disneyplus.com" class="disney">Disney+</a>
+    <a href="https://www.twitch.tv" class="twitch">Twitch</a>
+    <a href="https://open.spotify.com" class="spotify">Spotify</a>
+    <a href="https://www.primevideo.com" class="prime">Prime Video</a>
+    <a href="https://movies2watch.tv" class="movies2w">Movies2Watch</a>
+  </div>
+</body>
+</html>

@@ -95,7 +95,16 @@
           [
             ./hosts/${hostname}/configuration.nix
             inputs.niri.nixosModules.niri
-            {nixpkgs.overlays = [inputs.niri.overlays.niri (_: _: {rio = inputs.nixpkgs-rio.legacyPackages.${system}.rio; notal = inputs.notal.packages.${system}.default; deploy-rs = inputs.deploy-rs.packages.${system}.default;})];}
+            {
+              nixpkgs.overlays = [
+                inputs.niri.overlays.niri
+                (_: _: {
+                  rio = inputs.nixpkgs-rio.legacyPackages.${system}.rio;
+                  notal = inputs.notal.packages.${system}.default;
+                  deploy-rs = inputs.deploy-rs.packages.${system}.default;
+                })
+              ];
+            }
             home-manager.nixosModules.home-manager
             {
               home-manager.sharedModules = [
@@ -181,7 +190,7 @@
           inherit inputs;
         };
         modules = [
-          { nixpkgs.hostPlatform = armSystem; }
+          {nixpkgs.hostPlatform = armSystem;}
           ./hosts/mediaPi/configuration.nix
           inputs.nixos-hardware.nixosModules.raspberry-pi-4
           home-manager.nixosModules.home-manager
