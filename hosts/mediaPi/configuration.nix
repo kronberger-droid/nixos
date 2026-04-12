@@ -78,10 +78,10 @@
   };
 
   nixpkgs.config.allowUnfree = true;
-  programs.firefox = {
+  programs.chromium = {
     enable = true;
-    preferences = {
-      "media.eme.enabled" = true; # Enable DRM (Widevine) for Netflix
+    extraOpts = {
+      "DefaultBrowserSettingEnabled" = true;
     };
   };
 
