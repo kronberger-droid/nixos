@@ -7,15 +7,14 @@
 
   imports = [
     (modulesPath + "/installer/sd-card/sd-image-aarch64.nix")
+    ../../modules/system/desktop/keyd.nix
   ];
 
   # Compressed image to save disk
   sdImage.compressImage = true;
 
-  # Pi 4 firmware & GPU
-  hardware.raspberry-pi."4" = {
-    fkms-3d.enable = true;
-  };
+  # Pi 4 — mainline kernel (cached on cache.nixos.org, unlike linux-rpi)
+  boot.kernelPackages = pkgs.linuxPackages_latest;
   hardware.graphics.enable = true;
 
   networking = {
@@ -57,18 +56,25 @@
       helix
       git
       wget
+      foot        # terminal
+      bluetuith   # bluetooth TUI
+      networkmanagerapplet # wifi tray
     ];
   };
 
-  # ── Kiosk ─────────────────────────────────────────────
-  services.cage = {
+  # ── Desktop ───────────────────────────────────────────
+  programs.sway = {
     enable = true;
-    user = "mediaPi";
-    program = toString (pkgs.writeShellScript "kiosk-launch" ''
-      ${pkgs.firefox}/bin/firefox \
-        --kiosk \
-        file:///home/mediaPi/.local/share/kiosk/start.html
-    '');
+    wrapperFeatures.gtk = true;
+  };
+
+  # Auto-login to mediaPi user
+  services.greetd = {
+    enable = true;
+    settings.default_session = {
+      command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${pkgs.sway}/bin/sway";
+      user = "greeter";
+    };
   };
 
   nixpkgs.config.allowUnfree = true;
@@ -77,6 +83,12 @@
     preferences = {
       "media.eme.enabled" = true; # Enable DRM (Widevine) for Netflix
     };
+  };
+
+  # ── Bluetooth ─────────────────────────────────────────
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
   };
 
   # ── Audio ─────────────────────────────────────────────
