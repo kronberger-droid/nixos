@@ -26,8 +26,9 @@
 
   # NetworkManager handles all networking; disable systemd-networkd to avoid
   # duplicate link management and spurious UP/DOWN log spam
-  # PIA VPN module enables systemd-networkd; force off since NM handles everything
-  systemd.network.enable = lib.mkForce false;
+  # Note: systemd-networkd stays enabled because the PIA VPN module uses it
+  # for WireGuard interface management. NM handles wifi/ethernet, networkd
+  # handles PIA's pia0 interface. The coexistence is fine.
 
   services.resolved = {
     enable = true;
