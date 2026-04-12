@@ -11,6 +11,7 @@
     ../../modules/system/hardware/ipu6-camera.nix
     ../../modules/system/scx-schedulers.nix
     ../../modules/profiles/vpn-workstation.nix
+    ../../modules/system/hardware/droidcam.nix
   ];
 
   programs.steam = {
@@ -40,8 +41,8 @@
       ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.coreutils}/bin/chgrp video /sys/class/leds/%k/brightness"
       ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.coreutils}/bin/chmod g+w /sys/class/leds/%k/brightness"
 
-      # Allow access to IIO devices for screen rotation
-      SUBSYSTEM=="iio", KERNEL=="iio:device*", MODE="0666"
+      # Allow access to IIO devices for screen rotation (group-restricted)
+      SUBSYSTEM=="iio", KERNEL=="iio:device*", MODE="0660", GROUP="video"
 
       # Prevent Realtek SD card reader from runtime suspending
       ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10ec", ATTR{device}=="0x525a", ATTR{power/control}="on"
@@ -59,25 +60,20 @@
     systemd-boot-defaults.enable = true;
     loader.efi.canTouchEfiVariables = false;
     kernel.sysctl = {
-      "kernel.sysrq" = 1;
+      # 176 = enable sync (16) + enable remount-ro (32) + enable reboot (128)
+      # Allows safe emergency reboot (REISUB) without exposing full sysrq
+      "kernel.sysrq" = 176;
     };
     kernelParams = [
       "nvme_core.default_ps_max_latency_us=0"
       "pcie_aspm=off"
       "snd_intel_dspcfg.dsp_driver=1"
-      "intel_iommu=off"
+      "intel_iommu=on"
       "console=tty1"
     ];
     kernelModules = [
       "hp_wmi"
-      "v4l2loopback"
     ];
-    extraModulePackages = [
-      config.boot.kernelPackages.v4l2loopback
-    ];
-    extraModprobeConfig = ''
-      options v4l2loopback devices=1 video_nr=42 card_label="DroidCam" exclusive_caps=1
-    '';
     blacklistedKernelModules = [
       "iTCO_wdt"
       "watchdog"
@@ -91,8 +87,10 @@
   };
 
   # Docker — for testing Nextcloud instances
+  # Socket-activated: daemon only starts when docker commands are run
   virtualisation.docker = {
     enable = true;
+    enableOnBoot = false;
     autoPrune = {
       enable = true;
       dates = "weekly";
@@ -110,8 +108,6 @@
   environment.systemPackages = with pkgs; [
     brightnessctl
     dmidecode
-    droidcam
-    android-tools
     docker-compose
   ];
 

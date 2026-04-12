@@ -97,12 +97,14 @@
   };
 
   # OOM protection — kills largest process before kernel OOM freezes the system
+  # earlyoom is preferred over systemd-oomd for desktop use (simpler, signal-based)
   services.earlyoom = {
     enable = true;
     freeMemThreshold = 5;
     freeSwapThreshold = 10;
     enableNotifications = true;
   };
+  systemd.oomd.enable = false;
 
   # Improved file system mount options (mkDefault so hardware-configuration.nix can override)
   fileSystems."/".options = lib.mkDefault ["noatime"];

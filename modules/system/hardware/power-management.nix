@@ -6,7 +6,9 @@
   # Power management configuration optimized for laptops
   powerManagement = {
     enable = true;
-    powertop.enable = isNotebook;
+    # powertop auto-tune disabled — TLP already manages the same knobs
+    # and conflicts with powertop. Keep powertop as a package for diagnostics.
+    powertop.enable = false;
 
     # Resume commands to ensure services restart properly
     resumeCommands = ''

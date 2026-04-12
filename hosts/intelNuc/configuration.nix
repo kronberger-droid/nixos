@@ -1,9 +1,10 @@
-{pkgs, config, ...}: {
+{pkgs, ...}: {
   imports = [
     ./hardware-configuration.nix
     ../common.nix
     ../../modules/system/scx-schedulers.nix
     ../../modules/profiles/vpn-workstation.nix
+    ../../modules/system/hardware/droidcam.nix
   ];
 
   boot = {
@@ -13,16 +14,9 @@
     kernelParams = [
       "console=tty1"
     ];
-    kernelModules = ["v4l2loopback"];
-    extraModulePackages = [config.boot.kernelPackages.v4l2loopback];
-    extraModprobeConfig = ''
-      options v4l2loopback devices=1 video_nr=42 card_label="DroidCam" exclusive_caps=1
-    '';
   };
 
   environment.systemPackages = with pkgs; [
-    droidcam
-    android-tools
     lm_sensors
     docker-compose
   ];
@@ -121,6 +115,9 @@
     cores = 12; # Leave 4 threads free for desktop responsiveness
     max-jobs = 2; # Max parallel derivation builds
   };
+
+  # Allow SSH from local network (shared security.nix restricts to Tailscale only)
+  networking.firewall.allowedTCPPorts = [22];
 
   users.users.kronberger.extraGroups = ["docker" "gamemode"];
 

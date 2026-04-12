@@ -21,14 +21,12 @@
       };
     };
     hostName = host;
-
-    # stevenblack = {
-    #   enable = true;
-    #   block = ["porn"];
-    # };
-
     enableIPv6 = true;
   };
+
+  # NetworkManager handles all networking; disable systemd-networkd to avoid
+  # duplicate link management and spurious UP/DOWN log spam
+  systemd.network.enable = false;
 
   services.resolved = {
     enable = true;
@@ -38,4 +36,10 @@
     };
   };
   services.tailscale.enable = true;
+
+  # Syncthing ports (service runs as user via Home Manager)
+  networking.firewall = {
+    allowedTCPPorts = [22000];
+    allowedUDPPorts = [22000 21027];
+  };
 }

@@ -13,6 +13,6 @@
     ./music.nix
     ./ai.nix
     ./qutebrowser.nix
-    ./megasync.nix
+    ./syncthing.nix
   ];
 }

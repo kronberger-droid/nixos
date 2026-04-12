@@ -79,11 +79,9 @@ in {
       };
     };
 
-    # Create wrapper script for easy control
-    environment.etc."tuwien-vpn/tuwien-vpn-control.sh" = {
-      text = ''
-        #!/usr/bin/env bash
-
+    # Wrapper script for easy VPN control
+    environment.systemPackages = [
+      (pkgs.writeShellScriptBin "tuwien-vpn" ''
         case "$1" in
           start)
             ${pkgs.systemd}/bin/systemctl start openconnect-tuwien.service
@@ -99,9 +97,8 @@ in {
             exit 1
             ;;
         esac
-      '';
-      mode = "0755";
-    };
+      '')
+    ];
 
     # Add sudo rules for VPN control
     security.sudo-rs.extraRules = [
