@@ -211,7 +211,7 @@
     };
 
     deploy.nodes.mediaPi = {
-      hostname = "192.168.2.92";
+      hostname = "192.168.2.94";
       sshUser = "root";
       user = "root";
       profiles.system.path =
