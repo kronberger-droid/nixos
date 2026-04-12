@@ -146,7 +146,7 @@
 
     # Kernel security
     "kernel.dmesg_restrict" = lib.mkDefault 1;
-    "kernel.kptr_restrict" = lib.mkDefault 2;
+    "kernel.kptr_restrict" = lib.mkForce 2; # nixpkgs defaults to 1, we want stricter
     "kernel.yama.ptrace_scope" = lib.mkDefault 1;
     "kernel.kexec_load_disabled" = lib.mkDefault 1;
 
