@@ -80,7 +80,7 @@ in {
         ''
         else ""
       );
-    config = {
+    config = rec {
       modifier = modKey;
       terminal = config.terminal.bin;
       output =
