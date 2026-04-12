@@ -1,11 +1,11 @@
-{pkgs, ...}: {
+{pkgs, lib, ...}: {
   # Enhanced firewall configuration
   networking.firewall = {
     enable = true;
     allowPing = false;
 
-    # Only allow essential services
-    allowedTCPPorts = [22]; # SSH only by default
+    # SSH restricted to Tailscale interface only (see extraCommands below)
+    allowedTCPPorts = [];
 
     # Allow specific applications through the firewall
     allowedTCPPortRanges = [
@@ -19,9 +19,13 @@
     # Block unnecessary protocols
     allowedUDPPorts = [];
 
-    # Log dropped packets (limited to prevent log spam)
+    # Allow SSH only on Tailscale interface
     extraCommands = ''
+      iptables -A INPUT -i tailscale0 -p tcp --dport 22 -j ACCEPT
       iptables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7
+    '';
+    extraStopCommands = ''
+      iptables -D INPUT -i tailscale0 -p tcp --dport 22 -j ACCEPT || true
     '';
   };
 
@@ -107,51 +111,56 @@
     };
   };
 
-  # Kernel security hardening
+  # Kernel security hardening (mkDefault so host-specific configs can override)
   boot.kernel.sysctl = {
     # Network security
-    "net.ipv4.conf.all.send_redirects" = 0;
-    "net.ipv4.conf.default.send_redirects" = 0;
-    "net.ipv4.conf.all.accept_redirects" = 0;
-    "net.ipv4.conf.default.accept_redirects" = 0;
-    "net.ipv4.conf.all.secure_redirects" = 0;
-    "net.ipv4.conf.default.secure_redirects" = 0;
-    "net.ipv6.conf.all.accept_redirects" = 0;
-    "net.ipv6.conf.default.accept_redirects" = 0;
-    "net.ipv4.conf.all.accept_source_route" = 0;
-    "net.ipv4.conf.default.accept_source_route" = 0;
-    "net.ipv6.conf.all.accept_source_route" = 0;
-    "net.ipv6.conf.default.accept_source_route" = 0;
+    "net.ipv4.conf.all.send_redirects" = lib.mkDefault 0;
+    "net.ipv4.conf.default.send_redirects" = lib.mkDefault 0;
+    "net.ipv4.conf.all.accept_redirects" = lib.mkDefault 0;
+    "net.ipv4.conf.default.accept_redirects" = lib.mkDefault 0;
+    "net.ipv4.conf.all.secure_redirects" = lib.mkDefault 0;
+    "net.ipv4.conf.default.secure_redirects" = lib.mkDefault 0;
+    "net.ipv6.conf.all.accept_redirects" = lib.mkDefault 0;
+    "net.ipv6.conf.default.accept_redirects" = lib.mkDefault 0;
+    "net.ipv4.conf.all.accept_source_route" = lib.mkDefault 0;
+    "net.ipv4.conf.default.accept_source_route" = lib.mkDefault 0;
+    "net.ipv6.conf.all.accept_source_route" = lib.mkDefault 0;
+    "net.ipv6.conf.default.accept_source_route" = lib.mkDefault 0;
 
     # IP spoofing protection
-    "net.ipv4.conf.all.rp_filter" = 1;
-    "net.ipv4.conf.default.rp_filter" = 1;
+    "net.ipv4.conf.all.rp_filter" = lib.mkDefault 1;
+    "net.ipv4.conf.default.rp_filter" = lib.mkDefault 1;
 
     # Ignore broadcast ping requests (keep unicast ICMP for path MTU discovery)
-    "net.ipv4.icmp_echo_ignore_broadcasts" = 1;
+    "net.ipv4.icmp_echo_ignore_broadcasts" = lib.mkDefault 1;
 
     # Log Martians
-    "net.ipv4.conf.all.log_martians" = 1;
-    "net.ipv4.conf.default.log_martians" = 1;
+    "net.ipv4.conf.all.log_martians" = lib.mkDefault 1;
+    "net.ipv4.conf.default.log_martians" = lib.mkDefault 1;
 
     # TCP SYN flood protection
-    "net.ipv4.tcp_syncookies" = 1;
-    "net.ipv4.tcp_max_syn_backlog" = 2048;
-    "net.ipv4.tcp_synack_retries" = 2;
-    "net.ipv4.tcp_syn_retries" = 5;
+    "net.ipv4.tcp_syncookies" = lib.mkDefault 1;
+    "net.ipv4.tcp_max_syn_backlog" = lib.mkDefault 2048;
+    "net.ipv4.tcp_synack_retries" = lib.mkDefault 2;
+    "net.ipv4.tcp_syn_retries" = lib.mkDefault 5;
 
     # Kernel security
-    "kernel.dmesg_restrict" = 1;
-    "kernel.kptr_restrict" = 2;
-    "kernel.yama.ptrace_scope" = 1;
-    "kernel.kexec_load_disabled" = 1;
+    "kernel.dmesg_restrict" = lib.mkDefault 1;
+    "kernel.kptr_restrict" = lib.mkDefault 2;
+    "kernel.yama.ptrace_scope" = lib.mkDefault 1;
+    "kernel.kexec_load_disabled" = lib.mkDefault 1;
 
     # Disable core dumps for security
-    "fs.suid_dumpable" = 0;
+    "fs.suid_dumpable" = lib.mkDefault 0;
 
     # Virtual memory security
-    "vm.mmap_rnd_bits" = 32;
-    "vm.mmap_rnd_compat_bits" = 16;
+    "vm.mmap_rnd_bits" = lib.mkDefault 32;
+    "vm.mmap_rnd_compat_bits" = lib.mkDefault 16;
+    "vm.mmap_min_addr" = lib.mkDefault 65536;
+
+    # Reboot on kernel oops/panic to avoid unstable state
+    "kernel.panic_on_oops" = lib.mkDefault 1;
+    "kernel.panic" = lib.mkDefault 10;
   };
 
   # Additional security measures

@@ -28,15 +28,10 @@
   };
 
   systemd.services.virt-secret-init-encryption.enable = false;
+  systemd.services.libvirt-guests.enable = false;
 
   programs.virt-manager.enable = true;
 
-  # Ensure OpenGL/DRI access
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true; # If you need 32-bit support
-  };
-
-  # Add virtualisation groups to the user
+  # Add virtualisation groups to the user (graphics configured in desktop.nix)
   users.users.kronberger.extraGroups = ["libvirtd" "kvm" "qemu-libvirtd" "render"];
 }

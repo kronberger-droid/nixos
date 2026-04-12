@@ -6,26 +6,16 @@
   syncDevices = import ../../shared/syncthing-devices.nix;
   inherit (syncDevices) devices mobileDevices;
 
-  # Only enable on hosts that are in the devices list
   enabled = builtins.hasAttr host devices;
 
-  # Which NixOS devices each host syncs with
   otherDevices =
     lib.filterAttrs (name: _: name != host) devices;
 
-  # All peers including mobile
   allPeerDevices = otherDevices // mobileDevices;
 in
   lib.mkIf enabled {
     services.syncthing = {
       enable = true;
-      user = "kronberger";
-      dataDir = "/home/kronberger";
-      configDir = "/home/kronberger/.config/syncthing";
-
-      # Localhost only — access remote UIs via SSH tunnel:
-      # ssh -L 8384:127.0.0.1:8384 kronberger@<host>
-      guiAddress = "127.0.0.1:8384";
 
       # Let Nix manage devices; allow adding folders via UI too
       overrideDevices = true;
@@ -35,9 +25,8 @@ in
         devices = allPeerDevices;
 
         folders = {
-          # Documents — synced across all NixOS machines
           "documents" = {
-            path = "/home/kronberger/Documents";
+            path = "~/Documents";
             devices = builtins.attrNames otherDevices;
             versioning = {
               type = "staggered";
@@ -50,7 +39,7 @@ in
 
           # Obsidian vault — synced to phone too
           "general-vault" = {
-            path = "/home/kronberger/Documents/notes/general-vault";
+            path = "~/Documents/notes/general-vault";
             devices = builtins.attrNames otherDevices ++ builtins.attrNames mobileDevices;
             versioning = {
               type = "staggered";
@@ -63,17 +52,11 @@ in
         };
 
         options = {
-          urAccepted = -1; # Disable usage reporting
+          urAccepted = -1;
           relaysEnabled = true;
           localAnnounceEnabled = true;
           globalAnnounceEnabled = true;
         };
       };
-    };
-
-    # Open firewall for Syncthing
-    networking.firewall = {
-      allowedTCPPorts = [22000]; # Sync protocol
-      allowedUDPPorts = [22000 21027]; # Sync + discovery
     };
   }

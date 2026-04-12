@@ -52,11 +52,6 @@ in {
       # Set primary compositor (both are always available via greetd)
       compositor.primary = primaryCompositor;
 
-      # services.gnome-keyring = {  # replaced by oo7-nixos
-      #   enable = true;
-      #   components = ["secrets"];
-      # };
-
       programs.ssh = {
         enable = true;
         enableDefaultConfig = false;

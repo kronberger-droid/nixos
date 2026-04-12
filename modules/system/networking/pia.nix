@@ -44,15 +44,15 @@ in {
         commands = [
           {
             command = "/run/current-system/sw/bin/systemctl start pia-vpn.service";
-            options = ["NOPASSWD" "SETENV"];
+            options = ["NOPASSWD"];
           }
           {
             command = "/run/current-system/sw/bin/systemctl stop pia-vpn.service";
-            options = ["NOPASSWD" "SETENV"];
+            options = ["NOPASSWD"];
           }
           {
             command = "/run/current-system/sw/bin/systemctl restart pia-vpn.service";
-            options = ["NOPASSWD" "SETENV"];
+            options = ["NOPASSWD"];
           }
         ];
       }
