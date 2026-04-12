@@ -181,10 +181,7 @@
           inherit inputs;
         };
         modules = [
-          {
-            nixpkgs.buildPlatform = x86System;
-            nixpkgs.hostPlatform = armSystem;
-          }
+          { nixpkgs.hostPlatform = armSystem; }
           ./hosts/mediaPi/configuration.nix
           inputs.nixos-hardware.nixosModules.raspberry-pi-4
           home-manager.nixosModules.home-manager
@@ -202,6 +199,15 @@
       profiles.system.path =
         inputs.deploy-rs.lib.${x86System}.activate.nixos
         self.nixosConfigurations.homeserver;
+    };
+
+    deploy.nodes.mediaPi = {
+      hostname = "192.168.2.92";
+      sshUser = "root";
+      user = "root";
+      profiles.system.path =
+        inputs.deploy-rs.lib.${armSystem}.activate.nixos
+        self.nixosConfigurations.mediaPi;
     };
 
     checks = nixpkgs.lib.genAttrs [x86System] (
