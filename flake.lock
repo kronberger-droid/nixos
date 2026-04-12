@@ -166,6 +166,28 @@
         "type": "github"
       }
     },
+    "fenix_2": {
+      "inputs": {
+        "nixpkgs": [
+          "notal",
+          "nixpkgs"
+        ],
+        "rust-analyzer-src": "rust-analyzer-src_2"
+      },
+      "locked": {
+        "lastModified": 1775721346,
+        "narHash": "sha256-ogqjruvVBYEj8sWM3viOucSo1Pna9c147EKQOfA+p3I=",
+        "owner": "nix-community",
+        "repo": "fenix",
+        "rev": "99fde43dfee2a672e4e37ef211e0844337e5b725",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "fenix",
+        "type": "github"
+      }
+    },
     "firefox-addons": {
       "inputs": {
         "nixpkgs": [
@@ -524,16 +546,17 @@
     },
     "notal": {
       "inputs": {
+        "fenix": "fenix_2",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1775768322,
-        "narHash": "sha256-97KfX989GKMhC7vnlhvoNEWdRMFhtM1Q0HeO7gJR5qU=",
+        "lastModified": 1776034424,
+        "narHash": "sha256-Lzr1CXjuVSlUcnxVHq8DRWu0cwz25bry57x8BBEAcks=",
         "owner": "kronberger-droid",
         "repo": "notal",
-        "rev": "c9fc268355277ad6932fc0fb4c8d95e69dd38151",
+        "rev": "c7af6623679ced1b13c883d044cf0639f141c040",
         "type": "github"
       },
       "original": {
@@ -609,6 +632,23 @@
       }
     },
     "rust-analyzer-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1775663707,
+        "narHash": "sha256-3cSvpBETRa8aDSrUCX1jGc6FSse3OWB7cXACIZW8BYI=",
+        "owner": "rust-lang",
+        "repo": "rust-analyzer",
+        "rev": "8c5af725817905e462052d91a8d229b85ffa83a5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rust-lang",
+        "ref": "nightly",
+        "repo": "rust-analyzer",
+        "type": "github"
+      }
+    },
+    "rust-analyzer-src_2": {
       "flake": false,
       "locked": {
         "lastModified": 1775663707,
