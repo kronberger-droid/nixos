@@ -25,10 +25,10 @@
           terminal = "${pkgs.foot}/bin/foot";
           modifier = "Mod4";
           startup = [
-            {command = "${pkgs.firefox}/bin/firefox file://${../../hosts/mediaPi/start.html}";}
+            {command = "${pkgs.chromium}/bin/chromium";}
           ];
           bars = [{
-            position = "bottom";
+            position = "top";
             statusCommand = "${pkgs.i3status}/bin/i3status";
             trayOutput = "*";
           }];
