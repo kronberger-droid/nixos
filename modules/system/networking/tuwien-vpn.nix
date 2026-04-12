@@ -38,11 +38,6 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
-    # Install OpenConnect
-    environment.systemPackages = with pkgs; [
-      openconnect
-    ];
-
     # Create systemd service for TU Wien VPN
     systemd.services.openconnect-tuwien = let
       connectScript = pkgs.writeShellScript "tuwien-vpn-connect" ''
@@ -79,8 +74,8 @@ in {
       };
     };
 
-    # Wrapper script for easy VPN control
     environment.systemPackages = [
+      pkgs.openconnect
       (pkgs.writeShellScriptBin "tuwien-vpn" ''
         case "$1" in
           start)
