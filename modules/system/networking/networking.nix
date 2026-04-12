@@ -26,7 +26,8 @@
 
   # NetworkManager handles all networking; disable systemd-networkd to avoid
   # duplicate link management and spurious UP/DOWN log spam
-  systemd.network.enable = false;
+  # PIA VPN module enables systemd-networkd; force off since NM handles everything
+  systemd.network.enable = lib.mkForce false;
 
   services.resolved = {
     enable = true;
