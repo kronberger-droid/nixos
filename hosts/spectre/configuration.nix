@@ -57,8 +57,14 @@
 
   boot = {
     binfmt.emulatedSystems = ["aarch64-linux"];
-    systemd-boot-defaults.enable = true;
+    # Lanzaboote replaces systemd-boot for Secure Boot
+    systemd-boot-defaults.enable = false;
+    loader.systemd-boot.enable = lib.mkForce false;
     loader.efi.canTouchEfiVariables = false;
+    lanzaboote = {
+      enable = true;
+      pkiBundle = "/var/lib/sbctl";
+    };
     kernel.sysctl = {
       # 176 = enable sync (16) + enable remount-ro (32) + enable reboot (128)
       # Allows safe emergency reboot (REISUB) without exposing full sysrq
@@ -80,6 +86,10 @@
     ];
     crashDump.enable = true;
   };
+
+  swapDevices = [
+    { device = "/swapfile"; size = 16 * 1024; }
+  ];
 
   systemd.sleep.settings.Sleep = {
     SuspendState = "mem";
@@ -109,6 +119,7 @@
     brightnessctl
     dmidecode
     docker-compose
+    sbctl
   ];
 
   system.stateVersion = "24.11";
