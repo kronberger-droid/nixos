@@ -61,6 +61,9 @@
     systemd-boot-defaults.enable = false;
     loader.systemd-boot.enable = lib.mkForce false;
     loader.efi.canTouchEfiVariables = false;
+    # systemd initrd is needed for TPM2 LUKS unlock
+    # (normally set by systemd-boot-defaults, which we disabled for lanzaboote)
+    initrd.systemd.enable = true;
     lanzaboote = {
       enable = true;
       pkiBundle = "/var/lib/sbctl";
@@ -85,6 +88,15 @@
       "watchdog"
     ];
     crashDump.enable = true;
+    initrd.luks.devices."nixos-root".crypttabExtraOpts = ["tpm2-device=auto"];
+    initrd.systemd.tpm2.enable = true;
+  };
+
+  # TPM2 support for Secure Boot + LUKS auto-unlock
+  security.tpm2 = {
+    enable = true;
+    pkcs11.enable = false;
+    tctiEnvironment.enable = true;
   };
 
   swapDevices = [
