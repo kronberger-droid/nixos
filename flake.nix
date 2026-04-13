@@ -37,9 +37,14 @@
     base16 = {
       url = "github:SenchoPens/base16.nix";
     };
+    niri-src = {
+      url = "github:kronberger-droid/niri";
+      flake = false;
+    };
     niri = {
-      url = "github:kronberger-droid/niri-flake";
+      url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.niri-unstable.follows = "niri-src";
     };
     firefox-addons = {
       url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
