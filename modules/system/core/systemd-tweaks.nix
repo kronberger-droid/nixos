@@ -19,7 +19,7 @@
 
   services = {
     fwupd.enable = true;
-    journald.extraConfig = ''
+    journald.extraConfig = lib.mkDefault ''
       Storage=persistent
       Compress=yes
       SystemMaxUse=1G

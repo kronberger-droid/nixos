@@ -30,7 +30,7 @@
     };
 
     # Spectre uses smaller journal limit than the common 1G default
-    journald.extraConfig = lib.mkForce ''
+    journald.extraConfig = ''
       Storage=persistent
       Compress=yes
       SystemMaxUse=500M
@@ -61,9 +61,6 @@
     systemd-boot-defaults.enable = false;
     loader.systemd-boot.enable = lib.mkForce false;
     loader.efi.canTouchEfiVariables = false;
-    # systemd initrd is needed for TPM2 LUKS unlock
-    # (normally set by systemd-boot-defaults, which we disabled for lanzaboote)
-    initrd.systemd.enable = true;
     lanzaboote = {
       enable = true;
       pkiBundle = "/var/lib/sbctl";
