@@ -367,7 +367,9 @@
     "niri": {
       "inputs": {
         "niri-stable": "niri-stable",
-        "niri-unstable": "niri-unstable",
+        "niri-unstable": [
+          "niri-src"
+        ],
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -376,16 +378,32 @@
         "xwayland-satellite-unstable": "xwayland-satellite-unstable"
       },
       "locked": {
-        "lastModified": 1774089290,
-        "narHash": "sha256-sK+VuKKH8q1DsdDNeA37c4YlSB+4JuOIrOffUsPZrL0=",
-        "owner": "kronberger-droid",
+        "lastModified": 1775877135,
+        "narHash": "sha256-nAqtUMy22olwyiOJB0CASVrbu5XB5+43GjlbIJ1KuvQ=",
+        "owner": "sodiboo",
         "repo": "niri-flake",
-        "rev": "17431a7c26932235f3604609531035bb34d340fc",
+        "rev": "f943da038fd668d435c2d17916577f295faa8839",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sodiboo",
+        "repo": "niri-flake",
+        "type": "github"
+      }
+    },
+    "niri-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1774088577,
+        "narHash": "sha256-07hk7HA0AJZr2Ztwy5tBDs/pOtNMKs562wh5d6Vj8qs=",
+        "owner": "kronberger-droid",
+        "repo": "niri",
+        "rev": "325771afb9b43c7e027d67e91791469640d7a5f3",
         "type": "github"
       },
       "original": {
         "owner": "kronberger-droid",
-        "repo": "niri-flake",
+        "repo": "niri",
         "type": "github"
       }
     },
@@ -402,22 +420,6 @@
       "original": {
         "owner": "YaLTeR",
         "ref": "v25.08",
-        "repo": "niri",
-        "type": "github"
-      }
-    },
-    "niri-unstable": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1774088577,
-        "narHash": "sha256-07hk7HA0AJZr2Ztwy5tBDs/pOtNMKs562wh5d6Vj8qs=",
-        "owner": "kronberger-droid",
-        "repo": "niri",
-        "rev": "325771afb9b43c7e027d67e91791469640d7a5f3",
-        "type": "github"
-      },
-      "original": {
-        "owner": "kronberger-droid",
         "repo": "niri",
         "type": "github"
       }
@@ -599,6 +601,7 @@
         "home-manager": "home-manager_2",
         "lix-module": "lix-module",
         "niri": "niri",
+        "niri-src": "niri-src",
         "nix-pia-vpn": "nix-pia-vpn",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
