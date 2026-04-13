@@ -54,6 +54,10 @@
       url = "github:kronberger-droid/oo7-nixos";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    lanzaboote = {
+      url = "github:nix-community/lanzaboote/v1.0.0";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     lix-module = {
       url = "git+https://git.lix.systems/lix-project/nixos-module?ref=release-2.93";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -156,6 +160,9 @@
         hostname = "spectre";
         system = x86System;
         isNotebook = true;
+        extraModules = [
+          inputs.lanzaboote.nixosModules.lanzaboote
+        ];
       };
 
       # Servers
