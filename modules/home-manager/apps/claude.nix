@@ -107,7 +107,7 @@
   };
   mcpJson = builtins.toJSON mcpToMerge;
 
-  hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {} || cfg.plugins != [] || cfg.claudeMd != "" || cfg.disableAutoMemory;
+  hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {} || cfg.plugins != [] || cfg.claudeMd != "" || cfg.disableAutoMemory || cfg.skills != {};
 in {
   options.claude = {
     statusline.enable = lib.mkEnableOption "Claude Code statusline";
@@ -124,6 +124,19 @@ in {
       type = lib.types.lines;
       default = "";
       description = "Content for the global ~/.claude/CLAUDE.md instructions file.";
+    };
+
+    skills = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule {
+        options = {
+          content = lib.mkOption {
+            type = lib.types.lines;
+            description = "Full SKILL.md content (frontmatter + body).";
+          };
+        };
+      });
+      default = {};
+      description = "Claude Code skills written to ~/.claude/skills/<name>/SKILL.md.";
     };
 
     mcpServers = lib.mkOption {
@@ -155,6 +168,13 @@ in {
     home.file.".claude/CLAUDE.md" = lib.mkIf (cfg.claudeMd != "") {
       text = cfg.claudeMd;
     };
+
+    # Skills
+    home.file = lib.mapAttrs' (name: skill:
+      lib.nameValuePair ".claude/skills/${name}/SKILL.md" {
+        text = skill.content;
+      }
+    ) cfg.skills;
 
     # Install the statusline script (only when statusline is enabled)
     home.file.".config/claude/statusline.sh" = lib.mkIf cfg.statusline.enable {
