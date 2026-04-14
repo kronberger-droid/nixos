@@ -15,6 +15,7 @@
         packages = with pkgs; [
           btop
           fastfetch
+          fuzzel
         ];
         stateVersion = "25.05";
       };
@@ -23,6 +24,7 @@
         enable = true;
         config = {
           terminal = "${pkgs.foot}/bin/foot";
+          menu = "${pkgs.fuzzel}/bin/fuzzel";
           modifier = "Mod4";
           startup = [
             {command = "${pkgs.chromium}/bin/chromium";}
