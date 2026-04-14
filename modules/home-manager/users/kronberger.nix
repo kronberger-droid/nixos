@@ -31,6 +31,8 @@ in {
       claude.claudeMd = builtins.readFile ../apps/claude-md.md;
       claude.disableAutoMemory = true;
 
+      claude.skills.rust-to-cpp.content = builtins.readFile ../apps/skills/rust-to-cpp.md;
+
       claude.mcpServers.inpdf = {
         command = "${pkgs.inpdf}/bin/inpdf";
         args = ["mcp"];
