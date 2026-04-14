@@ -1,6 +1,21 @@
 _: {
   xdg = {
     enable = true;
+    userDirs = {
+      enable = true;
+      createDirectories = true;
+      documents = "$HOME/Documents";
+      download = "$HOME/Downloads";
+      music = "$HOME/Music";
+      pictures = "$HOME/Pictures";
+      videos = "$HOME/Videos";
+      desktop = "$HOME/Desktop";
+      publicShare = "$HOME/Public";
+      templates = "$HOME/Templates";
+      extraConfig = {
+        XDG_PROGRAMMING_DIR = "$HOME/Programming";
+      };
+    };
     mimeApps = {
       enable = true;
       defaultApplications = {
