@@ -17,6 +17,36 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
   hardware.graphics.enable = true;
 
+  # GPIO 3 (pin 5) power button — press to shutdown, press again to wake
+  hardware.deviceTree.overlays = [
+    {
+      name = "gpio-shutdown";
+      dtsText = ''
+        /dts-v1/;
+        /plugin/;
+        / {
+          compatible = "brcm,bcm2711";
+          fragment@0 {
+            target-path = "/soc/gpio";
+            __overlay__ {
+              shutdown_button: shutdown_button {
+                compatible = "gpio-keys";
+                #address-cells = <1>;
+                #size-cells = <0>;
+                button: button@0 {
+                  label = "shutdown";
+                  linux,code = <116>; /* KEY_POWER */
+                  gpios = <&gpio 3 1>; /* GPIO 3, active low */
+                  debounce-interval = <50>;
+                };
+              };
+            };
+          };
+        };
+      '';
+    }
+  ];
+
   networking = {
     hostName = "mediaPi";
     networkmanager.enable = true;
