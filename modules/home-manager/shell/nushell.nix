@@ -27,6 +27,12 @@ in {
   xdg.configFile."nushell/utilities.nu".text = ''
     # Utility functions for various tasks
 
+    # Quick Q&A using Claude Haiku — pipe a question or pass directly
+    def ask [question?: string] {
+        let q = if ($question | is-not-empty) { $question } else { $in }
+        $q | claude -p --model haiku --system-prompt "Answer in 1-3 concise sentences. Be direct, no preamble."
+    }
+
     # Screen color picker utility for Wayland/Sway
     def color-picker [] {
         echo "In 1 sec you can pick a color!"
