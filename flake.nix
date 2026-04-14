@@ -107,6 +107,18 @@
             {
               nixpkgs.overlays = [
                 inputs.niri.overlays.niri
+                # Pin smithay git deps as FODs to avoid re-fetching on every eval.
+                # Update the hash when niri-src bumps its smithay rev in Cargo.lock.
+                (final: prev: {
+                  niri-unstable = prev.niri-unstable.overrideAttrs (old: {
+                    cargoDeps = final.rustPlatform.importCargoLock {
+                      lockFile = "${inputs.niri-src}/Cargo.lock";
+                      outputHashes = {
+                        "smithay-0.7.0" = "sha256-D1thFIY9xzmAO903OUpvTMVSXw/o7MZVDfYUG4QJJzs=";
+                      };
+                    };
+                  });
+                })
                 (_: _: {
                   rio = inputs.nixpkgs-rio.legacyPackages.${system}.rio;
                   notal = inputs.notal.packages.${system}.default;
