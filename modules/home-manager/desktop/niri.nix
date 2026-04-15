@@ -121,8 +121,8 @@ in {
       # Session
       "${modifier}+Shift+Q".action.close-window = [];
       "${modifier}+Shift+E".action.spawn = ["${config.xdg.configHome}/rofi/powermenu/powermenu.sh"];
-      "${modifier}+Shift+P".action.spawn = ["${pkgs.bitwarden-desktop}/bin/bitwarden"];
-      "${modifier}+Shift+W".action.spawn = ["${pkgs.rofi-rbw-wayland}/bin/rofi-rbw"];
+      "${modifier}+Shift+P".action.spawn = ["${pkgs.proton-pass}/bin/proton-pass"];
+      # "${modifier}+Shift+W".action.spawn = ["${config.home.homeDirectory}/.local/bin/rofi-proton-pass"];
       "${modifier}+Shift+B".action.spawn = ["qutebrowser"];
 
       # Notifications
@@ -373,6 +373,14 @@ in {
       # Bitwarden
       {
         matches = [{app-id = "^Bitwarden$";}];
+        open-floating = true;
+        default-column-width = {proportion = 0.6;};
+        default-window-height = {proportion = 0.7;};
+      }
+
+      # Proton Pass
+      {
+        matches = [{app-id = "^electron$"; title = "^Proton Pass$";}];
         open-floating = true;
         default-column-width = {proportion = 0.6;};
         default-window-height = {proportion = 0.7;};

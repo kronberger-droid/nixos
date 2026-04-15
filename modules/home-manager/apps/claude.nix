@@ -164,23 +164,27 @@ in {
   };
 
   config = lib.mkIf hasAnyConfig {
-    # Global CLAUDE.md instructions
-    home.file.".claude/CLAUDE.md" = lib.mkIf (cfg.claudeMd != "") {
-      text = cfg.claudeMd;
-    };
+    home.file = lib.mkMerge [
+      # Global CLAUDE.md instructions
+      (lib.mkIf (cfg.claudeMd != "") {
+        ".claude/CLAUDE.md".text = cfg.claudeMd;
+      })
 
-    # Skills
-    home.file = lib.mapAttrs' (name: skill:
-      lib.nameValuePair ".claude/skills/${name}/SKILL.md" {
-        text = skill.content;
-      }
-    ) cfg.skills;
+      # Skills
+      (lib.mapAttrs' (name: skill:
+        lib.nameValuePair ".claude/skills/${name}/SKILL.md" {
+          text = skill.content;
+        }
+      ) cfg.skills)
 
-    # Install the statusline script (only when statusline is enabled)
-    home.file.".config/claude/statusline.sh" = lib.mkIf cfg.statusline.enable {
-      source = statuslineScript;
-      executable = true;
-    };
+      # Install the statusline script (only when statusline is enabled)
+      (lib.mkIf cfg.statusline.enable {
+        ".config/claude/statusline.sh" = {
+          source = statuslineScript;
+          executable = true;
+        };
+      })
+    ];
 
     # Activation script to merge settings (statusline + plugins) into ~/.claude/settings.json
     home.activation.claudeSettings = lib.mkIf (cfg.statusline.enable || cfg.plugins != [] || cfg.disableAutoMemory) (lib.hm.dag.entryAfter ["writeBoundary"] ''

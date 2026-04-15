@@ -4,6 +4,7 @@ _: {
     userDirs = {
       enable = true;
       createDirectories = true;
+      setSessionVariables = true;
       documents = "$HOME/Documents";
       download = "$HOME/Downloads";
       music = "$HOME/Music";
@@ -13,7 +14,7 @@ _: {
       publicShare = "$HOME/Public";
       templates = "$HOME/Templates";
       extraConfig = {
-        XDG_PROGRAMMING_DIR = "$HOME/Programming";
+        PROGRAMMING = "$HOME/Programming";
       };
     };
     mimeApps = {
