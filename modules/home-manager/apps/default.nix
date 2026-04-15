@@ -3,6 +3,7 @@
     ./packages.nix
     ./firefox.nix
     ./bitwarden.nix
+    ./proton-pass.nix
     ./nchat.nix
     ./quickemu.nix
     ./claude.nix
