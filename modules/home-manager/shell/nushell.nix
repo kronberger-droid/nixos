@@ -252,6 +252,7 @@ in {
           template?: string                                  # template name for init (e.g. rust-cli, rust-gui)
           --update (-u)                                      # update flake inputs first
           --dir (-d): string = "${dirs.nixosConfig}"           # flake directory
+          --remote (-r)                                      # build on homeserver instead of locally
       ] {
           if $action == "init" {
               let templates_dir = ("${dirs.templates}" | path expand)
@@ -299,6 +300,21 @@ in {
           if $action == "rollback" {
               print $"(ansi yellow)Rolling back to previous generation...(ansi reset)"
               sudo nixos-rebuild switch --rollback
+              return
+          }
+
+          if $remote {
+              if $action not-in ["switch" "boot" "test" "build"] {
+                  print $"(ansi red)Remote build only supports: switch, boot, test, build(ansi reset)"
+                  return
+              }
+              print $"(ansi cyan)Building on homeserver...(ansi reset)"
+              try {
+                  $env.GIT_LFS_SKIP_SMUDGE = "1"
+                  sudo nixos-rebuild $action --flake $flake_dir --build-host kronberger@192.168.2.54
+              } catch {
+                  print $"\n(ansi yellow)Remote build interrupted or failed.(ansi reset)"
+              }
               return
           }
 

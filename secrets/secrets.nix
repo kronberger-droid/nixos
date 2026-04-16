@@ -12,4 +12,5 @@ in {
   "tuwien-vpn-totp.age".publicKeys = [intelNuc spectre];
   "spotify-password.age".publicKeys = [intelNuc spectre];
   "miniflux-credentials.age".publicKeys = [homeserver];
+  "harmonia-private-key.age".publicKeys = [homeserver];
 }

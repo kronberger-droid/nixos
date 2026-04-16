@@ -63,25 +63,6 @@
 - Sizing: `width: 100%`, `height: 80%`
 - Title: `title: [Plot Title]`
 
-## Vault Context (notal)
+## Vault Context
 
-My Obsidian vault is connected via the `notal` MCP server. Use it as dynamic context and memory.
-
-### When to read from the vault
-- **Before non-trivial tasks**: read `_context/active-projects.md` for current priorities
-- **When working on a topic**: use `search_notes` to find related notes in the vault
-- **When you need background**: use `get_links` to follow wikilinks from relevant notes
-- **When you need my preferences**: read `_context/preferences.md`
-
-### When to write to the vault
-- **After significant sessions**: write a brief summary to `_context/claude/session-YYYY-MM-DD-topic.md` with frontmatter `type: session-log`
-- **When learning something non-obvious about a project**: write to `_context/claude/learnings.md`
-- **When a decision is made**: write to `_context/claude/decisions.md`
-- Only write when there's something worth remembering across sessions. Don't write noise.
-
-### Vault conventions
-- Notes use YAML frontmatter with `type`, `status`, `tags` fields
-- Links use `[[wikilinks]]` — follow them with `get_links` for context chains
-- Tags use `#tag` and `#parent/child` format
-- The `_context/` folder is the shared interface between us
-- The `_context/claude/` subfolder is where you write — I review in Obsidian
+My Obsidian vault is at `~/Documents/notes/general-vault/`. Use the `/vault` skill to interact with it — read notes, search, write session logs, and load context. The skill uses Claude's built-in file tools (Read, Write, Edit, Grep, Glob) directly on the vault files.

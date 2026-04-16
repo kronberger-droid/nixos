@@ -14,6 +14,13 @@
     owner = "root";
   };
 
+  age.secrets.harmonia-private-key = {
+    file = "${inputs.self}/secrets/harmonia-private-key.age";
+    path = "/run/secrets/harmonia-private-key";
+    mode = "0400";
+    owner = "harmonia";
+  };
+
   # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -35,7 +42,7 @@
     firewall = {
       enable = true;
       allowPing = false;
-      allowedTCPPorts = [22 53 3080 8070 9443];
+      allowedTCPPorts = [22 53 3080 5000 8070 9443];
       allowedUDPPorts = [53];
 
       # Log dropped packets (limited to prevent log spam)
@@ -143,6 +150,12 @@
   };
 
   services.tailscale.enable = true;
+
+  # Binary cache — serves /nix/store to other machines on the network
+  services.harmonia.cache = {
+    enable = true;
+    signKeyPath = "/run/secrets/harmonia-private-key";
+  };
 
   # DNS + ad blocking — accessible on LAN (:53) and web UI (:3080)
   services.adguardhome = {

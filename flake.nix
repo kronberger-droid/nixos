@@ -62,10 +62,6 @@
       url = "git+https://git.lix.systems/lix-project/nixos-module?ref=release-2.93";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    notal = {
-      url = "github:kronberger-droid/notal";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     deploy-rs = {
       url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -121,7 +117,6 @@
                 })
                 (_: _: {
                   rio = inputs.nixpkgs-rio.legacyPackages.${system}.rio;
-                  notal = inputs.notal.packages.${system}.default;
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                 })
               ];
