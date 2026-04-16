@@ -601,26 +601,6 @@
         "type": "github"
       }
     },
-    "notal": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1776114035,
-        "narHash": "sha256-EYqX4Ry/B8wJgmPMI58dqN6wAUAmlOXCu0+Ipx4TjKA=",
-        "owner": "kronberger-droid",
-        "repo": "notal",
-        "rev": "eee81e8f07e09e4bc20faf98f566a90cc8979b19",
-        "type": "github"
-      },
-      "original": {
-        "owner": "kronberger-droid",
-        "repo": "notal",
-        "type": "github"
-      }
-    },
     "oo7-nixos": {
       "inputs": {
         "nixpkgs": [
@@ -707,7 +687,6 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "nixpkgs-rio": "nixpkgs-rio",
-        "notal": "notal",
         "oo7-nixos": "oo7-nixos",
         "starship-nerd-fonts": "starship-nerd-fonts"
       }

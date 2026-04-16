@@ -22,6 +22,7 @@ in {
     # ── Shared ───────────────────────────────────────────────────
     {
       programs.ssh.startAgent = false;
+      programs.ssh.enableAskPassword = false;
       environment.systemPackages = [pkgs.libsecret];
     }
 

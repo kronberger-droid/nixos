@@ -221,7 +221,7 @@ in {
         [ -z "$SELECTED" ] && exit 0
 
         # Extract VPN name (strip "[ON]  " or "[OFF] " prefix)
-        VPN_NAME=$(echo "$SELECTED" | ${pkgs.sd}/bin/sd '^\[O[NF]*\] *' '''')
+        VPN_NAME=$(echo "$SELECTED" | ${pkgs.sd}/bin/sd '^\[O[NF]*\] *' "")
 
         case "$VPN_NAME" in
             Tailscale)

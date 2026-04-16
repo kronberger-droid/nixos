@@ -112,7 +112,7 @@ in {
   options.claude = {
     statusline.enable = lib.mkEnableOption "Claude Code statusline";
 
-    disableAutoMemory = lib.mkEnableOption "disable Claude Code auto-memory (use Obsidian vault via notal instead)";
+    disableAutoMemory = lib.mkEnableOption "disable Claude Code auto-memory";
 
     plugins = lib.mkOption {
       type = lib.types.listOf lib.types.str;

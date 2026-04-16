@@ -29,18 +29,13 @@ in {
         "rust-analyzer-lsp@claude-plugins-official"
       ];
       claude.claudeMd = builtins.readFile ../apps/claude-md.md;
-      claude.disableAutoMemory = true;
 
       claude.skills.rust-to-cpp.content = builtins.readFile ../apps/skills/rust-to-cpp.md;
+      claude.skills.vault.content = builtins.readFile ../apps/skills/vault.md;
 
       claude.mcpServers.inpdf = {
         command = "${pkgs.inpdf}/bin/inpdf";
         args = ["mcp"];
-      };
-
-      claude.mcpServers.notal = {
-        command = "${pkgs.notal}/bin/notal";
-        args = ["--vault-path" "/home/kronberger/Documents/notes/general-vault/"];
       };
 
       programs.arrabbiata-tui = {
