@@ -2,7 +2,7 @@ _: {
   nix.settings = {
     substituters = [
       "https://cache.nixos.org/"
-      "http://192.168.2.54:5000"
+      "http://100.92.46.97:5001"
       "https://nix-community.cachix.org"
       "https://kronberger-droid.cachix.org"
     ];
