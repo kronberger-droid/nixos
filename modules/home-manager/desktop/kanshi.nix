@@ -42,6 +42,23 @@
             }
           ];
         }
+        # Presentation mode - mirror to external display
+        {
+          profile.name = "presentation";
+          profile.outputs = [
+            {
+              criteria = "eDP-1";
+              mode = "1920x1080";
+              position = "0,0";
+              scale = 1.0;
+            }
+            {
+              criteria = "DP-*";
+              mode = "1920x1080";
+              position = "0,0";
+            }
+          ];
+        }
       ]
       else if host == "spectre"
       then [
