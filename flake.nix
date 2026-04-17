@@ -15,6 +15,9 @@
       url = "github:kronberger-droid/rio";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    claude-code = {
+      url = "github:sadjow/claude-code-nix";
+    };
     dropkitten = {
       url = "github:kronberger-droid/dropkitten";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -119,6 +122,7 @@
                 (_: _: {
                   rio = inputs.rio.packages.${system}.rio;
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
+                  claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
                 })
               ];
             }
