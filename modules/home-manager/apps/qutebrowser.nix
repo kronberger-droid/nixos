@@ -12,10 +12,16 @@ in {
         javascript.clipboard = "access";
       };
 
-      # Prefer dark mode in websites that support it
+      # Force dark mode on all pages using perceptual lightness inversion
       colors.webpage = {
         preferred_color_scheme = "dark";
         darkmode.enabled = true;
+        darkmode.algorithm = "lightness-cielab";
+        darkmode.policy.page = "smart";
+        darkmode.policy.images = "never";
+        darkmode.contrast = 0.0;
+        darkmode.threshold.background = 205;
+        darkmode.threshold.foreground = 30;
       };
 
       # Completion bar (Ctrl+O, :commands)
