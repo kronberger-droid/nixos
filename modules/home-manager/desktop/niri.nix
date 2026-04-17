@@ -25,7 +25,17 @@
       else "";
   in ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${idPart}${cwdPart}${execPart}"];
 
+  # Spawn on current workspace using niri's one-shot spawn rules
+  spawnOnWs = pkgs.writeShellScript "spawn-on-ws" ''
+    WS_IDX=$(niri msg -j workspaces | ${pkgs.jq}/bin/jq -r '[.[] | select(.is_focused)][0].idx')
+    exec niri msg action spawn --rule "open-on-workspace \"$WS_IDX\"" -- "$@"
+  '';
+
+  # Wrap a spawn command list to pin the window to the current workspace
+  wsSpawn = cmd: ["${spawnOnWs}"] ++ cmd;
+
   scratchpadToggle = "${config.xdg.configHome}/waybar/scratchpad-toggle.sh";
+
 in {
   home.packages = with pkgs; [
     fuzzel
@@ -109,7 +119,7 @@ in {
       # Applications
       "${modifier}+Return".action.spawn = termSpawn {cwdArg = true;};
       "${modifier}+D".action.spawn = ["${pkgs.rofi}/bin/rofi" "-show" "drun"];
-      "${modifier}+Shift+S".action.spawn = ["${pkgs.firefox}/bin/firefox"];
+      "${modifier}+Shift+S".action.spawn = wsSpawn ["${pkgs.firefox}/bin/firefox"];
       "${modifier}+Shift+Return".action.spawn = termSpawn {floating = true; cwdArg = true;};
       "${modifier}+Shift+T".action.spawn = termSpawn {floating = true; exec = "${pkgs.btop}/bin/btop";};
       "${modifier}+Shift+X".action.spawn = termSpawn {floating = true; exec = "${pkgs.yazi}/bin/yazi $(${cwd})";};
