@@ -1,7 +1,4 @@
-source ~/.zoxide.nu
-
 # Import modular configuration files
-source ~/.config/nushell/development.nu
 source ~/.config/nushell/utilities.nu
 source ~/.config/nushell/keybindings.nu
 

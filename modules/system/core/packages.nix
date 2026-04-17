@@ -36,7 +36,6 @@
     eza
     bat
     bat-extras.core
-    zoxide
     erdtree
     ripgrep
     rip2

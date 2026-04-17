@@ -400,7 +400,11 @@ in {
 
     extraEnv = builtins.readFile ./nushell/extra_env.nu;
 
-    extraConfig = builtins.readFile ./nushell/extra_config.nu;
+    extraConfig =
+      (lib.optionalString hasTerminal ''
+        source ~/.config/nushell/development.nu
+      '')
+      + builtins.readFile ./nushell/extra_config.nu;
 
     shellAliases =
       {
