@@ -15,6 +15,7 @@
       appIdFlag = "--app-id";
       hasKittens = false;
       floatingAppId = "floating_shell";
+      cwdViaExec = true; # --working-dir is broken; use -e cd workaround
     };
 
     kitty = {
@@ -24,6 +25,7 @@
       appIdFlag = "--app-id";
       hasKittens = true;
       floatingAppId = "floating_shell";
+      cwdViaExec = false;
     };
 
     alacritty = {
@@ -33,6 +35,7 @@
       appIdFlag = "--class";
       hasKittens = false;
       floatingAppId = "floating_shell";
+      cwdViaExec = false;
     };
   };
 
@@ -85,6 +88,12 @@ in {
       readOnly = true;
       description = "App ID value for floating windows (null if not supported)";
     };
+
+    cwdViaExec = lib.mkOption {
+      type = lib.types.bool;
+      readOnly = true;
+      description = "Use -e cd workaround instead of --working-dir flag";
+    };
   };
 
   config.terminal = {
@@ -94,5 +103,6 @@ in {
     appIdFlag = lib.mkDefault selectedConfig.appIdFlag;
     hasKittens = lib.mkDefault selectedConfig.hasKittens;
     floatingAppId = lib.mkDefault selectedConfig.floatingAppId;
+    cwdViaExec = lib.mkDefault selectedConfig.cwdViaExec;
   };
 }

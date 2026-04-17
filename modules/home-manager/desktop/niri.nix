@@ -15,12 +15,18 @@
       if floating && config.terminal.floatingAppId != null
       then "${config.terminal.appIdFlag} ${config.terminal.floatingAppId} "
       else "";
+    # When --working-dir is broken (e.g. Rio), use -e bash -c "cd ... && exec cmd"
     cwdPart =
-      if cwdArg
+      if cwdArg && !config.terminal.cwdViaExec
       then "${config.terminal.workingDirFlag} $(${cwd}) "
       else "";
     execPart =
-      if exec != null
+      if cwdArg && config.terminal.cwdViaExec
+      then
+        if exec != null
+        then "${config.terminal.execFlag} ${pkgs.bash}/bin/bash -c \"cd '$(${cwd})' && exec ${exec}\""
+        else "${config.terminal.execFlag} ${pkgs.bash}/bin/bash -c \"cd '$(${cwd})' && exec \\$SHELL\""
+      else if exec != null
       then "${config.terminal.execFlag} ${exec} "
       else "";
   in ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${idPart}${cwdPart}${execPart}"];

@@ -4,46 +4,63 @@
     settings = {
       # Font configuration
       fonts = {
-        size = 14;
+        size = 15;
         hinting = true;
         use-drawable-chars = true;
-        features = []; # no ligatures — match kitty behavior
+        features = []; # JetBrainsMonoNL has no ligatures by design
 
-        # Monochrome icons instead of colored emoji
-        emoji = {
-          family = "Symbols Nerd Font Mono";
-        };
+        # Map Unicode ranges missing from Nerd Font to Noto Sans Symbols 2
+        symbol-map = [
+          { start = "2300"; end = "23FF"; font-family = "Noto Sans Symbols 2"; } # Misc Technical (⏱⏵⏸)
+          { start = "2600"; end = "26FF"; font-family = "Noto Sans Symbols 2"; } # Misc Symbols (☀☁☂)
+          { start = "2700"; end = "27BF"; font-family = "Noto Sans Symbols 2"; } # Dingbats (✔✘✂)
+          { start = "2800"; end = "28FF"; font-family = "Noto Sans Symbols 2"; } # Braille patterns
+        ];
 
         regular = {
-          family = "JetBrainsMono Nerd Font";
+          family = "JetBrainsMonoNL Nerd Font";
           style = "Normal";
-          weight = 400;
+          weight = 600;
         };
         bold = {
-          family = "JetBrainsMono Nerd Font";
+          family = "JetBrainsMonoNL Nerd Font";
           style = "Normal";
-          weight = 700;
+          weight = 800;
         };
         italic = {
-          family = "JetBrainsMono Nerd Font";
+          family = "JetBrainsMonoNL Nerd Font";
           style = "Italic";
-          weight = 400;
+          weight = 600;
         };
         bold-italic = {
-          family = "JetBrainsMono Nerd Font";
+          family = "JetBrainsMonoNL Nerd Font";
           style = "Italic";
-          weight = 700;
+          weight = 800;
         };
       };
 
       # Text rendering
-      line-height = 1.05;
+      line-height = 1.0; # >1.0 causes mouse selection offset (github.com/raphamorim/rio/issues/1101)
       padding-x = 4;
+
+      # Hide mouse cursor while typing
+      hide-mouse-cursor-when-typing = true;
+
+      # Auto-copy on select (no Ctrl+Shift+C needed)
+      copy-on-select = true;
+
+      # Cursor
+      cursor = {
+        shape = "block";
+        blinking = true;
+        blinking-interval = 600;
+      };
 
       # Renderer
       renderer = {
         backend = "Vulkan";
         performance = "High";
+        disable-unfocused-render = true;
       };
 
       # Window settings
@@ -55,9 +72,10 @@
       # Disable quit confirmation
       confirm-before-quit = false;
 
-      # Navigation
+      # Navigation — Plain since we use niri/zellij for splits/tabs
       navigation = {
         mode = "Plain";
+        use-split = false;
       };
 
       # Theme - using base16 scheme to match Kitty
