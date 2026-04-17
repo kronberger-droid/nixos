@@ -9,33 +9,35 @@
         use-drawable-chars = true;
         features = []; # JetBrainsMonoNL has no ligatures by design
 
-        # Map Unicode ranges missing from Nerd Font to Noto Sans Symbols 2
+        # Map Unicode ranges missing from JetBrainsMono Nerd Font.
+        # Prefer Symbols Nerd Font Mono (monospace) where it has coverage;
+        # fall back to Noto Sans Symbols 2 only for Braille (not in Nerd Font).
         symbol-map = [
-          { start = "2300"; end = "23FF"; font-family = "Noto Sans Symbols 2"; } # Misc Technical (⏱⏵⏸)
-          { start = "2600"; end = "26FF"; font-family = "Noto Sans Symbols 2"; } # Misc Symbols (☀☁☂)
-          { start = "2700"; end = "27BF"; font-family = "Noto Sans Symbols 2"; } # Dingbats (✔✘✂)
-          { start = "2800"; end = "28FF"; font-family = "Noto Sans Symbols 2"; } # Braille patterns
+          { start = "2300"; end = "23FF"; font-family = "Noto Sans Symbols 2"; } # Misc Technical — clocks ⏰⏱⏲, media ⏵⏸ (gaps in Nerd Font Mono)
+          { start = "2600"; end = "26FF"; font-family = "Symbols Nerd Font Mono"; } # Misc Symbols ☀☁☂
+          { start = "2700"; end = "27BF"; font-family = "Symbols Nerd Font Mono"; } # Dingbats ✔✘✂
+          { start = "2800"; end = "28FF"; font-family = "Noto Sans Symbols 2"; }    # Braille (spinners, btop)
         ];
 
         regular = {
           family = "JetBrainsMonoNL Nerd Font";
           style = "Normal";
-          weight = 600;
+          weight = 400;
         };
         bold = {
           family = "JetBrainsMonoNL Nerd Font";
           style = "Normal";
-          weight = 800;
+          weight = 700;
         };
         italic = {
           family = "JetBrainsMonoNL Nerd Font";
           style = "Italic";
-          weight = 600;
+          weight = 400;
         };
         bold-italic = {
           family = "JetBrainsMonoNL Nerd Font";
           style = "Italic";
-          weight = 800;
+          weight = 700;
         };
       };
 
@@ -43,24 +45,20 @@
       line-height = 1.0; # >1.0 causes mouse selection offset (github.com/raphamorim/rio/issues/1101)
       padding-x = 4;
 
-      # Hide mouse cursor while typing
-      hide-mouse-cursor-when-typing = true;
-
       # Auto-copy on select (no Ctrl+Shift+C needed)
       copy-on-select = true;
 
       # Cursor
       cursor = {
         shape = "block";
-        blinking = true;
-        blinking-interval = 600;
+        blinking = false;
       };
 
       # Renderer
       renderer = {
         backend = "Vulkan";
         performance = "High";
-        disable-unfocused-render = true;
+        disable-unfocused-render = false; # true stops rendering when unfocused, hiding Helix/tail-like output until refocus
       };
 
       # Window settings
