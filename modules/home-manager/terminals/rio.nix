@@ -9,30 +9,31 @@
         use-drawable-chars = true;
         features = []; # JetBrainsMonoNL has no ligatures by design
 
-        # Map Unicode ranges missing from JetBrainsMono Nerd Font.
-        # Prefer Symbols Nerd Font Mono (monospace) where it has coverage;
-        # fall back to Noto Sans Symbols 2 only for Braille (not in Nerd Font).
+        # Map Unicode ranges where JetBrainsMono Nerd Font has poor or no coverage
+        # to JuliaMono, a mono-metric symbol font that matches terminal cells.
+        # Note: "Symbols Nerd Font Mono" only covers Nerd Font icon ranges (PUA),
+        # not standard Unicode symbol blocks — don't use it here.
         symbol-map = [
-          { start = "2300"; end = "23FF"; font-family = "Noto Sans Symbols 2"; } # Misc Technical — clocks ⏰⏱⏲, media ⏵⏸ (gaps in Nerd Font Mono)
-          { start = "2600"; end = "26FF"; font-family = "Symbols Nerd Font Mono"; } # Misc Symbols ☀☁☂
-          { start = "2700"; end = "27BF"; font-family = "Symbols Nerd Font Mono"; } # Dingbats ✔✘✂
-          { start = "2800"; end = "28FF"; font-family = "Noto Sans Symbols 2"; }    # Braille (spinners, btop)
+          { start = "2300"; end = "23FF"; font-family = "JuliaMono"; } # Misc Technical (⏺⏱⏵⏸)
+          { start = "2600"; end = "26FF"; font-family = "JuliaMono"; } # Misc Symbols (★☀☁☂)
+          { start = "2700"; end = "27BF"; font-family = "JuliaMono"; } # Dingbats (✔✘✂)
+          { start = "2800"; end = "28FF"; font-family = "JuliaMono"; } # Braille (spinners, btop)
         ];
 
         regular = {
           family = "JetBrainsMonoNL Nerd Font";
           style = "Normal";
-          weight = 400;
+          weight = 500; # Medium — a hair heavier than default 400
         };
         bold = {
           family = "JetBrainsMonoNL Nerd Font";
           style = "Normal";
-          weight = 700;
+          weight = 700; # Bold
         };
         italic = {
           family = "JetBrainsMonoNL Nerd Font";
           style = "Italic";
-          weight = 400;
+          weight = 500;
         };
         bold-italic = {
           family = "JetBrainsMonoNL Nerd Font";
