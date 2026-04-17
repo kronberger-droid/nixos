@@ -6,6 +6,7 @@
     dejavu_fonts
     noto-fonts
     noto-fonts-cjk-sans
+    julia-mono # Mono symbol fallback for Rio symbol-map (★ ☀ ✔ ⏺ etc.)
 
     liberation_ttf
     cm_unicode
