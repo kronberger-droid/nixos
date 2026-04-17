@@ -11,8 +11,9 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixpkgs-rio = {
-      url = "github:kronberger-droid/nixpkgs/rio-0.3.1";
+    rio = {
+      url = "github:kronberger-droid/rio";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     dropkitten = {
       url = "github:kronberger-droid/dropkitten";
@@ -116,7 +117,7 @@
                   });
                 })
                 (_: _: {
-                  rio = inputs.nixpkgs-rio.legacyPackages.${system}.rio;
+                  rio = inputs.rio.packages.${system}.rio;
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                 })
               ];
@@ -182,6 +183,8 @@
         };
         modules = [
           ./hosts/homeserver/configuration.nix
+          home-manager.nixosModules.home-manager
+          ./modules/home-manager/users/kronberger-server.nix
           agenix.nixosModules.default
           {environment.systemPackages = [agenix.packages.${x86System}.default];}
           inputs.lix-module.nixosModules.default
