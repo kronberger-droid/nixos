@@ -110,7 +110,7 @@
                     cargoDeps = final.rustPlatform.importCargoLock {
                       lockFile = "${inputs.niri-src}/Cargo.lock";
                       outputHashes = {
-                        "smithay-0.7.0" = "sha256-D1thFIY9xzmAO903OUpvTMVSXw/o7MZVDfYUG4QJJzs=";
+                        "smithay-0.7.0" = "sha256-NuTaQ+977mXtLmNDOkgGoG5MXmcRMPlBvn/qkCzH2aM=";
                       };
                     };
                   });
