@@ -1,10 +1,18 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: let
+  mkSymlink = path:
+    config.lib.file.mkOutOfStoreSymlink
+    "/home/kronberger/.config/nixos/${path}";
+in {
+  xdg.configFile."yazi/flavors/base16-transparent.yazi/flavor.toml".source =
+    mkSymlink "modules/home-manager/apps/yazi/base16-transparent.toml";
+
   programs.yazi = {
     enable = true;
     shellWrapperName = "y";
-    flavors = {
-      "base16-transparent" = ./yazi/base16-transparent.toml;
-    };
     plugins = {
       inherit (pkgs.yaziPlugins) bookmarks;
     };

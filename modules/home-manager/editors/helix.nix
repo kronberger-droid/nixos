@@ -1,4 +1,54 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  config,
+  ...
+}: let
+  scheme = config.scheme;
+
+  # Generated palette theme — maps scheme colors to names used by base16_transparent
+  base16PaletteTheme = pkgs.writeText "base16-nix.toml" ''
+    inherits = "base16_transparent"
+
+    [palette]
+    # Generic names (used by base16_transparent's style rules)
+    black = "#${scheme.base00}"
+    red = "#${scheme.base08}"
+    green = "#${scheme.base0B}"
+    yellow = "#${scheme.base0A}"
+    blue = "#${scheme.base0D}"
+    magenta = "#${scheme.base0E}"
+    cyan = "#${scheme.base0C}"
+    white = "#${scheme.base05}"
+    gray = "#${scheme.base03}"
+    light-gray = "#${scheme.base04}"
+    light-red = "#${scheme.base08}"
+    light-green = "#${scheme.base0B}"
+    light-yellow = "#${scheme.base0A}"
+    light-blue = "#${scheme.base0D}"
+    light-magenta = "#${scheme.base0E}"
+    light-cyan = "#${scheme.base0C}"
+    # Base16 names (for overlay use)
+    base00 = "#${scheme.base00}"
+    base01 = "#${scheme.base01}"
+    base02 = "#${scheme.base02}"
+    base03 = "#${scheme.base03}"
+    base04 = "#${scheme.base04}"
+    base05 = "#${scheme.base05}"
+    base06 = "#${scheme.base06}"
+    base07 = "#${scheme.base07}"
+    base08 = "#${scheme.base08}"
+    base09 = "#${scheme.base09}"
+    base0A = "#${scheme.base0A}"
+    base0B = "#${scheme.base0B}"
+    base0C = "#${scheme.base0C}"
+    base0D = "#${scheme.base0D}"
+    base0E = "#${scheme.base0E}"
+    base0F = "#${scheme.base0F}"
+  '';
+
+  nixosConfigPath = "/home/kronberger/.config/nixos";
+  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${nixosConfigPath}/${path}";
+in {
   imports = [
     ./helix/dprint.nix
   ];
@@ -47,10 +97,13 @@
     ];
 
     file = {
-      ".config/helix/ignore".source = ./helix/ignore;
-      ".config/harper/dictionary.txt".source = ./helix/harper_dict.txt;
-      ".config/rumdl/rumdl.toml".source = ./helix/rumdl.toml;
-      ".config/helix/themes/custom-base16.toml".source = ./helix/custom-base16.toml;
+      # Nix-generated palette (inherits base16_transparent + scheme colors)
+      ".config/helix/themes/base16-nix.toml".source = base16PaletteTheme;
+      # Hot-reloadable files — symlinked directly to the repo
+      ".config/helix/themes/custom-base16.toml".source = mkSymlink "modules/home-manager/editors/helix/custom-base16.toml";
+      ".config/helix/ignore".source = mkSymlink "modules/home-manager/editors/helix/ignore";
+      ".config/harper/dictionary.txt".source = mkSymlink "modules/home-manager/editors/helix/harper_dict.txt";
+      ".config/rumdl/rumdl.toml".source = mkSymlink "modules/home-manager/editors/helix/rumdl.toml";
     };
   };
 

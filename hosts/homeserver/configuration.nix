@@ -41,7 +41,7 @@
     firewall = {
       enable = true;
       allowPing = false;
-      allowedTCPPorts = [22 53 3080 5001 8070 9443];
+      allowedTCPPorts = [22 53 3080 5000 5001 8070 9443];
       allowedUDPPorts = [53];
 
       # Log dropped packets (limited to prevent log spam)
