@@ -357,7 +357,11 @@ in {
             niri msg action focus-window --id "$WINDOW_ID"
           fi
         else
-          ${config.terminal.bin} ${config.terminal.appIdFlag} "$APP_ID" ${config.terminal.execFlag} ${pkgs.zellij}/bin/zellij -l ncspot attach "$SESSION_NAME" --create
+          if ${pkgs.zellij}/bin/zellij list-sessions -s -n 2>/dev/null | grep -qx "$SESSION_NAME"; then
+            ${config.terminal.bin} ${config.terminal.appIdFlag} "$APP_ID" ${config.terminal.execFlag} ${pkgs.zellij}/bin/zellij attach "$SESSION_NAME"
+          else
+            ${config.terminal.bin} ${config.terminal.appIdFlag} "$APP_ID" ${config.terminal.execFlag} ${pkgs.zellij}/bin/zellij -s "$SESSION_NAME" -n ncspot
+          fi
           await_state "open"
         fi
       '';
