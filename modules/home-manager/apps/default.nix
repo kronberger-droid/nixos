@@ -15,5 +15,6 @@
     ./ai.nix
     ./qutebrowser.nix
     ./syncthing.nix
+    ./obsidian.nix
   ];
 }
