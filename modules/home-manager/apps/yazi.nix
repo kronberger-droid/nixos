@@ -72,7 +72,7 @@ in {
         }
         {
           on = ["g" "n"];
-          run = "cd ~/Documents/notes/general-vault";
+          run = "cd ${config.vault.path}";
           desc = "Go to Obsidian vault";
         }
         {

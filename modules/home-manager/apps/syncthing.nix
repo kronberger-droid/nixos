@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   host,
   ...
@@ -39,7 +40,7 @@ in
 
           # Obsidian vault — synced to phone too
           "general-vault" = {
-            path = "~/Documents/notes/general-vault";
+            path = config.vault.path;
             devices = builtins.attrNames otherDevices ++ builtins.attrNames mobileDevices;
             versioning = {
               type = "staggered";
