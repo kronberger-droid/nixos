@@ -1,7 +1,8 @@
-{pkgs, arrabbiata, inputs, ...}: {
+{pkgs, lib, arrabbiata, inputs, ...}: {
   imports = [
     ./hardware-configuration.nix
-    ../../modules/system/core/nix-caches.nix
+    ../../modules/system/core/nix-settings.nix
+    ../../modules/system/core/locale.nix
     ../../modules/system/services/arrabbiata.nix
     ../../modules/system/services/syncthing.nix
   ];
@@ -41,7 +42,7 @@
     firewall = {
       enable = true;
       allowPing = false;
-      allowedTCPPorts = [22 53 3080 5000 5001 8070 9443];
+      allowedTCPPorts = [22 53 3080 5001 8070];
       allowedUDPPorts = [53];
 
       # Log dropped packets (limited to prevent log spam)
@@ -258,11 +259,8 @@
     "fs.suid_dumpable" = 0;
   };
 
-  # Nix settings
-  nix.settings = {
-    experimental-features = ["nix-command" "flakes"];
-    trusted-users = ["root" "kronberger"];
-  };
+  # Override: don't list self as a remote builder
+  nix.buildMachines = lib.mkForce [];
 
   # Disable sleep — it's a server
   systemd.sleep.settings.Sleep = {
