@@ -310,8 +310,7 @@ in {
               }
               print $"(ansi cyan)Building on homeserver...(ansi reset)"
               try {
-                  $env.GIT_LFS_SKIP_SMUDGE = "1"
-                  sudo nixos-rebuild $action --flake $flake_dir --build-host kronberger@192.168.2.54
+                      sudo nixos-rebuild $action --flake $flake_dir --build-host kronberger@192.168.2.54
               } catch {
                   print $"\n(ansi yellow)Remote build interrupted or failed.(ansi reset)"
               }
@@ -322,7 +321,6 @@ in {
           let nh_args = if $action == "dry" { ["--dry"] } else { [] }
 
           try {
-              $env.GIT_LFS_SKIP_SMUDGE = "1"
               nh os $nh_action $flake_dir ...$nh_args
           } catch {
               print $"\n(ansi yellow)Build interrupted or failed.(ansi reset)"
