@@ -262,6 +262,10 @@
   # Override: don't list self as a remote builder
   nix.buildMachines = lib.mkForce [];
 
+  # Limit build parallelism to avoid OOM
+  nix.settings.max-jobs = 2;
+  nix.settings.cores = 2;
+
   # Disable sleep — it's a server
   systemd.sleep.settings.Sleep = {
     AllowSuspend = "no";
