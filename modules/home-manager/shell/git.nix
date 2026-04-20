@@ -19,7 +19,6 @@
 
     git = {
       enable = true;
-      lfs.enable = true;
       signing.format = null;
       ignores = [
         ".rumdl_cache"
@@ -33,14 +32,7 @@
           email = "kronberger@proton.me";
         };
         init.defaultBranch = "main";
-        url."git@github.com:".insteadOf = "https://github.com/";
         pull.rebase = true;
-        filter.lfs = {
-          required = true;
-          clean = "git-lfs clean -- %f";
-          smudge = "git-lfs smudge -- %f";
-          process = "git-lfs filter-process";
-        };
       };
     };
   };
