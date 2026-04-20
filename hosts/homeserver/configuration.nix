@@ -263,8 +263,8 @@
   nix.buildMachines = lib.mkForce [];
 
   # Limit build parallelism to avoid OOM
-  nix.settings.max-jobs = 2;
-  nix.settings.cores = 2;
+  nix.settings.max-jobs = 4;
+  nix.settings.cores = 4;
 
   # Disable sleep — it's a server
   systemd.sleep.settings.Sleep = {
