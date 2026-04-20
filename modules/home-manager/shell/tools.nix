@@ -18,6 +18,8 @@
   };
 
   home.packages = with pkgs; [
+    bat
+    rip2
     fastfetch
     translate-shell
     wiki-tui
