@@ -431,9 +431,9 @@ in {
       {
         command_timeout = 2000;
         git_status = {
-          ahead = "↑$\{count}";
-          behind = "↓$\{count}";
-          diverged = "↑$\{ahead_count}↓$\{behind_count}";
+          ahead = "↑";
+          behind = "↓";
+          diverged = "↕";
         };
         git_branch.symbol = " ";
         nix_shell = {
