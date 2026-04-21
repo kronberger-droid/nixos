@@ -33,6 +33,11 @@ in {
         $q | claude -p --model haiku --system-prompt "Answer in 1-3 concise sentences. Be direct, no preamble."
     }
 
+    # Launch a GUI app detached from this shell — survives closing the terminal
+    def detach [...cmd: string] {
+        ^setsid -f ...$cmd out> /dev/null err> /dev/null
+    }
+
     # Screen color picker utility for Wayland/Sway
     def color-picker [] {
         echo "In 1 sec you can pick a color!"
