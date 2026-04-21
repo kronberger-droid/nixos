@@ -68,4 +68,13 @@ in {
     udisks2.enable = true;
     upower.enable = true;
   };
+
+  systemd.services.rfkill-unblock-bluetooth = {
+    wantedBy = ["multi-user.target"];
+    after = ["systemd-rfkill.service"];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.util-linux}/bin/rfkill unblock bluetooth";
+    };
+  };
 }
