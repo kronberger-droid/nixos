@@ -108,6 +108,10 @@ in {
     # Startup commands
     spawn-at-startup = [
       {command = ["${pkgs.swaybg}/bin/swaybg" "-m" "fill" "-i" "${./sway/deathpaper.jpg}"];}
+      # Warm the page cache by reading Firefox's binary + libs into RAM.
+      # No process stays running; just primes the kernel disk cache so the
+      # first real launch skips cold I/O from /nix/store.
+      {command = ["${pkgs.bash}/bin/bash" "-c" "cat ${pkgs.firefox}/lib/firefox/firefox ${pkgs.firefox}/lib/firefox/*.so > /dev/null 2>&1 &"];}
     ];
 
     animations.enable = false;
