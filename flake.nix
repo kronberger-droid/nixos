@@ -48,7 +48,8 @@
     niri = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.niri-unstable.follows = "niri-src";
+      inputs.niri-unstable.url = "github:kronberger-droid/niri";
+      inputs.niri-unstable.flake = false;
     };
     firefox-addons = {
       url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
