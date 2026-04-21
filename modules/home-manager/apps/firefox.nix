@@ -71,6 +71,14 @@ in {
         "browser.tabs.unloadOnLowMemory" = true;
         "browser.low_commit_space_threshold_mb" = 1024;
 
+        # Warm-start: defer tab work until each tab is actually focused.
+        # Makes window restore paint instantly; tabs load on click.
+        "browser.sessionstore.restore_on_demand" = true;
+        "browser.sessionstore.restore_tabs_lazily" = true;
+        "browser.sessionstore.restore_pinned_tabs_on_demand" = true;
+        # Show a blank window immediately instead of waiting for XUL.
+        "browser.startup.blankWindow" = true;
+
         # UI performance
         "browser.tabs.animate" = false;
         "browser.fullscreen.animate" = false;
