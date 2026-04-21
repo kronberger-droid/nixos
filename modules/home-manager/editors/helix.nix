@@ -222,7 +222,7 @@ in {
           file-types = ["nix"];
         };
         rust-analyzer = {
-          command = "${pkgs.rust-analyzer-unwrapped}/bin/rust-analyzer";
+          command = "rust-analyzer";
           config = {
             check.command = "clippy";
           };
