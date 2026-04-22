@@ -45,6 +45,7 @@
     dust
     ouch
     tealdeer
+    chafa
 
     # Network cli
     nmap

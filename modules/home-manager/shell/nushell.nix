@@ -415,8 +415,10 @@ in {
         cat = "bat";
         rip = "rip --graveyard ($env.HOME)/.local/share/Trash";
       }
+      // lib.optionalAttrs hasTerminal {
+        icat = "chafa";
+      }
       // lib.optionalAttrs (hasTerminal && config.terminal.hasKittens) {
-        icat = "kitten icat";
         ssh = "kitty +kitten ssh";
       };
   };
