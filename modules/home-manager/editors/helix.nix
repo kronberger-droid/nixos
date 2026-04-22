@@ -225,6 +225,7 @@ in {
           command = "rust-analyzer";
           config = {
             check.command = "clippy";
+            rustfmt.extraArgs = ["--config" "max_width=70"];
           };
         };
         harper = {
