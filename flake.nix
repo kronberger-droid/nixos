@@ -54,6 +54,14 @@
       url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Self-hosted NixOS module for the oo7 secret-service stack (daemon +
+    # ssh-agent + PAM + portal). nixpkgs packages oo7/oo7-portal/oo7-server
+    # but has no `services.oo7.*` module yet — this flake fills that gap.
+    #
+    # Retire when upstream lands a module. Watch for it via:
+    #   - https://github.com/linux-credentials/oo7/releases
+    #   - https://github.com/NixOS/nixpkgs/commits/master/pkgs/by-name/oo/oo7
+    #   - https://github.com/NixOS/nixpkgs/pulls?q=oo7+in%3Atitle
     oo7-nixos = {
       url = "github:kronberger-droid/oo7-nixos";
       inputs.nixpkgs.follows = "nixpkgs";

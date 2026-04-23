@@ -46,6 +46,10 @@ in {
     })
 
     # ── oo7 ──────────────────────────────────────────────────────
+    # `services.oo7.*` comes from the self-hosted `oo7-nixos` flake input
+    # (see flake.nix). When nixpkgs ships its own module, drop the flake
+    # input, delete the `_module.args.oo7-*` overrides, and re-point these
+    # options at the upstream names.
     (lib.mkIf (cfg == "oo7") {
       services.gnome.gnome-keyring.enable = lib.mkForce false;
       services.gnome.gcr-ssh-agent.enable = lib.mkForce false;
