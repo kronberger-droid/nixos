@@ -78,6 +78,46 @@ in {
         }
     }
 
+    # Watch every .typ file in a folder, optionally writing PDFs to a separate output dir.
+    # Each `typst watch` runs in the background; Ctrl+C stops them all.
+    def typst-watch-all [
+        folder: path                       # folder containing .typ files
+        --output (-o): path                # optional output folder for the .pdf files
+    ] {
+        let src = ($folder | path expand)
+        if not ($src | path exists) {
+            print $"Error: folder not found: ($src)"
+            return
+        }
+
+        let out = if ($output | is-empty) { $src } else { $output | path expand }
+        if not ($out | path exists) {
+            mkdir $out
+        }
+
+        let files = (glob ($src | path join "*.typ"))
+        if ($files | is-empty) {
+            print $"No .typ files in ($src)"
+            return
+        }
+
+        let pids = ($files | each { |f|
+            let f_str = ($f | into string)
+            let stem = ($f_str | path basename | str replace --regex '\.typ$' "")
+            let pdf = ($out | path join $"($stem).pdf")
+            print $"watching ($f_str) -> ($pdf)"
+            job spawn { ^typst watch $f_str $pdf out> /dev/null err> /dev/null }
+        })
+
+        print "Press Ctrl+C to stop all watchers."
+        try {
+            loop { sleep 1sec }
+        } catch {
+            $pids | each { |id| try { job kill $id } }
+            print "stopped."
+        }
+    }
+
     # QuickEMU VM management
     def emu [config?: string] {
         let emulation_dir = ("${dirs.emulation}" | path expand)
