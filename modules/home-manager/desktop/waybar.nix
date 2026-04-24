@@ -533,7 +533,9 @@ in {
         };
 
         cpu = {
-          on-click = dropkittenCmd tui.monitor;
+          # Bypass dropkitten so niri's btop_monitor window-rule controls sizing
+          # (btop needs at least 80x24, dropkitten's fractional sizing came up short).
+          on-click = "${config.terminal.bin} ${config.terminal.appIdFlag} btop_monitor ${config.terminal.execFlag} ${pkgs.btop}/bin/btop";
           format = "{usage}% ";
           tooltip = false;
         };
