@@ -17,6 +17,7 @@
     };
     claude-code = {
       url = "github:sadjow/claude-code-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     dropkitten = {
       url = "github:kronberger-droid/dropkitten";
@@ -48,6 +49,7 @@
     niri = {
       url = "github:sodiboo/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs-stable.follows = "nixpkgs";
       inputs.niri-unstable.follows = "niri-src";
     };
     firefox-addons = {
@@ -65,6 +67,7 @@
     oo7-nixos = {
       url = "github:kronberger-droid/oo7-nixos";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.oo7-ssh-agent.inputs.rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
     };
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v1.0.0";
