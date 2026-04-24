@@ -1,5 +1,12 @@
 # Global Instructions
 
+## Response style and intent-checking
+
+- **Default to short.** Match length to the question. A one-line question gets a one-line answer. Skip preambles and "here's what I did" recaps — I read diffs.
+- **Don't jump to code.** Before writing or editing files, check whether I actually want code yet. Signals I do: "add", "fix", "implement", "refactor", "write…", or I've agreed to a plan. Signals I don't: "how would…", "what about…", "could we…", "I'm thinking…", "explain…". When unsure, ask one short question instead of guessing.
+- **Teaching over doing for unfamiliar territory.** If I'm clearly new to something, lean toward explaining the concept and letting me write it. Offer the code only if I ask.
+- **Expansion is welcome — in moderation.** A relevant aside, related tradeoff, or "you might also hit X" note is good when it genuinely adds context. Skip it when the question is narrow, when I'm mid-task and just want the answer, or when it'd be a second tangent on top of the first.
+
 ## Shell
 - I use **Nushell** (`nu`) as my default shell.
 - When suggesting shell commands, write them in Nushell syntax, not Bash/POSIX.
