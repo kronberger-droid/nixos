@@ -704,11 +704,11 @@
         "systems": "systems_6"
       },
       "locked": {
-        "lastModified": 1777282145,
-        "narHash": "sha256-w5jR/Z02TgvdWkMT234r9HahvSrdV5aS5mzUoArQymA=",
+        "lastModified": 1776437545,
+        "narHash": "sha256-mzOgto8ELVrf1RWyL4BoU836HGnMBBeyWwfBFAPgoDE=",
         "owner": "kronberger-droid",
         "repo": "rio",
-        "rev": "6e95ca32656358073ed6e889602cf52ef3dc6dc2",
+        "rev": "47436f23fe135c464c93f638d11f524b270a504b",
         "type": "github"
       },
       "original": {
