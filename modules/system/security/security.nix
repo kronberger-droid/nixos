@@ -153,9 +153,10 @@
     # Disable core dumps for security
     "fs.suid_dumpable" = lib.mkDefault 0;
 
-    # Virtual memory security
-    "vm.mmap_rnd_bits" = lib.mkDefault 32;
-    "vm.mmap_rnd_compat_bits" = lib.mkDefault 16;
+    # Virtual memory security. `vm.mmap_rnd_bits` (32) and
+    # `vm.mmap_rnd_compat_bits` (16) are now set by nixpkgs in
+    # `nixos/modules/config/sysctl.nix` with a unique-valued option type,
+    # which rejects same-priority duplicates. Leave them to nixpkgs.
     "vm.mmap_min_addr" = lib.mkDefault 65536;
 
     # Reboot on kernel oops/panic to avoid unstable state
