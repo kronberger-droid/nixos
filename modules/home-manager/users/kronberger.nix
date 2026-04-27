@@ -63,7 +63,6 @@ in {
         packages = with pkgs; [
           dropkittenPkg
           nemo-with-extensions
-          yazi
           # Nix tooling (was in devShell)
           nixpkgs-fmt
           deadnix
