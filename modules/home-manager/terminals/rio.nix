@@ -91,7 +91,11 @@
 
       # Renderer
       renderer = {
-        backend = "Vulkan";
+        # `Automatic` lets sugarloaf/wgpu probe Vulkan → GL → fallback at startup.
+        # Forcing `Vulkan` segfaulted on launch under Wayland after upgrading to 0.4.0
+        # (rio_window::wayland::EventLoop::poll_events_with_timeout). Switch back to
+        # `Vulkan` once https://github.com/raphamorim/rio/issues/1530 settles.
+        backend = "Automatic";
         performance = "High";
         disable-unfocused-render = false; # true stops rendering when unfocused, hiding Helix/tail-like output until refocus
       };

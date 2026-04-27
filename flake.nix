@@ -11,10 +11,6 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    rio = {
-      url = "github:kronberger-droid/rio";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     claude-code = {
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -73,10 +69,6 @@
       url = "github:nix-community/lanzaboote/v1.0.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    lix-module = {
-      url = "git+https://git.lix.systems/lix-project/nixos-module?ref=release-2.93";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     deploy-rs = {
       url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -97,6 +89,16 @@
     agenix,
     ...
   }: let
+    # Inline replacement for the lix-module flake input. The module's only job
+    # we care about is "make the system Nix daemon be Lix instead of CppNix",
+    # which is one line against pkgs.lix from nixpkgs unstable. The upstream
+    # module also applies a CppNix-compat overlay for tools like `devenv`,
+    # `nixd`, `nix-du`, etc. — none of which are in this config — so we don't
+    # need it. Re-add the flake input if any of those land here later.
+    lixModule = {pkgs, ...}: {
+      nix.package = pkgs.lix;
+    };
+
     # Helper function to create host configurations
     mkHost = {
       hostname,
@@ -131,7 +133,6 @@
                   });
                 })
                 (_: _: {
-                  rio = inputs.rio.packages.${system}.rio;
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                   claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
                 })
@@ -149,7 +150,7 @@
               environment.systemPackages = [agenix.packages.${system}.default];
             }
             inputs.oo7-nixos.nixosModules.default
-            inputs.lix-module.nixosModules.default
+            lixModule
           ]
           ++ extraModules;
       };
@@ -202,7 +203,7 @@
           ./modules/home-manager/users/kronberger-server.nix
           agenix.nixosModules.default
           {environment.systemPackages = [agenix.packages.${x86System}.default];}
-          inputs.lix-module.nixosModules.default
+          lixModule
         ];
       };
 
@@ -217,7 +218,7 @@
           ./hosts/devPi/configuration.nix
           home-manager.nixosModules.home-manager
           ./modules/home-manager/devPi.nix
-          inputs.lix-module.nixosModules.default
+          lixModule
         ];
       };
 
@@ -232,7 +233,7 @@
           inputs.nixos-hardware.nixosModules.raspberry-pi-4
           home-manager.nixosModules.home-manager
           ./modules/home-manager/mediaPi.nix
-          inputs.lix-module.nixosModules.default
+          lixModule
         ];
       };
     };
@@ -315,7 +316,7 @@
       system = x86System;
       modules = [
         ./hosts/recovery/configuration.nix
-        inputs.lix-module.nixosModules.default
+        lixModule
       ];
     };
   };
