@@ -1,0 +1,20 @@
+Flip Rio's image-protocol map to Kgp.
+
+Yazi 26.1.22 hardcodes `Rio => [Iip, Sixel]` in `yazi-adapter::Brand::adapters`,
+but Rio 0.3.x doesn't render iTerm2 inline images correctly (the cell-anchored
+atlas path is unwired in its renderer), so previews go stale. Yazi's `main`
+already flipped Rio → [Kgp] (commit c4c533e, 2026-04-26), which routes through
+Rio's working virtual-placement Kitty path. This patch backports just that one
+arm onto stock 26.1.22 so we can ride nixpkgs' release tracking.
+
+--- a/yazi-adapter/src/brand.rs
++++ b/yazi-adapter/src/brand.rs
+@@ -100,7 +100,7 @@
+ 			Self::Ghostty => &[A::Kgp],
+ 			Self::Microsoft => &[A::Sixel],
+ 			Self::Warp => &[A::Iip, A::KgpOld],
+-			Self::Rio => &[A::Iip, A::Sixel],
++			Self::Rio => &[A::Kgp],
+ 			Self::BlackBox => &[A::Sixel],
+ 			Self::VSCode => &[A::Iip, A::Sixel],
+ 			Self::Tabby => &[A::Iip, A::Sixel],

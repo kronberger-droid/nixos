@@ -7,33 +7,24 @@
     config.lib.file.mkOutOfStoreSymlink
     "/home/kronberger/.config/nixos/${path}";
 
-  # Yazi 26.1.22 hardcodes Rio → [Iip, Sixel] in `yazi-adapter::Brand::adapters`,
-  # but Rio 0.3.11 doesn't actually render iTerm2 inline images (the cell-anchored
-  # atlas path is unwired in its renderer), so PDF previews go stale.
-  # Yazi's `main` flipped Rio → [Kgp] (commit c4c533e, 2026-04-26), which routes
-  # through Rio's working virtual-placement path. Pin to that snapshot until
-  # the next yazi release lands in nixpkgs. Tracking: rio#1530.
-  yaziMaster = pkgs.yazi.overrideAttrs (old: rec {
-    version = "26.1.22-unstable-2026-04-26";
-    src = pkgs.fetchFromGitHub {
-      owner = "sxyazi";
-      repo = "yazi";
-      rev = "c4c533e3efca8da498b137dfc907bc5e20090f93";
-      hash = "sha256-/aRe0XpElRx8zLYAjhd3SroJn90hRqfCqhHJEZKUQB0=";
-    };
-    cargoDeps = pkgs.rustPlatform.fetchCargoVendor {
-      inherit src;
-      name = "yazi-${version}-vendor";
-      hash = "sha256-0wIbl7csRdifBnPMR0HfL/Rx90ehNf5O5O3UBXZXOpo=";
-    };
-  });
+  # Backport just the Rio → Kgp adapter flip from yazi master (commit c4c533e,
+  # 2026-04-26) onto stock 26.1.22. Rio 0.3.x's iTerm2 inline-image path is
+  # unwired in its renderer, so the stock map of `Rio => [Iip, Sixel]` produces
+  # stale previews. The patch is a single-arm change in `yazi-adapter`, leaves
+  # Cargo.lock untouched, so `cargoHash` stays valid. Drop once nixpkgs ships a
+  # yazi version that includes this upstream.
+  yaziPatched = pkgs.yazi.override {
+    yazi-unwrapped = pkgs.yazi-unwrapped.overrideAttrs (old: {
+      patches = (old.patches or []) ++ [ ./yazi/rio-kgp-adapter.patch ];
+    });
+  };
 in {
   xdg.configFile."yazi/flavors/base16-transparent.yazi/flavor.toml".source =
     mkSymlink "modules/home-manager/apps/yazi/base16-transparent.toml";
 
   programs.yazi = {
     enable = true;
-    package = yaziMaster;
+    package = yaziPatched;
     shellWrapperName = "y";
     plugins = {
       inherit (pkgs.yaziPlugins) bookmarks;
