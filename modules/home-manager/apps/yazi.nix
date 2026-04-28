@@ -6,25 +6,12 @@
   mkSymlink = path:
     config.lib.file.mkOutOfStoreSymlink
     "/home/kronberger/.config/nixos/${path}";
-
-  # Backport just the Rio → Kgp adapter flip from yazi master (commit c4c533e,
-  # 2026-04-26) onto stock 26.1.22. Rio 0.3.x's iTerm2 inline-image path is
-  # unwired in its renderer, so the stock map of `Rio => [Iip, Sixel]` produces
-  # stale previews. The patch is a single-arm change in `yazi-adapter`, leaves
-  # Cargo.lock untouched, so `cargoHash` stays valid. Drop once nixpkgs ships a
-  # yazi version that includes this upstream.
-  yaziPatched = pkgs.yazi.override {
-    yazi-unwrapped = pkgs.yazi-unwrapped.overrideAttrs (old: {
-      patches = (old.patches or []) ++ [ ./yazi/rio-kgp-adapter.patch ];
-    });
-  };
 in {
   xdg.configFile."yazi/flavors/base16-transparent.yazi/flavor.toml".source =
     mkSymlink "modules/home-manager/apps/yazi/base16-transparent.toml";
 
   programs.yazi = {
     enable = true;
-    package = yaziPatched;
     shellWrapperName = "y";
     plugins = {
       inherit (pkgs.yaziPlugins) bookmarks;
@@ -107,6 +94,14 @@ in {
     };
     settings = {
       flavor = "base16-transparent";
+      # Skip PDF previews — Rio 0.3.11 doesn't speak any graphics protocol
+      # yazi can probe successfully (Iip is unwired, Kgp probe fails), so the
+      # built-in pdftoppm previewer just produces stale frames. Drop the
+      # previewer entirely; PDFs still open in detached zathura via the rule
+      # below.
+      plugin.prepend_previewers = [
+        { mime = "application/pdf"; run = "noop"; }
+      ];
       opener = {
         "detached-pdf" = [
           {
