@@ -1,14 +1,8 @@
-{config, pkgs, inputs, ...}: let
+{pkgs, inputs, ...}: let
   addons = inputs.firefox-addons.packages.${pkgs.stdenv.hostPlatform.system};
 in {
   programs.firefox = {
     enable = true;
-    # Pin to the legacy profile path. With `home.stateVersion = "26.05"` HM's
-    # default is `${xdg.configHome}/mozilla/firefox`, but nixpkgs' firefox
-    # wrapper still exports `MOZ_LEGACY_PROFILES=1`, so the browser reads from
-    # `~/.mozilla/firefox`. Without this override the declarative profile is
-    # written to a directory firefox never opens.
-    configPath = ".mozilla/firefox";
 
     profiles.default = {
       extensions.packages = with addons; [
