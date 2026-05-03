@@ -71,7 +71,7 @@ in {
           nvd
           deploy-rs
         ];
-        stateVersion = "26.05";
+        stateVersion = "24.11";
       };
     };
   };
