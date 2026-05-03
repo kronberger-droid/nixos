@@ -305,6 +305,16 @@ in {
       "${modifier}+Ctrl+Shift+WheelScrollDown".action.move-column-right = [];
       "${modifier}+Ctrl+Shift+WheelScrollUp".action.move-column-left = [];
 
+      # Touchpad two-finger scroll (window-in-column, e.g. tabs)
+      "${modifier}+TouchpadScrollDown" = {
+        cooldown-ms = 150;
+        action.focus-window-down = [];
+      };
+      "${modifier}+TouchpadScrollUp" = {
+        cooldown-ms = 150;
+        action.focus-window-up = [];
+      };
+
       # Volume and brightness
       "XF86AudioRaiseVolume" = {
         allow-when-locked = true;
