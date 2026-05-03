@@ -5,10 +5,23 @@
 }: let
   # Ctrl+O picker: narrow to zathura-supported formats and to a relevant scope:
   # git repo root if zathura's cwd is inside one, otherwise the cwd's parent
-  # (so you see siblings of the current folder). $PPID is the zathura that
-  # spawned this script, so we always target the right window via D-Bus.
+  # (so you see siblings of the current folder). zathura spawns this script
+  # via g_spawn_async, which double-forks — $PPID is systemd, not zathura.
+  # We instead identify the spawning zathura by CWD: g_spawn_async inherits
+  # zathura's working directory, so we match it against /proc/<pid>/cwd of
+  # each registered org.pwmt.zathura.PID-* bus name.
   pickerScript = pkgs.writeShellScript "zathura-rofi-open" ''
-    base=$(${pkgs.coreutils}/bin/readlink "/proc/$PPID/cwd" 2>/dev/null || pwd)
+    base=$(pwd)
+    zpid=""
+    for name in $(${pkgs.systemd}/bin/busctl --user list --no-legend \
+                  | ${pkgs.gawk}/bin/awk '/^org\.pwmt\.zathura\.PID-/ {print $1}'); do
+      pid=''${name#org.pwmt.zathura.PID-}
+      if [ "$(${pkgs.coreutils}/bin/readlink "/proc/$pid/cwd" 2>/dev/null)" = "$base" ]; then
+        zpid=$pid
+        break
+      fi
+    done
+    [ -z "$zpid" ] && exit 1
     if root=$(${pkgs.git}/bin/git -C "$base" rev-parse --show-toplevel 2>/dev/null); then
       search_root="$root"
     else
@@ -23,7 +36,7 @@
            | ${pkgs.rofi}/bin/rofi -dmenu -i -p "open document")
     [ -z "$pick" ] && exit 0
     ${pkgs.systemd}/bin/busctl --user call \
-      "org.pwmt.zathura.PID-$PPID" \
+      "org.pwmt.zathura.PID-$zpid" \
       /org/pwmt/zathura \
       org.pwmt.zathura \
       OpenDocument ssi "$search_root/$pick" "" 0
