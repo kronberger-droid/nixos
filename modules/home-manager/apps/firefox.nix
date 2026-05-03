@@ -3,6 +3,10 @@
 in {
   programs.firefox = {
     enable = true;
+    # Silence HM 26.05's configPath-default-change warning. Keep the legacy
+    # path because nixpkgs' firefox wrapper exports `MOZ_LEGACY_PROFILES=1`,
+    # so firefox reads `~/.mozilla/firefox` regardless of HM's default.
+    configPath = ".mozilla/firefox";
 
     profiles.default = {
       extensions.packages = with addons; [
