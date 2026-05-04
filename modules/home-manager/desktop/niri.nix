@@ -438,6 +438,26 @@ in {
         default-window-height = {proportion = 0.6;};
       }
 
+      # xdg-desktop-portal-gtk file picker (Firefox, Chromium, anything portal-routed)
+      {
+        matches = [{app-id = "^xdg-desktop-portal-gtk$";}];
+        open-floating = true;
+        default-column-width = {proportion = 0.5;};
+        default-window-height = {proportion = 0.6;};
+        max-width = 1280;
+        max-height = 860;
+      }
+
+      # qutebrowser internal file picker (Qt subprocess shows up as bare python3.x)
+      {
+        matches = [{app-id = "^python3\\.[0-9]+$";}];
+        open-floating = true;
+        default-column-width = {proportion = 0.5;};
+        default-window-height = {proportion = 0.6;};
+        max-width = 1280;
+        max-height = 860;
+      }
+
       # ncspot popup (right-side panel)
       {
         matches = [{app-id = "^ncspot_popup$";}];
