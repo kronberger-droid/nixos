@@ -1,5 +1,8 @@
 {pkgs, ...}: {
-  qt.enable = true;
+  qt = {
+    enable = true;
+    platformTheme.name = "gtk3";
+  };
 
   home.pointerCursor = {
     gtk.enable = true;
@@ -24,5 +27,12 @@
       name = "Qogir";
       package = pkgs.qogir-icon-theme;
     };
+    gtk3.extraConfig.gtk-application-prefer-dark-theme = true;
+    gtk4.extraConfig.gtk-application-prefer-dark-theme = true;
+  };
+
+  dconf.settings."org/gnome/desktop/interface" = {
+    color-scheme = "prefer-dark";
+    gtk-theme = "Fluent-round-Dark-compact";
   };
 }
