@@ -12,7 +12,7 @@
   dirs = {
     nixosConfig = "~/.config/nixos";
     templates = "~/.config/nixos/templates";
-    projects = "~/Programming";
+    projects = "~/Projects";
     emulation = "~/Emulation";
   };
 in {

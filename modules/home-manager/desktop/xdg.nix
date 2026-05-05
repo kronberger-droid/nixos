@@ -13,9 +13,6 @@ _: {
       desktop = "$HOME/Desktop";
       publicShare = "$HOME/Public";
       templates = "$HOME/Templates";
-      extraConfig = {
-        PROGRAMMING = "$HOME/Programming";
-      };
     };
     mimeApps = {
       enable = true;
