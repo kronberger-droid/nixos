@@ -398,6 +398,30 @@ in {
     };
   };
 
+  # Drive scratchpad/ncspot status updates from niri's event stream instead
+  # of polling every 2 seconds. Signals waybar (RTMIN+12) on any window event.
+  systemd.user.services.niri-window-watcher = {
+    Unit = {
+      Description = "Watch niri window events and signal waybar";
+      PartOf = ["graphical-session.target"];
+      After = ["graphical-session.target"];
+    };
+    Service = {
+      ExecStart = "${pkgs.writeShellScript "niri-window-watcher" ''
+        ${pkgs.niri-unstable}/bin/niri msg event-stream | while IFS= read -r line; do
+          case "$line" in
+            Window*)
+              ${pkgs.procps}/bin/pkill -RTMIN+12 waybar 2>/dev/null || true
+              ;;
+          esac
+        done
+      ''}";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = ["graphical-session.target"];
+  };
+
   programs.waybar = {
     enable = true;
     systemd = {
@@ -496,7 +520,8 @@ in {
           return-type = "json";
           exec = "${config.xdg.configHome}/waybar/scratchpad-status.sh";
           on-click = "${config.xdg.configHome}/waybar/scratchpad-toggle.sh";
-          interval = 2;
+          # Event-driven via niri-window-watcher.service; no polling needed
+          interval = 0;
           signal = 12;
           format = "{text}";
           escape = true;
@@ -651,7 +676,9 @@ in {
           exec = "${config.xdg.configHome}/waybar/screenrec-status.sh";
           on-click = "${config.xdg.configHome}/waybar/screenrec-toggle.sh";
           return-type = "json";
-          interval = 2;
+          # Toggle script signals immediately on click; 30s is a safety net
+          # for the rare case where wl-screenrec exits on its own
+          interval = 30;
           signal = 10;
           format = "{}";
         };

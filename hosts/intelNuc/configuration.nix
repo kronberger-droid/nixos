@@ -102,8 +102,10 @@
   };
 
   # Docker — for testing Nextcloud instances
+  # Socket-activated: daemon only starts when docker commands are run
   virtualisation.docker = {
     enable = true;
+    enableOnBoot = false;
     autoPrune = {
       enable = true;
       dates = "weekly";
@@ -115,9 +117,6 @@
     cores = 12; # Leave 4 threads free for desktop responsiveness
     max-jobs = 2; # Max parallel derivation builds
   };
-
-  # Allow SSH from local network (shared security.nix restricts to Tailscale only)
-  networking.firewall.allowedTCPPorts = [22];
 
   users.users.kronberger.extraGroups = ["docker" "gamemode"];
 

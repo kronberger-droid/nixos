@@ -14,6 +14,8 @@
       backend = "pulseaudio";
       bitrate = 320;
       device_type = "computer";
+      # Disable Spotify Connect discovery — only ncspot is used locally
+      disable_discovery = true;
     };
   };
 
