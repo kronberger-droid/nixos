@@ -157,6 +157,10 @@
     package = pkgs.nix-serve-ng;
     port = 5001;
     secretKeyFile = "/run/secrets/cache-private-key";
+    # Priority > cache.nixos.org (40), so it's queried as a fallback rather
+    # than first. Avoids stalling evals when the LAN cache serves a narinfo
+    # but 404s the matching .nar.
+    extraParams = "--priority 50";
   };
 
   # DNS + ad blocking — accessible on LAN (:53) and web UI (:3080)
