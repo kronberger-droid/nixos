@@ -48,6 +48,10 @@
       inputs.nixpkgs-stable.follows = "nixpkgs";
       inputs.niri-unstable.follows = "niri-src";
     };
+    ironbar = {
+      url = "github:JakeStanger/ironbar";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     firefox-addons = {
       url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -142,6 +146,7 @@
             {
               home-manager.sharedModules = [
                 inputs.base16.homeManagerModule
+                inputs.ironbar.homeManagerModules.default
               ];
             }
             ./modules/home-manager/users/kronberger.nix

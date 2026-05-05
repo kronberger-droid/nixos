@@ -60,6 +60,9 @@
     # Enhanced SSH security
     openssh = {
       enable = true;
+      # Don't open port 22 on every interface — the iptables rule above
+      # only accepts SSH on tailscale0
+      openFirewall = false;
       settings = {
         # Disable password authentication
         PasswordAuthentication = false;

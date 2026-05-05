@@ -4,6 +4,7 @@
     ./niri.nix
     ./sway.nix
     ./waybar.nix
+    # ./ironbar.nix
     ./rofi.nix
     ./kanshi.nix
     ./session-services.nix

@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   host,
   ...
 }: let
@@ -59,15 +60,17 @@ in {
   };
 
   services = {
-    avahi = {
-      enable = true;
-      nssmdns4 = true;
-      nssmdns6 = true;
-    };
+    # Avahi (mDNS/DNS-SD) disabled — not used for printers/casting on this network
+    avahi.enable = false;
+    # speech-dispatcher defaults to enabled in nixpkgs; disable explicitly
+    speechd.enable = false;
     gvfs.enable = true;
     udisks2.enable = true;
     upower.enable = true;
   };
+
+  # Mask Bluetooth OBEX file-transfer service (shipped by bluez, never used)
+  systemd.user.services.obex.enable = lib.mkForce false;
 
   systemd.services.rfkill-unblock-bluetooth = {
     wantedBy = ["multi-user.target"];
