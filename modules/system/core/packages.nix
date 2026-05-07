@@ -56,6 +56,9 @@
     exfat
     popsicle
 
+    # Diagnostics
+    lm_sensors
+
     # Secrets
     cryptsetup
 
