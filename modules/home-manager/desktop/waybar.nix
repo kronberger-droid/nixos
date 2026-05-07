@@ -303,6 +303,11 @@ in {
             niri msg action focus-window --id "$WINDOW_ID"
           fi
         else
+          # Drop a resurrectable-but-dead session so attach --create makes a
+          # fresh one instead of restoring an empty shell where yazi used to be.
+          if ${pkgs.zellij}/bin/zellij list-sessions -n 2>/dev/null | grep -q "^$SESSION_NAME .*EXITED"; then
+            ${pkgs.zellij}/bin/zellij delete-session "$SESSION_NAME" --force >/dev/null 2>&1 || true
+          fi
           ${config.terminal.bin} ${config.terminal.appIdFlag} "$APP_ID" ${config.terminal.execFlag} ${pkgs.zellij}/bin/zellij attach "$SESSION_NAME" --create
           await_state "open"
         fi
@@ -357,6 +362,11 @@ in {
             niri msg action focus-window --id "$WINDOW_ID"
           fi
         else
+          # Drop a resurrectable-but-dead session of the same name so we don't
+          # attach to a ghost where ncspot is no longer running.
+          if ${pkgs.zellij}/bin/zellij list-sessions -n 2>/dev/null | grep -q "^$SESSION_NAME .*EXITED"; then
+            ${pkgs.zellij}/bin/zellij delete-session "$SESSION_NAME" --force >/dev/null 2>&1 || true
+          fi
           if ${pkgs.zellij}/bin/zellij list-sessions -s -n 2>/dev/null | grep -qx "$SESSION_NAME"; then
             ${config.terminal.bin} ${config.terminal.appIdFlag} "$APP_ID" ${config.terminal.execFlag} ${pkgs.zellij}/bin/zellij attach "$SESSION_NAME"
           else

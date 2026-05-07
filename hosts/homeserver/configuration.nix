@@ -84,6 +84,7 @@
     git
     nushell
     docker-compose
+    lm_sensors
   ];
 
   # Docker — for wiesinger to deploy containers without touching Nix
