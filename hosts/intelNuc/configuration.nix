@@ -17,14 +17,8 @@
   };
 
   environment.systemPackages = with pkgs; [
-    lm_sensors
     docker-compose
   ];
-
-  environment.sessionVariables = {
-    "__GL_SYNC_TO_VBLANK" = "1";
-    "INTEL_DEBUG" = "sync";
-  };
 
   programs.steam = {
     enable = true;
