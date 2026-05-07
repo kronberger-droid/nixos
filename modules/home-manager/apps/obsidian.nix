@@ -81,4 +81,21 @@ in {
       --caret-color: #${s.base05};
     }
   '';
+
+  # Syncthing per-device ignores for the vault. .stignore is local-only
+  # (never propagated), so each machine reading its own copy is correct.
+  config.home.file."${vaultRel}/.stignore".text = ''
+    # Device-local Obsidian state — should not sync.
+    .obsidian/workspace.json
+    .obsidian/workspace-mobile.json
+    .obsidian/cache
+    .obsidian/cache.json
+
+    # Trash and OS junk.
+    .trash/
+    .DS_Store
+
+    # Syncthing conflict files — never re-sync them.
+    *.sync-conflict-*
+  '';
 }
