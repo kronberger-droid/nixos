@@ -94,13 +94,11 @@ in {
     };
     settings = {
       flavor = "base16-transparent";
-      # Skip PDF previews — Rio 0.3.11 doesn't speak any graphics protocol
-      # yazi can probe successfully (Iip is unwired, Kgp probe fails), so the
-      # built-in pdftoppm previewer just produces stale frames. Drop the
-      # previewer entirely; PDFs still open in detached zathura via the rule
-      # below.
       plugin.prepend_previewers = [
-        { mime = "application/pdf"; run = "noop"; }
+        { mime = "*/*"; run = "noop"; }
+      ];
+      plugin.prepend_preloaders = [
+        { mime = "*/*"; run = "noop"; }
       ];
       opener = {
         "detached-pdf" = [
