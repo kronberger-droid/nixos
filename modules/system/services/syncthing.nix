@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   host,
   ...
 }: let
@@ -15,6 +16,12 @@
 
   # All peers including mobile
   allPeerDevices = otherDevices // mobileDevices;
+
+  # The vault is synced as its own Syncthing folder, so exclude it from
+  # the parent `documents` folder to avoid double-indexing every change.
+  documentsIgnore = pkgs.writeText "documents-stignore" ''
+    notes/general-vault
+  '';
 in
   lib.mkIf enabled {
     services.syncthing = {
@@ -70,6 +77,10 @@ in
         };
       };
     };
+
+    systemd.tmpfiles.rules = [
+      "L+ /home/kronberger/Documents/.stignore - - - - ${documentsIgnore}"
+    ];
 
     # Open firewall for Syncthing
     networking.firewall = {
