@@ -64,6 +64,7 @@
     lanzaboote = {
       enable = true;
       pkiBundle = "/var/lib/sbctl";
+      configurationLimit = 20;
     };
     kernel.sysctl = {
       # 176 = enable sync (16) + enable remount-ro (32) + enable reboot (128)
