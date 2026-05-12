@@ -625,11 +625,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1777954456,
-        "narHash": "sha256-hGdgeU2Nk87RAuZyYjyDjFL6LK7dAZN5RE9+hrDTkDU=",
+        "lastModified": 1778443072,
+        "narHash": "sha256-zi7/fsqM/kFdNuED//4WOCUtezGtKKqRNORjMvfwjnA=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "549bd84d6279f9852cae6225e372cc67fb91a4c1",
+        "rev": "da5ad661ba4e5ef59ba743f0d112cbc30e474f32",
         "type": "github"
       },
       "original": {
@@ -747,16 +747,15 @@
         "systems": "systems_5"
       },
       "locked": {
-        "lastModified": 1778575435,
-        "narHash": "sha256-QUpiTDRwCvySNRVB4LKIzU8en0z3PEjH2EfLhs6tFKk=",
-        "owner": "kronberger-droid",
+        "lastModified": 1778616073,
+        "narHash": "sha256-fjPuB2/sEXsE8gnnvDLU5a6Qgac3crbs7v/kOlUhtZE=",
+        "owner": "raphamorim",
         "repo": "rio",
-        "rev": "1b606e459743a0bf66a6f422e7ba60701049d213",
+        "rev": "67b2fcceafb5dbb07dd9047bf835b18938485754",
         "type": "github"
       },
       "original": {
-        "owner": "kronberger-droid",
-        "ref": "fix/issue-1593-maximize-oob",
+        "owner": "raphamorim",
         "repo": "rio",
         "type": "github"
       }
