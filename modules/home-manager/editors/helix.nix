@@ -70,7 +70,6 @@ in {
       # Markdown
       rumdl
       markdown-oxide
-      mermaid-cli
 
       # Spellcheck
       harper
