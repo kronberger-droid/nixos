@@ -11,6 +11,7 @@ _: {
         <family>emoji</family>
         <prefer>
           <family>Noto Sans Symbols 2</family>
+          <family>Symbola</family>
           <family>STIX Two Math</family>
           <family>DejaVu Sans</family>
         </prefer>
@@ -20,6 +21,7 @@ _: {
         <family>Noto Color Emoji</family>
         <prefer>
           <family>Noto Sans Symbols 2</family>
+          <family>Symbola</family>
           <family>STIX Two Math</family>
           <family>DejaVu Sans</family>
         </prefer>

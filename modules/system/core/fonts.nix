@@ -8,6 +8,7 @@
     noto-fonts
     noto-fonts-cjk-sans
     julia-mono # Mono symbol fallback for Rio symbol-map (★ ☀ ✔ ⏺ etc.)
+    symbola # Monochrome coverage for SMP emoji (🚀 ✅ 🟢 …) that Noto Sans Symbols 2 lacks
 
     liberation_ttf
     cm_unicode
