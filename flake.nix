@@ -14,7 +14,7 @@
     # Use `packages.${system}.rio-nightly` instead of `.default` if you want
     # the Rust-nightly compiler variant.
     rio-upstream = {
-      url = "github:kronberger-droid/rio/fix/issue-1593-maximize-oob";
+      url = "github:raphamorim/rio";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
