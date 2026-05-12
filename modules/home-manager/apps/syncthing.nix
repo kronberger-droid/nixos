@@ -60,4 +60,10 @@ in
         };
       };
     };
+
+    # The vault is synced as its own Syncthing folder, so exclude it from
+    # the parent `documents` folder to avoid double-indexing every change.
+    home.file."Documents/.stignore".text = ''
+      notes/general-vault
+    '';
   }
