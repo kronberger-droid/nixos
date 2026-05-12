@@ -3,6 +3,20 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Temporary: pull rio 0.4.3 from our open nixpkgs PR until it merges.
+    # PR: https://github.com/NixOS/nixpkgs/pull/518401
+    # Currently unused — overlay swapped to rio-upstream (Rio's own flake at
+    # main). Kept here so a one-line overlay flip restores the 0.4.3 PR build
+    # if nightly turns out unstable. Remove once we're committed to either path
+    # AND 0.4.3 has landed in nixos-unstable.
+    nixpkgs-rio.url = "github:kronberger-droid/nixpkgs/rio-0.4.3";
+    # Rio "nightly": upstream main built with Rio's own flake (MSRV toolchain).
+    # Use `packages.${system}.rio-nightly` instead of `.default` if you want
+    # the Rust-nightly compiler variant.
+    rio-upstream = {
+      url = "github:kronberger-droid/rio/fix/issue-1593-maximize-oob";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -139,6 +153,7 @@
                 (_: _: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                   claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
+                  rio = inputs.rio-upstream.packages.${system}.default;
                 })
               ];
             }
