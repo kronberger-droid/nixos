@@ -13,9 +13,12 @@
         # Only remap codepoints NOT covered by JetBrainsMonoNL Nerd Font.
         # Ranges derived from `fc-match --format=%{family} "...:charset=CP"` per codepoint
         # in Misc Technical, Misc Symbols, Dingbats, and Braille blocks.
-        # Without these, fontconfig falls back to DejaVu Sans (proportional), breaking cell alignment.
+        # Without these, the dynamic fallback may return a proportional font, breaking cell alignment.
         # Note: "Symbols Nerd Font Mono" only covers Nerd Font icon ranges (PUA),
         # not standard Unicode symbol blocks — don't use it here.
+        # Note: SMP emoji (🚀 U+1F680, 🟢 U+1F7E2, …) are intentionally NOT in this map —
+        # they're left to sugarloaf's per-codepoint fontconfig discovery (linux.rs:discover_fallback),
+        # which picks Symbola from the system font set. Color/wide-cell handling is automatic.
         symbol-map = [
           # Misc Technical (U+2300-23FF) — JBM covers ~45%, remap the gaps
           { start = "2300"; end = "2301"; font-family = "JuliaMono"; }
