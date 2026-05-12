@@ -149,6 +149,10 @@
                       };
                     };
                   });
+                  # Make pkgs.niri resolve to the same fork build — collapses
+                  # the closure so scripts using `pkgs.niri/bin/niri msg` don't
+                  # pull in a parallel nixpkgs niri build.
+                  niri = final.niri-unstable;
                 })
                 (_: _: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
