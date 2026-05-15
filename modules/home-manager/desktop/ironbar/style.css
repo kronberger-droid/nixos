@@ -30,20 +30,25 @@ box,
   text-shadow: none;
 }
 
-/* Font + base text color, applied narrowly */
-label,
-button {
-  color: @base05;
+/* Font + base text color — applied universally so all GTK nodes pick up
+ * the Nerd Font fallback (otherwise Pango may substitute a font that
+ * lacks the private-use-area glyphs). Matches waybar's 14px. */
+* {
   font-family: "Symbols Nerd Font Mono", "JetBrainsMono Nerd Font Mono";
   font-size: 14px;
   min-height: 0;
+}
+
+label,
+button {
+  color: @base05;
   padding: 0;
 }
 
-/* Bar root — fully transparent */
+/* Bar root — fully transparent, slim */
 #bar {
   background: transparent;
-  min-height: 28px;
+  min-height: 26px;
 }
 
 /* Force every nested container to take only the height it needs */
@@ -51,6 +56,7 @@ box,
 .container,
 .widget {
   min-height: 0;
+  padding: 0;
 }
 
 /* Buttons everywhere (custom-module buttons): no GTK chrome */
@@ -59,20 +65,39 @@ button {
   border: none;
   box-shadow: none;
   padding: 0 4px;
+  margin: 0;
 }
 
 /* Plain widgets — flat on the transparent bar */
 .tray,
-.music,
 .volume,
 .sys-info,
 .upower,
 .bluetooth,
 .network,
+.vpn,
 .ncspot,
+.dnd,
+.idle_inhibitor,
+.rotation,
+.screenrec,
 .script {
   padding: 0 5px;
   margin: 0 5px;
+}
+
+/* MPRIS music — match waybar's #custom-mpris spacing */
+.music {
+  margin: 0 0 0 10px;
+  padding: 0;
+  color: @base0B;
+}
+
+/* Group separators — quiet color, tight spacing (matches #custom-separator) */
+.separator {
+  color: @base03;
+  padding: 0 2px;
+  margin: 0;
 }
 
 /* Accent pill widgets */
@@ -90,6 +115,11 @@ button {
 /* ncspot tint to match waybar's #custom-ncspot */
 .ncspot button {
   color: @base0B;
+}
+
+/* Screen recording — red when active (matches waybar's .recording state) */
+.screenrec label {
+  color: @base08;
 }
 
 /* Workspaces strip — dark container, brown-accent on focused item */
@@ -113,11 +143,6 @@ button {
 }
 .workspaces .item.urgent {
   color: @base08;
-}
-
-/* Music gets the ncspot-green accent */
-.music {
-  color: @base0B;
 }
 
 /* Focused window title — quiet */
