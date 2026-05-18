@@ -10,6 +10,7 @@
     zapzap
     signal-desktop
     fluffychat
+    vesktop
 
     # Documents
     (pkgs.obsidian.overrideAttrs (oldAttrs: {
