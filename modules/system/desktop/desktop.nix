@@ -1,6 +1,5 @@
 {
   pkgs,
-  lib,
   host,
   ...
 }: let
@@ -68,9 +67,6 @@ in {
     udisks2.enable = true;
     upower.enable = true;
   };
-
-  # Mask Bluetooth OBEX file-transfer service (shipped by bluez, never used)
-  systemd.user.services.obex.enable = lib.mkForce false;
 
   systemd.services.rfkill-unblock-bluetooth = {
     wantedBy = ["multi-user.target"];
