@@ -35,6 +35,10 @@
 in {
   services.greetd = {
     enable = true;
+    # TUI-aware unit hardening: hangs up + deallocates tty1 before tuigreet
+    # opens it, and redirects greetd's stderr to the journal. Stops the
+    # boot-log tail and stray warnings from bleeding into the greeter UI.
+    useTextGreeter = true;
     settings = {
       default_session = {
         command = ''
