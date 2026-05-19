@@ -4,6 +4,11 @@
     enable = true;
     allowPing = false;
 
+    # NixOS-managed LOG rule; idempotent across firewall reloads. Replaces a
+    # hand-rolled `iptables -A INPUT -j LOG` in extraCommands that duplicated
+    # itself every time NetworkManager triggered a reload.
+    logRefusedConnections = true;
+
     # SSH restricted to Tailscale interface only (see extraCommands below)
     allowedTCPPorts = [];
 
@@ -22,7 +27,6 @@
     # Allow SSH only on Tailscale interface
     extraCommands = ''
       iptables -A INPUT -i tailscale0 -p tcp --dport 22 -j ACCEPT
-      iptables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7
     '';
     extraStopCommands = ''
       iptables -D INPUT -i tailscale0 -p tcp --dport 22 -j ACCEPT || true
@@ -31,9 +35,11 @@
 
   # Security services
   services = {
-    # Fail2ban for SSH protection
+    # Fail2ban for SSH protection.
+    # mkDefault so hosts where SSH isn't reachable from the public internet
+    # (e.g. spectre — SSH is only opened on tailscale0) can disable it.
     fail2ban = {
-      enable = true;
+      enable = lib.mkDefault true;
       maxretry = 3;
       bantime = "1h";
       bantime-increment = {
@@ -182,9 +188,9 @@
         "-w /var/log/faillog -p wa -k logins"
         "-w /var/log/lastlog -p wa -k logins"
         "-w /var/log/tallylog -p wa -k logins"
-        "-w /var/run/utmp -p wa -k session"
-        "-w /var/log/wtmp -p wa -k logins"
-        "-w /var/log/btmp -p wa -k logins"
+        # utmp/wtmp/btmp watches removed: those files are touched on every
+        # login, logout, and `who`, generating constant audit records that
+        # duplicate systemd-logind's own session journal.
       ];
     };
 

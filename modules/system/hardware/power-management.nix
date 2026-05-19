@@ -12,7 +12,6 @@
 
     # Resume commands to ensure services restart properly
     resumeCommands = ''
-      systemctl restart thermald || true
       systemctl restart NetworkManager || true
     '';
   };
@@ -82,8 +81,10 @@
       };
     };
 
-    # Thermal management
-    thermald.enable = true;
+    # Thermal management: TLP already drives PLATFORM_PROFILE_ON_{AC,BAT}.
+    # Running thermald in parallel fights TLP for the same platform-profile
+    # knob, so leave it off here.
+    thermald.enable = false;
   };
 
   # Laptop-specific systemd settings

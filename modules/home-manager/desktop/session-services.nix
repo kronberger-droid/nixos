@@ -194,9 +194,10 @@ in {
       # Lower values make rotation more sensitive
       threshold = 0.5
 
-      # Polling interval in milliseconds
-      # How often to check the accelerometer
-      poll-interval = 500
+      # Polling interval in milliseconds.
+      # 1 Hz is plenty for screen rotation responsiveness and halves the
+      # wakeup rate vs the upstream default of 500 ms.
+      poll-interval = 1000
 
       # Allow all orientations (normal, left, right, inverted)
       # Set to false to disable upside-down rotation
