@@ -71,24 +71,9 @@
   };
 
   # System optimization services
+  # Journal retention is enforced continuously by journald via SystemMaxUse
+  # (set per-host in journald.extraConfig), so no extra vacuum timer is needed.
   systemd = {
-    services.journal-vacuum = {
-      description = "Vacuum old journal entries";
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${pkgs.systemd}/bin/journalctl --vacuum-time=7d";
-      };
-    };
-
-    timers.journal-vacuum = {
-      description = "Weekly journal vacuum";
-      wantedBy = ["timers.target"];
-      timerConfig = {
-        OnCalendar = "weekly";
-        Persistent = true;
-      };
-    };
-
     # Faster shutdown
     settings.Manager = {
       DefaultTimeoutStopSec = "10s";
@@ -101,7 +86,10 @@
   services.earlyoom = {
     enable = true;
     freeMemThreshold = 5;
-    freeSwapThreshold = 10;
+    # zram counts as swap; at 50% RAM zram (see zramSwap above) a 10% free-swap
+    # threshold trips during normal heavy use and pops mako notifications.
+    # 2% still protects against true low-swap conditions.
+    freeSwapThreshold = 2;
     enableNotifications = true;
   };
   systemd.oomd.enable = false;

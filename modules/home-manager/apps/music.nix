@@ -5,8 +5,11 @@
 }: {
   home.packages = [pkgs.ncspot];
 
+  # spotifyd is a Spotify Connect target (lets other devices cast here);
+  # ncspot connects to Spotify directly and does not need it. Disabled until
+  # the agenix secret for password_cmd is set up.
   services.spotifyd = {
-    enable = true;
+    enable = false;
     settings.global = {
       username = "martinkronberger";
       password_cmd = "${pkgs.coreutils}/bin/cat /run/secrets/spotify-password";
