@@ -420,7 +420,7 @@ in {
       ExecStart = "${pkgs.writeShellScript "niri-window-watcher" ''
         ${pkgs.niri-unstable}/bin/niri msg event-stream | while IFS= read -r line; do
           case "$line" in
-            Window*)
+            'Window closed:'*|'Window opened or changed:'*'app_id: Some("scratchpad")'*)
               ${pkgs.procps}/bin/pkill -RTMIN+12 waybar 2>/dev/null || true
               ;;
           esac
@@ -531,7 +531,7 @@ in {
           exec = "${config.xdg.configHome}/waybar/scratchpad-status.sh";
           on-click = "${config.xdg.configHome}/waybar/scratchpad-toggle.sh";
           # Event-driven via niri-window-watcher.service; no polling needed
-          interval = 0;
+          interval = "once";
           signal = 12;
           format = "{text}";
           escape = true;
@@ -540,7 +540,7 @@ in {
         "custom/ncspot" = {
           return-type = "json";
           exec = ''echo '{"text":"\uf1bc","tooltip":"Open ncspot"}' '';
-          interval = 0;
+          interval = "once";
           on-click = "${config.xdg.configHome}/waybar/ncspot-toggle.sh";
           format = "{text}";
         };
