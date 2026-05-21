@@ -42,6 +42,9 @@
     pdfarranger
     pdfpc
 
+    # Archives
+    unrar
+
     # Security
     openssl
 
