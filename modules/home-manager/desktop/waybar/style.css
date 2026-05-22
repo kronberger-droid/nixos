@@ -91,6 +91,18 @@ window#waybar {
   color: @base0B;
 }
 
+#custom-tray-handle,
+#custom-toggles-handle {
+  padding: 0px 5px;
+  margin: 0px 5px;
+  color: @base03;
+}
+
+#custom-tray-handle:hover,
+#custom-toggles-handle:hover {
+  color: @base05;
+}
+
 #workspaces {
   background: @base00E6;
   border-radius: 15px;

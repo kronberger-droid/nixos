@@ -478,12 +478,7 @@ in {
         modules-left = ["custom/menu" "sway/workspaces" "niri/workspaces" "custom/scratchpad" "sway/scratchpad" "sway/mode"];
         modules-right =
           [
-            "custom/screenrec"
-            "idle_inhibitor"
-            "custom/dnd"
-          ]
-          ++ lib.optionals isNotebook [
-            "custom/rotation"
+            "group/toggles-cluster"
           ]
           ++ [
             "custom/separator"
@@ -506,8 +501,7 @@ in {
           ]
           ++ [
             "custom/separator"
-            "custom/ncspot"
-            "tray"
+            "group/tray-cluster"
             "clock"
             "custom/power"
           ];
@@ -543,6 +537,46 @@ in {
           interval = "once";
           on-click = "${config.xdg.configHome}/waybar/ncspot-toggle.sh";
           format = "{text}";
+        };
+
+        # Collapse ncspot + tray behind a single handle (browser-overflow
+        # style). The anchor (custom/tray-handle) stays put; hovering it
+        # reveals the rest, expanding leftward so the clock doesn't shift.
+        "group/tray-cluster" = {
+          orientation = "inherit";
+          drawer = {
+            transition-duration = 300;
+            children-class = "tray-cluster-item";
+            transition-left-to-right = false;
+            click-to-reveal = true;
+          };
+          modules = ["custom/tray-handle" "custom/ncspot" "tray"];
+        };
+
+        "custom/tray-handle" = {
+          format = "";
+          tooltip = false;
+        };
+
+        # Collapse the left-side toggles (screenrec, idle, dnd, rotation) behind
+        # a chevron handle — same drawer mechanic as the tray cluster, revealing
+        # leftward so the rest of the right section never shifts.
+        "group/toggles-cluster" = {
+          orientation = "inherit";
+          drawer = {
+            transition-duration = 300;
+            children-class = "toggles-cluster-item";
+            transition-left-to-right = false;
+            click-to-reveal = true;
+          };
+          modules =
+            ["custom/toggles-handle" "custom/screenrec" "idle_inhibitor" "custom/dnd"]
+            ++ lib.optionals isNotebook ["custom/rotation"];
+        };
+
+        "custom/toggles-handle" = {
+          format = "";
+          tooltip = false;
         };
 
         "custom/separator" = {
