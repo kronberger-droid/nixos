@@ -5,6 +5,7 @@
     nerd-fonts._0xproto
     nerd-fonts.symbols-only
     dejavu_fonts
+    inter # modern sans-serif — recommended Standard/Sans-serif font for the browser
     noto-fonts
     noto-fonts-cjk-sans
     julia-mono # Mono symbol fallback for Rio symbol-map (★ ☀ ✔ ⏺ etc.)
