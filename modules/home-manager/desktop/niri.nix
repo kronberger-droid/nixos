@@ -3,6 +3,7 @@
   pkgs,
   lib,
   isNotebook,
+  host,
   ...
 }: let
   modifier = "Mod";
@@ -61,10 +62,14 @@ in {
         };
       };
 
-      touchpad = lib.mkIf isNotebook {
+      touchpad = lib.mkIf isNotebook ({
         tap = true;
         natural-scroll = true;
-      };
+      }
+      # Spectre's touchpad feels sluggish; bump libinput accel-speed (-1.0..1.0).
+      // lib.optionalAttrs (host == "spectre") {
+        accel-speed = 0.3;
+      });
 
       mouse = {
         accel-speed = 0.4;
@@ -108,13 +113,21 @@ in {
     # Startup commands
     spawn-at-startup = [
       {command = ["${pkgs.swaybg}/bin/swaybg" "-m" "fill" "-i" "${./sway/deathpaper.jpg}"];}
-      # Warm the page cache by reading Firefox's binary + libs into RAM.
+      # Warm the page cache by reading Helium's binary + resources into RAM.
       # No process stays running; just primes the kernel disk cache so the
-      # first real launch skips cold I/O from /nix/store.
-      {command = ["${pkgs.bash}/bin/bash" "-c" "cat ${pkgs.firefox}/lib/firefox/firefox ${pkgs.firefox}/lib/firefox/*.so > /dev/null 2>&1 &"];}
+      # first real launch skips cold I/O from /nix/store. Helium is a
+      # bwrap-wrapped AppImage, so the heavy files (~290MB) live in the
+      # *-extracted store path, not under pkgs.helium (an 8KB wrapper) — glob
+      # by the stable -extracted suffix so it survives version bumps.
+      {command = ["${pkgs.bash}/bin/bash" "-c" "cat /nix/store/*-helium-*-extracted/opt/helium/{helium,*.pak,*.dat,*.so*} > /dev/null 2>&1 &"];}
     ];
 
-    animations.enable = false;
+    animations = {
+      enable = true;
+      # niri's stock springs already convey "where windows went"; globally
+      # compress them for a snappier feel.
+      slowdown = 0.5;
+    };
 
     prefer-no-csd = true;
 
@@ -129,7 +142,7 @@ in {
       # Applications
       "${modifier}+Return".action.spawn = termSpawn {cwdArg = true;};
       "${modifier}+D".action.spawn = ["${pkgs.rofi}/bin/rofi" "-show" "drun"];
-      "${modifier}+Shift+S".action.spawn = wsSpawn ["${pkgs.firefox}/bin/firefox"];
+      "${modifier}+Shift+S".action.spawn = wsSpawn ["${pkgs.helium}/bin/helium"];
       "${modifier}+Shift+Return".action.spawn = termSpawn {floating = true; cwdArg = true;};
       "${modifier}+Shift+T".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} btop_monitor ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"];
       "${modifier}+Shift+X".action.spawn = termSpawn {floating = true; exec = "${pkgs.yazi}/bin/yazi $(${cwd})";};
@@ -141,8 +154,8 @@ in {
       # Session
       "${modifier}+Shift+Q".action.close-window = [];
       "${modifier}+Shift+E".action.spawn = ["${config.xdg.configHome}/rofi/powermenu/powermenu.sh"];
-      "${modifier}+Shift+P".action.spawn = ["${pkgs.proton-pass}/bin/proton-pass"];
-      # "${modifier}+Shift+W".action.spawn = ["${config.home.homeDirectory}/.local/bin/rofi-proton-pass"];
+      "${modifier}+Shift+P".action.spawn = ["${pkgs.bitwarden-desktop}/bin/bitwarden"];
+      "${modifier}+Shift+W".action.spawn = ["${pkgs.rofi-rbw-wayland}/bin/rofi-rbw"];
       "${modifier}+Shift+B".action.spawn = ["qutebrowser"];
 
       # Notifications
