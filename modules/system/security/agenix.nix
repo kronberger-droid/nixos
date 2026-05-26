@@ -76,5 +76,20 @@
       owner = "kronberger";
     };
 
+    # aerc mail passwords, read via *-cred-cmd (cat) in apps/aerc.nix
+    aerc-gmx-password = {
+      file = "${inputs.self}/secrets/aerc-gmx-password.age";
+      path = "/run/secrets/aerc-gmx-password";
+      mode = "0400";
+      owner = "kronberger";
+    };
+
+    aerc-uptudate-password = {
+      file = "${inputs.self}/secrets/aerc-uptudate-password.age";
+      path = "/run/secrets/aerc-uptudate-password";
+      mode = "0400";
+      owner = "kronberger";
+    };
+
   };
 }
