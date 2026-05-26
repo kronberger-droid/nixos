@@ -166,7 +166,7 @@ in {
     # Mount/unmount the IAP fileserver (VPN-gated) over sshfs.
     # Connect the VPN *first*. reconnect + keepalive turn a VPN drop into a
     # bounded I/O error and auto-recovery instead of an indefinite hang. The
-    # mountpoint lives under ~/mnt so syncthing/megasync never scan it.
+    # mountpoint lives under ~/Network so syncthing/megasync never scan it.
     #   iap-server            mount (default)
     #   iap-server unmount    unmount before dropping the VPN
     #   iap-server unmount -f lazy-detach a wedged mount (connection died)
@@ -178,7 +178,7 @@ in {
         let host = "kronberger@iap-fileserver-1.iap.tuwien.ac.at"
         let remote = "/sph"
         let port = 10222
-        let mountpoint = ("~/mnt/iap-server" | path expand)
+        let mountpoint = ("~/Network/iap-server" | path expand)
         let mounted = (^mount | lines | where ($it | str contains $mountpoint) | is-not-empty)
 
         match $action {
