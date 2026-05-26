@@ -119,28 +119,28 @@ in {
         prepend_rules = [
           # send pdfs to detached zathura
           {
-            name = "*.pdf";
+            url = "*.pdf";
             use = "detached-pdf";
           }
           # send images to detaced swayimg
           {
-            name = "*.png";
+            url = "*.png";
             use = "detached-image";
           }
           {
-            name = "*.jpg";
+            url = "*.jpg";
             use = "detached-image";
           }
           {
-            name = "*.jpeg";
+            url = "*.jpeg";
             use = "detached-image";
           }
           {
-            name = "*.gif";
+            url = "*.gif";
             use = "detached-image";
           }
           {
-            name = "*.svg";
+            url = "*.svg";
             use = "detached-image";
           }
         ];
