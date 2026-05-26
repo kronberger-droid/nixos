@@ -725,11 +725,11 @@
         "systems": "systems_5"
       },
       "locked": {
-        "lastModified": 1779230136,
-        "narHash": "sha256-ON7CJ1NDwLfjvLZ0ugN45LUjBGiwRNASiQwuDa6F1vM=",
+        "lastModified": 1779737827,
+        "narHash": "sha256-CDmF9eyr6mXa3cRLiBqL8uZqnTE+PIBqe3r2Jc1YbJo=",
         "owner": "raphamorim",
         "repo": "rio",
-        "rev": "9c4c42612ac47a462a289160f62bea13bfd477cc",
+        "rev": "a7766425b007d679c2ae4edb512d6420f286d051",
         "type": "github"
       },
       "original": {
