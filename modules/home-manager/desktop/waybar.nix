@@ -670,7 +670,10 @@ in {
           tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
           tooltip-format-enumerate-connected-battery = "{device_alias}\t{device_battery_percentage}%";
           on-click = dropkittenCmd tui.bluetooth;
-          on-click-right = "sh -c 'if ${pkgs.bluez}/bin/bluetoothctl show | grep -q \"Powered: yes\"; then ${pkgs.bluez}/bin/bluetoothctl power off; else ${pkgs.bluez}/bin/bluetoothctl power on; fi'";
+          # Detect power state via D-Bus, not `bluetoothctl show`: BlueZ 5.86's
+          # one-shot `show` exits before its object cache populates and prints
+          # nothing, so the old grep never matched and only ever powered on.
+          on-click-right = "sh -c 'if ${pkgs.systemd}/bin/busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Powered | grep -q true; then ${pkgs.bluez}/bin/bluetoothctl power off; else ${pkgs.bluez}/bin/bluetoothctl power on; fi'";
         };
 
         network = {
