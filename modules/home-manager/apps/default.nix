@@ -12,6 +12,7 @@
     ./yazi.nix
     ./taskwarrior.nix
     ./music.nix
+    ./aerc.nix
     ./ai.nix
     ./qutebrowser.nix
     ./syncthing.nix
