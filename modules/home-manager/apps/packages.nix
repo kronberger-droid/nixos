@@ -50,6 +50,7 @@
 
     # Networking
     localsend
+    sshfs # mount remote SFTP/SSH dirs locally (see sftp-mount in nushell)
 
     # System
     ltunify
