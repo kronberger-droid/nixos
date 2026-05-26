@@ -11,6 +11,7 @@ in {
   "tunet-credentials.age".publicKeys = [intelNuc spectre];
   "tuwien-vpn-totp.age".publicKeys = [intelNuc spectre];
   "spotify-password.age".publicKeys = [intelNuc spectre];
+  "sftp-password.age".publicKeys = [intelNuc spectre];
   "miniflux-credentials.age".publicKeys = [homeserver];
   "cache-private-key.age".publicKeys = [homeserver];
 }

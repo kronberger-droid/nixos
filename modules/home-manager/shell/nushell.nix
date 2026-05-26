@@ -162,6 +162,60 @@ in {
         cd $emulation_dir
         quickemu --vm $config_file
     }
+
+    # Mount/unmount the IAP fileserver (VPN-gated) over sshfs.
+    # Connect the VPN *first*. reconnect + keepalive turn a VPN drop into a
+    # bounded I/O error and auto-recovery instead of an indefinite hang. The
+    # mountpoint lives under ~/mnt so syncthing/megasync never scan it.
+    #   iap-server            mount (default)
+    #   iap-server unmount    unmount before dropping the VPN
+    #   iap-server unmount -f lazy-detach a wedged mount (connection died)
+    #   iap-server status     show whether it's mounted
+    def iap-server [
+        action: string = "mount"   # mount, unmount, status
+        --force (-f)               # for unmount: lazy-detach a wedged mount
+    ] {
+        let host = "kronberger@iap-fileserver-1.iap.tuwien.ac.at"
+        let remote = "/sph"
+        let port = 10222
+        let mountpoint = ("~/mnt/iap-server" | path expand)
+        let mounted = (^mount | lines | where ($it | str contains $mountpoint) | is-not-empty)
+
+        match $action {
+            "mount" => {
+                if $mounted {
+                    print $"(ansi yellow)Already mounted at ($mountpoint)(ansi reset)"
+                    return
+                }
+                mkdir $mountpoint
+                $"(open /run/secrets/sftp-password | str trim)(char newline)"
+                | sshfs $"($host):($remote)" $mountpoint -o $"password_stdin,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,port=($port)"
+                print $"(ansi green)Mounted ($host):($remote) -> ($mountpoint)(ansi reset)"
+            }
+            "unmount" => {
+                if $force {
+                    fusermount3 -uz $mountpoint   # lazy: detach even while "busy"
+                    print $"(ansi green)Force-unmounted ($mountpoint)(ansi reset)"
+                } else if not $mounted {
+                    print $"(ansi yellow)Not mounted: ($mountpoint)(ansi reset)"
+                } else {
+                    fusermount3 -u $mountpoint
+                    print $"(ansi green)Unmounted ($mountpoint)(ansi reset)"
+                }
+            }
+            "status" => {
+                if $mounted {
+                    print $"(ansi green)mounted(ansi reset) at ($mountpoint)"
+                } else {
+                    print $"(ansi yellow)not mounted(ansi reset)"
+                }
+            }
+            _ => {
+                print $"(ansi red)Unknown action '($action)'(ansi reset)"
+                print "Usage: iap-server [mount | unmount | status]  (unmount -f to force)"
+            }
+        }
+    }
   '';
 
   # Generate development.nu with dynamic terminal configuration (requires terminal module)

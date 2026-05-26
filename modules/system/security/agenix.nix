@@ -68,5 +68,13 @@
       owner = "kronberger";
     };
 
+    # Single-line SFTP password, read by the sftp-mount nushell helper
+    sftp-password = {
+      file = "${inputs.self}/secrets/sftp-password.age";
+      path = "/run/secrets/sftp-password";
+      mode = "0400";
+      owner = "kronberger";
+    };
+
   };
 }
