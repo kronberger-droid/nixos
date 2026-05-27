@@ -51,6 +51,15 @@ in {
   programs.niri.settings = {
     environment = {
       DISPLAY = ":11";
+
+      # niri isn't in Chromium's desktop-environment table, so Electron/Chromium
+      # apps auto-detect no keyring and fall back to the plaintext "basic" store
+      # (newer Element outright refuses it). Chromium scans this colon list and
+      # picks the first recognised token, so appending "GNOME" steers it to the
+      # gnome-libsecret backend, which talks to the running oo7 Secret Service.
+      # "niri" stays first so niri-portals.conf still wins (oo7 stays the portal).
+      # Set here, not in home.sessionVariables, because niri overrides that.
+      XDG_CURRENT_DESKTOP = "niri:GNOME";
     };
 
     # Input configuration
