@@ -16,9 +16,16 @@
         # Without these, the dynamic fallback may return a proportional font, breaking cell alignment.
         # Note: "Symbols Nerd Font Mono" only covers Nerd Font icon ranges (PUA),
         # not standard Unicode symbol blocks — don't use it here.
-        # Note: SMP emoji (🚀 U+1F680, 🟢 U+1F7E2, …) are intentionally NOT in this map —
-        # they're left to sugarloaf's per-codepoint fontconfig discovery (linux.rs:discover_fallback),
-        # which picks Symbola from the system font set. Color/wide-cell handling is automatic.
+        # SMP emoji (🚀 U+1F680, 🟢 U+1F7E2, …) are mapped to "Noto Emoji" — the monochrome
+        # (grayscale) sibling of Noto Color Emoji. They CAN'T be fixed by fontconfig fallback:
+        # sugarloaf's per-codepoint discovery (linux.rs:discover_fallback) hints fontconfig with
+        # the *primary* family, not "emoji", so the emoji alias in fonts.nix never fires — and
+        # once both Noto Emoji and Symbola cover a glyph it's a charset tie decided by fragile
+        # ordering. symbol-map is the only deterministic route (Rio 0.4.x has no emoji/extras key).
+        # symbol-map is a HARD override (tofu on miss, no fallback), so these ranges are derived
+        # from Noto Emoji's own charset; its gaps stay on the existing Symbola fallback. Regen:
+        #   fc-query --format='%{charset}\n' NotoEmoji.ttf | tr ' ' '\n' | sort -u \
+        #     | awk -F- '{s=strtonum("0x"$1)} s>=0x1F000 && s<=0x1FFFF'
         symbol-map = [
           # Misc Technical (U+2300-23FF) — JBM covers ~45%, remap the gaps
           { start = "2300"; end = "2301"; font-family = "JuliaMono"; }
@@ -55,6 +62,72 @@
           { start = "279F"; end = "27BF"; font-family = "JuliaMono"; }
           # Braille Patterns (U+2800-28FF) — JBM has 0 coverage, remap entire block (spinners, btop)
           { start = "2800"; end = "28FF"; font-family = "JuliaMono"; }
+
+          # SMP emoji (U+1F000-1FFFF) → "Noto Emoji" monochrome. Auto-derived from the font's
+          # charset (regen command above); gaps are unassigned/non-emoji codepoints that stay
+          # on the Symbola fallback. Covers Emoticons, Misc Pictographs, Transport, Supplemental,
+          # Extended-A, the colored shapes (🟢🟠🟥 U+1F7E0-1F7EB), and flag regional indicators.
+          { start = "1F004"; end = "1F004"; font-family = "Noto Emoji"; }
+          { start = "1F0CF"; end = "1F0CF"; font-family = "Noto Emoji"; }
+          { start = "1F170"; end = "1F171"; font-family = "Noto Emoji"; }
+          { start = "1F17E"; end = "1F17F"; font-family = "Noto Emoji"; }
+          { start = "1F18E"; end = "1F18E"; font-family = "Noto Emoji"; }
+          { start = "1F191"; end = "1F19A"; font-family = "Noto Emoji"; }
+          { start = "1F1E6"; end = "1F1FF"; font-family = "Noto Emoji"; } # regional indicators (flags)
+          { start = "1F201"; end = "1F202"; font-family = "Noto Emoji"; }
+          { start = "1F21A"; end = "1F21A"; font-family = "Noto Emoji"; }
+          { start = "1F22F"; end = "1F22F"; font-family = "Noto Emoji"; }
+          { start = "1F232"; end = "1F23A"; font-family = "Noto Emoji"; }
+          { start = "1F250"; end = "1F251"; font-family = "Noto Emoji"; }
+          { start = "1F300"; end = "1F321"; font-family = "Noto Emoji"; }
+          { start = "1F324"; end = "1F393"; font-family = "Noto Emoji"; }
+          { start = "1F396"; end = "1F397"; font-family = "Noto Emoji"; }
+          { start = "1F399"; end = "1F39B"; font-family = "Noto Emoji"; }
+          { start = "1F39E"; end = "1F3F0"; font-family = "Noto Emoji"; }
+          { start = "1F3F3"; end = "1F3F5"; font-family = "Noto Emoji"; }
+          { start = "1F3F7"; end = "1F4FD"; font-family = "Noto Emoji"; }
+          { start = "1F4FF"; end = "1F53D"; font-family = "Noto Emoji"; }
+          { start = "1F549"; end = "1F54E"; font-family = "Noto Emoji"; }
+          { start = "1F550"; end = "1F567"; font-family = "Noto Emoji"; }
+          { start = "1F56F"; end = "1F570"; font-family = "Noto Emoji"; }
+          { start = "1F573"; end = "1F57A"; font-family = "Noto Emoji"; }
+          { start = "1F587"; end = "1F587"; font-family = "Noto Emoji"; }
+          { start = "1F58A"; end = "1F58D"; font-family = "Noto Emoji"; }
+          { start = "1F590"; end = "1F590"; font-family = "Noto Emoji"; }
+          { start = "1F595"; end = "1F596"; font-family = "Noto Emoji"; }
+          { start = "1F5A4"; end = "1F5A5"; font-family = "Noto Emoji"; }
+          { start = "1F5A8"; end = "1F5A8"; font-family = "Noto Emoji"; }
+          { start = "1F5B1"; end = "1F5B2"; font-family = "Noto Emoji"; }
+          { start = "1F5BC"; end = "1F5BC"; font-family = "Noto Emoji"; }
+          { start = "1F5C2"; end = "1F5C4"; font-family = "Noto Emoji"; }
+          { start = "1F5D1"; end = "1F5D3"; font-family = "Noto Emoji"; }
+          { start = "1F5DC"; end = "1F5DE"; font-family = "Noto Emoji"; }
+          { start = "1F5E1"; end = "1F5E1"; font-family = "Noto Emoji"; }
+          { start = "1F5E3"; end = "1F5E3"; font-family = "Noto Emoji"; }
+          { start = "1F5E8"; end = "1F5E8"; font-family = "Noto Emoji"; }
+          { start = "1F5EF"; end = "1F5EF"; font-family = "Noto Emoji"; }
+          { start = "1F5F3"; end = "1F5F3"; font-family = "Noto Emoji"; }
+          { start = "1F5FA"; end = "1F64F"; font-family = "Noto Emoji"; } # Emoticons (😀-🙏)
+          { start = "1F680"; end = "1F6C5"; font-family = "Noto Emoji"; } # Transport & Map (🚀)
+          { start = "1F6CB"; end = "1F6D2"; font-family = "Noto Emoji"; }
+          { start = "1F6D5"; end = "1F6D7"; font-family = "Noto Emoji"; }
+          { start = "1F6DC"; end = "1F6E5"; font-family = "Noto Emoji"; }
+          { start = "1F6E9"; end = "1F6E9"; font-family = "Noto Emoji"; }
+          { start = "1F6EB"; end = "1F6EC"; font-family = "Noto Emoji"; }
+          { start = "1F6F0"; end = "1F6F0"; font-family = "Noto Emoji"; }
+          { start = "1F6F3"; end = "1F6FC"; font-family = "Noto Emoji"; }
+          { start = "1F7E0"; end = "1F7EB"; font-family = "Noto Emoji"; } # colored circles/squares (🟢🟥)
+          { start = "1F7F0"; end = "1F7F0"; font-family = "Noto Emoji"; }
+          { start = "1F90C"; end = "1F93A"; font-family = "Noto Emoji"; }
+          { start = "1F93C"; end = "1F945"; font-family = "Noto Emoji"; }
+          { start = "1F947"; end = "1F9FF"; font-family = "Noto Emoji"; } # Supplemental Symbols (🤖🦀)
+          { start = "1FA70"; end = "1FA7C"; font-family = "Noto Emoji"; }
+          { start = "1FA80"; end = "1FA88"; font-family = "Noto Emoji"; }
+          { start = "1FA90"; end = "1FABD"; font-family = "Noto Emoji"; }
+          { start = "1FABF"; end = "1FAC5"; font-family = "Noto Emoji"; }
+          { start = "1FACE"; end = "1FADB"; font-family = "Noto Emoji"; }
+          { start = "1FAE0"; end = "1FAE8"; font-family = "Noto Emoji"; }
+          { start = "1FAF0"; end = "1FAF8"; font-family = "Noto Emoji"; }
         ];
 
         regular = {
