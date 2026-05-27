@@ -4,13 +4,6 @@
 
   nixpkgs.overlays = [
     (_: prev: {
-      brave = prev.brave.override {
-        commandLineArgs = [
-          "--password-store=basic"
-        ];
-      };
-
-
       inpdf = prev.rustPlatform.buildRustPackage {
         pname = "inpdf";
         version = "0-unstable-2026-02-03";
