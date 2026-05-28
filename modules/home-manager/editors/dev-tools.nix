@@ -1,16 +1,14 @@
-{
-  pkgs,
-  inputs,
-  ...
-}: let
-  rustToolchain = inputs.fenix.packages.${pkgs.stdenv.hostPlatform.system}.stable.toolchain;
-in {
+{pkgs, ...}: {
   home.file.".rustfmt.toml".text = ''
     max_width = 70
   '';
 
   home.packages = with pkgs; [
-    rustToolchain
+    rustc
+    cargo
+    clippy
+    rustfmt
+    rust-analyzer
     tokei
     cargo-generate
     serpl
