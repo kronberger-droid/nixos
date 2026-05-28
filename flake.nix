@@ -37,14 +37,6 @@
       url = "github:rcambrj/nix-pia-vpn";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    fenix = {
-      url = "github:nix-community/fenix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    arrabbiata-tui = {
-      url = "github:kronberger-droid/arrabbiata-tui";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     arrabbiata = {
       url = "github:kronberger-droid/arrabbiata";
       inputs.nixpkgs.follows = "nixpkgs";

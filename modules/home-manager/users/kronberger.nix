@@ -38,11 +38,6 @@ in {
         args = ["mcp"];
       };
 
-      programs.arrabbiata-tui = {
-        enable = true;
-        configFile = "/run/secrets/arrabbiata-config";
-      };
-
       # Set default terminal emulator
       terminal.emulator = "rio";
 

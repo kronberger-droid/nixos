@@ -7,7 +7,6 @@
     ./nchat.nix
     ./quickemu.nix
     ./claude.nix
-    ./arrabbiata-tui.nix
     ./zathura.nix
     ./yazi.nix
     ./taskwarrior.nix
