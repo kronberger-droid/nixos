@@ -10,12 +10,26 @@
     # if nightly turns out unstable. Remove once we're committed to either path
     # AND 0.4.3 has landed in nixos-unstable.
     nixpkgs-rio.url = "github:kronberger-droid/nixpkgs/rio-0.4.3";
-    # Rio "nightly": upstream main built with Rio's own flake (MSRV toolchain).
-    # Use `packages.${system}.rio-nightly` instead of `.default` if you want
-    # the Rust-nightly compiler variant.
+    # Rio "nightly": upstream main built with Rio's own flake.
+    # We pick `.rio-stable` (latest released Rust) rather than `.default`
+    # (= Rio's MSRV), because upstream pins MSRV to unreleased Rust versions
+    # and rust-overlay only carries shipped stable channels. Switch back to
+    # `.default` once Rio's MSRV is at or below the latest released stable.
+    # `packages.${system}.rio-nightly` is the Rust-nightly compiler variant.
+    # rust-overlay is hoisted from rio-upstream so we control its lock.
+    # Rio's `.rio-stable` resolves to `rust-bin.stable.latest.minimal` against
+    # rust-overlay's pinned rev — when rio's own flake.lock lags behind a Rust
+    # release, `latest.stable` returns the old toolchain and rio's MSRV-bumped
+    # source fails to compile. Locking rust-overlay here lets us refresh it
+    # with `nix flake update rust-overlay` without waiting on upstream rio.
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     rio-upstream = {
       url = "github:raphamorim/rio";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
     };
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -145,7 +159,7 @@
                 (_: _: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                   claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
-                  rio = inputs.rio-upstream.packages.${system}.default;
+                  rio = inputs.rio-upstream.packages.${system}.rio-stable;
                 })
               ];
             }
