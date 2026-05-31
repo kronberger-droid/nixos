@@ -67,6 +67,11 @@ in {
           deploy-rs
         ];
         stateVersion = "24.11";
+        # HM master bumped its release string to 26.11 ahead of nixpkgs
+        # unstable (still 26.05) during the 26.05 changeover. Both inputs
+        # track unstable and HM follows nixpkgs, so there is no real
+        # mismatch — silence the false-positive warning.
+        enableNixpkgsReleaseCheck = false;
       };
     };
   };
