@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  lib,
   ...
 }: let
   scheme = config.scheme;
@@ -46,211 +47,281 @@
     base0F = "#${scheme.base0F}"
   '';
 
-  nixosConfigPath = "/home/kronberger/.config/nixos";
-  mkSymlink = path: config.lib.file.mkOutOfStoreSymlink "${nixosConfigPath}/${path}";
+  livePath = config.helix.liveConfigPath;
+  # Editable helix config: when a live repo checkout is configured, symlink
+  # straight into it (edit without rebuild); otherwise copy from the store
+  # (e.g. nix-on-droid, where the repo isn't checked out at a fixed path).
+  mkConfigSource = {
+    repoPath,
+    storePath,
+  }:
+    if livePath != null
+    then config.lib.file.mkOutOfStoreSymlink "${livePath}/${repoPath}"
+    else storePath;
+
+  # When false, drop the heavyweight language tooling (Typst, Python, CSV,
+  # GLSL, PDF viewer, compilers) and keep only Nix + Markdown + Rust editing.
+  full = !config.helix.minimal;
 in {
   imports = [
     ./helix/dprint.nix
   ];
 
-  home = {
-    packages = with pkgs; [
-      # Nix
-      nil
-      statix
-      deadnix
-      alejandra
+  options.helix = {
+    liveConfigPath = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = "/home/kronberger/.config/nixos";
+      description = ''
+        Path to a live checkout of this nixos repo. When set, helix's editable
+        config files are out-of-store symlinks into it (edit without rebuild).
+        Set to null where the repo isn't checked out at a fixed path (e.g.
+        nix-on-droid) to copy the files from the store instead.
+      '';
+    };
 
-      # Typst
-      typst
-      typstyle
-      typst-live
-      tinymist
-
-      # Markdown
-      rumdl
-      markdown-oxide
-
-      # Spellcheck
-      harper
-
-      # PDF Viewer
-      zathura
-
-      # CSV
-      prettier
-
-      # General Compilers
-      gcc
-
-      # Rust
-      bacon
-      rust-script
-
-      # Python
-      ruff
-      pyright
-
-      # OpenGL
-      glsl_analyzer
-    ];
-
-    file = {
-      # Nix-generated palette (inherits base16_transparent + scheme colors)
-      ".config/helix/themes/base16-nix.toml".source = base16PaletteTheme;
-      # Hot-reloadable files — symlinked directly to the repo
-      ".config/helix/themes/custom-base16.toml".source = mkSymlink "modules/home-manager/editors/helix/custom-base16.toml";
-      ".config/helix/ignore".source = mkSymlink "modules/home-manager/editors/helix/ignore";
-      ".config/harper/dictionary.txt".source = mkSymlink "modules/home-manager/editors/helix/harper_dict.txt";
-      ".config/rumdl/rumdl.toml".source = mkSymlink "modules/home-manager/editors/helix/rumdl.toml";
+    minimal = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Trim the language tooling to a lean core (Nix + Markdown + Rust
+        editing), omitting heavyweight servers/formatters (Typst, Python,
+        CSV, GLSL, PDF viewer, compilers). For constrained targets like
+        nix-on-droid. Also prunes the matching languages.toml entries so the
+        omitted tools don't get pulled into the closure by store-path refs.
+      '';
     };
   };
 
-  programs.helix = {
-    enable = true;
-    defaultEditor = true;
-    settings = {
-      theme = "custom-base16";
-      editor = {
-        text-width = 80;
-        soft-wrap = {
-          enable = true;
-          wrap-at-text-width = true;
+  config = {
+    home = {
+      # Order preserved so the full build's home profile is byte-identical;
+      # full-only packages are interleaved via optionals.
+      packages = with pkgs;
+        [
+          # Nix
+          nil
+          statix
+          deadnix
+          alejandra
+        ]
+        ++ lib.optionals full [
+          # Typst
+          typst
+          typstyle
+          typst-live
+          tinymist
+        ]
+        ++ [
+          # Markdown
+          rumdl
+          markdown-oxide
+
+          # Spellcheck
+          harper
+        ]
+        ++ lib.optionals full [
+          # PDF Viewer
+          zathura
+
+          # CSV
+          prettier
+
+          # General Compilers
+          gcc
+
+          # Rust
+          bacon
+          rust-script
+
+          # Python
+          ruff
+          pyright
+
+          # OpenGL
+          glsl_analyzer
+        ];
+
+      file = {
+        # Nix-generated palette (inherits base16_transparent + scheme colors)
+        ".config/helix/themes/base16-nix.toml".source = base16PaletteTheme;
+        # Editable files — live symlink on desktop, store copy elsewhere
+        ".config/helix/themes/custom-base16.toml".source = mkConfigSource {
+          repoPath = "modules/home-manager/editors/helix/custom-base16.toml";
+          storePath = ./helix/custom-base16.toml;
         };
-        line-number = "relative";
-        cursor-shape = {
-          insert = "bar";
-          normal = "block";
-          select = "underline";
+        ".config/helix/ignore".source = mkConfigSource {
+          repoPath = "modules/home-manager/editors/helix/ignore";
+          storePath = ./helix/ignore;
         };
-        statusline = {
-          left = [
-            "mode"
-            "spinner"
-            "version-control"
-            "file-modification-indicator"
-            "file-name"
-          ];
+        ".config/harper/dictionary.txt".source = mkConfigSource {
+          repoPath = "modules/home-manager/editors/helix/harper_dict.txt";
+          storePath = ./helix/harper_dict.txt;
         };
-        file-picker = {
-          hidden = false;
-        };
-        end-of-line-diagnostics = "hint";
-        inline-diagnostics = {
-          cursor-line = "warning";
-        };
-        lsp = {
-          auto-signature-help = false;
-          display-messages = false;
-          display-inlay-hints = false;
-        };
-      };
-      keys.normal = {
-        space.space = "file_picker";
-        ret = {
-          ret = ":w";
-          q = ":q";
-          w = ":wq";
-          r = ":reload-all";
+        ".config/rumdl/rumdl.toml".source = mkConfigSource {
+          repoPath = "modules/home-manager/editors/helix/rumdl.toml";
+          storePath = ./helix/rumdl.toml;
         };
       };
     };
 
-    languages = {
-      language = [
-        {
-          name = "csv";
-          formatter = {
-            command = "${pkgs.prettier}/bin/prettier";
-            args = ["--parser" "csv"];
+    programs.helix = {
+      enable = true;
+      defaultEditor = true;
+      settings = {
+        theme = "custom-base16";
+        editor = {
+          text-width = 80;
+          soft-wrap = {
+            enable = true;
+            wrap-at-text-width = true;
           };
-          auto-format = true;
-        }
-        {
-          name = "markdown";
-          language-servers = [
-            "rumdl"
-            "harper"
-          ];
-          formatter = {
-            command = "${pkgs.rumdl}/bin/rumdl";
-            args = ["fmt" "-"];
+          line-number = "relative";
+          cursor-shape = {
+            insert = "bar";
+            normal = "block";
+            select = "underline";
           };
-          auto-format = true;
-        }
-        {
-          name = "rust";
-          language-servers = [
-            "rust-analyzer"
-            "harper"
-          ];
-        }
-        {
-          name = "typst";
-          language-servers = [
-            "tinymist"
-            "harper"
-          ];
-          formatter = {
-            command = "${pkgs.typstyle}/bin/typstyle";
+          statusline = {
+            left = [
+              "mode"
+              "spinner"
+              "version-control"
+              "file-modification-indicator"
+              "file-name"
+            ];
           };
-          auto-format = true;
-        }
-        {
-          name = "python";
-          language-servers = ["pyright"];
-          formatter = {
-            command = "${pkgs.ruff}/bin/ruff";
-            args = ["format" "-"];
+          file-picker = {
+            hidden = false;
           };
-          auto-format = true;
-        }
-        {
-          name = "nix";
-          language-servers = ["nil"];
-          formatter = {
-            command = "${pkgs.alejandra}/bin/alejandra";
-            args = ["--quiet"];
+          end-of-line-diagnostics = "hint";
+          inline-diagnostics = {
+            cursor-line = "warning";
           };
-          auto-format = true;
-        }
-      ];
-      language-server = {
-        nil = {
-          command = "${pkgs.nil}/bin/nil";
-          file-types = ["nix"];
-        };
-        rust-analyzer = {
-          command = "rust-analyzer";
-          config = {
-            check.command = "clippy";
-            rustfmt.extraArgs = ["--config" "max_width=70"];
+          lsp = {
+            auto-signature-help = false;
+            display-messages = false;
+            display-inlay-hints = false;
           };
         };
-        harper = {
-          command = "${pkgs.harper}/bin/harper-ls";
-          args = ["--stdio"];
-          config = {
-            harper-ls = {
-              userDictPath = "~/.config/harper/dictionary.txt";
+        keys.normal = {
+          space.space = "file_picker";
+          ret = {
+            ret = ":w";
+            q = ":q";
+            w = ":wq";
+            r = ":reload-all";
+          };
+        };
+      };
+
+      languages = {
+        # Order preserved (csv, markdown, rust, typst, python, nix) so the
+        # generated languages.toml is byte-identical on full builds; the
+        # full-only entries are interleaved via optionals.
+        language =
+          lib.optionals full [
+            {
+              name = "csv";
+              formatter = {
+                command = "${pkgs.prettier}/bin/prettier";
+                args = ["--parser" "csv"];
+              };
+              auto-format = true;
+            }
+          ]
+          ++ [
+            {
+              name = "markdown";
+              language-servers = [
+                "rumdl"
+                "harper"
+              ];
+              formatter = {
+                command = "${pkgs.rumdl}/bin/rumdl";
+                args = ["fmt" "-"];
+              };
+              auto-format = true;
+            }
+            {
+              name = "rust";
+              language-servers = [
+                "rust-analyzer"
+                "harper"
+              ];
+            }
+          ]
+          ++ lib.optionals full [
+            {
+              name = "typst";
+              language-servers = [
+                "tinymist"
+                "harper"
+              ];
+              formatter = {
+                command = "${pkgs.typstyle}/bin/typstyle";
+              };
+              auto-format = true;
+            }
+            {
+              name = "python";
+              language-servers = ["pyright"];
+              formatter = {
+                command = "${pkgs.ruff}/bin/ruff";
+                args = ["format" "-"];
+              };
+              auto-format = true;
+            }
+          ]
+          ++ [
+            {
+              name = "nix";
+              language-servers = ["nil"];
+              formatter = {
+                command = "${pkgs.alejandra}/bin/alejandra";
+                args = ["--quiet"];
+              };
+              auto-format = true;
+            }
+          ];
+        language-server =
+          {
+            nil = {
+              command = "${pkgs.nil}/bin/nil";
+              file-types = ["nix"];
+            };
+            rust-analyzer = {
+              command = "rust-analyzer";
+              config = {
+                check.command = "clippy";
+                rustfmt.extraArgs = ["--config" "max_width=70"];
+              };
+            };
+            harper = {
+              command = "${pkgs.harper}/bin/harper-ls";
+              args = ["--stdio"];
+              config = {
+                harper-ls = {
+                  userDictPath = "~/.config/harper/dictionary.txt";
+                };
+              };
+            };
+
+            rumdl = {
+              command = "${pkgs.rumdl}/bin/rumdl";
+              args = ["server" "--stdio"];
+            };
+          }
+          // lib.optionalAttrs full {
+            pyright = {
+              command = "${pkgs.pyright}/bin/pyright-langserver";
+              args = ["--stdio"];
+              config = {
+                python.analysis = {
+                  typeCheckingMode = "basic";
+                };
+              };
             };
           };
-        };
-
-        rumdl = {
-          command = "${pkgs.rumdl}/bin/rumdl";
-          args = ["server" "--stdio"];
-        };
-
-        pyright = {
-          command = "${pkgs.pyright}/bin/pyright-langserver";
-          args = ["--stdio"];
-          config = {
-            python.analysis = {
-              typeCheckingMode = "basic";
-            };
-          };
-        };
       };
     };
   };
