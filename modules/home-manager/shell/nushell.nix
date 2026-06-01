@@ -14,6 +14,7 @@
     templates = "~/.config/nixos/templates";
     projects = "~/Projects";
     emulation = "~/Emulation";
+    vault = "~/Documents/notes/general-vault";
   };
 in {
   home.packages = with pkgs; [
@@ -31,6 +32,18 @@ in {
     def ask [question?: string] {
         let q = if ($question | is-not-empty) { $question } else { $in }
         $q | claude -p --model haiku --system-prompt "Answer in 1-3 concise sentences. Be direct, no preamble."
+    }
+
+    # Open helix in the Obsidian vault. `cd` is scoped to this function, so
+    # your shell's working dir is unchanged after you quit helix.
+    def vault [] {
+        let dir = ("${dirs.vault}" | path expand)
+        if not ($dir | path exists) {
+            print $"(ansi red)Vault not found: ($dir)(ansi reset)"
+            return
+        }
+        cd $dir
+        hx .
     }
 
     # Launch a GUI app detached from this shell — survives closing the terminal
