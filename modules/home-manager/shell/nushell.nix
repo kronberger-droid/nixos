@@ -544,6 +544,14 @@ in {
       (builtins.removeAttrs (builtins.fromTOML (builtins.readFile inputs.starship-nerd-fonts)) ["maven"])
       {
         command_timeout = 2000;
+        # Relabel long, uninteresting paths to short names (git-repo-like).
+        # Applied before truncation, so the label only survives within
+        # `truncation_length` (default 3) folders of the root — same as how
+        # Starship shows a real repo's name. Matches against the ~-contracted
+        # path, so the key must start with ~, not /home/...
+        directory.substitutions = {
+          "~/Documents/notes/general-vault" = "vault";
+        };
         git_status = {
           ahead = "↑";
           behind = "↓";
