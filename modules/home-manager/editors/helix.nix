@@ -213,6 +213,22 @@ in {
             w = ":wq";
             r = ":reload-all";
           };
+          # Ctrl-x: browse with yazi, open the picked file in *this* helix.
+          # X for "explorer", matching the niri Mod+Shift+X yazi binding.
+          # Helix has no RPC, so the round-trip goes through a chooser file:
+          # :insert-output hands yazi the terminal (and inserts nothing, since
+          # --chooser-file sends the path to the temp file, not stdout); the
+          # printf restores the escape sequences yazi clobbered; :open reads
+          # the path back; the mouse toggle forces a clean redraw.
+          "C-x" = [
+            ":sh rm -f /tmp/helix-yazi-chooser"
+            ":insert-output yazi \"%{buffer_name}\" --chooser-file=/tmp/helix-yazi-chooser"
+            ":sh printf \"\\x1b[?1049h\\x1b[?2004h\" > /dev/tty"
+            ":open %sh{cat /tmp/helix-yazi-chooser}"
+            ":redraw"
+            ":set mouse false"
+            ":set mouse true"
+          ];
         };
       };
 
