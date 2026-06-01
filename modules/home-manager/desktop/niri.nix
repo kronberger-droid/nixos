@@ -140,6 +140,11 @@ in {
 
     prefer-no-csd = true;
 
+    # Tapping a screen corner opens the overview — a pointer-free entry point
+    # to niri's touch-friendly window management (tap to focus, drag between
+    # workspaces). Touch-down at a corner counts as the pointer reaching it.
+    gestures.hot-corners.enable = true;
+
     screenshot-path = "~/Pictures/Screenshots/screenshot-%Y-%m-%d-%H-%M-%S.png";
 
     hotkey-overlay = {
@@ -177,6 +182,7 @@ in {
       "Alt+Print".action.screenshot-window = [];
 
       # UI
+      "${modifier}+O".action.toggle-overview = [];
       "${modifier}+Shift+Slash".action.show-hotkey-overlay = [];
       "${modifier}+Escape" = {
         allow-inhibiting = false;
