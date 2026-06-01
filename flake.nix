@@ -35,6 +35,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-on-droid = {
+      url = "github:nix-community/nix-on-droid";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -257,6 +262,25 @@
           lixModule
         ];
       };
+    };
+
+    # Nix-on-Droid (Android / Termux). Its own builder — not nixosSystem —
+    # so it lives outside mkHost and nixosConfigurations.
+    nixOnDroidConfigurations.default = inputs.nix-on-droid.lib.nixOnDroidConfiguration {
+      pkgs = import nixpkgs {
+        system = armSystem;
+        config.allowUnfree = true;
+        overlays = [
+          inputs.nix-on-droid.overlays.default
+          inputs.rust-overlay.overlays.default
+          (_: _: {
+            claude-code-bin = inputs.claude-code.packages.${armSystem}.claude-code;
+          })
+        ];
+      };
+      modules = [./hosts/droid/nix-on-droid.nix];
+      extraSpecialArgs = {inherit inputs;};
+      home-manager-path = home-manager.outPath;
     };
 
     # Remote deployment (deploy-rs)
