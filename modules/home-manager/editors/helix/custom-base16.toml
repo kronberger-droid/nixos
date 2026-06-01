@@ -8,6 +8,12 @@ inherits = "base16-nix"
 # Explicit line number color
 "ui.linenr" = { fg = "base03", modifiers = ["dim"] }
 
+# Make hint diagnostics (harper spell/grammar) barely-there: a faint dotted
+# underline in the muted base03, no colored text. Errors/warnings keep their
+# default louder styling.
+"diagnostic.hint" = { underline = { color = "base03", style = "dotted" } }
+"hint" = { fg = "base03" }
+
 # Granular syntax scopes (not in standard base16_transparent)
 "variable.builtin" = { fg = "base0E" }
 "variable.parameter" = { fg = "base08" }

@@ -193,7 +193,9 @@ in {
           file-picker = {
             hidden = false;
           };
-          end-of-line-diagnostics = "hint";
+          # Only warnings/errors get trailing end-of-line text; harper's
+          # hint-level findings stay as a faint underline only (see theme).
+          end-of-line-diagnostics = "warning";
           inline-diagnostics = {
             cursor-line = "warning";
           };
@@ -232,8 +234,9 @@ in {
           ++ [
             {
               name = "markdown";
+              # rumdl stays as the formatter below; dropped as a language
+              # server to cut its diagnostics noise (harper handles prose).
               language-servers = [
-                "rumdl"
                 "harper"
               ];
               formatter = {
@@ -302,6 +305,19 @@ in {
               config = {
                 harper-ls = {
                   userDictPath = "~/.config/harper/dictionary.txt";
+                  # Render findings as subtle hints, not loud warnings — the
+                  # main "quiet" knob. With end-of-line-diagnostics = "hint"
+                  # these only surface at the cursor line.
+                  diagnosticSeverity = "hint";
+                  # Keep spell checking; silence the prose-style nags (which
+                  # also fire on rust comments). Drop this block for grammar.
+                  linters = {
+                    SpellCheck = true;
+                    SpelledNumbers = false;
+                    SentenceCapitalization = false;
+                    LongSentences = false;
+                    RepeatedWords = false;
+                  };
                 };
               };
             };
