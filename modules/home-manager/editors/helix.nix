@@ -2,7 +2,6 @@
   pkgs,
   config,
   lib,
-  isNotebook,
   ...
 }: let
   scheme = config.scheme;
@@ -171,7 +170,7 @@ in {
       settings = {
         theme = "custom-base16";
         editor = {
-          text-width = 80;
+          text-width = 70;
           soft-wrap = {
             enable = true;
             wrap-at-text-width = true;
@@ -313,7 +312,6 @@ in {
               command = "rust-analyzer";
               config = {
                 check.command = "clippy";
-                rustfmt.extraArgs = ["--config" "max_width=${toString (if isNotebook then 70 else 100)}"];
               };
             };
             harper = {
