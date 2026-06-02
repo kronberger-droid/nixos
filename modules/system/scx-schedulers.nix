@@ -1,21 +1,22 @@
 {pkgs, ...}: {
   # SCX (Sched-Ext) Schedulers for improved desktop responsiveness
-  # Requires kernel 6.12+ (currently using 6.17.8)
+  # Requires kernel 6.12+ (currently using 6.18)
 
-  # Install scx scheduler packages (rustscheds includes scx_rusty)
+  # Install scx scheduler packages (rustscheds includes scx_lavd)
   environment.systemPackages = with pkgs; [
     scx.rustscheds
   ];
 
-  # Enable scx_rusty scheduler via systemd service
-  # scx_rusty is optimized for desktop workloads with better responsiveness
-  systemd.services.scx-rusty = {
-    description = "SCX Rusty Scheduler for Desktop Performance";
+  # Enable scx_lavd scheduler via systemd service
+  # scx_lavd (Latency-Aware Virtual Deadline) prioritizes latency-critical
+  # tasks for snappier interactive use (browsing, editing, gaming).
+  systemd.services.scx-lavd = {
+    description = "SCX LAVD Scheduler for Desktop Responsiveness";
     wantedBy = ["multi-user.target"];
     after = ["basic.target"];
     serviceConfig = {
       Type = "simple";
-      ExecStart = "${pkgs.scx.rustscheds}/bin/scx_rusty";
+      ExecStart = "${pkgs.scx.rustscheds}/bin/scx_lavd";
       Restart = "on-failure";
       RestartSec = "5s";
       # Run with elevated priority
