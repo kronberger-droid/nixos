@@ -1,6 +1,11 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  isNotebook,
+  ...
+}: {
+  # Wider lines on the desktop; narrower on notebooks where screens are smaller.
   home.file.".rustfmt.toml".text = ''
-    max_width = 70
+    max_width = ${toString (if isNotebook then 70 else 100)}
   '';
 
   home.packages = with pkgs; [
