@@ -49,4 +49,9 @@
   };
 
   nixpkgs.config.allowUnfree = true;
+
+  # bitwarden-desktop 2026.5.0 pins electron 39, which nixpkgs flags as EOL.
+  nixpkgs.config.permittedInsecurePackages = [
+    "electron-39.8.10"
+  ];
 }
