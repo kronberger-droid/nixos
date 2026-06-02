@@ -96,6 +96,9 @@
     };
     nixos-hardware = {
       url = "github:NixOS/nixos-hardware";
+      # Dedupe onto our nixpkgs; otherwise it pins its own stale tarball
+      # nixpkgs (an unused transitive node that just bloats flake.lock).
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     starship-nerd-fonts = {
       url = "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml";
