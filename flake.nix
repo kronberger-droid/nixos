@@ -141,6 +141,10 @@
             {
               nixpkgs.overlays = [
                 inputs.niri.overlays.niri
+                # Exposes `pkgs.rust-bin` so home-manager (useGlobalPkgs) can
+                # pull a toolchain from rust-overlay instead of nixpkgs' rustc,
+                # which lags Rust stable. See modules/home-manager/editors/dev-tools.nix.
+                inputs.rust-overlay.overlays.default
                 # Pin smithay git deps as FODs to avoid re-fetching on every eval.
                 # Update the hash when niri-src bumps its smithay rev in Cargo.lock.
                 (final: prev: {
