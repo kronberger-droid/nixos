@@ -12,17 +12,19 @@
     };
   };
 
-  # Type via ydotool (kernel /dev/uinput / evdev) instead of the default
-  # wtype. wtype uses the Wayland virtual-keyboard protocol and uploads a
-  # fresh keymap for every out-of-layout character; Chromium/Firefox drop
-  # keys during that swap, so long passwords arrive mangled in browsers
-  # while editors work fine. ydotool has no keymap dance and types reliably.
-  # Daemon + group membership live in modules/system/desktop/ydotool.nix.
-  # start-delay covers focus returning to the browser after rofi closes;
-  # key-delay (ms) can be lowered further if typing feels slow.
+  # Default action is autotype (Enter types username+Tab+password) via wtype,
+  # which works in editors and Firefox. wtype needs no daemon, group, or keyd
+  # handling (unlike ydotool), so we use it and keep no extra machinery.
+  #
+  # Caveat: Chromium-based browsers (Helium, Brave) drop/stutter synthetic
+  # keystrokes from any typer — an upstream Chromium/Wayland input limitation,
+  # cf. https://github.com/atx/wtype/issues/31. For those, use the built-in
+  # copy shortcut (Alt+c = password, Alt+u = username) and paste with Ctrl+V;
+  # clear-after wipes the password from the clipboard 30s after a copy.
   xdg.configFile."rofi-rbw.rc".text = ''
-    typer = ydotool
+    typer = wtype
+    clear-after = 30
     typing-start-delay = 0.4
-    typing-key-delay = 8
+    typing-key-delay = 12
   '';
 }
