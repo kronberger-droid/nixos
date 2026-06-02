@@ -1,13 +1,5 @@
-{
-  pkgs,
-  isNotebook,
-  ...
-}: {
-  # Wider lines on the desktop; narrower on notebooks where screens are smaller.
-  home.file.".rustfmt.toml".text = ''
-    max_width = ${toString (if isNotebook then 70 else 100)}
-  '';
-
+{pkgs, ...}: {
+  # rustfmt uses its default max_width (100); per-project rustfmt.toml still wins.
   home.packages = with pkgs; [
     rustc
     cargo
