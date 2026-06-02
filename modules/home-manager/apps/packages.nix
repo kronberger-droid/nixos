@@ -6,7 +6,7 @@
 
     # Messaging
     thunderbird
-    gurk-rs
+    # gurk-rs
     element-desktop
     zapzap
     signal-desktop
