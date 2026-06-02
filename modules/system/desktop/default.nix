@@ -4,5 +4,6 @@
     ./greetd.nix
     ./keyring.nix
     ./keyd.nix
+    ./ydotool.nix
   ];
 }
