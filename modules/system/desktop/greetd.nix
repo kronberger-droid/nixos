@@ -41,16 +41,19 @@ in {
     useTextGreeter = true;
     settings = {
       default_session = {
-        command = ''
-          ${pkgs.tuigreet}/bin/tuigreet \
-          --time \
-          --asterisks \
-          --user-menu \
-          --cmd ${sessionWrapper} \
-          --remember \
-          --remember-user-session \
-          --sessions ${quietSessions}/share/wayland-sessions:${pkgs.sway}/share/wayland-sessions
-        '';
+        # Must stay a single-line string: greetd's TOML parser rejects the
+        # multi-line ('''…''') literal that nixpkgs' toml generator now emits,
+        # failing with "expected equals sign" and leaving a blank greeter.
+        command = lib.concatStringsSep " " [
+          "${pkgs.tuigreet}/bin/tuigreet"
+          "--time"
+          "--asterisks"
+          "--user-menu"
+          "--cmd ${sessionWrapper}"
+          "--remember"
+          "--remember-user-session"
+          "--sessions ${quietSessions}/share/wayland-sessions:${pkgs.sway}/share/wayland-sessions"
+        ];
       };
     };
   };
