@@ -9,21 +9,14 @@ in {
     # Core Rust toolchain (rustc, cargo, rustfmt, clippy, rust-analyzer, …)
     rustToolchain
 
-    # Common Rust development tools
-    cargo-expand # Expand macros
-    cargo-watch # Auto-rebuild on file changes
-    cargo-edit # cargo add, cargo rm, cargo upgrade commands
-    cargo-outdated # Check for outdated dependencies
-    cargo-audit # Security vulnerability scanner
-    cargo-bloat # Find out what takes most space in your binary
-    cargo-flamegraph # Generate flamegraphs for profiling
-    cargo-nextest # Next-generation test runner
-    cargo-llvm-cov # Code coverage with LLVM
-
-    # Build and linking tools
+    # Build and linking tools. clang is the linker driver Rust shells out to;
+    # mold is the actual linker selected via RUSTFLAGS below. lld is dropped —
+    # it already ships inside clang's LLVM and nothing references it. The heavier
+    # cargo-* dev/profiling tools (expand, watch, edit, outdated, audit, bloat,
+    # flamegraph, nextest, llvm-cov) are desktop-only; install ad hoc with
+    # `nix shell nixpkgs#cargo-…` if ever needed on the phone.
     clang # C/C++ compiler (required for Rust linking)
     mold # Fast linker
-    lld # LLVM linker (alternative)
   ];
 
   # Set environment variables for Rust
