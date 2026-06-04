@@ -20,8 +20,10 @@
     # Portable leaf modules shared with the desktop/server configs
     ../../modules/home-manager/shell/nushell.nix
     ../../modules/home-manager/shell/git.nix
-    ../../modules/home-manager/shell/tools.nix
     ../../modules/home-manager/editors/helix.nix
+
+    # Droid-local trimmed CLI tools (lean subset of shell/tools.nix)
+    ./tools.nix
   ];
 
   # The repo isn't checked out at a fixed path on Android, so copy helix's
