@@ -273,7 +273,7 @@
 
     # Nix-on-Droid (Android / Termux). Its own builder — not nixosSystem —
     # so it lives outside mkHost and nixosConfigurations.
-    nixOnDroidConfigurations.default = inputs.nix-on-droid.lib.nixOnDroidConfiguration {
+    nixOnDroidConfigurations.droid = inputs.nix-on-droid.lib.nixOnDroidConfiguration {
       pkgs = import nixpkgs {
         system = armSystem;
         config.allowUnfree = true;
