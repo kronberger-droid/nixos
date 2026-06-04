@@ -4,7 +4,10 @@
   ...
 }: {
   imports = [
-    ./rust.nix
+    # Temporarily disabled: rust-overlay toolchain builds locally on-device and
+    # is the prime suspect for the proot build-env pty/fd permission failure
+    # during `nix-on-droid switch`. Re-enable once the switch succeeds without it.
+    # ./rust.nix
   ];
 
   android-integration.termux-setup-storage.enable = true;
