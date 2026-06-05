@@ -200,25 +200,25 @@
         selection-background = "#${config.scheme.base02}";
         selection-foreground = "#${config.scheme.base05}";
 
-        # ANSI colors
-        black = "#${config.scheme.base00}";
-        red = "#${config.scheme.base08}";
-        green = "#${config.scheme.base0B}";
-        yellow = "#${config.scheme.base0A}";
-        blue = "#${config.scheme.base0D}";
-        magenta = "#${config.scheme.base0E}";
-        cyan = "#${config.scheme.base0C}";
-        white = "#${config.scheme.base05}";
+        # ANSI colors (sourced from config.ansi — shared with kitty + helix)
+        black = "#${config.ansi.black}";
+        red = "#${config.ansi.red}";
+        green = "#${config.ansi.green}";
+        yellow = "#${config.ansi.yellow}";
+        blue = "#${config.ansi.blue}";
+        magenta = "#${config.ansi.magenta}";
+        cyan = "#${config.ansi.cyan}";
+        white = "#${config.ansi.white}";
 
         # Bright ANSI colors
-        light-black = "#${config.scheme.base03}";
-        light-red = "#${config.scheme.base09}";
-        light-green = "#${config.scheme.base0B}";
-        light-yellow = "#${config.scheme.base0A}";
-        light-blue = "#${config.scheme.base0D}";
-        light-magenta = "#${config.scheme.base0E}";
-        light-cyan = "#${config.scheme.base0C}";
-        light-white = "#${config.scheme.base07}";
+        light-black = "#${config.ansi."bright-black"}";
+        light-red = "#${config.ansi."bright-red"}";
+        light-green = "#${config.ansi."bright-green"}";
+        light-yellow = "#${config.ansi."bright-yellow"}";
+        light-blue = "#${config.ansi."bright-blue"}";
+        light-magenta = "#${config.ansi."bright-magenta"}";
+        light-cyan = "#${config.ansi."bright-cyan"}";
+        light-white = "#${config.ansi."bright-white"}";
 
         # UI elements
         tabs = "#${config.scheme.base00}";

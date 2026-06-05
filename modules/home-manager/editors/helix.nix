@@ -5,29 +5,34 @@
   ...
 }: let
   scheme = config.scheme;
+  ansi = config.ansi;
 
   # Generated palette theme — maps scheme colors to names used by base16_transparent
   base16PaletteTheme = pkgs.writeText "base16-nix.toml" ''
     inherits = "base16_transparent"
 
     [palette]
-    # Generic names (used by base16_transparent's style rules)
-    black = "#${scheme.base00}"
-    red = "#${scheme.base08}"
-    green = "#${scheme.base0B}"
-    yellow = "#${scheme.base0A}"
-    blue = "#${scheme.base0D}"
-    magenta = "#${scheme.base0E}"
-    cyan = "#${scheme.base0C}"
-    white = "#${scheme.base05}"
-    gray = "#${scheme.base03}"
+    # Generic names (used by base16_transparent's style rules). The ANSI-slot
+    # names are sourced from config.ansi (shared with kitty + rio); light-gray
+    # is base04, a base16 ramp color with no ANSI slot. Note light-red is the
+    # bright-red slot = base09 (orange), so base16_transparent's variable/
+    # markup.list pick that up; errors are pinned back to red in the overlay.
+    black = "#${ansi.black}"
+    red = "#${ansi.red}"
+    green = "#${ansi.green}"
+    yellow = "#${ansi.yellow}"
+    blue = "#${ansi.blue}"
+    magenta = "#${ansi.magenta}"
+    cyan = "#${ansi.cyan}"
+    white = "#${ansi.white}"
+    gray = "#${ansi."bright-black"}"
     light-gray = "#${scheme.base04}"
-    light-red = "#${scheme.base08}"
-    light-green = "#${scheme.base0B}"
-    light-yellow = "#${scheme.base0A}"
-    light-blue = "#${scheme.base0D}"
-    light-magenta = "#${scheme.base0E}"
-    light-cyan = "#${scheme.base0C}"
+    light-red = "#${ansi."bright-red"}"
+    light-green = "#${ansi."bright-green"}"
+    light-yellow = "#${ansi."bright-yellow"}"
+    light-blue = "#${ansi."bright-blue"}"
+    light-magenta = "#${ansi."bright-magenta"}"
+    light-cyan = "#${ansi."bright-cyan"}"
     # Base16 names (for overlay use)
     base00 = "#${scheme.base00}"
     base01 = "#${scheme.base01}"
