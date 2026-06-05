@@ -13,9 +13,11 @@
   home.enableNixpkgsReleaseCheck = false;
 
   imports = [
-    # base16 module provides the `scheme` option that helix.nix consumes
+    # base16 module provides the `scheme` option that helix.nix consumes;
+    # ansi.nix derives config.ansi from it (also consumed by helix.nix)
     inputs.base16.homeManagerModule
     ../../modules/home-manager/theming/base16-scheme.nix
+    ../../modules/home-manager/theming/ansi.nix
 
     # Portable leaf modules shared with the desktop/server configs
     ../../modules/home-manager/shell/nushell.nix

@@ -33,10 +33,10 @@ _: {
 
     # Accent colors
     base08 = "ac4142"; # Error/Red (from kitty color1)
-    base09 = "ac4142"; # Urgent/Red (same as base08 - from kitty color1)
+    base09 = "ac4142"; # Urgent/Red (same as base08 - keeps the bright-red slot red, not orange)
     base0A = "e5b566"; # Warning/Yellow (from kitty color3)
     base0B = "7e8d50"; # Green (from kitty color2)
-    base0C = "7dd5cf"; # Cyan (from kitty color6)
+    base0C = "6fb3ad"; # Cyan (desaturated to sit with the muted accent family)
     base0D = "6c99ba"; # Blue (from kitty color4)
     base0E = "9e4e85"; # Magenta (from kitty color5)
     base0F = "8a8177"; # Custom accent - brown (myTheme.accentColor / color12)

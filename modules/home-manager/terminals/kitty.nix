@@ -67,25 +67,25 @@
       selection_background = "#${config.scheme.base02}";
       selection_foreground = "#${config.scheme.base05}";
 
-      # ANSI colors
-      color0 = "#${config.scheme.base00}"; # black
-      color1 = "#${config.scheme.base08}"; # red
-      color2 = "#${config.scheme.base0B}"; # green
-      color3 = "#${config.scheme.base0A}"; # yellow
-      color4 = "#${config.scheme.base0D}"; # blue
-      color5 = "#${config.scheme.base0E}"; # magenta
-      color6 = "#${config.scheme.base0C}"; # cyan
-      color7 = "#${config.scheme.base05}"; # white
+      # ANSI colors (sourced from config.ansi — shared with rio + helix)
+      color0 = "#${config.ansi.black}";
+      color1 = "#${config.ansi.red}";
+      color2 = "#${config.ansi.green}";
+      color3 = "#${config.ansi.yellow}";
+      color4 = "#${config.ansi.blue}";
+      color5 = "#${config.ansi.magenta}";
+      color6 = "#${config.ansi.cyan}";
+      color7 = "#${config.ansi.white}";
 
       # Bright ANSI colors
-      color8 = "#${config.scheme.base03}"; # bright black (gray)
-      color9 = "#${config.scheme.base09}"; # bright red
-      color10 = "#${config.scheme.base0B}"; # bright green
-      color11 = "#${config.scheme.base0A}"; # bright yellow
-      color12 = "#${config.scheme.base0D}"; # bright blue
-      color13 = "#${config.scheme.base0E}"; # bright magenta
-      color14 = "#${config.scheme.base0C}"; # bright cyan
-      color15 = "#${config.scheme.base07}"; # bright white
+      color8 = "#${config.ansi."bright-black"}";
+      color9 = "#${config.ansi."bright-red"}";
+      color10 = "#${config.ansi."bright-green"}";
+      color11 = "#${config.ansi."bright-yellow"}";
+      color12 = "#${config.ansi."bright-blue"}";
+      color13 = "#${config.ansi."bright-magenta"}";
+      color14 = "#${config.ansi."bright-cyan"}";
+      color15 = "#${config.ansi."bright-white"}";
     };
   };
 }
