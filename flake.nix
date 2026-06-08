@@ -130,6 +130,9 @@
       isNotebook,
       primaryCompositor ? "niri",
       extraModules ? [],
+      # The home-manager user module. Defaults to the full workstation user;
+      # lean hosts (e.g. mediaBox) pass a trimmed one.
+      userModule ? ./modules/home-manager/users/kronberger.nix,
     }:
       nixpkgs.lib.nixosSystem {
         inherit system;
@@ -177,7 +180,7 @@
                 inputs.base16.homeManagerModule
               ];
             }
-            ./modules/home-manager/users/kronberger.nix
+            userModule
             agenix.nixosModules.default
             {
               environment.systemPackages = [agenix.packages.${system}.default];
@@ -269,21 +272,16 @@
         ];
       };
 
-      # x86 notebook media appliance — same browser-kiosk profile as mediaPi,
-      # but real-disk install (systemd-boot) and Helium instead of Chromium.
-      # Standalone like mediaPi: deliberately skips the mkHost workstation
-      # stack (niri, agenix, oo7, rust toolchain).
-      mediaBox = nixpkgs.lib.nixosSystem {
-        specialArgs = {
-          host = "mediaBox";
-          inherit inputs;
-        };
-        modules = [
-          {nixpkgs.hostPlatform = x86System;}
-          ./hosts/mediaBox/configuration.nix
-          home-manager.nixosModules.home-manager
-          lixModule
-        ];
+      # x86 notebook media box — a "focused spectre": full niri desktop
+      # (waybar, rofi, mako, nemo, keyd, theming) via the shared mkHost stack,
+      # but with a lean media user (no dev toolchains, no personal apps) and a
+      # lean system config (no common.nix, so no agenix/workstation services).
+      mediaBox = mkHost {
+        hostname = "mediaBox";
+        system = x86System;
+        isNotebook = true;
+        primaryCompositor = "niri";
+        userModule = ./modules/home-manager/users/media.nix;
       };
     };
 
