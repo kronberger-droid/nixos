@@ -96,6 +96,7 @@ in {
         foot # terminal
         bluetuith # bluetooth TUI
         networkmanagerapplet # wifi tray
+        pcmanfm # lightweight GTK file manager (mounts via gvfs/udisks2)
         cfg.browserPackage
       ];
     };
@@ -139,6 +140,13 @@ in {
       pulse.enable = true;
     };
 
+    # ── Removable media ───────────────────────────────────
+    # udisks2 is the mount backend; udiskie (in the Sway startup below) is the
+    # session daemon that watches for inserts and triggers the mount. gvfs adds
+    # trash/mtp/network backends the GUI file manager expects.
+    services.udisks2.enable = true;
+    services.gvfs.enable = true;
+
     # ── SSH ───────────────────────────────────────────────
     services.openssh = {
       enable = true;
@@ -179,7 +187,13 @@ in {
             terminal = "${pkgs.foot}/bin/foot";
             menu = "${pkgs.fuzzel}/bin/fuzzel";
             modifier = "Mod4";
+            keybindings = lib.mkOptionDefault {
+              "Mod4+e" = "exec ${pkgs.pcmanfm}/bin/pcmanfm";
+            };
             startup = [
+              # Auto-mount removable media; click the notification to open it in
+              # the file manager. Tray icon shows in the Sway bar (trayOutput).
+              {command = "${pkgs.udiskie}/bin/udiskie --automount --notify --tray --file-manager ${pkgs.pcmanfm}/bin/pcmanfm";}
               {command = cfg.browserCommand;}
             ];
             bars = [
