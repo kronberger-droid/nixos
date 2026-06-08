@@ -15,12 +15,17 @@ in {
     enable = true;
     extraPortals = [
       pkgs.xdg-desktop-portal-gtk
+      pkgs.xdg-desktop-portal-gnome
     ];
     config = {
       sway.default = ["wlr" "gtk"];
       niri = {
         default = ["gtk"];
         "org.freedesktop.impl.portal.FileChooser" = ["gtk"];
+        # gnome backend implements niri's per-window screencast picker;
+        # gtk has no ScreenCast impl, so window sharing (Helium/Teams) needs this.
+        "org.freedesktop.impl.portal.ScreenCast" = ["gnome"];
+        "org.freedesktop.impl.portal.Screenshot" = ["gnome"];
       };
     };
     wlr = {
