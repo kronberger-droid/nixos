@@ -15,34 +15,6 @@
         };
         cargoHash = "sha256-q7DR0+u1p0Dkp6LhFvNHXuiZoC7am8XH+HC+suLgBY4=";
       };
-
-      helium = let
-        pname = "helium";
-        version = "0.12.3.1";
-        src = prev.fetchurl {
-          url = "https://github.com/imputnet/helium-linux/releases/download/${version}/helium-${version}-x86_64.AppImage";
-          hash = "sha256-VnOhzhAulvFNBB/0AD1d+K/TzfFL9Zwtk/vcm5vWl+I=";
-        };
-        appimageContents = prev.appimageTools.extractType2 {inherit pname version src;};
-      in
-        prev.appimageTools.wrapType2 {
-          inherit pname version src;
-
-          extraInstallCommands = ''
-            install -m 444 -D ${appimageContents}/helium.desktop \
-              $out/share/applications/helium.desktop
-            install -m 444 -D ${appimageContents}/helium.png \
-              $out/share/icons/hicolor/512x512/apps/helium.png
-            substituteInPlace $out/share/applications/helium.desktop \
-              --replace 'Exec=helium' 'Exec=helium --enable-features=UseOzonePlatform --ozone-platform=wayland'
-          '';
-
-          meta = {
-            description = "Privacy-focused Chromium fork from imputnet";
-            homepage = "https://helium.computer";
-            platforms = ["x86_64-linux"];
-          };
-        };
     })
   ];
 

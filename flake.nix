@@ -265,7 +265,23 @@
           ./hosts/mediaPi/configuration.nix
           inputs.nixos-hardware.nixosModules.raspberry-pi-4
           home-manager.nixosModules.home-manager
-          ./modules/home-manager/mediaPi.nix
+          lixModule
+        ];
+      };
+
+      # x86 notebook media appliance — same browser-kiosk profile as mediaPi,
+      # but real-disk install (systemd-boot) and Helium instead of Chromium.
+      # Standalone like mediaPi: deliberately skips the mkHost workstation
+      # stack (niri, agenix, oo7, rust toolchain).
+      mediaBox = nixpkgs.lib.nixosSystem {
+        specialArgs = {
+          host = "mediaBox";
+          inherit inputs;
+        };
+        modules = [
+          {nixpkgs.hostPlatform = x86System;}
+          ./hosts/mediaBox/configuration.nix
+          home-manager.nixosModules.home-manager
           lixModule
         ];
       };
