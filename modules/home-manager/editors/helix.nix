@@ -178,7 +178,6 @@ in {
           text-width = 70;
           soft-wrap = {
             enable = true;
-            wrap-at-text-width = true;
           };
           line-number = "relative";
           cursor-shape = {

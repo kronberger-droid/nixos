@@ -6,6 +6,7 @@
     nerd-fonts.symbols-only
     dejavu_fonts
     inter # modern sans-serif — recommended Standard/Sans-serif font for the browser
+    (google-fonts.override {fonts = ["ChakraPetch"];}) # Chakra Petch — geometric/techy display sans
     noto-fonts
     noto-fonts-cjk-sans
     julia-mono # Mono symbol fallback for Rio symbol-map (★ ☀ ✔ ⏺ etc.)
