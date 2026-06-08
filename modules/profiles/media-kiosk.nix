@@ -108,12 +108,21 @@ in {
       wrapperFeatures.gtk = true;
     };
 
-    # Auto-login to the kiosk user, straight into Sway
+    # Auto-login straight into the kiosk session — no prompt.
     services.greetd = {
       enable = true;
-      settings.default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${pkgs.sway}/bin/sway";
-        user = "greeter";
+      settings = {
+        # greetd runs this once at startup with no greeter: passwordless
+        # autologin as the kiosk user, straight into Sway -> browser.
+        initial_session = {
+          command = "${pkgs.sway}/bin/sway";
+          user = cfg.user;
+        };
+        # Fallback greeter, only reached if you explicitly log out of Sway.
+        default_session = {
+          command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${pkgs.sway}/bin/sway";
+          user = "greeter";
+        };
       };
     };
 
