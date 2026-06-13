@@ -55,6 +55,19 @@
       # No confirmation
       confirm_os_window_close = 0;
 
+      # Fonts — kept visually in sync with rio.nix. NOTE the unit difference:
+      # rio's `size` is in PIXELS (16px), kitty's `font_size` is in POINTS.
+      # Strict 96-DPI conversion: pt = px * 72/96 = 16 * 0.75 = 12pt. Both
+      # terminals are fractional-scaling aware and apply the output scale
+      # identically, so it cancels and only this unit conversion matters.
+      # Weights mirror rio: regular = Medium (500), bold = Bold (700), italics
+      # match. The "NL" family is the no-ligatures variant — nothing to disable.
+      font_size = "12.0";
+      font_family = ''family="JetBrainsMonoNL Nerd Font" style="Medium"'';
+      bold_font = ''family="JetBrainsMonoNL Nerd Font" style="Bold"'';
+      italic_font = ''family="JetBrainsMonoNL Nerd Font" style="Medium Italic"'';
+      bold_italic_font = ''family="JetBrainsMonoNL Nerd Font" style="Bold Italic"'';
+
       # for dropdown menu
       allow_remote_control = "socket-only";
       listen_on = "unix:/tmp/kitty-rc.sock";
