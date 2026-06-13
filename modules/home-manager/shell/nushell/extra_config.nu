@@ -5,6 +5,7 @@ source ~/.config/nushell/keybindings.nu
 $env.config = {
 	show_banner: false
 	edit_mode: 'vi'
+	buffer_editor: 'hx'
 	shell_integration: {
 		osc133: true
 		osc633: true
