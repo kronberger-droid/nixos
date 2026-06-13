@@ -176,6 +176,9 @@ in {
         theme = "custom-base16";
         editor = {
           text-width = 70;
+          scrolloff = 8;
+          color-modes = true;
+          bufferline = "multiple";
           soft-wrap = {
             enable = true;
           };
@@ -192,6 +195,12 @@ in {
               "version-control"
               "file-modification-indicator"
               "file-name"
+            ];
+            right = [
+              "diagnostics"
+              "selections"
+              "position"
+              "file-encoding"
             ];
           };
           file-picker = {
