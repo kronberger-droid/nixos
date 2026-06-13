@@ -117,6 +117,20 @@ in {
         position = "top";
         place-within-column = true;
       };
+
+      # Drop shadow — mainly adds depth where floating windows
+      # (scratchpad, ncspot, dialogs) overlap the tiled strip.
+      shadow = {
+        enable = true;
+      };
+    };
+
+    # Hide the cursor after a few seconds of pointer inactivity.
+    # NOTE: hide-on-key-press caused issues with OnlyOffice before, so it's
+    # left off here — only the inactivity timeout is enabled. Bump/remove the
+    # timeout if it feels off.
+    cursor = {
+      hide-after-inactive-ms = 5000;
     };
 
     # Startup commands
@@ -448,6 +462,9 @@ in {
         open-floating = true;
         default-column-width = {proportion = 0.6;};
         default-window-height = {proportion = 0.7;};
+        # Render as a solid block in screencasts/recordings — the vault
+        # stays visible to us but never leaks into shared/recorded screens.
+        block-out-from = "screencast";
       }
 
       # Proton Pass
@@ -456,6 +473,7 @@ in {
         open-floating = true;
         default-column-width = {proportion = 0.6;};
         default-window-height = {proportion = 0.7;};
+        block-out-from = "screencast";
       }
 
       # File dialogs
