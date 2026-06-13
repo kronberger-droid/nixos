@@ -6,16 +6,31 @@
 }: let
   cfg = config.claude;
 
-  # Statusline script using word-based labels (like starship's "in/on/via" style)
+  # Statusline script using word-based labels (like starship's "in/on/via" style).
+  #
+  # Width-safe by construction: the line is assembled segment by segment, and a
+  # segment is only appended while its VISIBLE text still fits in $COLUMNS.
+  # Claude Code captures the script's stdout (so `tput cols` can't see the
+  # terminal) but exports COLUMNS/LINES for us since v2.1.153. Keeping the line
+  # from ever wrapping matters: Claude Code's renderer counts only "\n", not
+  # visual wraps, so a wrapped statusline desyncs its input-box height math and
+  # smears the redraw (see github.com/anthropics/claude-code issues #22115,
+  # #51828). Segments are measured by their PLAIN text but emitted COLORED, so
+  # truncation only ever lands on a clean boundary, never mid-escape-sequence.
   statuslineScript = pkgs.writeShellScript "claude-statusline" ''
     input=$(cat)
 
-    # Parse JSON fields
-    model=$(echo "$input" | ${pkgs.jq}/bin/jq -r '.model.display_name // "Claude"')
-    cwd=$(echo "$input" | ${pkgs.jq}/bin/jq -r '.workspace.current_dir // ""')
-    added=$(echo "$input" | ${pkgs.jq}/bin/jq -r '.cost.total_lines_added // 0')
-    removed=$(echo "$input" | ${pkgs.jq}/bin/jq -r '.cost.total_lines_removed // 0')
-    ctx_used=$(echo "$input" | ${pkgs.jq}/bin/jq -r '.context_window.used_percentage // 0')
+    # Parse JSON fields (strip stray newlines so output is always single-line)
+    model=$(printf '%s' "$input" | ${pkgs.jq}/bin/jq -r '.model.display_name // "Claude"' | tr -d '\n\r')
+    cwd=$(printf '%s' "$input" | ${pkgs.jq}/bin/jq -r '.workspace.current_dir // ""')
+    added=$(printf '%s' "$input" | ${pkgs.jq}/bin/jq -r '.cost.total_lines_added // 0')
+    removed=$(printf '%s' "$input" | ${pkgs.jq}/bin/jq -r '.cost.total_lines_removed // 0')
+    ctx_used=$(printf '%s' "$input" | ${pkgs.jq}/bin/jq -r '.context_window.used_percentage // 0')
+
+    # Width budget. Claude Code sets COLUMNS (>= v2.1.153); fall back to 80.
+    # Reserve a small margin so we never butt against the exact edge.
+    cols=''${COLUMNS:-80}
+    if [ "$cols" -gt 6 ] 2>/dev/null; then max=$(( cols - 2 )); else max=$cols; fi
 
     # Colors (ANSI)
     reset='\033[0m'
@@ -27,35 +42,47 @@
     white='\033[37m'
     dim='\033[2m'
 
-    # Build output
     output=""
+    vis=0
+    # add_segment <plain-text> <colored-text>: append only if it still fits.
+    add_segment() {
+      local plain="$1" colored="$2" len=''${#1}
+      if [ $(( vis + len )) -le "$max" ]; then
+        output+="$colored"
+        vis=$(( vis + len ))
+      fi
+    }
 
     # Model
-    output+="''${magenta}''${model}''${reset}"
+    add_segment "$model" "''${magenta}''${model}''${reset}"
 
     # Directory (basename)
     if [ -n "$cwd" ]; then
-      dir_name=$(basename "$cwd")
-      output+=" ''${white}in''${reset} ''${cyan}''${dir_name}''${reset}"
+      dir_name=$(basename "$cwd" | tr -d '\n\r')
+      add_segment " in $dir_name" " ''${white}in''${reset} ''${cyan}''${dir_name}''${reset}"
     fi
 
     # Git branch
     if [ -n "$cwd" ]; then
-      branch=$(${pkgs.git}/bin/git -C "$cwd" rev-parse --abbrev-ref HEAD 2>/dev/null)
+      branch=$(${pkgs.git}/bin/git -C "$cwd" rev-parse --abbrev-ref HEAD 2>/dev/null | tr -d '\n\r')
       if [ -n "$branch" ]; then
-        output+=" ''${white}on''${reset} ''${green}''${branch}''${reset}"
+        add_segment " on $branch" " ''${white}on''${reset} ''${green}''${branch}''${reset}"
       fi
     fi
 
     # Lines changed (only if non-zero)
     if [ "$added" != "0" ] || [ "$removed" != "0" ]; then
-      output+=" ''${dim}│''${reset}"
+      seg_plain=" |"
+      seg_color=" ''${dim}│''${reset}"
       if [ "$added" != "0" ]; then
-        output+=" ''${green}+''${added}''${reset}"
+        seg_plain+=" +$added"
+        seg_color+=" ''${green}+''${added}''${reset}"
       fi
       if [ "$removed" != "0" ]; then
-        output+=" ''${red}-''${removed}''${reset}"
+        seg_plain+=" -$removed"
+        seg_color+=" ''${red}-''${removed}''${reset}"
       fi
+      add_segment "$seg_plain" "$seg_color"
     fi
 
     # Context window (only if >10%)
@@ -68,7 +95,7 @@
       else
         ctx_color=$dim
       fi
-      output+=" ''${dim}│''${reset} ''${ctx_color}ctx ''${ctx_int}%''${reset}"
+      add_segment " | ctx $ctx_int%" " ''${dim}│''${reset} ''${ctx_color}ctx ''${ctx_int}%''${reset}"
     fi
 
     printf "%b" "$output"
@@ -76,7 +103,22 @@
 
   # JSON to merge into ~/.claude/settings.json (statusline + plugins)
   settingsToMerge =
-    lib.optionalAttrs cfg.statusline.enable {
+    {
+      # Default to the fullscreen (alternate-screen) renderer instead of the
+      # inline one. The inline renderer redraws via cursor-up + erase-line,
+      # which saturates at the viewport top once content scrolls past it —
+      # leaving ghosted, overlapping output and the cursor drifting out of the
+      # input box (upstream issue #51828). Fullscreen draws to a reserved
+      # screen and repaints regions directly, avoiding that path entirely.
+      # Tradeoff: the conversation isn't left in terminal scrollback on exit
+      # (reopen `claude`, or scroll/PageUp inside it, to see history).
+      # Per the docs this is the CLAUDE_CODE_NO_FLICKER env var, not a settings
+      # key; `/tui fullscreen` does the same for a single session.
+      env = {
+        CLAUDE_CODE_NO_FLICKER = "1";
+      };
+    }
+    // lib.optionalAttrs cfg.statusline.enable {
       statusLine = {
         type = "command";
         command = "${statuslineScript}";

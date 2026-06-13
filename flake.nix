@@ -45,6 +45,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     claude-code = {
+      # Tracks latest. We briefly pinned to 2.1.168 chasing a TUI render glitch
+      # (cursor escaping the input box, ghosted/overlapping redraws), but it
+      # reproduced on every pinned version and in multiple terminals — it's
+      # upstream issue #51828 (Ink main-screen renderer overflowing the
+      # viewport), not a version regression. So no reason to forgo features.
+      # The fix lives in claude.nix: the fullscreen renderer, enabled via the
+      # CLAUDE_CODE_NO_FLICKER env var (equivalently the `/tui fullscreen` cmd).
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
