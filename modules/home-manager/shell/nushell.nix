@@ -395,7 +395,7 @@ in {
               print $"(ansi yellow)Warning: these files are not staged and will be invisible to the flake:(ansi reset)"
               print ((ansi dark_gray) + $unadded + (ansi reset))
               let answer = (input $"(ansi yellow)Continue anyway? [y/N] (ansi reset)")
-              if ($answer | str downcase) != "y" {
+              if ($answer | str lowercase) != "y" {
                   print "Aborted."
                   return
               }
@@ -544,6 +544,16 @@ in {
       (builtins.removeAttrs (builtins.fromTOML (builtins.readFile inputs.starship-nerd-fonts)) ["maven"])
       {
         command_timeout = 2000;
+        # Single-line module row. `$all` is every module in default order, which
+        # *includes* a `$line_break` (after cmd_duration, pushing time/status to
+        # a 2nd line) and a trailing `$character` caret. Disable both: line_break
+        # so all modules stay on one row, character to drop the caret. The real
+        # 2nd line (the input line) comes from nushell's vi indicators carrying a
+        # leading newline (see extra_config.nu) — reedline trims a *trailing*
+        # newline off the prompt but keeps a *leading* one on the indicator.
+        format = "$all";
+        line_break.disabled = true;
+        character.disabled = true;
         # Relabel long, uninteresting paths to short names (git-repo-like).
         # Applied before truncation, so the label only survives within
         # `truncation_length` (default 3) folders of the root — same as how
@@ -565,7 +575,7 @@ in {
         };
         time = {
           disabled = false;
-          format = "[$time]($style) ";
+          format = "at [$time]($style) ";
         };
       };
   };

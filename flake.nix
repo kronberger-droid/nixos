@@ -111,6 +111,16 @@
       url = "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml";
       flake = false;
     };
+    # nushell built from our fork's helix-mode-wip branch: current upstream
+    # (v0.113.2) + the glue wiring reedline's selection-first Helix edit mode
+    # (`edit_mode = "helix"`). Its Cargo.lock pins reedline to our fork's
+    # helix-mode-wip rev, fetched as a FOD via outputHashes in the overlay
+    # below (same pattern as niri-src/smithay). The reedline branch also carries
+    # #1097, the leading-CRLF prompt fix our two-line prompt needs.
+    nushell-helix = {
+      url = "github:kronberger-droid/nushell/helix-mode-wip";
+      flake = false;
+    };
   };
 
   outputs = inputs @ {
@@ -173,6 +183,22 @@
                   # the closure so scripts using `pkgs.niri/bin/niri msg` don't
                   # pull in a parallel nixpkgs niri build.
                   niri = final.niri-unstable;
+                  # nushell from our helix-mode-wip fork (see the nushell-helix
+                  # input). Reuses nixpkgs' build; only src + vendored deps are
+                  # swapped. reedline is the lone git dep, pinned by the fork's
+                  # Cargo.lock rev and fetched here as a FOD. Update the hash
+                  # when the reedline rev in that Cargo.lock changes.
+                  nushell = prev.nushell.overrideAttrs (old: {
+                    version = "0.113.2-helix-wip";
+                    src = inputs.nushell-helix;
+                    cargoDeps = final.rustPlatform.importCargoLock {
+                      lockFile = "${inputs.nushell-helix}/Cargo.lock";
+                      outputHashes = {
+                        "reedline-0.48.0" = "sha256-GGWddHLxp6JUJ2HjkGKyBVKkuXrmPJ6xfIs7lSF7Fg8=";
+                      };
+                    };
+                    doCheck = false;
+                  });
                 })
                 (_: _: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
