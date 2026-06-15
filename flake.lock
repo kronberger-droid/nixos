@@ -327,11 +327,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781305496,
-        "narHash": "sha256-g8Vv4Qfc7n+lgov97REu3X6BeJtvYY0hlSUZR1GrGQQ=",
+        "lastModified": 1781497404,
+        "narHash": "sha256-9GAF8sSsnkyCVCWkomXR0T+zdSxyUlfPt6neQidimdg=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "c87a39aa979acc4848016d2220c6238390d84779",
+        "rev": "1285cd3d6882a9847f2d56ed5541b3350c8a6162",
         "type": "github"
       },
       "original": {
@@ -640,11 +640,11 @@
     "nushell-helix": {
       "flake": false,
       "locked": {
-        "lastModified": 1781515350,
-        "narHash": "sha256-ER3prkagYamTcbObr+ba/Xz76HN9gHY5DYS1Q23IF8U=",
+        "lastModified": 1781529262,
+        "narHash": "sha256-sUyWVdVSH2jQDoZH7NNYpVwCC9x7rcVoBjVVoEOHUhY=",
         "owner": "kronberger-droid",
         "repo": "nushell",
-        "rev": "598abefd514d6ec35d3ccb43df22b5d67e07bd05",
+        "rev": "c7eeec42e9d92e3c9bd74e5de3b5c20e23940204",
         "type": "github"
       },
       "original": {
@@ -818,11 +818,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781320681,
-        "narHash": "sha256-mjJ/VxJaIkgcUvKANgKOaaN5M1X1X+6NjCP0C5hw0WI=",
+        "lastModified": 1781493707,
+        "narHash": "sha256-lzf7qdQWuiY0T9VEbfH2CmP1LZQAYooU/sZuSgEJEBk=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "5b929d8c854149d926d05ea0cd6469bf4e54db27",
+        "rev": "06f25b8e40805beb2121a4dae4cc37d6f981800f",
         "type": "github"
       },
       "original": {
