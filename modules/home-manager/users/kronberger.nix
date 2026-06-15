@@ -26,7 +26,6 @@ in {
         "context7@claude-plugins-official"
         "github@claude-plugins-official"
         "explanatory-output-style@claude-plugins-official"
-        "rust-analyzer-lsp@claude-plugins-official"
       ];
       claude.claudeMd = builtins.readFile ../apps/claude-md.md;
 
