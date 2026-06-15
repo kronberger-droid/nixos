@@ -637,6 +637,23 @@
         "type": "gitlab"
       }
     },
+    "nushell-helix": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781515350,
+        "narHash": "sha256-ER3prkagYamTcbObr+ba/Xz76HN9gHY5DYS1Q23IF8U=",
+        "owner": "kronberger-droid",
+        "repo": "nushell",
+        "rev": "598abefd514d6ec35d3ccb43df22b5d67e07bd05",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kronberger-droid",
+        "ref": "helix-mode-wip",
+        "repo": "nushell",
+        "type": "github"
+      }
+    },
     "oo7-nixos": {
       "inputs": {
         "nixpkgs": [
@@ -716,11 +733,11 @@
         "systems": "systems_5"
       },
       "locked": {
-        "lastModified": 1781048597,
-        "narHash": "sha256-xXTHmBbYckD/BU0ZQH/YezMwmxW7jr9c+5Hej4oQkUk=",
+        "lastModified": 1781435951,
+        "narHash": "sha256-pV04NJJcYbk3nor4sKAewIY7OdoUROhLr8BqK5Or1KY=",
         "owner": "raphamorim",
         "repo": "rio",
-        "rev": "fdf5a7b9602bbeb19bfe5d3dae6ebe39894b1e39",
+        "rev": "e1946a7b98a5a5a4074f384437f0256abf1df75b",
         "type": "github"
       },
       "original": {
@@ -746,6 +763,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "nixpkgs-rio": "nixpkgs-rio",
+        "nushell-helix": "nushell-helix",
         "oo7-nixos": "oo7-nixos",
         "rio-upstream": "rio-upstream",
         "rust-overlay": "rust-overlay_3",
