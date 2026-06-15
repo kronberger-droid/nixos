@@ -194,7 +194,7 @@
                     cargoDeps = final.rustPlatform.importCargoLock {
                       lockFile = "${inputs.nushell-helix}/Cargo.lock";
                       outputHashes = {
-                        "reedline-0.48.0" = "sha256-GGWddHLxp6JUJ2HjkGKyBVKkuXrmPJ6xfIs7lSF7Fg8=";
+                        "reedline-0.48.0" = "sha256-ICAjVrgjlOMBLafGZwvU45KXGZf3KCwfRRhgVRkkcRw=";
                       };
                     };
                     doCheck = false;
