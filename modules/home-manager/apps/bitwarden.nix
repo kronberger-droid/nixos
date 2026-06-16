@@ -8,6 +8,7 @@
     enable = true;
     settings = {
       email = "kronberger@proton.me";
+      base_url = "https://vault.bitwarden.eu";
       pinentry = pkgs.pinentry-rofi;
     };
   };
