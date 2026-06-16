@@ -144,6 +144,9 @@ in {
 
           # OpenGL
           glsl_analyzer
+
+          # JSON / web (Biome: LSP + formatter)
+          biome
         ];
 
       file = {
@@ -303,6 +306,24 @@ in {
               };
               auto-format = true;
             }
+            {
+              name = "json";
+              language-servers = ["biome"];
+              formatter = {
+                command = "${pkgs.biome}/bin/biome";
+                args = ["format" "--stdin-file-path" "file.json"];
+              };
+              auto-format = true;
+            }
+            {
+              name = "jsonc";
+              language-servers = ["biome"];
+              formatter = {
+                command = "${pkgs.biome}/bin/biome";
+                args = ["format" "--stdin-file-path" "file.jsonc"];
+              };
+              auto-format = true;
+            }
           ]
           ++ [
             {
@@ -364,6 +385,10 @@ in {
                   typeCheckingMode = "basic";
                 };
               };
+            };
+            biome = {
+              command = "${pkgs.biome}/bin/biome";
+              args = ["lsp-proxy"];
             };
           };
       };
