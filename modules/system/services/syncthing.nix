@@ -1,12 +1,17 @@
 {
   lib,
   pkgs,
+  config,
   host,
   username,
   ...
 }: let
   syncDevices = import ../../shared/syncthing-devices.nix;
   inherit (syncDevices) devices mobileDevices;
+
+  # The user's home, taken from the NixOS account definition rather than
+  # rebuilt from a string, so it tracks any users.users.<name>.home override.
+  homeDir = config.users.users.${username}.home;
 
   # Only enable on hosts that are in the devices list
   enabled = builtins.hasAttr host devices;
@@ -28,8 +33,8 @@ in
     services.syncthing = {
       enable = true;
       user = username;
-      dataDir = "/home/${username}";
-      configDir = "/home/${username}/.config/syncthing";
+      dataDir = homeDir;
+      configDir = "${homeDir}/.config/syncthing";
 
       # Localhost only — access remote UIs via SSH tunnel:
       # ssh -L 8384:127.0.0.1:8384 <user>@<host>
@@ -45,7 +50,7 @@ in
         folders = {
           # Documents — synced across all NixOS machines
           "documents" = {
-            path = "/home/${username}/Documents";
+            path = "${homeDir}/Documents";
             devices = builtins.attrNames otherDevices;
             versioning = {
               type = "staggered";
@@ -58,7 +63,7 @@ in
 
           # Obsidian vault — synced to phone too
           "general-vault" = {
-            path = "/home/${username}/Documents/notes/general-vault";
+            path = "${homeDir}/Documents/notes/general-vault";
             devices = builtins.attrNames otherDevices ++ builtins.attrNames mobileDevices;
             versioning = {
               type = "staggered";
@@ -80,7 +85,7 @@ in
     };
 
     systemd.tmpfiles.rules = [
-      "L+ /home/${username}/Documents/.stignore - - - - ${documentsIgnore}"
+      "L+ ${homeDir}/Documents/.stignore - - - - ${documentsIgnore}"
     ];
 
     # Open firewall for Syncthing
