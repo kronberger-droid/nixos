@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  username,
+  ...
+}: {
   imports = [
     ./hardware-configuration.nix
     ../common.nix
@@ -112,7 +116,7 @@
     max-jobs = 2; # Max parallel derivation builds
   };
 
-  users.users.kronberger.extraGroups = ["docker" "gamemode"];
+  users.users.${username}.extraGroups = ["docker" "gamemode"];
 
   system.stateVersion = "24.11";
 }

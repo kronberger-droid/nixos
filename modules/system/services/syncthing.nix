@@ -1,11 +1,17 @@
 {
   lib,
   pkgs,
+  config,
   host,
+  username,
   ...
 }: let
   syncDevices = import ../../shared/syncthing-devices.nix;
   inherit (syncDevices) devices mobileDevices;
+
+  # The user's home, taken from the NixOS account definition rather than
+  # rebuilt from a string, so it tracks any users.users.<name>.home override.
+  homeDir = config.users.users.${username}.home;
 
   # Only enable on hosts that are in the devices list
   enabled = builtins.hasAttr host devices;
@@ -26,12 +32,12 @@ in
   lib.mkIf enabled {
     services.syncthing = {
       enable = true;
-      user = "kronberger";
-      dataDir = "/home/kronberger";
-      configDir = "/home/kronberger/.config/syncthing";
+      user = username;
+      dataDir = homeDir;
+      configDir = "${homeDir}/.config/syncthing";
 
       # Localhost only — access remote UIs via SSH tunnel:
-      # ssh -L 8384:127.0.0.1:8384 kronberger@<host>
+      # ssh -L 8384:127.0.0.1:8384 <user>@<host>
       guiAddress = "127.0.0.1:8384";
 
       # Let Nix manage devices; allow adding folders via UI too
@@ -44,7 +50,7 @@ in
         folders = {
           # Documents — synced across all NixOS machines
           "documents" = {
-            path = "/home/kronberger/Documents";
+            path = "${homeDir}/Documents";
             devices = builtins.attrNames otherDevices;
             versioning = {
               type = "staggered";
@@ -57,7 +63,7 @@ in
 
           # Obsidian vault — synced to phone too
           "general-vault" = {
-            path = "/home/kronberger/Documents/notes/general-vault";
+            path = "${homeDir}/Documents/notes/general-vault";
             devices = builtins.attrNames otherDevices ++ builtins.attrNames mobileDevices;
             versioning = {
               type = "staggered";
@@ -79,7 +85,7 @@ in
     };
 
     systemd.tmpfiles.rules = [
-      "L+ /home/kronberger/Documents/.stignore - - - - ${documentsIgnore}"
+      "L+ ${homeDir}/Documents/.stignore - - - - ${documentsIgnore}"
     ];
 
     # Open firewall for Syncthing

@@ -4,6 +4,7 @@
   host,
   isNotebook,
   primaryCompositor,
+  username,
   ...
 }: let
   dropkittenPkg = inputs.dropkitten.packages.${pkgs.stdenv.hostPlatform.system}.dropkitten;
@@ -15,7 +16,7 @@ in {
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "backup-$(date +%Y%m%d-%H%M%S)";
-    users.kronberger = {
+    users.${username} = {
       imports = [
         ../.
       ];
@@ -52,8 +53,8 @@ in {
       };
 
       home = {
-        username = "kronberger";
-        homeDirectory = "/home/kronberger";
+        inherit username;
+        homeDirectory = "/home/${username}";
         packages = with pkgs; [
           dropkittenPkg
           nemo-with-extensions
