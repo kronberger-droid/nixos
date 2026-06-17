@@ -1,4 +1,8 @@
-{inputs, ...}: {
+{
+  inputs,
+  username,
+  ...
+}: {
   # Enable SSH for agenix
   services.openssh = {
     enable = true;
@@ -43,7 +47,7 @@
       file = "${inputs.self}/secrets/github-token.age";
       path = "/run/secrets/github-token";
       mode = "0400";
-      owner = "kronberger";
+      owner = username;
     };
 
     # Format: TUNET_USERNAME=e12202316@student.tuwien.ac.at\nTUNET_PASSWORD=your_password
@@ -58,7 +62,7 @@
       file = "${inputs.self}/secrets/spotify-password.age";
       path = "/run/secrets/spotify-password";
       mode = "0400";
-      owner = "kronberger";
+      owner = username;
     };
 
     # Single-line SFTP password, read by the sftp-mount nushell helper
@@ -66,7 +70,7 @@
       file = "${inputs.self}/secrets/sftp-password.age";
       path = "/run/secrets/sftp-password";
       mode = "0400";
-      owner = "kronberger";
+      owner = username;
     };
 
     # aerc mail passwords, read via *-cred-cmd (cat) in apps/aerc.nix
@@ -74,14 +78,14 @@
       file = "${inputs.self}/secrets/aerc-gmx-password.age";
       path = "/run/secrets/aerc-gmx-password";
       mode = "0400";
-      owner = "kronberger";
+      owner = username;
     };
 
     aerc-uptudate-password = {
       file = "${inputs.self}/secrets/aerc-uptudate-password.age";
       path = "/run/secrets/aerc-uptudate-password";
       mode = "0400";
-      owner = "kronberger";
+      owner = username;
     };
 
   };

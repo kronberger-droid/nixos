@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  username,
+  ...
+}: {
   # Install QuickEMU and related packages
   environment.systemPackages = with pkgs; [
     quickemu
@@ -33,5 +37,5 @@
   programs.virt-manager.enable = true;
 
   # Add virtualisation groups to the user (graphics configured in desktop.nix)
-  users.users.kronberger.extraGroups = ["libvirtd" "kvm" "qemu-libvirtd" "render"];
+  users.users.${username}.extraGroups = ["libvirtd" "kvm" "qemu-libvirtd" "render"];
 }

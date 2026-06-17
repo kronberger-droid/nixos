@@ -1,4 +1,9 @@
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  username,
+  ...
+}: {
   # Enhanced firewall configuration
   networking.firewall = {
     enable = true;
@@ -90,7 +95,7 @@
         LoginGraceTime = 30;
 
         # Only allow specific users
-        AllowUsers = ["kronberger"];
+        AllowUsers = [username];
       };
 
       # Use strong key exchange algorithms

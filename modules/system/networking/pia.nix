@@ -3,6 +3,7 @@
   config,
   inputs,
   lib,
+  username,
   ...
 }: let
   cfg = config.services.pia;
@@ -37,10 +38,10 @@ in {
     # Don't auto-start on boot (matching previous behavior)
     systemd.services.pia-vpn.wantedBy = lib.mkForce [];
 
-    # Allow kronberger to start/stop PIA via sudo
+    # Allow the primary user to start/stop PIA via sudo
     security.sudo-rs.extraRules = [
       {
-        users = ["kronberger"];
+        users = [username];
         commands = [
           {
             command = "/run/current-system/sw/bin/systemctl start pia-vpn.service";

@@ -75,7 +75,7 @@ in {
   options.helix = {
     liveConfigPath = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
-      default = "/home/kronberger/.config/nixos";
+      default = "${config.home.homeDirectory}/.config/nixos";
       description = ''
         Path to a live checkout of this nixos repo. When set, helix's editable
         config files are out-of-store symlinks into it (edit without rebuild).

@@ -1,4 +1,11 @@
-{pkgs, lib, arrabbiata, inputs, ...}: {
+{
+  pkgs,
+  lib,
+  arrabbiata,
+  inputs,
+  username,
+  ...
+}: {
   imports = [
     ./hardware-configuration.nix
     ../../modules/system/core/nix-settings.nix
@@ -53,7 +60,7 @@
   };
 
   # Users
-  users.users.kronberger = {
+  users.users.${username} = {
     createHome = true;
     isNormalUser = true;
     extraGroups = ["wheel"];
@@ -117,7 +124,7 @@
       LoginGraceTime = 30;
 
       # Only allow specific users
-      AllowUsers = ["kronberger" "wiesinger"];
+      AllowUsers = [username "wiesinger"];
     };
 
     # Strong ciphers and key exchange
@@ -212,7 +219,7 @@
   security.sudo-rs = {
     enable = true;
     extraRules = [{
-      users = ["kronberger"];
+      users = [username];
       commands = [{
         command = "ALL";
         options = ["NOPASSWD"];

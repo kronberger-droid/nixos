@@ -2,6 +2,7 @@
   pkgs,
   lib,
   config,
+  username,
   ...
 }: {
   imports = [
@@ -128,7 +129,7 @@
     max-jobs = 2; # Max parallel derivation builds
   };
 
-  users.users.kronberger.extraGroups = ["docker"];
+  users.users.${username}.extraGroups = ["docker"];
 
   environment.systemPackages = with pkgs; [
     brightnessctl
