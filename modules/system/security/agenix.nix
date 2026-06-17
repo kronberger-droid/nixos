@@ -1,4 +1,37 @@
-{inputs, ...}: {
+{
+  inputs,
+  username,
+  lib,
+  ...
+}: let
+  # Every secret has the same shape: an age file in ./secrets, decrypted to
+  # /run/secrets/<name> with mode 0400. Only the owner varies (root vs the
+  # primary user), so list the names and let mkSecret fill in the rest.
+  mkSecret = owner: name: {
+    file = "${inputs.self}/secrets/${name}.age";
+    path = "/run/secrets/${name}";
+    mode = "0400";
+    inherit owner;
+  };
+
+  # Decrypted for root (consumed by system services / login).
+  rootSecrets = [
+    "kronberger-password" # hashed password for user login
+    "pia-credentials" # PIA_USER=pXXXXXXX\nPIA_PASS=your_password
+    "tuwien-vpn-password"
+    "tuwien-vpn-totp"
+    "tunet-credentials" # TUNET_USERNAME=e12202316@student.tuwien.ac.at\nTUNET_PASSWORD=your_password
+  ];
+
+  # Decrypted for the primary user (read directly from their session/tools).
+  userSecrets = [
+    "github-token"
+    "spotify-password"
+    "sftp-password" # single-line SFTP password, read by the sftp-mount nushell helper
+    "aerc-gmx-password" # aerc mail passwords, read via *-cred-cmd (cat) in apps/aerc.nix
+    "aerc-uptudate-password"
+  ];
+in {
   # Enable SSH for agenix
   services.openssh = {
     enable = true;
@@ -8,81 +41,7 @@
     };
   };
 
-  age.secrets = {
-    # Hashed password for user login
-    kronberger-password = {
-      file = "${inputs.self}/secrets/kronberger-password.age";
-      path = "/run/secrets/kronberger-password";
-      mode = "0400";
-      owner = "root";
-    };
-
-    # Format: PIA_USER=pXXXXXXX\nPIA_PASS=your_password
-    pia-credentials = {
-      file = "${inputs.self}/secrets/pia-credentials.age";
-      path = "/run/secrets/pia-credentials";
-      mode = "0400";
-      owner = "root";
-    };
-
-    tuwien-vpn-password = {
-      file = "${inputs.self}/secrets/tuwien-vpn-password.age";
-      path = "/run/secrets/tuwien-vpn-password";
-      mode = "0400";
-      owner = "root";
-    };
-
-    tuwien-vpn-totp = {
-      file = "${inputs.self}/secrets/tuwien-vpn-totp.age";
-      path = "/run/secrets/tuwien-vpn-totp";
-      mode = "0400";
-      owner = "root";
-    };
-
-    github-token = {
-      file = "${inputs.self}/secrets/github-token.age";
-      path = "/run/secrets/github-token";
-      mode = "0400";
-      owner = "kronberger";
-    };
-
-    # Format: TUNET_USERNAME=e12202316@student.tuwien.ac.at\nTUNET_PASSWORD=your_password
-    tunet-credentials = {
-      file = "${inputs.self}/secrets/tunet-credentials.age";
-      path = "/run/secrets/tunet-credentials";
-      mode = "0400";
-      owner = "root";
-    };
-
-    spotify-password = {
-      file = "${inputs.self}/secrets/spotify-password.age";
-      path = "/run/secrets/spotify-password";
-      mode = "0400";
-      owner = "kronberger";
-    };
-
-    # Single-line SFTP password, read by the sftp-mount nushell helper
-    sftp-password = {
-      file = "${inputs.self}/secrets/sftp-password.age";
-      path = "/run/secrets/sftp-password";
-      mode = "0400";
-      owner = "kronberger";
-    };
-
-    # aerc mail passwords, read via *-cred-cmd (cat) in apps/aerc.nix
-    aerc-gmx-password = {
-      file = "${inputs.self}/secrets/aerc-gmx-password.age";
-      path = "/run/secrets/aerc-gmx-password";
-      mode = "0400";
-      owner = "kronberger";
-    };
-
-    aerc-uptudate-password = {
-      file = "${inputs.self}/secrets/aerc-uptudate-password.age";
-      path = "/run/secrets/aerc-uptudate-password";
-      mode = "0400";
-      owner = "kronberger";
-    };
-
-  };
+  age.secrets =
+    lib.genAttrs rootSecrets (mkSecret "root")
+    // lib.genAttrs userSecrets (mkSecret username);
 }

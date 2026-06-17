@@ -1,4 +1,8 @@
-{lib, ...}: {
+{
+  lib,
+  username,
+  ...
+}: {
   imports = [./nix-caches.nix];
 
   nix = {
@@ -18,8 +22,8 @@
 
       # Security
       sandbox = true;
-      allowed-users = ["root" "kronberger"];
-      trusted-users = ["root" "kronberger"];
+      allowed-users = ["root" username];
+      trusted-users = ["root" username];
 
       # nh handles dirty tree warnings
       warn-dirty = false;
@@ -27,7 +31,7 @@
     buildMachines = [
       {
         hostName = "homeserver";
-        sshUser = "kronberger";
+        sshUser = username;
         sshKey = "/root/.ssh/nix-builder";
         system = "x86_64-linux";
         maxJobs = 12;

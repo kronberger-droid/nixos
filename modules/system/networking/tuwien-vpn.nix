@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  username,
   ...
 }: let
   cfg = config.services.tuwien-vpn;
@@ -98,7 +99,7 @@ in {
     # Add sudo rules for VPN control
     security.sudo-rs.extraRules = [
       {
-        users = ["kronberger"];
+        users = [username];
         commands = [
           {
             command = "/run/current-system/sw/bin/systemctl start openconnect-tuwien.service";
@@ -121,7 +122,7 @@ in {
       polkit.addRule(function(action, subject) {
           if ((action.id == "org.freedesktop.systemd1.manage-units" &&
                action.lookup("unit") == "openconnect-tuwien.service") &&
-              subject.user == "kronberger") {
+              subject.user == "${username}") {
               return polkit.Result.YES;
           }
       });

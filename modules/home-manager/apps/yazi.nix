@@ -5,7 +5,7 @@
 }: let
   mkSymlink = path:
     config.lib.file.mkOutOfStoreSymlink
-    "/home/kronberger/.config/nixos/${path}";
+    "${config.home.homeDirectory}/.config/nixos/${path}";
 in {
   xdg.configFile."yazi/flavors/base16-transparent.yazi/flavor.toml".source =
     mkSymlink "modules/home-manager/apps/yazi/base16-transparent.toml";
@@ -87,7 +87,7 @@ in {
         }
         {
           on = ["g" "u"];
-          run = "cd /run/media/kronberger";
+          run = "cd /run/media/${config.home.username}";
           desc = "Go to USB/removable media";
         }
       ];

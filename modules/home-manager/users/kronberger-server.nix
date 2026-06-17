@@ -1,10 +1,15 @@
-{pkgs, inputs, ...}: {
+{
+  pkgs,
+  inputs,
+  username,
+  ...
+}: {
   home-manager = {
     extraSpecialArgs = {inherit inputs;};
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "backup";
-    users.kronberger = {
+    users.${username} = {
       imports = [
         ../shell/nushell.nix
         ../shell/git.nix
@@ -12,8 +17,8 @@
       ];
 
       home = {
-        username = "kronberger";
-        homeDirectory = "/home/kronberger";
+        inherit username;
+        homeDirectory = "/home/${username}";
         stateVersion = "25.05";
       };
 
