@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  username,
+  ...
+}: {
   imports = [
     ./hardware-configuration.nix
     ../common.nix
@@ -33,7 +37,7 @@
   };
 
   systemd.tmpfiles.rules = [
-    "d /mnt/data 0755 kronberger users - -"
+    "d /mnt/data 0755 ${username} users - -"
   ];
 
   environment.systemPackages = with pkgs; [

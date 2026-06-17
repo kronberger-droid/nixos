@@ -1,5 +1,10 @@
-{pkgs, config, ...}: {
-  users.users.kronberger = {
+{
+  pkgs,
+  config,
+  username,
+  ...
+}: {
+  users.users.${username} = {
     createHome = true;
     isNormalUser = true;
     hashedPasswordFile = config.age.secrets.kronberger-password.path;

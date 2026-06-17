@@ -146,6 +146,10 @@
       system,
       isNotebook,
       primaryCompositor ? "niri",
+      # Primary local-account username. Single source of truth: threaded into
+      # both the NixOS modules (via specialArgs) and the home-manager user
+      # module, which mirrors it into home.username/homeDirectory.
+      username ? "kronberger",
       extraModules ? [],
       # The home-manager user module. Defaults to the full workstation user;
       # lean hosts (e.g. mediaBox) pass a trimmed one.
@@ -155,7 +159,7 @@
         inherit system;
         specialArgs = {
           host = hostname;
-          inherit isNotebook inputs primaryCompositor;
+          inherit isNotebook inputs primaryCompositor username;
         };
         modules =
           [
@@ -263,6 +267,7 @@
         system = x86System;
         specialArgs = {
           host = "homeserver";
+          username = "kronberger";
           inherit inputs;
           arrabbiata = inputs.arrabbiata.packages.${x86System}.default;
         };
@@ -314,6 +319,7 @@
         system = x86System;
         isNotebook = true;
         primaryCompositor = "niri";
+        username = "media";
         userModule = ./modules/home-manager/users/media.nix;
       };
     };
