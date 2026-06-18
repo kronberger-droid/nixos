@@ -59,6 +59,14 @@
       url = "github:kronberger-droid/dropkitten";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Matt Pocock's Claude Code skills collection. Consumed as plain files
+    # (flake = false): claude.nix symlinks each skill folder into
+    # ~/.claude/skills/, and kronberger.nix derives the set from the repo's
+    # own .claude-plugin/plugin.json. Bump with `nix flake update mattpocock-skills`.
+    mattpocock-skills = {
+      url = "github:mattpocock/skills";
+      flake = false;
+    };
     nix-pia-vpn = {
       url = "github:rcambrj/nix-pia-vpn";
       inputs.nixpkgs.follows = "nixpkgs";
