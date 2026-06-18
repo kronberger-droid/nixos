@@ -345,6 +345,22 @@
         "type": "github"
       }
     },
+    "mattpocock-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781772093,
+        "narHash": "sha256-6T0KwZcUIIbd6kpkQXPCnnJPVY2mEjxYjed4FjKnRAw=",
+        "owner": "mattpocock",
+        "repo": "skills",
+        "rev": "6eeb81b5fcfeeb5bd531dd47ab2f9f2bbea27461",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mattpocock",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "niri": {
       "inputs": {
         "niri-stable": "niri-stable",
@@ -735,6 +751,7 @@
         "dropkitten": "dropkitten",
         "home-manager": "home-manager_2",
         "lanzaboote": "lanzaboote",
+        "mattpocock-skills": "mattpocock-skills",
         "niri": "niri",
         "niri-src": "niri-src",
         "nix-on-droid": "nix-on-droid",

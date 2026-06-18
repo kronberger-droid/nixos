@@ -149,7 +149,7 @@
   };
   mcpJson = builtins.toJSON mcpToMerge;
 
-  hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {} || cfg.plugins != [] || cfg.claudeMd != "" || cfg.disableAutoMemory || cfg.skills != {};
+  hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {} || cfg.plugins != [] || cfg.claudeMd != "" || cfg.disableAutoMemory || cfg.skills != {} || cfg.skillDirs != {};
 in {
   options.claude = {
     statusline.enable = lib.mkEnableOption "Claude Code statusline";
@@ -179,6 +179,17 @@ in {
       });
       default = {};
       description = "Claude Code skills written to ~/.claude/skills/<name>/SKILL.md.";
+    };
+
+    skillDirs = lib.mkOption {
+      type = lib.types.attrsOf lib.types.path;
+      default = {};
+      description = ''
+        Directory-based Claude Code skills. Each entry symlinks a whole skill
+        folder (SKILL.md plus any companion files/scripts) to
+        ~/.claude/skills/<name>. Use for skills sourced from a flake input,
+        as opposed to the inline `skills` option for single-file SKILL.md text.
+      '';
     };
 
     mcpServers = lib.mkOption {
@@ -212,12 +223,19 @@ in {
         ".claude/CLAUDE.md".text = cfg.claudeMd;
       })
 
-      # Skills
+      # Skills (inline single-file SKILL.md)
       (lib.mapAttrs' (name: skill:
         lib.nameValuePair ".claude/skills/${name}/SKILL.md" {
           text = skill.content;
         }
       ) cfg.skills)
+
+      # Skills (directory-based; whole folder symlinked from a source path)
+      (lib.mapAttrs' (name: dir:
+        lib.nameValuePair ".claude/skills/${name}" {
+          source = dir;
+        }
+      ) cfg.skillDirs)
 
       # Install the statusline script (only when statusline is enabled)
       (lib.mkIf cfg.statusline.enable {
