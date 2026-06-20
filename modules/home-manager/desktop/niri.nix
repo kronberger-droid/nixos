@@ -150,6 +150,10 @@ in {
       # niri's stock springs already convey "where windows went"; globally
       # compress them for a snappier feel.
       slowdown = 0.5;
+      # Windows appear/vanish instantly — no open/close animation. Other
+      # animations (workspace switch, movement, resize) are unaffected.
+      window-open.enable = false;
+      window-close.enable = false;
     };
 
     prefer-no-csd = true;
