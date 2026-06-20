@@ -195,23 +195,10 @@
                   # the closure so scripts using `pkgs.niri/bin/niri msg` don't
                   # pull in a parallel nixpkgs niri build.
                   niri = final.niri-unstable;
-                  # nushell from our helix-mode-wip fork (see the nushell-helix
-                  # input). Reuses nixpkgs' build; only src + vendored deps are
-                  # swapped. reedline is the lone git dep, pinned by the fork's
-                  # Cargo.lock rev and fetched here as a FOD. Update the hash
-                  # when the reedline rev in that Cargo.lock changes.
-                  nushell = prev.nushell.overrideAttrs (old: {
-                    version = "0.113.2-helix-wip";
-                    src = inputs.nushell-helix;
-                    cargoDeps = final.rustPlatform.importCargoLock {
-                      lockFile = "${inputs.nushell-helix}/Cargo.lock";
-                      outputHashes = {
-                        "reedline-0.48.0" = "sha256-ICAjVrgjlOMBLafGZwvU45KXGZf3KCwfRRhgVRkkcRw=";
-                      };
-                    };
-                    doCheck = false;
-                  });
                 })
+                # nushell from our helix-mode-wip fork. Shared with the
+                # homeserver (built outside mkHost) — see the overlay file.
+                (import ./modules/shared/nushell-overlay.nix inputs)
                 (_: _: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                   claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
@@ -281,6 +268,10 @@
         };
         modules = [
           ./hosts/homeserver/configuration.nix
+          # Same Helix-mode nushell the mkHost hosts get. Needed because the
+          # server's home-manager (useGlobalPkgs) and login shell both read
+          # `edit_mode = "helix"`, which stock nushell rejects.
+          {nixpkgs.overlays = [(import ./modules/shared/nushell-overlay.nix inputs)];}
           home-manager.nixosModules.home-manager
           ./modules/home-manager/users/kronberger-server.nix
           agenix.nixosModules.default
