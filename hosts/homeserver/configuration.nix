@@ -92,6 +92,15 @@
     nushell
     docker-compose
     lm_sensors
+    # Rust toolchain for building/testing crates (e.g. the nushell fork)
+    # directly on the server. nixpkgs' cargo/rustc — matches the compiler
+    # nixpkgs' own nushell build uses. gcc + pkg-config + openssl cover the
+    # usual native link/build deps a `cargo build` needs.
+    cargo
+    rustc
+    gcc
+    pkg-config
+    openssl
   ];
 
   # Docker — for wiesinger to deploy containers without touching Nix
