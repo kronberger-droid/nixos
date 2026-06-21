@@ -55,6 +55,13 @@ in {
       # Stock nushell (see stockNushell above) — no source rebuild on this host.
       programs.nushell.package = stockNushell;
 
+      # Drop the bitwarden-desktop launcher (Mod+Shift+P) — this box uses the
+      # browser extension instead. Unbinding it removes the only reference to
+      # ${pkgs.bitwarden-desktop}, so its EOL electron-39 closure goes too (the
+      # permittedInsecurePackages allowance in configuration.nix is dropped).
+      # sway.nix sets keybindings via mkOptionDefault, so null just wins here.
+      wayland.windowManager.sway.config.keybindings."Mod4+Shift+p" = lib.mkForce null;
+
       home = {
         username = "media";
         homeDirectory = "/home/media";

@@ -49,12 +49,7 @@ in {
     HandleLidSwitchExternalPower = "ignore";
   };
 
-  nixpkgs.config = {
-    allowUnfree = true;
-    # bitwarden-desktop (bound to Mod+Shift+P in sway.nix) pins electron 39,
-    # which nixpkgs flags as EOL. Same allowance as core/nix-settings.nix.
-    permittedInsecurePackages = ["electron-39.8.10"];
-  };
+  nixpkgs.config.allowUnfree = true;
 
   networking = {
     hostName = "mediaBox";
