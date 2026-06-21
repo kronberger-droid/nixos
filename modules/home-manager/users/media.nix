@@ -73,6 +73,22 @@ in {
         }
       ];
 
+      # Minimal git: the lean media user skips the full shell/git.nix (gh,
+      # gh-dash, delta), so it had no identity configured and commits would fail.
+      # Configure just git here — install + identity + sane defaults — matching
+      # the identity used elsewhere in this repo (shell/git.nix).
+      programs.git = {
+        enable = true;
+        settings = {
+          user = {
+            name = "kronberger-droid";
+            email = "kronberger@proton.me";
+          };
+          init.defaultBranch = "main";
+          pull.rebase = true;
+        };
+      };
+
       home = {
         username = "media";
         homeDirectory = "/home/media";
