@@ -1,8 +1,14 @@
 {
   config,
   pkgs,
+  lib,
   ...
-}: {
+}: let
+  # Gate the niri logout path: interpolating ${pkgs.niri} pulls the source-built
+  # niri fork into the closure, so only emit it when niri is the primary
+  # compositor (keeps it out of sway-only hosts like mediaBox).
+  niriPrimary = config.compositor.primary == "niri";
+in {
   programs.rofi = {
     enable = true;
     package = pkgs.rofi;
@@ -85,9 +91,13 @@
         		elif [[ $1 == '--suspend' ]]; then
         			${pkgs.systemd}/bin/systemctl suspend
         		elif [[ $1 == '--logout' ]]; then
-        			if [[ -n "$NIRI_SOCKET" ]]; then
+        			${lib.optionalString niriPrimary ''
+            if [[ -n "$NIRI_SOCKET" ]]; then
         				${pkgs.niri}/bin/niri msg action quit
-        			elif [[ -n "$SWAYSOCK" ]]; then
+        				exit 0
+        			fi
+          ''}
+        			if [[ -n "$SWAYSOCK" ]]; then
         				${pkgs.sway}/bin/swaymsg exit
         			fi
         		fi

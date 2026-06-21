@@ -7,6 +7,7 @@
 # neovim, no claude/ai, no aerc/syncthing/etc.
 {
   pkgs,
+  lib,
   inputs,
   host,
   isNotebook,
@@ -14,6 +15,12 @@
   ...
 }: let
   dropkittenPkg = inputs.dropkitten.packages.${pkgs.stdenv.hostPlatform.system}.dropkitten;
+  # Stock nushell straight from nixpkgs, bypassing the global helix-mode overlay
+  # (modules/shared/nushell-overlay.nix). The overlay rebuilds nushell from our
+  # fork's source; this media box doesn't need the helix edit-mode, so use the
+  # prebuilt cache binary instead. nushell.nix detects the non-fork build and
+  # falls back to vi edit-mode automatically.
+  stockNushell = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nushell;
 in {
   home-manager = {
     extraSpecialArgs = {
@@ -24,23 +31,36 @@ in {
     backupFileExtension = "backup";
     users.media = {
       imports = [
-        ../desktop # niri, sway, waybar, rofi, mako (session-services), udiskie, kanshi, xdg
+        ../desktop # sway, waybar, rofi, mako (session-services), udiskie, kanshi, xdg
         ../theming # base16 colors, fonts
         ../terminals # rio/kitty/zellij + the terminal.* options the desktop reads
         ../editors/helix.nix # helix only (the EDITOR); no neovim, no dev-tools
         ../shell/nushell.nix # login shell config
       ];
 
-      # rio terminal; niri as the launched compositor (sway config still built).
-      terminal.emulator = "rio";
+      # Drop niri's home config entirely on this host: niri-flake validates the
+      # generated KDL by running the niri binary, which would pull in the
+      # built-from-source niri-unstable fork. Without it, sway (prebuilt from
+      # cache) is the only compositor here. System-side niri is disabled in
+      # hosts/mediaBox/configuration.nix.
+      disabledModules = [../desktop/niri.nix];
+
+      # kitty (prebuilt) instead of rio (built from rio-upstream's flake).
+      # terminals/rio.nix hard-enables rio, so disable it explicitly — selecting
+      # kitty below is not enough to keep rio out of the closure.
+      terminal.emulator = "kitty";
+      programs.rio.enable = lib.mkForce false;
       compositor.primary = primaryCompositor;
+
+      # Stock nushell (see stockNushell above) — no source rebuild on this host.
+      programs.nushell.package = stockNushell;
 
       home = {
         username = "media";
         homeDirectory = "/home/media";
         packages = with pkgs; [
-          nemo-with-extensions # GUI file manager (Mod+Shift+N in niri)
-          helium # browser (Mod+Shift+S in niri)
+          nemo-with-extensions # GUI file manager (Mod+Shift+N)
+          firefox # browser (Mod+Shift+S in sway)
         ];
         stateVersion = "25.05";
         # HM master's release string runs ahead of nixpkgs unstable; both track

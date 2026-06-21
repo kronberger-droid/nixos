@@ -6,21 +6,25 @@
   isNotebook,
   ...
 }: let
-  # Compositor-agnostic DPMS control script
-  dpmsOff = pkgs.writeShellScript "dpms-off" ''
-    if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
-      ${pkgs.niri}/bin/niri msg action power-off-monitors
-    elif [ -n "$SWAYSOCK" ] && [ -S "$SWAYSOCK" ]; then
-      ${pkgs.sway}/bin/swaymsg 'output * dpms off'
-    fi
-  '';
-  dpmsOn = pkgs.writeShellScript "dpms-on" ''
-    if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
-      ${pkgs.niri}/bin/niri msg action power-on-monitors
-    elif [ -n "$SWAYSOCK" ] && [ -S "$SWAYSOCK" ]; then
-      ${pkgs.sway}/bin/swaymsg 'output * dpms on'
-    fi
-  '';
+  # DPMS control, dispatching on whichever compositor's socket is live. The niri
+  # branch interpolates ${pkgs.niri} (the source-built fork), so only emit it
+  # when niri is the primary compositor — otherwise it drags the fork into the
+  # closure of sway-only hosts (mediaBox) for a code path that never runs there.
+  niriPrimary = config.compositor.primary == "niri";
+  dpms = name: niriAction: swayState:
+    pkgs.writeShellScript name ''
+      ${lib.optionalString niriPrimary ''
+        if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
+          ${pkgs.niri}/bin/niri msg action ${niriAction}
+          exit 0
+        fi
+      ''}
+      if [ -n "$SWAYSOCK" ] && [ -S "$SWAYSOCK" ]; then
+        ${pkgs.sway}/bin/swaymsg 'output * dpms ${swayState}'
+      fi
+    '';
+  dpmsOff = dpms "dpms-off" "power-off-monitors" "off";
+  dpmsOn = dpms "dpms-on" "power-on-monitors" "on";
 in {
   imports = [
     ./sway/swaylock.nix

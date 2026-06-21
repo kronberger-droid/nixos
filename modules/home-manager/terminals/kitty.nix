@@ -1,8 +1,14 @@
 {
   pkgs,
   config,
+  lib,
   ...
-}: {
+}: let
+  # The niri branch interpolates ${pkgs.niri} (the source-built fork). Only emit
+  # it when niri is the primary compositor, so sway-only hosts (mediaBox) don't
+  # pull the fork into their closure just for this helper.
+  niriPrimary = config.compositor.primary == "niri";
+in {
   home.packages = with pkgs; [
     imagemagick
   ];
@@ -15,11 +21,12 @@
       # Only uses cwd for terminals and file managers, not browsers/other apps.
       # Supports both sway and niri.
 
-      if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
-          focused=$(${pkgs.niri}/bin/niri msg -j focused-window)
-          app_id=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.app_id // empty')
-          pid=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.pid')
-      elif [ -n "$SWAYSOCK" ] && [ -S "$SWAYSOCK" ]; then
+      ${lib.optionalString niriPrimary ''
+        if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
+            focused=$(${pkgs.niri}/bin/niri msg -j focused-window)
+            app_id=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.app_id // empty')
+            pid=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.pid')
+        el''}if [ -n "$SWAYSOCK" ] && [ -S "$SWAYSOCK" ]; then
           focused=$(${pkgs.sway}/bin/swaymsg -t get_tree | ${pkgs.jq}/bin/jq -r \
                 '.. | select(.type?) | select(.type=="con") | select(.focused==true)')
           app_id=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.app_id // empty')
