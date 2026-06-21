@@ -62,6 +62,17 @@ in {
       # sway.nix sets keybindings via mkOptionDefault, so null just wins here.
       wayland.windowManager.sway.config.keybindings."Mod4+Shift+p" = lib.mkForce null;
 
+      # Appliance autostart: launch firefox on login. config.startup is a list,
+      # so this concatenates with sway.nix's entries (transparency, autotiling)
+      # rather than replacing them. always = false → only on initial start, not
+      # on every `swaymsg reload`. Mod+Shift+S still opens it manually.
+      wayland.windowManager.sway.config.startup = [
+        {
+          command = "${pkgs.firefox}/bin/firefox";
+          always = false;
+        }
+      ];
+
       home = {
         username = "media";
         homeDirectory = "/home/media";
