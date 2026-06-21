@@ -80,6 +80,16 @@ in {
   # so this override stays host-local.
   xdg.portal.config.sway.default = lib.mkForce ["wlr" "gtk"];
 
+  # keyd: the shared default profile (keyd.nix) swaps leftalt<->leftmeta, tuned
+  # to the main laptops' key layout. On this box that sends the physical Super
+  # key through as Alt, so sway's Mod4 (Super) bindings never fire. Map both
+  # modifiers to themselves so physical Super is Mod4 again; the rest of the
+  # default profile (capslock overload, nav/compose layers) is untouched.
+  services.keyd.keyboards.default.settings.main = {
+    leftalt = lib.mkForce "leftalt";
+    leftmeta = lib.mkForce "leftmeta";
+  };
+
   # ── User ──────────────────────────────────────────────
   users.users.media = {
     isNormalUser = true;
