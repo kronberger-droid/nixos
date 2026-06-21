@@ -410,7 +410,10 @@ in {
 
   # Drive scratchpad/ncspot status updates from niri's event stream instead
   # of polling every 2 seconds. Signals waybar (RTMIN+12) on any window event.
-  systemd.user.services.niri-window-watcher = {
+  # niri-only: interpolating ${pkgs.niri-unstable} forces the (source-built)
+  # niri fork into the closure, so gate it on the primary compositor to keep it
+  # off sway hosts like mediaBox.
+  systemd.user.services.niri-window-watcher = lib.mkIf (config.compositor.primary == "niri") {
     Unit = {
       Description = "Watch niri window events and signal waybar";
       PartOf = ["graphical-session.target"];

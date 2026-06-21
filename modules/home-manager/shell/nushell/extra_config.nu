@@ -4,14 +4,13 @@ source ~/.config/nushell/keybindings.nu
 
 $env.config = {
 	show_banner: false
-	edit_mode: 'helix'
+	# edit_mode + helix cursor shapes are injected after this record by
+	# nushell.nix, conditional on the nushell build: the helix edit-mode only
+	# exists in our fork (reedline HelixMode), so stock-nushell hosts (mediaBox)
+	# fall back to vi and never see the unsupported 'helix' value.
 	buffer_editor: 'hx'
-	# Cursor per mode. Helix now has its own shapes (reedline HelixMode), so
-	# normal/select/insert are independent.
+	# Cursor per mode (stock-valid keys only; helix_* added by the injection).
 	cursor_shape: {
-		helix_normal: block       # block in normal
-		helix_select: underscore  # underline in select
-		helix_insert: line        # caret in insert
 		vi_insert: line
 		vi_normal: block
 		emacs: line

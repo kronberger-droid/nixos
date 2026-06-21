@@ -1,33 +1,40 @@
-# x86 notebook media box — a "focused spectre": full niri desktop without the
+# x86 notebook media box — a "focused spectre": full sway desktop without the
 # development tooling or personal apps, and without common.nix (so no agenix
 # secrets / kronberger system user / workstation services).
 #
-# The home-manager side is the lean media user (see users/media.nix), wired in
-# via mkHost's userModule parameter in flake.nix.
+# Compositor is sway (prebuilt from cache) rather than the niri fork, which is
+# built from source — see programs.niri/sway overrides below. The home-manager
+# side is the lean media user (see users/media.nix), wired in via mkHost's
+# userModule parameter in flake.nix.
 {
-  config,
   lib,
   pkgs,
+  inputs,
   ...
 }: let
-  # Autologin/greeter both launch niri through niri-session (it activates
-  # graphical-session.target via systemd; bare `niri` cannot). Redirect stderr
-  # so the TTY stays clean — errors land in /tmp/niri-session.log.
-  niriSession = "${config.programs.niri.package}/bin/niri-session";
-  sessionWrapper = pkgs.writeShellScript "niri-session-quiet" ''
-    exec ${niriSession} 2>/tmp/niri-session.log
+  # Autologin/greeter both launch sway. Home-manager's sway config sets
+  # systemd.enable = true, so a bare `sway` activates graphical-session.target
+  # itself (there's no separate `sway-session` binary like niri's). Redirect
+  # stderr so the TTY stays clean — errors land in /tmp/sway-session.log.
+  sessionWrapper = pkgs.writeShellScript "sway-session-quiet" ''
+    exec ${pkgs.sway}/bin/sway 2>/tmp/sway-session.log
   '';
+
+  # Stock nushell from nixpkgs, bypassing the global helix-mode overlay so this
+  # box uses the prebuilt cache binary instead of rebuilding the fork. Must
+  # match the media user's home shell (users/media.nix) — both the login shell
+  # below and home-manager's programs.nushell point at the same package.
+  stockNushell = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nushell;
 in {
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
   imports = [
     ./hardware-configuration.nix
     # System desktop pieces, cherry-picked instead of via common.nix:
-    ../../modules/system/desktop/desktop.nix # niri + xdg portals + bluetooth + graphics + gvfs/udisks2
+    ../../modules/system/desktop/desktop.nix # compositor + xdg portals + bluetooth + graphics + gvfs/udisks2 (niri overridden to sway below)
     ../../modules/system/desktop/keyring.nix # oo7 secret service (secure Helium storage)
     ../../modules/system/desktop/keyd.nix # keyd remaps (matches main machines)
     ../../modules/system/hardware/audio.nix # pipewire
-    ../../modules/system/core/helium.nix # helium overlay (x86_64)
     ../../modules/system/core/fonts.nix # font set
     ../../modules/system/core/locale.nix # Europe/Vienna + de_AT locale
   ];
@@ -44,7 +51,7 @@ in {
 
   nixpkgs.config = {
     allowUnfree = true;
-    # bitwarden-desktop (bound to Mod+Shift+P in niri.nix) pins electron 39,
+    # bitwarden-desktop (bound to Mod+Shift+P in sway.nix) pins electron 39,
     # which nixpkgs flags as EOL. Same allowance as core/nix-settings.nix.
     permittedInsecurePackages = ["electron-39.8.10"];
   };
@@ -54,18 +61,36 @@ in {
     networkmanager.enable = true;
   };
 
-  # polkit: mounting/niri actions; rtkit: pipewire realtime priority.
+  # polkit: mounting/sway actions; rtkit: pipewire realtime priority.
   # (common.nix's core/users.nix sets these for workstations; we're not
   # importing it, so declare them here.)
   security.polkit.enable = true;
   security.rtkit.enable = true;
+
+  # ── Compositor: sway, not niri ────────────────────────
+  # desktop.nix enables programs.niri with the niri-unstable fork (built from
+  # source). This box uses sway instead, so turn the niri module off — that
+  # drops niri-unstable from the system closure (no Rust compile) — and enable
+  # sway, which comes prebuilt from the binary cache. Home-manager owns the
+  # actual sway config (wayland.windowManager.sway in desktop/sway.nix); the
+  # system module just provides the wrapped binary, polkit, and session bits.
+  programs.niri.enable = lib.mkForce false;
+  programs.sway = {
+    enable = true;
+    wrapperFeatures.gtk = true;
+  };
+  # The NixOS sway module sets the sway portal backend to just ["gtk"], which
+  # collides with desktop.nix's ["wlr" "gtk"] (wlr is what drives screencast on
+  # this box). Force the desktop.nix intent. Only mediaBox enables programs.sway,
+  # so this override stays host-local.
+  xdg.portal.config.sway.default = lib.mkForce ["wlr" "gtk"];
 
   # ── User ──────────────────────────────────────────────
   users.users.media = {
     isNormalUser = true;
     description = "Media";
     extraGroups = ["wheel" "networkmanager" "audio" "video" "render"];
-    shell = pkgs.nushell;
+    shell = stockNushell;
     # No agenix on this host, so use a changeable initial password instead of a
     # hashed-password secret. Change it after first boot with `passwd`.
     initialPassword = "media";
@@ -75,7 +100,7 @@ in {
     ];
   };
 
-  environment.shells = [pkgs.nushell];
+  environment.shells = [stockNushell];
 
   # ── Login: autologin straight into niri ───────────────
   services.greetd = {

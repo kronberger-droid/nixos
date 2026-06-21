@@ -317,7 +317,9 @@
         hostname = "mediaBox";
         system = x86System;
         isNotebook = true;
-        primaryCompositor = "niri";
+        # sway (prebuilt from cache) instead of the niri fork (built from
+        # source) — keeps this box off the Rust compile path.
+        primaryCompositor = "sway";
         username = "media";
         userModule = ./modules/home-manager/users/media.nix;
       };

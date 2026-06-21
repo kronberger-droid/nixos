@@ -514,7 +514,27 @@ in {
       (lib.optionalString hasTerminal ''
         source ~/.config/nushell/development.nu
       '')
-      + builtins.readFile ./nushell/extra_config.nu;
+      + builtins.readFile ./nushell/extra_config.nu
+      # Layer the edit mode on after the base record. The helix edit-mode and
+      # its cursor shapes only exist in our nushell fork; on stock nushell
+      # (mediaBox, which uses the prebuilt package to skip the source build)
+      # fall back to vi so the config stays error-free.
+      + (
+        if lib.hasInfix "helix" (config.programs.nushell.package.version or "")
+        then ''
+
+          $env.config.edit_mode = 'helix'
+          $env.config.cursor_shape = ($env.config.cursor_shape | merge {
+            helix_normal: block
+            helix_select: underscore
+            helix_insert: line
+          })
+        ''
+        else ''
+
+          $env.config.edit_mode = 'vi'
+        ''
+      );
 
     shellAliases =
       {
