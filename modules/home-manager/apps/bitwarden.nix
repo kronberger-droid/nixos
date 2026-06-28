@@ -17,6 +17,11 @@
   # which works in editors and Firefox. wtype needs no daemon, group, or keyd
   # handling (unlike ydotool), so we use it and keep no extra machinery.
   #
+  # When the entry has a TOTP, rofi-rbw automatically copies it to the
+  # clipboard right after typing the password (built-in behaviour, since the
+  # default targets include "password"). use-notify-send surfaces a mako
+  # toast so we know the code is waiting in the clipboard, ready to paste.
+  #
   # Caveat: Chromium-based browsers (Helium, Brave) drop/stutter synthetic
   # keystrokes from any typer — an upstream Chromium/Wayland input limitation,
   # cf. https://github.com/atx/wtype/issues/31. For those, use the built-in
@@ -27,5 +32,6 @@
     clear-after = 30
     typing-start-delay = 0.4
     typing-key-delay = 12
+    use-notify-send = true
   '';
 }
