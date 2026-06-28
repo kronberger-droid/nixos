@@ -637,11 +637,11 @@
     "nushell-helix": {
       "flake": false,
       "locked": {
-        "lastModified": 1781529262,
-        "narHash": "sha256-sUyWVdVSH2jQDoZH7NNYpVwCC9x7rcVoBjVVoEOHUhY=",
+        "lastModified": 1782666627,
+        "narHash": "sha256-XOPKcUbHiczSH+BrRY2Yp4u8durh1SLsiV1j/mhKm+0=",
         "owner": "kronberger-droid",
         "repo": "nushell",
-        "rev": "c7eeec42e9d92e3c9bd74e5de3b5c20e23940204",
+        "rev": "d1d5e4914d4b9965e8efe80f762d9084c35896d9",
         "type": "github"
       },
       "original": {
