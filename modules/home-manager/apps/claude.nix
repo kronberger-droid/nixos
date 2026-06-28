@@ -114,9 +114,9 @@
       # (reopen `claude`, or scroll/PageUp inside it, to see history).
       # Per the docs this is the CLAUDE_CODE_NO_FLICKER env var, not a settings
       # key; `/tui fullscreen` does the same for a single session.
-      env = {
-        CLAUDE_CODE_NO_FLICKER = "1";
-      };
+      # env = {
+      #   CLAUDE_CODE_NO_FLICKER = "1";
+      # };
     }
     // lib.optionalAttrs cfg.statusline.enable {
       statusLine = {
@@ -224,18 +224,22 @@ in {
       })
 
       # Skills (inline single-file SKILL.md)
-      (lib.mapAttrs' (name: skill:
-        lib.nameValuePair ".claude/skills/${name}/SKILL.md" {
-          text = skill.content;
-        }
-      ) cfg.skills)
+      (lib.mapAttrs' (
+          name: skill:
+            lib.nameValuePair ".claude/skills/${name}/SKILL.md" {
+              text = skill.content;
+            }
+        )
+        cfg.skills)
 
       # Skills (directory-based; whole folder symlinked from a source path)
-      (lib.mapAttrs' (name: dir:
-        lib.nameValuePair ".claude/skills/${name}" {
-          source = dir;
-        }
-      ) cfg.skillDirs)
+      (lib.mapAttrs' (
+          name: dir:
+            lib.nameValuePair ".claude/skills/${name}" {
+              source = dir;
+            }
+        )
+        cfg.skillDirs)
 
       # Install the statusline script (only when statusline is enabled)
       (lib.mkIf cfg.statusline.enable {
