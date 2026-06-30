@@ -54,8 +54,10 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  # bitwarden-desktop 2026.5.0 pins electron 39, which nixpkgs flags as EOL.
+  # bitwarden-desktop 2026.6.0 pins electron 39, which nixpkgs flags as EOL.
+  # vesktop 1.6.5 builds with pnpm 10.29.2, which nixpkgs flags for several CVEs.
   nixpkgs.config.permittedInsecurePackages = [
     "electron-39.8.10"
+    "pnpm-10.29.2"
   ];
 }
