@@ -27,6 +27,11 @@
 
       # nh handles dirty tree warnings
       warn-dirty = false;
+
+      # Silence Lix's "ill-defined escape" warnings emitted by the deploy-rs
+      # input's flake.nix (e.g. "Cargo\.lock", ".*\.rs$"). Enabling the
+      # deprecated feature stops the warning; it's upstream's source, not ours.
+      extra-deprecated-features = ["broken-string-escape"];
     };
     buildMachines = [
       {
