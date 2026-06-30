@@ -3,22 +3,27 @@
   host,
   ...
 }: {
-  # Kanshi - Automatic display configuration for Wayland
-  # Profile-based approach with predictable behavior
+  # Shikane - Dynamic display configuration for Wayland (kanshi successor)
+  # Profile-based, with richer per-attribute output matching.
+  #
+  # search syntax: "[[attrs]kind]pattern"
+  #   attrs ∈ {d=description, n=name, m=model, v=vendor, s=serialnumber}
+  #   kind  ∈ {= exact, % substring, / regex}   (defaults to exact, any attr)
+  # Verify the real attribute strings with `niri msg outputs`.
 
-  services.kanshi = {
+  services.shikane = {
     enable = host != "intelNuc"; # Disable for Intel NUC - single static display
-    systemdTarget = "graphical-session.target";
 
-    settings =
+    settings.profile =
       if host == "t480s"
       then [
         # Laptop only profile
         {
-          profile.name = "laptop";
-          profile.outputs = [
+          name = "laptop";
+          output = [
             {
-              criteria = "eDP-1";
+              search = "n=eDP-1";
+              enable = true;
               mode = "1920x1080";
               position = "0,0";
               scale = 1.0;
@@ -27,16 +32,18 @@
         }
         # Docked profile with external display
         {
-          profile.name = "docked";
-          profile.outputs = [
+          name = "docked";
+          output = [
             {
-              criteria = "eDP-1";
+              search = "n=eDP-1";
+              enable = true;
               mode = "1920x1080";
               position = "0,0";
               scale = 1.0;
             }
             {
-              criteria = "DP-*";
+              search = "n/DP-.*";
+              enable = true;
               mode = "2560x1440";
               position = "1920,0";
             }
@@ -44,16 +51,18 @@
         }
         # Presentation mode - mirror to external display
         {
-          profile.name = "presentation";
-          profile.outputs = [
+          name = "presentation";
+          output = [
             {
-              criteria = "eDP-1";
+              search = "n=eDP-1";
+              enable = true;
               mode = "1920x1080";
               position = "0,0";
               scale = 1.0;
             }
             {
-              criteria = "DP-*";
+              search = "n/DP-.*";
+              enable = true;
               mode = "1920x1080";
               position = "0,0";
             }
@@ -64,50 +73,54 @@
       then [
         # Standard laptop profile
         {
-          profile.name = "laptop";
-          profile.outputs = [
+          name = "laptop";
+          output = [
             {
-              criteria = "eDP-1";
+              search = "n=eDP-1";
+              enable = true;
               position = "0,0";
               scale = 1.25;
             }
           ];
         }
-
         {
-          profile.name = "uni-desk-aoc-dual";
-          profile.outputs = [
+          name = "uni-desk-aoc-dual";
+          output = [
             {
-              criteria = "eDP-1";
-              position = "0,1080";
+              search = "m=U3277WB";
+              enable = true;
+              position = "0,0";
               scale = 1.5;
             }
             {
-              criteria = "AOC U3277WB 0x0000061F";
+              search = "n=eDP-1";
+              enable = true;
+              position = "640,1440";
+              scale = 1.5;
+            }
+          ];
+        }
+        {
+          name = "uni-desk-aoc-only";
+          output = [
+            {
+              search = "n=eDP-1";
+              enable = false;
+            }
+            {
+              search = "m=U3277WB";
+              enable = true;
               position = "0,0";
               scale = 2.0;
             }
           ];
         }
         {
-          profile.name = "uni-desk-aoc-only";
-          profile.outputs = [
+          name = "uni-desk-aoc";
+          output = [
             {
-              criteria = "eDP-1";
-              status = "disable";
-            }
-            {
-              criteria = "AOC U3277WB 0x0000061F";
-              position = "0,0";
-              scale = 2.0;
-            }
-          ];
-        }
-        {
-          profile.name = "uni-desk-aoc";
-          profile.outputs = [
-            {
-              criteria = "AOC U3277WB 0x0000061F";
+              search = "m=U3277WB";
+              enable = true;
               position = "0,0";
               scale = 2.0;
             }
@@ -115,15 +128,17 @@
         }
         # University desk with Iiyama monitor
         {
-          profile.name = "uni-desk";
-          profile.outputs = [
+          name = "uni-desk";
+          output = [
             {
-              criteria = "eDP-1";
+              search = "n=eDP-1";
+              enable = true;
               position = "0,1080";
               scale = 1.25;
             }
             {
-              criteria = "Iiyama North America PL2475HD 11098M2205863";
+              search = "m=PL2475HD";
+              enable = true;
               position = "0,0";
               scale = 1.0;
             }
@@ -133,17 +148,14 @@
       else [
         # Fallback for portable or other hosts
         {
-          profile.name = "default";
-          profile.outputs = [
+          name = "default";
+          output = [
             {
-              criteria = "*";
+              search = "n/.*";
+              enable = true;
             }
           ];
         }
       ];
   };
-
-  home.packages = with pkgs; [
-    kanshi
-  ];
 }
