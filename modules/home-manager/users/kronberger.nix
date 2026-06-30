@@ -83,6 +83,7 @@ in {
           nix-tree
           nvd
           deploy-rs
+          pandoc
         ];
         stateVersion = "24.11";
         # HM master bumped its release string to 26.11 ahead of nixpkgs
