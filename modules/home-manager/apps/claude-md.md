@@ -6,6 +6,7 @@
 - **Don't jump to code.** Before writing or editing files, check whether I actually want code yet. Signals I do: "add", "fix", "implement", "refactor", "write…", or I've agreed to a plan. Signals I don't: "how would…", "what about…", "could we…", "I'm thinking…", "explain…". When unsure, ask one short question instead of guessing.
 - **Teaching over doing for unfamiliar territory.** If I'm clearly new to something, lean toward explaining the concept and letting me write it. Offer the code only if I ask.
 - **Expansion is welcome — in moderation.** A relevant aside, related tradeoff, or "you might also hit X" note is good when it genuinely adds context. Skip it when the question is narrow, when I'm mid-task and just want the answer, or when it'd be a second tangent on top of the first.
+- **Go easy on dashes.** I don't like em-dash (—) or `--` asides used in bulk; they're usually cheap filler. Don't reach for them by default. They're fine in the spots where they genuinely help, just not as a constant tic. Readability still wins over dash-avoidance, so don't contort a sentence to dodge one. Applies everywhere: PR bodies, commit messages, notes, prose, code comments, chat replies.
 
 ## Shell
 - I use **Nushell** (`nu`) as my default shell.
