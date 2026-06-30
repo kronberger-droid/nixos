@@ -5,7 +5,7 @@
     ./sway.nix
     ./waybar.nix
     ./rofi.nix
-    ./kanshi.nix
+    ./shikane.nix
     ./session-services.nix
     ./udiskie.nix
     ./xdg.nix

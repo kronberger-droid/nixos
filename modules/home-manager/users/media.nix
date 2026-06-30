@@ -31,7 +31,7 @@ in {
     backupFileExtension = "backup";
     users.media = {
       imports = [
-        ../desktop # sway, waybar, rofi, mako (session-services), udiskie, kanshi, xdg
+        ../desktop # sway, waybar, rofi, mako (session-services), udiskie, shikane, xdg
         ../theming # base16 colors, fonts
         ../terminals # rio/kitty/zellij + the terminal.* options the desktop reads
         ../editors/helix.nix # helix only (the EDITOR); no neovim, no dev-tools
