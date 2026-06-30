@@ -718,8 +718,8 @@ in {
             portable = "";
           };
           format-muted = " {format_source}";
-          format-source = "\ ";
-          format-source-muted = "\ ";
+          format-source = " ";
+          format-source-muted = " ";
         };
 
         "custom/screenrec" = {
