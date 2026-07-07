@@ -14,6 +14,10 @@
       id = "UKYT4BM-RHAHSKP-3EW3QRN-USWUMRL-MC56REB-AM4JDPZ-GLY3QW5-XRKW4QI";
       addresses = ["tcp://100.64.13.9:22000" "dynamic"];
     };
+    P14E = {
+      id = "A7PN6IC-IJE2WVL-4CM3BR5-SK7JDKV-NZSBPU7-NPKXZ5R-UMYEAVU-IOUBYQM";
+      addresses = ["tcp://100.103.204.24:2200" "dynamic"];
+    };
   };
 
   mobileDevices = {
