@@ -2,7 +2,6 @@
   config,
   pkgs,
   lib,
-  host,
   isNotebook,
   ...
 }: let
@@ -86,7 +85,7 @@ in {
 
   # ── Batsignal ───────────────────────────────────────────────────
   services.batsignal = {
-    enable = host == "spectre";
+    enable = isNotebook;
   };
 
   # ── Swayidle ────────────────────────────────────────────────────

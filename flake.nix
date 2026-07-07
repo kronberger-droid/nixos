@@ -257,6 +257,18 @@
         ];
       };
 
+      # Intel NUC P14E Laptop Element — modular "Compute Element" chassis.
+      # Not yet installed; hardware-configuration.nix is a placeholder until
+      # nixos-generate-config runs on the real disk.
+      P14E = mkHost {
+        hostname = "P14E";
+        system = x86System;
+        isNotebook = true;
+        extraModules = [
+          inputs.lanzaboote.nixosModules.lanzaboote
+        ];
+      };
+
       # Servers
       homeserver = nixpkgs.lib.nixosSystem {
         system = x86System;

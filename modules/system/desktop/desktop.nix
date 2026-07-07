@@ -8,6 +8,7 @@
     intelNuc = "HDMI-A-1";
     t480s = "eDP-1";
     spectre = "eDP-1";
+    P14E = "eDP-1";
     portable = "*";
     # Media box: usually driving an external display (TV) over HDMI, so let
     # the screencast picker target any output rather than pinning the panel.
