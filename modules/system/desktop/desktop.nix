@@ -1,4 +1,5 @@
 {
+  lib,
   pkgs,
   host,
   ...
@@ -57,7 +58,7 @@ in {
   hardware = {
     bluetooth = {
       enable = true;
-      powerOnBoot = false;
+      powerOnBoot = lib.mkDefault false;
     };
     firmware = [pkgs.linux-firmware];
     graphics = {

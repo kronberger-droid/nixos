@@ -116,6 +116,10 @@
     max-jobs = 2; # Max parallel derivation builds
   };
 
+  # Always-on box, not a laptop — power the radio on boot so a trusted
+  # bluetooth keyboard reconnects on its own (default is false for laptops).
+  hardware.bluetooth.powerOnBoot = true;
+
   users.users.${username}.extraGroups = ["docker" "gamemode"];
 
   system.stateVersion = "24.11";
