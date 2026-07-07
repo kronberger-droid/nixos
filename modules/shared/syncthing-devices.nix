@@ -16,7 +16,7 @@
     };
     P14E = {
       id = "A7PN6IC-IJE2WVL-4CM3BR5-SK7JDKV-NZSBPU7-NPKXZ5R-UMYEAVU-IOUBYQM";
-      addresses = ["tcp://100.103.204.24:2200" "dynamic"];
+      addresses = ["tcp://100.103.204.24:22000" "dynamic"];
     };
   };
 
