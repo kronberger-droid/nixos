@@ -99,10 +99,7 @@ in {
     # No agenix on this host, so use a changeable initial password instead of a
     # hashed-password secret. Change it after first boot with `passwd`.
     initialPassword = "media";
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFijJelcEDGPlu9aDnjkLa4TWNXXJGeyHgw6ucANynAW"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFXI1vd+dtthymv9vLy9QuoyGHuX5ZEkDXXSPfP6NVr"
-    ];
+    openssh.authorizedKeys.keys = builtins.attrValues (import ../../modules/shared/ssh-keys.nix);
   };
 
   environment.shells = [stockNushell];
