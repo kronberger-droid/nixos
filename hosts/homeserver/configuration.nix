@@ -49,7 +49,7 @@
     firewall = {
       enable = true;
       allowPing = false;
-      allowedTCPPorts = [22 53 3080 5001 8070];
+      allowedTCPPorts = [22 53 3080 5001 8070 2283];
       allowedUDPPorts = [53];
 
       # Log dropped packets (limited to prevent log spam)
@@ -180,6 +180,19 @@
     extraParams = "--priority 50";
   };
 
+  # nix-serve's module hardcodes DynamicUser, whose ephemeral UID resolves only through
+  # nscd -> nss-systemd. nscd here is nsncd (Type=simple, no readiness notification), so
+  # "started" just means "process forked" — nix-serve's getpwuid() can still race ahead of
+  # nsncd actually being able to answer, aborting the unit (self-heals via Restart=always,
+  # but the first failure trips deploy-rs's rollback). Give it a static system user instead
+  # so resolution goes through the plain `files` NSS module and there's nothing left to race.
+  users.users.nix-serve = {
+    isSystemUser = true;
+    group = "nix-serve";
+  };
+  users.groups.nix-serve = {};
+  systemd.services.nix-serve.serviceConfig.DynamicUser = lib.mkForce false;
+
   # DNS + ad blocking — accessible on LAN (:53) and web UI (:3080)
   services.adguardhome = {
     enable = true;
@@ -199,6 +212,7 @@
         # Local DNS — add your services here
         {domain = "adguard.home.lan"; answer = "192.168.2.54"; enabled = true;}
         {domain = "rss.home.lan"; answer = "192.168.2.54"; enabled = true;}
+        {domain = "photos.home.lan"; answer = "192.168.2.54"; enabled = true;}
       ];
     };
   };
@@ -218,6 +232,16 @@
       CLEANUP_ARCHIVE_READ_DAYS = "60";
     };
     adminCredentialsFile = "/run/secrets/miniflux-credentials";
+  };
+
+  # Photo/video backup — Postgres (vectorchord) + Redis auto-provisioned by the module.
+  # Local unix-socket DB auth needs no secrets file (User=immich peers with role "immich").
+  services.immich = {
+    enable = true;
+    host = "0.0.0.0";
+    # ML worker (faces/smart search) is CPU-only inference, on-demand not continuous —
+    # trim to machine-learning.enable = false if it strains the NUC's resources.
+    machine-learning.enable = true;
   };
 
   # Power saving
