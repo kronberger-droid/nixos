@@ -11,10 +11,7 @@
     description = "Kronberger";
     extraGroups = ["networkmanager" "wheel" "audio" "video" "dialout"];
     shell = pkgs.nushell;
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFijJelcEDGPlu9aDnjkLa4TWNXXJGeyHgw6ucANynAW"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFXI1vd+dtthymv9vLy9QuoyGHuX5ZEkDXXSPfP6NVr"
-    ];
+    openssh.authorizedKeys.keys = builtins.attrValues (import ../../shared/ssh-keys.nix);
   };
 
   environment = {
