@@ -5,6 +5,7 @@
   };
 
   home.pointerCursor = {
+    enable = true;
     gtk.enable = true;
     package = pkgs.quintom-cursor-theme;
     name = "Quintom_Ink";
