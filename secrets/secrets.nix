@@ -8,6 +8,7 @@ in {
   "pia-credentials.age".publicKeys = [intelNuc spectre P14E];
   "tuwien-vpn-password.age".publicKeys = [intelNuc spectre P14E];
   "github-token.age".publicKeys = [intelNuc spectre P14E];
+  "nix-github-token.age".publicKeys = [intelNuc spectre P14E];
   "tunet-credentials.age".publicKeys = [intelNuc spectre P14E];
   "tuwien-vpn-totp.age".publicKeys = [intelNuc spectre P14E];
   "spotify-password.age".publicKeys = [intelNuc spectre P14E];
