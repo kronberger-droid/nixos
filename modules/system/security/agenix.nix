@@ -43,5 +43,19 @@ in {
 
   age.secrets =
     lib.genAttrs rootSecrets (mkSecret "root")
-    // lib.genAttrs userSecrets (mkSecret username);
+    // lib.genAttrs userSecrets (mkSecret username)
+    // {
+      # Nix authenticates GitHub flake fetches by !include-ing this file into
+      # nix.conf (see core/nix-settings.nix). Flake evaluation runs as whoever
+      # invokes nix — the user (`nix flake update`) or root (`nixos-rebuild`) —
+      # so it's group-readable by `users` rather than the usual 0400.
+      # Contents: a single nix.conf line `access-tokens = github.com=<token>`.
+      nix-github-token = {
+        file = "${inputs.self}/secrets/nix-github-token.age";
+        path = "/run/secrets/nix-github-token";
+        mode = "0440";
+        owner = "root";
+        group = "users";
+      };
+    };
 }

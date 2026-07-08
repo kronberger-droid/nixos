@@ -31,8 +31,21 @@
       # Silence Lix's "ill-defined escape" warnings emitted by the deploy-rs
       # input's flake.nix (e.g. "Cargo\.lock", ".*\.rs$"). Enabling the
       # deprecated feature stops the warning; it's upstream's source, not ours.
-      extra-deprecated-features = ["broken-string-escape"];
+      # Lix names this `deprecated-features` (full list); the CppNix-style
+      # `extra-deprecated-features` append form is unknown to Lix and itself
+      # warns "unknown setting". Default is [], so listing it outright is exact.
+      deprecated-features = ["broken-string-escape"];
     };
+
+    # Authenticate GitHub API requests when resolving `github:` flake inputs,
+    # lifting the anonymous 60 req/hr rate limit to 5000/hr (avoids the HTTP 403
+    # "rate limit exceeded" on `nix flake update`). The token lives in an agenix
+    # secret; `!include` keeps it out of the world-readable /etc/nix/nix.conf,
+    # and the leading `!` makes nix skip the file silently on hosts/boots where
+    # it hasn't been decrypted yet instead of erroring.
+    extraOptions = ''
+      !include /run/secrets/nix-github-token
+    '';
     buildMachines = [
       {
         hostName = "homeserver";
