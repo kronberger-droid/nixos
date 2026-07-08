@@ -88,12 +88,20 @@
       # Allows safe emergency reboot (REISUB) without exposing full sysrq
       "kernel.sysrq" = 176;
     };
+    # Hibernation resume target. The swapfile lives on the LUKS-backed root
+    # fs, so resume happens from the unlocked mapper device plus the file's
+    # first physical block (from `filefrag -v /swapfile`). If the swapfile is
+    # ever recreated (resize, reinstall) this offset must be recomputed.
+    # NB: hibernation is only *available* when no process holds secret memory;
+    # Electron/Chromium apps do, which disables it kernel-wide while they run.
+    resumeDevice = "/dev/mapper/nixos-root";
     kernelParams = [
       "nvme_core.default_ps_max_latency_us=0"
       "pcie_aspm=off"
       "snd_intel_dspcfg.dsp_driver=1"
       "intel_iommu=on"
       "console=tty1"
+      "resume_offset=68904960"
     ];
     blacklistedKernelModules = [
       "iTCO_wdt"
