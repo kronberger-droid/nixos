@@ -26,6 +26,7 @@
   # Decrypted for the primary user (read directly from their session/tools).
   userSecrets = [
     "github-token"
+    "radicale-password" # plaintext CardDAV password, read by vdirsyncer
     "spotify-password"
     "sftp-password" # single-line SFTP password, read by the sftp-mount nushell helper
     "aerc-gmx-password" # aerc mail passwords, read via *-cred-cmd (cat) in apps/aerc.nix

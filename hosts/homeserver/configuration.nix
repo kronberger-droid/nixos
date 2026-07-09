@@ -28,6 +28,14 @@
     mode = "0400";
   };
 
+  # Radicale htpasswd line (`user:$2y$...`), read by the radicale service user.
+  age.secrets.radicale-htpasswd = {
+    file = "${inputs.self}/secrets/radicale-htpasswd.age";
+    path = "/run/secrets/radicale-htpasswd";
+    mode = "0400";
+    owner = "radicale";
+  };
+
   # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -49,7 +57,7 @@
     firewall = {
       enable = true;
       allowPing = false;
-      allowedTCPPorts = [22 53 3080 5001 8070 2283];
+      allowedTCPPorts = [22 53 3080 5001 8070 2283 5232];
       allowedUDPPorts = [53];
 
       # Log dropped packets (limited to prevent log spam)
@@ -217,6 +225,25 @@
   services.arrabbiata = {
     enable = true;
     package = arrabbiata;
+  };
+
+  # CardDAV/CalDAV server — contacts sync to the phone (DAVx5 -> stock Contacts)
+  # and desktop (vdirsyncer/khard -> aerc). Reached over the tailnet at
+  # http://homeserver:5232, already WireGuard-encrypted, so plain HTTP is fine.
+  # Collections are stored as individual vCard files under the storage folder.
+  services.radicale = {
+    enable = true;
+    settings = {
+      server.hosts = ["0.0.0.0:5232" "[::]:5232"];
+      auth = {
+        type = "htpasswd";
+        htpasswd_filename = "/run/secrets/radicale-htpasswd";
+        # bcrypt line from `htpasswd -nbB`. If this radicale build lacks bcrypt
+        # support, switch this to "plain"/"md5" and regenerate the secret.
+        htpasswd_encryption = "bcrypt";
+      };
+      storage.filesystem_folder = "/var/lib/radicale/collections";
+    };
   };
 
   # RSS reader — backed by PostgreSQL (auto-provisioned by the module)
