@@ -17,4 +17,8 @@ in {
   "aerc-uptudate-password.age".publicKeys = [intelNuc spectre P14E];
   "miniflux-credentials.age".publicKeys = [homeserver];
   "cache-private-key.age".publicKeys = [homeserver];
+  # bcrypt htpasswd line — only the server needs it.
+  "radicale-htpasswd.age".publicKeys = [homeserver];
+  # plaintext CardDAV password — the user machines (vdirsyncer) need it.
+  "radicale-password.age".publicKeys = [intelNuc spectre P14E];
 }
