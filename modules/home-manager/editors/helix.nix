@@ -335,6 +335,12 @@ in {
               };
               auto-format = true;
             }
+            {
+              # aerc opens drafts as *.eml -> helix `mail` grammar. Attach harper
+              # for spell/grammar checking while composing (prose, like markdown).
+              name = "mail";
+              language-servers = ["harper"];
+            }
           ];
         language-server =
           {

@@ -17,8 +17,9 @@ in {
     home.packages = with pkgs;
       [
         catimg # inline image viewer for the terminal
-        w3m # alternative HTML viewer
+        w3m # HTML viewer; also backs aerc's bundled `html` filter
         html2text # HTML to plain text
+        pandoc # markdown -> HTML for the multipart-converter (compose in md)
       ]
       ++ lib.optional cfg.tuwien.enable oama;
 
@@ -47,14 +48,36 @@ in {
       extraConfig = {
         general = {
           unsafe-accounts-conf = true;
+          # Default dir for :save on attachments.
+          default-save-path = "~/Downloads";
+        };
+        ui = {
+          # Group replies into threads in the message list.
+          threading-enabled = true;
         };
         viewer = {
           pager = "less -R";
         };
+        compose = {
+          # Edit To/Cc/Bcc/Subject as plain lines at the top of the buffer in
+          # the editor, instead of aerc's modal header prompts. Also makes the
+          # helix `mail` grammar highlight correctly (real header block present).
+          edit-headers = true;
+          # Contact autocomplete for address headers, backed by khard (see
+          # apps/contacts.nix). Reads the vdir synced from Radicale.
+          address-book-cmd = "khard email --parsable %s";
+        };
         filters = {
-          "text/plain" = "cat";
-          "text/html" = "${pkgs.html2text}/bin/html2text";
+          # Bundled aerc filters: `colorize` adds quote/diff/url coloring to
+          # plain text; `html` renders via w3m (nicer than html2text dumps).
+          "text/plain" = "${pkgs.aerc}/libexec/aerc/filters/colorize";
+          "text/html" = "${pkgs.aerc}/libexec/aerc/filters/html";
           "image/*" = "${pkgs.catimg}/bin/catimg -w \${WIDTH} -";
+        };
+        # Compose the body as Markdown (text/plain, stays readable as-is), then
+        # `:multipart text/html` adds a rendered HTML alternative on send.
+        multipart-converters = {
+          "text/html" = "${pkgs.pandoc}/bin/pandoc -f markdown -t html --standalone";
         };
       };
       extraAccounts =
