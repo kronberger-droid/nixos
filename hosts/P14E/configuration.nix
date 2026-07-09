@@ -102,6 +102,12 @@
       "intel_iommu=on"
       "console=tty1"
       "resume_offset=68904960"
+      # Disable memfd_secret kernel-wide. Any process holding secret memory
+      # (Electron/Chromium apps like Bitwarden do) makes the kernel refuse
+      # hibernation, since secretmem pages must never hit disk but a hibernate
+      # image writes all of RAM. LUKS-encrypted swap already protects the image
+      # at rest, so the trade-off is negligible here.
+      "secretmem.enable=0"
     ];
     blacklistedKernelModules = [
       "iTCO_wdt"
