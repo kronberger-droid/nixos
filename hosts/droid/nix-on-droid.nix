@@ -10,8 +10,8 @@
   # relying on "this host's pkgs happens to carry no nushell overlay") pins the
   # cached build explicitly — it stays stock even if the overlay is ever added to
   # this host's pkgs. nushell.nix detects the non-fork build via its version
-  # string and falls back to vi edit-mode automatically. The login shell below
-  # and home-manager's programs.nushell.package (home.nix) point at THIS package.
+  # string and falls back to vi edit-mode automatically. Used for both
+  # home-manager's programs.nushell.package and the bash->nu handoff (home.nix).
   stockNushell = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nushell;
 in {
   imports = [
@@ -47,10 +47,13 @@ in {
     NIX_PATH = "";
   };
 
-  # Default login shell is nushell (configured via home-manager). Use the pinned
-  # cached build (see stockNushell above) so activation never triggers an
-  # on-device source rebuild.
-  user.shell = "${stockNushell}/bin/nu";
+  # Login shell is bash, NOT nushell directly. nushell is not a POSIX login
+  # shell: recent versions hard-abort with "Nushell launched as a REPL, but
+  # STDIN is not a TTY" when nix-on-droid execs them at login, which bricks the
+  # app on open. Bash logs in cleanly and hands off to nushell only once there's
+  # a real interactive TTY (see programs.bash.initExtra in home.nix), so nu
+  # inherits the terminal and starts fine. The interactive shell is still nu.
+  user.shell = "${pkgs.bash}/bin/bash";
 
   # Read the changelog before changing this value
   system.stateVersion = "24.05";
