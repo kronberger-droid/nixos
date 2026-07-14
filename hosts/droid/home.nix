@@ -9,10 +9,23 @@
   # Read the changelog before changing this value
   home.stateVersion = "24.05";
 
-  # Cached stock nushell — same package the login shell uses (see
-  # nix-on-droid.nix). Keeps the phone off the fork's on-device Rust build;
+  # Cached stock nushell — keeps the phone off the fork's on-device Rust build;
   # nushell.nix sees the non-fork version string and falls back to vi edit-mode.
   programs.nushell.package = stockNushell;
+
+  # bash is the nix-on-droid login shell (see user.shell in nix-on-droid.nix);
+  # it hands off to nushell for real interactive sessions. The `-t 0` guard is
+  # the crux: only exec nu when stdin is an actual TTY, so nu never hits its
+  # "STDIN is not a TTY" launch check that aborts the app at login. Non-TTY or
+  # script invocations (and the failsafe/rescue path) stay in plain bash.
+  programs.bash = {
+    enable = true;
+    initExtra = ''
+      if [[ $- == *i* ]] && [ -t 0 ]; then
+        exec ${stockNushell}/bin/nu
+      fi
+    '';
+  };
 
   # HM master tracks 26.11 while nixpkgs unstable is still 26.05; both follow
   # unstable here, so this is a false positive (same as the desktop config).
