@@ -2,7 +2,18 @@
   pkgs,
   inputs,
   ...
-}: {
+}: let
+  # Stock nushell straight from nixpkgs, NOT the helix-mode fork
+  # (modules/shared/nushell-overlay.nix). The fork builds from source (Rust) and
+  # we deliberately keep the phone off any on-device compile, so use the prebuilt
+  # cache binary. Pulling it from inputs.nixpkgs.legacyPackages (rather than
+  # relying on "this host's pkgs happens to carry no nushell overlay") pins the
+  # cached build explicitly — it stays stock even if the overlay is ever added to
+  # this host's pkgs. nushell.nix detects the non-fork build via its version
+  # string and falls back to vi edit-mode automatically. The login shell below
+  # and home-manager's programs.nushell.package (home.nix) point at THIS package.
+  stockNushell = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nushell;
+in {
   imports = [
     # Temporarily disabled: rust-overlay toolchain builds locally on-device and
     # is the prime suspect for the proot build-env pty/fd permission failure
@@ -36,8 +47,10 @@
     NIX_PATH = "";
   };
 
-  # Default login shell is nushell (configured via home-manager)
-  user.shell = "${pkgs.nushell}/bin/nu";
+  # Default login shell is nushell (configured via home-manager). Use the pinned
+  # cached build (see stockNushell above) so activation never triggers an
+  # on-device source rebuild.
+  user.shell = "${stockNushell}/bin/nu";
 
   # Read the changelog before changing this value
   system.stateVersion = "24.05";
@@ -78,6 +91,6 @@
     config = ./home.nix;
     backupFileExtension = "hm-bak";
     useGlobalPkgs = true;
-    extraSpecialArgs = {inherit inputs;};
+    extraSpecialArgs = {inherit inputs stockNushell;};
   };
 }
