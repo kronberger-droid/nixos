@@ -561,7 +561,22 @@ in {
 
     settings =
       lib.recursiveUpdate
-      (builtins.removeAttrs (builtins.fromTOML (builtins.readFile inputs.starship-nerd-fonts)) ["maven"])
+      (
+        let
+          preset = builtins.fromTOML (builtins.readFile inputs.starship-nerd-fonts);
+        in
+          # Strip entries our pinned starship is too old to parse (otherwise it
+          # warns on every prompt): `maven` (a module we don't use) and the
+          # `os.symbols.InstantOS` variant — starship master's preset carries it
+          # but our nixpkgs starship doesn't know it yet. If a later preset bump
+          # adds another unknown os variant, strip it here the same way.
+          (builtins.removeAttrs preset ["maven"])
+          // {
+            os = preset.os // {
+              symbols = builtins.removeAttrs preset.os.symbols ["InstantOS"];
+            };
+          }
+      )
       {
         command_timeout = 2000;
         # Single-line module row. `$all` is every module in default order, which
