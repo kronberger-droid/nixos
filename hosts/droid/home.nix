@@ -3,10 +3,16 @@
   lib,
   pkgs,
   inputs,
+  stockNushell,
   ...
 }: {
   # Read the changelog before changing this value
   home.stateVersion = "24.05";
+
+  # Cached stock nushell — same package the login shell uses (see
+  # nix-on-droid.nix). Keeps the phone off the fork's on-device Rust build;
+  # nushell.nix sees the non-fork version string and falls back to vi edit-mode.
+  programs.nushell.package = stockNushell;
 
   # HM master tracks 26.11 while nixpkgs unstable is still 26.05; both follow
   # unstable here, so this is a false positive (same as the desktop config).
