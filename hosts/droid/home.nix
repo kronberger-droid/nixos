@@ -5,7 +5,16 @@
   inputs,
   stockNushell,
   ...
-}: {
+}: let
+  # Hand off from the bash login shell to nushell, but only for an interactive
+  # session on a real TTY — otherwise nu aborts with "STDIN is not a TTY". POSIX
+  # so it's safe in .profile as well as .bashrc.
+  nuHandoff = ''
+    case $- in
+      *i*) [ -t 0 ] && exec ${stockNushell}/bin/nu ;;
+    esac
+  '';
+in {
   # Read the changelog before changing this value
   home.stateVersion = "24.05";
 
@@ -18,13 +27,15 @@
   # the crux: only exec nu when stdin is an actual TTY, so nu never hits its
   # "STDIN is not a TTY" launch check that aborts the app at login. Non-TTY or
   # script invocations (and the failsafe/rescue path) stay in plain bash.
+  #
+  # Placed in BOTH profileExtra (.profile / .bash_profile — the login path
+  # nix-on-droid actually uses) and initExtra (.bashrc — non-login interactive).
+  # POSIX `case`/`[ -t 0 ]` so it's valid in .profile too; `exec` means whichever
+  # fires first wins and the other is never reached.
   programs.bash = {
     enable = true;
-    initExtra = ''
-      if [[ $- == *i* ]] && [ -t 0 ]; then
-        exec ${stockNushell}/bin/nu
-      fi
-    '';
+    profileExtra = nuHandoff;
+    initExtra = nuHandoff;
   };
 
   # HM master tracks 26.11 while nixpkgs unstable is still 26.05; both follow
