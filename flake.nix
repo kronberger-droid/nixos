@@ -99,7 +99,6 @@
     oo7-nixos = {
       url = "github:kronberger-droid/oo7-nixos";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.oo7-ssh-agent.inputs.rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
     };
     lanzaboote = {
       url = "github:nix-community/lanzaboote";
