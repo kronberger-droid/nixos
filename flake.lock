@@ -803,7 +803,7 @@
     "starship-nerd-fonts": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-ryCfz2m/9pab1tPRFa2zxnaEY3ghSA5VNqIIjSFj5Ww=",
+        "narHash": "sha256-8KGG/K3WkSA1JR+BfkegVbSGiH5ZdyvWQgaV/oV4MPE=",
         "type": "file",
         "url": "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml"
       },
