@@ -15,6 +15,12 @@
   stockNushell = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nushell;
 in {
   imports = [
+    # Replaces upstream's installPackages activation (nix-env --install) with
+    # a build-free `nix-env --set` — proot on this device cannot allocate the
+    # builder pty that the on-device user-environment build needs, which
+    # aborted every switch before home-manager activation. See file header.
+    ./user-environment.nix
+
     # Temporarily disabled: rust-overlay toolchain builds locally on-device and
     # is the prime suspect for the proot build-env pty/fd permission failure
     # during `nix-on-droid switch`. Re-enable once the switch succeeds without it.
