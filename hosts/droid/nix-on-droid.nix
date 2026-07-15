@@ -21,6 +21,11 @@ in {
     # aborted every switch before home-manager activation. See file header.
     ./user-environment.nix
 
+    # Pins proot-static back to unstable-2023-11-11: the 2024-05-04 build
+    # upstream ships breaks ALL local derivation builds on this device with
+    # the same pseudoterminal error. See file header.
+    ./proot-pin.nix
+
     # Temporarily disabled: rust-overlay toolchain builds locally on-device and
     # is the prime suspect for the proot build-env pty/fd permission failure
     # during `nix-on-droid switch`. Re-enable once the switch succeeds without it.
