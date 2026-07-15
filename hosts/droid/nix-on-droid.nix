@@ -48,7 +48,7 @@ in {
   environment.etcBackupExtension = ".bak";
 
   environment.sessionVariables = {
-    SHELL = "${pkgs.bash}/bin/bash";
+    SHELL = "${pkgs.bashInteractive}/bin/bash";
     # Disable channels warning since we're using flakes
     NIX_PATH = "";
   };
@@ -59,7 +59,10 @@ in {
   # app on open. Bash logs in cleanly and hands off to nushell only once there's
   # a real interactive TTY (see programs.bash.initExtra in home.nix), so nu
   # inherits the terminal and starts fine. The interactive shell is still nu.
-  user.shell = "${pkgs.bash}/bin/bash";
+  # bashInteractive, not pkgs.bash: nixpkgs' plain bash is the minimal build
+  # without readline — as a login shell it gives a degraded, editing-less
+  # prompt. bashInteractive is the full build (and what nix-on-droid ships).
+  user.shell = "${pkgs.bashInteractive}/bin/bash";
 
   # Read the changelog before changing this value
   system.stateVersion = "24.05";
