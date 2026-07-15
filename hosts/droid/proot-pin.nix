@@ -62,7 +62,12 @@ in {
       };
 
       prootStatic = mkOption {
-        type = types.package;
+        # types.str, not upstream's types.package: the package type coerces
+        # the raw store-path string through builtins.storePath, which requires
+        # --impure AND the path to be valid in the local store at eval time.
+        # As a plain string the path only has to exist once the activation
+        # script's realise guard has substituted it.
+        type = types.str;
         readOnly = true;
         internal = true;
         description = "<literal>proot-static</literal> package.";
