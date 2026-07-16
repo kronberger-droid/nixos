@@ -74,6 +74,20 @@ in {
 
   nix.extraOptions = ''
     experimental-features = nix-command flakes
+
+    # Never build on-device: proot on this phone denies the pseudoterminal
+    # Nix allocates for every local builder ("getting pseudoterminal
+    # attributes: Permission denied"), so ALL builds are pushed to the
+    # homeserver (aarch64 via binfmt emulation; kronberger is a trusted-user
+    # there via modules/system/core/nix-settings.nix). max-jobs = 0 forces
+    # remote building even though the builder's system matches ours.
+    # Requires ~/.ssh/id_ed25519 (authorized on the homeserver) and its host
+    # key in known_hosts. 192.168.2.54 = LAN; use 100.92.46.97 when on
+    # tailscale away from home. Trade-off: switching needs the homeserver
+    # reachable — acceptable, since local builds cannot work at all.
+    builders = ssh://kronberger@192.168.2.54 aarch64-linux
+    builders-use-substitutes = true
+    max-jobs = 0
   '';
 
   # Terminal colors (based on the Kitty config)
