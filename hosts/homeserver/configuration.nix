@@ -40,6 +40,11 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # aarch64 emulation so this host can act as remote builder for the phone's
+  # nix-on-droid config (proot on the phone cannot allocate build ptys, so the
+  # droid config points its `builders` here and never builds locally).
+  boot.binfmt.emulatedSystems = ["aarch64-linux"];
+
   # Networking
   networking = {
     hostName = "homeserver";
