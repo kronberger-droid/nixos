@@ -345,6 +345,12 @@
         overlays = [
           inputs.nix-on-droid.overlays.default
           inputs.rust-overlay.overlays.default
+          # Same Helix-mode nushell fork as every other host. Previously
+          # droid stayed on stock nixpkgs nushell to avoid an on-device Rust
+          # build, but the homeserver (which builds this same overlay) is
+          # already droid's remote builder/substituter, so it hands back the
+          # prebuilt output instead of compiling on the phone.
+          (import ./modules/shared/nushell-overlay.nix inputs)
           (_: _: {
             claude-code-bin = inputs.claude-code.packages.${armSystem}.claude-code;
           })

@@ -25,8 +25,7 @@ in {
   # Same fork detection as the edit_mode injection in extraConfig below:
   # stock nushell hard-errors at startup on the fork-only helix_* keybinding
   # modes ("expected 'emacs', 'vi_insert', or 'vi_normal'"), so strip them
-  # from the mode lists when running the prebuilt stock package (droid,
-  # mediaBox).
+  # from the mode lists when running the prebuilt stock package (mediaBox).
   xdg.configFile."nushell/keybindings.nu".text = let
     src = builtins.readFile ./nushell/keybindings.nu;
   in
