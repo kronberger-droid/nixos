@@ -3,7 +3,6 @@
   lib,
   pkgs,
   inputs,
-  stockNushell,
   ...
 }: let
   # Hand off from the bash login shell to nushell, but only for an interactive
@@ -18,7 +17,7 @@
     if [ -z "''${NO_NU:-}" ]; then
       if [ -t 0 ]; then
         case $- in
-          *i*) exec ${stockNushell}/bin/nu ;;
+          *i*) exec ${pkgs.nushell}/bin/nu ;;
         esac
         echo "[droid] staying in bash: TTY stdin but shell is not interactive (\$0=$0, \$-=$-)" >&2
       else
@@ -34,7 +33,7 @@
           case $0 in
             -*)
               export _NU_TRIED=1
-              ${stockNushell}/bin/nu < /dev/tty > /dev/tty 2>&1 && exit
+              ${pkgs.nushell}/bin/nu < /dev/tty > /dev/tty 2>&1 && exit
               ;;
           esac
         fi
@@ -45,10 +44,6 @@
 in {
   # Read the changelog before changing this value
   home.stateVersion = "24.05";
-
-  # Cached stock nushell — keeps the phone off the fork's on-device Rust build;
-  # nushell.nix sees the non-fork version string and falls back to vi edit-mode.
-  programs.nushell.package = stockNushell;
 
   # bash is the nix-on-droid login shell (see user.shell in nix-on-droid.nix);
   # it hands off to nushell for real interactive sessions. The `-t 0` guard is

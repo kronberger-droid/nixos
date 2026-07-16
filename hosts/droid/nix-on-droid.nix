@@ -2,18 +2,7 @@
   pkgs,
   inputs,
   ...
-}: let
-  # Stock nushell straight from nixpkgs, NOT the helix-mode fork
-  # (modules/shared/nushell-overlay.nix). The fork builds from source (Rust) and
-  # we deliberately keep the phone off any on-device compile, so use the prebuilt
-  # cache binary. Pulling it from inputs.nixpkgs.legacyPackages (rather than
-  # relying on "this host's pkgs happens to carry no nushell overlay") pins the
-  # cached build explicitly — it stays stock even if the overlay is ever added to
-  # this host's pkgs. nushell.nix detects the non-fork build via its version
-  # string and falls back to vi edit-mode automatically. Used for both
-  # home-manager's programs.nushell.package and the bash->nu handoff (home.nix).
-  stockNushell = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nushell;
-in {
+}: {
   imports = [
     # Replaces upstream's installPackages activation (nix-env --install) with
     # a build-free `nix-env --set` — proot on this device cannot allocate the
@@ -124,6 +113,6 @@ in {
     config = ./home.nix;
     backupFileExtension = "hm-bak";
     useGlobalPkgs = true;
-    extraSpecialArgs = {inherit inputs stockNushell;};
+    extraSpecialArgs = {inherit inputs;};
   };
 }
