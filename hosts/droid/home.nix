@@ -22,7 +22,23 @@
         esac
         echo "[droid] staying in bash: TTY stdin but shell is not interactive (\$0=$0, \$-=$-)" >&2
       else
-        echo "[droid] staying in bash: stdin is not a TTY (stdin -> $(readlink /proc/$$/fd/0 2>/dev/null || echo unknown)); nu needs a TTY" >&2
+        # SELinux in the nix-on-droid app denies terminal ioctls on the
+        # INHERITED stdin fd (isatty -> EACCES) while a freshly opened
+        # /dev/tty works fine — helix (crossterm) relies on exactly that.
+        # So for the app's login shell ($0 = "-bash"; plain `bash -l -c cmd`
+        # keeps $0 = "bash" and is never hijacked), hand nu fds opened from
+        # /dev/tty. Deliberately NOT exec: if nu still cannot start, we fall
+        # back to bash with a breadcrumb instead of ending the session —
+        # nu aborting at startup is what bricked app launch originally.
+        if [ -z "''${_NU_TRIED:-}" ] && ( : < /dev/tty ) 2>/dev/null; then
+          case $0 in
+            -*)
+              export _NU_TRIED=1
+              ${stockNushell}/bin/nu < /dev/tty > /dev/tty 2>&1 && exit
+              ;;
+          esac
+        fi
+        echo "[droid] staying in bash: stdin is not a TTY (stdin -> $(readlink /proc/$$/fd/0 2>/dev/null || echo unknown)) and the /dev/tty handoff did not stick" >&2
       fi
     fi
   '';
