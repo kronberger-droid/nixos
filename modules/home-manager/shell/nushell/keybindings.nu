@@ -5,6 +5,11 @@
 # the real reedline Helix edit mode (edit_mode = 'helix'), which implements that
 # behaviour in the engine. What remains are genuine nushell bindings; they
 # target helix modes (and vi, so they survive a switch back to edit_mode 'vi').
+#
+# NOTE: keep mode lists written EXACTLY as
+# `[helix_insert helix_normal vi_insert vi_normal]` — nushell.nix rewrites
+# that literal to `[vi_insert vi_normal]` for stock-nushell hosts, where the
+# fork-only helix_* modes are a startup error.
 
 export def get_keybindings [] {
     [
