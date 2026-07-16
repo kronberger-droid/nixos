@@ -9,10 +9,22 @@
   # Hand off from the bash login shell to nushell, but only for an interactive
   # session on a real TTY — otherwise nu aborts with "STDIN is not a TTY". POSIX
   # so it's safe in .profile as well as .bashrc.
+  #
+  # When the handoff does NOT fire, say why on stderr: a silent landing in
+  # bare bash is undebuggable from the phone, and the reason (no TTY vs. shell
+  # not interactive) points at completely different culprits. Set NO_NU=1 to
+  # skip the handoff (and the breadcrumb) and get plain bash on purpose.
   nuHandoff = ''
-    case $- in
-      *i*) [ -t 0 ] && exec ${stockNushell}/bin/nu ;;
-    esac
+    if [ -z "''${NO_NU:-}" ]; then
+      if [ -t 0 ]; then
+        case $- in
+          *i*) exec ${stockNushell}/bin/nu ;;
+        esac
+        echo "[droid] staying in bash: TTY stdin but shell is not interactive (\$0=$0, \$-=$-)" >&2
+      else
+        echo "[droid] staying in bash: stdin is not a TTY (stdin -> $(readlink /proc/$$/fd/0 2>/dev/null || echo unknown)); nu needs a TTY" >&2
+      fi
+    fi
   '';
 in {
   # Read the changelog before changing this value
