@@ -82,10 +82,12 @@ in {
     # there via modules/system/core/nix-settings.nix). max-jobs = 0 forces
     # remote building even though the builder's system matches ours.
     # Requires ~/.ssh/id_ed25519 (authorized on the homeserver) and its host
-    # key in known_hosts. 192.168.2.54 = LAN; use 100.92.46.97 when on
-    # tailscale away from home. Trade-off: switching needs the homeserver
+    # key in known_hosts. Both routes to the homeserver are listed — tailscale
+    # (100.92.46.97, works from anywhere while the Tailscale app is connected)
+    # first, home LAN (192.168.2.54) as fallback; nix skips an unreachable
+    # builder and tries the next. Trade-off: switching needs the homeserver
     # reachable — acceptable, since local builds cannot work at all.
-    builders = ssh://kronberger@192.168.2.54 aarch64-linux
+    builders = ssh://kronberger@100.92.46.97 aarch64-linux ; ssh://kronberger@192.168.2.54 aarch64-linux
     builders-use-substitutes = true
     max-jobs = 0
   '';
