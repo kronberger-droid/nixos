@@ -1,26 +1,25 @@
-{pkgs, ...}: {
-  # SCX (Sched-Ext) Schedulers for improved desktop responsiveness
-  # Requires kernel 6.12+ (currently using 6.18)
+{...}: {
+  # SCX (sched-ext) userspace scheduler for improved desktop responsiveness.
+  # Requires kernel 6.12+ with sched_ext (currently on 6.18).
+  #
+  # Managed through the upstream `services.scx` module instead of a hand-rolled
+  # systemd unit. The previous unit restart-looped a scheduler that the kernel
+  # ejected during the CPU churn of shutdown (Restart=on-failure with no
+  # meaningful start limit), re-attaching a BPF scheduler mid-teardown and
+  # stalling poweroff. The upstream module rate-limits restarts and guards
+  # startup on /sys/kernel/sched_ext existing.
+  services.scx = {
+    enable = true;
+    # scx_lavd (Latency-Aware Virtual Deadline) prioritizes latency-critical
+    # tasks for snappier interactive use (browsing, editing, gaming).
+    scheduler = "scx_lavd";
+  };
 
-  # Install scx scheduler packages (rustscheds includes scx_lavd)
-  environment.systemPackages = with pkgs; [
-    scx.rustscheds
-  ];
-
-  # Enable scx_lavd scheduler via systemd service
-  # scx_lavd (Latency-Aware Virtual Deadline) prioritizes latency-critical
-  # tasks for snappier interactive use (browsing, editing, gaming).
-  systemd.services.scx-lavd = {
-    description = "SCX LAVD Scheduler for Desktop Responsiveness";
-    wantedBy = ["multi-user.target"];
-    after = ["basic.target"];
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = "${pkgs.scx.rustscheds}/bin/scx_lavd";
-      Restart = "on-failure";
-      RestartSec = "5s";
-      # Run with elevated priority
-      Nice = -10;
-    };
+  # Belt-and-suspenders for the reported shutdown stall: cap the stop timeout so
+  # a slow BPF detach can't hold up poweroff for the default 90s, and keep the
+  # elevated priority the previous hand-rolled unit ran with.
+  systemd.services.scx.serviceConfig = {
+    TimeoutStopSec = "10s";
+    Nice = -10;
   };
 }
