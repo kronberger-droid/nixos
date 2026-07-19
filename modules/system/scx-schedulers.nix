@@ -14,12 +14,4 @@
     # tasks for snappier interactive use (browsing, editing, gaming).
     scheduler = "scx_lavd";
   };
-
-  # Belt-and-suspenders for the reported shutdown stall: cap the stop timeout so
-  # a slow BPF detach can't hold up poweroff for the default 90s, and keep the
-  # elevated priority the previous hand-rolled unit ran with.
-  systemd.services.scx.serviceConfig = {
-    TimeoutStopSec = "10s";
-    Nice = -10;
-  };
 }
