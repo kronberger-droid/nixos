@@ -14,6 +14,7 @@
         ../shell/nushell.nix
         ../shell/git.nix
         ../shell/tools.nix
+        ../apps/zellij.nix
       ];
 
       home = {

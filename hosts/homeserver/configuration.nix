@@ -101,6 +101,7 @@
     wget
     git
     nushell
+    zellij
     docker-compose
     lm_sensors
     # Rust toolchain for building/testing crates (e.g. the nushell fork)
