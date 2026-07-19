@@ -119,7 +119,7 @@
       flake = false;
     };
     # nushell built from our fork's helix-mode-wip branch: current upstream
-    # (v0.113.2) + the glue wiring reedline's selection-first Helix edit mode
+    # (v0.114.0) + the glue wiring reedline's selection-first Helix edit mode
     # (`edit_mode = "helix"`). Its Cargo.lock pins reedline to our fork's
     # helix-mode-wip rev, fetched as a FOD via outputHashes in the overlay
     # below (same pattern as niri-src/smithay). The reedline branch also carries

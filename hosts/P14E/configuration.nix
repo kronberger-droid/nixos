@@ -78,6 +78,10 @@
     systemd-boot-defaults.enable = false;
     loader.systemd-boot.enable = lib.mkForce false;
     loader.efi.canTouchEfiVariables = false;
+    # HiDPI panel renders the boot menu at native res, making the generation
+    # list tiny. "0" forces the lowest UEFI text mode (80x25) for larger text.
+    # Lanzaboote reads this value into loader.conf even with systemd-boot off.
+    loader.systemd-boot.consoleMode = "0";
     lanzaboote = {
       enable = true;
       pkiBundle = "/var/lib/sbctl";
