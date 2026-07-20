@@ -145,6 +145,48 @@
           ];
         }
       ]
+      else if host == "P14E"
+      then [
+        # Lid open: internal HiDPI panel + AOC U3277WB side by side.
+        # HDMI on the left (logical 3072 wide at scale 1.25), panel to its right.
+        {
+          name = "lid-open";
+          output = [
+            {
+              search = "m=U3277WB";
+              enable = true;
+              mode = "3840x2160";
+              position = "0,0";
+              scale = 1.25;
+            }
+            {
+              search = "n=eDP-1";
+              enable = true;
+              mode = "3000x2000";
+              position = "3072,0";
+              scale = 2.0;
+            }
+          ];
+        }
+        # Lid closed: niri drops eDP-1, so this profile (HDMI only) is the
+        # only one that fully matches. Internal panel stays off.
+        {
+          name = "lid-closed";
+          output = [
+            {
+              search = "n=eDP-1";
+              enable = false;
+            }
+            {
+              search = "m=U3277WB";
+              enable = true;
+              mode = "3840x2160";
+              position = "0,0";
+              scale = 1.25;
+            }
+          ];
+        }
+      ]
       else [
         # Fallback for portable or other hosts
         {
