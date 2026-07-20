@@ -3,6 +3,7 @@
 {
   pkgs,
   lib,
+  config,
   ...
 }: {
   programs.zellij = {
@@ -31,8 +32,26 @@
       # Don't pop the release-notes screen after a version bump on every attach.
       show_release_notes = false;
 
-      # theme left at "default", which inherits your local terminal's ANSI
-      # palette over SSH. Set e.g. theme = "nord"; if you want a fixed look.
+      # Match the desktop machines' look (modules/home-manager/terminals/zellij.nix):
+      # compact single-line status bar instead of the full frame+status UI.
+      simplified_ui = true;
+      default_layout = "compact";
+      pane_frames = false;
+      theme = "base16";
+    };
+
+    themes.base16 = with config.scheme; {
+      fg = "#${base05}";
+      bg = "#${base00}";
+      black = "#${base01}";
+      red = "#${base08}";
+      green = "#${base0B}";
+      yellow = "#${base0A}";
+      blue = "#${base0D}";
+      magenta = "#${base0E}";
+      cyan = "#${base0C}";
+      white = "#${base06}";
+      orange = "#${base09}";
     };
   };
 

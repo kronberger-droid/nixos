@@ -284,6 +284,11 @@
           # `edit_mode = "helix"`, which stock nushell rejects.
           {nixpkgs.overlays = [(import ./modules/shared/nushell-overlay.nix inputs)];}
           home-manager.nixosModules.home-manager
+          {
+            home-manager.sharedModules = [
+              inputs.base16.homeManagerModule
+            ];
+          }
           ./modules/home-manager/users/kronberger-server.nix
           agenix.nixosModules.default
           {environment.systemPackages = [agenix.packages.${x86System}.default];}

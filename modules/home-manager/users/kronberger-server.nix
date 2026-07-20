@@ -15,6 +15,7 @@
         ../shell/git.nix
         ../shell/tools.nix
         ../apps/zellij.nix
+        ../theming/base16-scheme.nix
       ];
 
       home = {
