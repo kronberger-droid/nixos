@@ -40,7 +40,11 @@
       theme = "base16";
     };
 
-    themes.base16 = with config.scheme; {
+    # programs.zellij.themes.<name> only controls the *filename*
+    # (zellij/themes/base16.kdl) — the file's content still needs its own
+    # "base16 { ... }" node inside, or zellij rejects it with "No theme node
+    # found in file".
+    themes.base16.base16 = with config.scheme; {
       fg = "#${base05}";
       bg = "#${base00}";
       black = "#${base01}";
