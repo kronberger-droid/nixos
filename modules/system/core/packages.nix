@@ -24,6 +24,7 @@
     git
     curl
     gparted
+    parted
 
     # Basic cli tools
     eza
