@@ -31,6 +31,7 @@
 
       # Don't pop the release-notes screen after a version bump on every attach.
       show_release_notes = false;
+      show_startup_tips = false;
 
       # Match the desktop machines' look (modules/home-manager/terminals/zellij.nix):
       # compact single-line status bar instead of the full frame+status UI.
@@ -38,24 +39,27 @@
       default_layout = "compact";
       pane_frames = false;
       theme = "base16";
-    };
 
-    # programs.zellij.themes.<name> only controls the *filename*
-    # (zellij/themes/base16.kdl) — the file's content still needs its own
-    # "base16 { ... }" node inside, or zellij rejects it with "No theme node
-    # found in file".
-    themes.base16.base16 = with config.scheme; {
-      fg = "#${base05}";
-      bg = "#${base00}";
-      black = "#${base01}";
-      red = "#${base08}";
-      green = "#${base0B}";
-      yellow = "#${base0A}";
-      blue = "#${base0D}";
-      magenta = "#${base0E}";
-      cyan = "#${base0C}";
-      white = "#${base06}";
-      orange = "#${base09}";
+      # Defined inline in config.kdl rather than via programs.zellij.themes
+      # (which writes a standalone zellij/themes/base16.kdl): standalone
+      # theme files need their own "themes { }" wrapper plus the newer
+      # base/background/emphasis_* schema, not this simple flat-hex one —
+      # zellij rejects the flat format there with "No theme node found in
+      # file". Inline in config.kdl, the flat format works fine (matches
+      # modules/home-manager/terminals/zellij.nix on the desktop machines).
+      themes.base16 = with config.scheme; {
+        fg = "#${base05}";
+        bg = "#${base00}";
+        black = "#${base01}";
+        red = "#${base08}";
+        green = "#${base0B}";
+        yellow = "#${base0A}";
+        blue = "#${base0D}";
+        magenta = "#${base0E}";
+        cyan = "#${base0C}";
+        white = "#${base06}";
+        orange = "#${base09}";
+      };
     };
   };
 
