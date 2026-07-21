@@ -20,8 +20,10 @@ read it when you need to calibrate phrasing closely or the rules below feel
 underspecified.
 
 ### Both registers
-- **One clause per line.** Wrap at sentence/idea boundaries; don't merge lines
-  into flowing paragraphs. This is the most recognisable trait.
+- **One clause per line, soft-wrapped.** Break at sentence/idea boundaries only,
+  never at a column limit. A clause runs as long as it needs and GitHub wraps it
+  for display, so don't hard-wrap at 80 chars mid-clause. Don't merge lines into
+  flowing paragraphs either. This is the most recognisable trait.
 - **`since`, not `because`** (38 vs 5 in my corpus). `thus`, `anyways`,
   `Otherwise`, `Still` also recur. Never `tbh`, `imo`, `afaik`, `LGTM`, `nit:`.
 - **Backtick every identifier, file, path**: `resolve_head`,
