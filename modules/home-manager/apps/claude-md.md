@@ -13,6 +13,12 @@
 When drafting PR bodies, review comments, or issue replies **as me**, match this.
 Derived from ~144 of my comments and 16 PR bodies on `nushell/reedline`.
 
+Only the directives live here. The full evidence base (verbatim quotes per rule,
+the fuller short-form/long-form breakdown) is at
+`~/Documents/notes/general-vault/_context/claude/github-writing-style.md` —
+read it when you need to calibrate phrasing closely or the rules below feel
+underspecified.
+
 ### Both registers
 - **One clause per line.** Wrap at sentence/idea boundaries; don't merge lines
   into flowing paragraphs. This is the most recognisable trait.
