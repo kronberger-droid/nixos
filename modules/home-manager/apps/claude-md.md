@@ -24,6 +24,9 @@ underspecified.
   never at a column limit. A clause runs as long as it needs and GitHub wraps it
   for display, so don't hard-wrap at 80 chars mid-clause. Don't merge lines into
   flowing paragraphs either. This is the most recognisable trait.
+  **Commit messages are the exception**: hard-wrap those bodies at ~72, since
+  `git log` indents by 4 and does not reflow. My own history sits at median 70 /
+  p90 78.
 - **`since`, not `because`** (38 vs 5 in my corpus). `thus`, `anyways`,
   `Otherwise`, `Still` also recur. Never `tbh`, `imo`, `afaik`, `LGTM`, `nit:`.
 - **Backtick every identifier, file, path**: `resolve_head`,
