@@ -46,34 +46,27 @@ in {
     })
 
     # ── oo7 ──────────────────────────────────────────────────────
-    # `services.oo7.*` comes from the self-hosted `oo7-nixos` flake input
-    # (see flake.nix). When nixpkgs ships its own module, drop the flake
-    # input, delete the `_module.args.oo7-*` overrides, and re-point these
-    # options at the upstream names.
+    # Split ownership since nixpkgs landed its own `services.oo7`:
+    #
+    #   `enable`  — nixpkgs. Owns the oo7-daemon unit, its D-Bus
+    #               registration, the cap_ipc_lock wrapper the shipped unit
+    #               execs, pam_oo7 and the .portal file.
+    #   the rest  — the self-hosted `oo7-nixos` flake input, which now only
+    #               carries what nixpkgs lacks: the SSH agent, the default
+    #               Login collection, the gcr unlock prompt, ambient
+    #               CAP_IPC_LOCK, actually starting the portal, and the
+    #               PAM socket-wait race fix.
+    #
+    # Retire the input entirely if nixpkgs ever grows an SSH agent.
     (lib.mkIf (cfg == "oo7") {
       services.gnome.gnome-keyring.enable = lib.mkForce false;
       services.gnome.gcr-ssh-agent.enable = lib.mkForce false;
 
       _module.args.oo7-ssh-agent =
         inputs.oo7-nixos.packages.${system}.oo7-ssh-agent;
-      _module.args.oo7-pam =
-        inputs.oo7-nixos.packages.${system}.oo7-pam;
-
-      # nixpkgs' oo7-server now ships a unit with
-      # ExecStart=/run/wrappers/bin/oo7-daemon, so the daemon only starts if a
-      # wrapper grants cap_ipc_lock (it mlock()s secrets). nixpkgs' own
-      # services.oo7 module declares this, but it fires off `services.oo7.enable`
-      # which we never set, since we drive the finer-grained oo7-nixos options
-      # instead. Declare the wrapper here so the shipped unit resolves.
-      # Drop this if we ever migrate to the upstream module wholesale.
-      security.wrappers.oo7-daemon = {
-        owner = "root";
-        group = "root";
-        capabilities = "cap_ipc_lock=ep";
-        source = "${config.services.oo7.daemon.package}/libexec/oo7-daemon";
-      };
 
       services.oo7 = {
+        enable = true;
         daemon.enable = true;
         sshAgent.enable = true;
         pam = {

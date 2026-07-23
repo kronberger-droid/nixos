@@ -653,11 +653,11 @@
         "oo7-ssh-agent": "oo7-ssh-agent"
       },
       "locked": {
-        "lastModified": 1783451455,
-        "narHash": "sha256-kUVOdFE8tjW0nSN4qxsHm/TXHxe6/yZdIfbuHqgXVxw=",
+        "lastModified": 1784805737,
+        "narHash": "sha256-qPNgcVDAsq8P6dYcc5v/8Fxd/Sl8yMY0OzXyuR3xaWU=",
         "owner": "kronberger-droid",
         "repo": "oo7-nixos",
-        "rev": "b1c2116fcb96dcdcaae86c98be3fda8ada8267a6",
+        "rev": "f3d18502dfc743265f767f14387aed50d6809ceb",
         "type": "github"
       },
       "original": {
