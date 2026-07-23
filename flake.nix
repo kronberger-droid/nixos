@@ -10,6 +10,12 @@
     # if nightly turns out unstable. Remove once we're committed to either path
     # AND 0.4.3 has landed in nixos-unstable.
     nixpkgs-rio.url = "github:kronberger-droid/nixpkgs/rio-0.4.3";
+    # freecad-wayland regressed on current nixos-unstable and won't build.
+    # Pin it to the last nixpkgs rev we published to origin/main (d407951),
+    # where it still built, while the rest of the system tracks unstable.
+    # The overlay below pulls only `freecad-wayland` out of this input.
+    # Drop it once unstable's freecad builds again, then bump/remove here.
+    nixpkgs-freecad.url = "github:NixOS/nixpkgs/d407951447dcd00442e97087bf374aad70c04cea";
     # Rio "nightly": upstream main built with Rio's own flake.
     # We pick `.rio-stable` (latest released Rust) rather than `.default`
     # (= Rio's MSRV), because upstream pins MSRV to unreleased Rust versions
@@ -211,6 +217,16 @@
                   rio =
                     inputs.rio-upstream.packages.${system}.rio-stable.overrideAttrs
                     (_: {doCheck = false;});
+                  # freecad-wayland is broken on current unstable, so pull it
+                  # from nixpkgs-freecad (origin/main's last-good rev) instead.
+                  # Fresh nixpkgs import needs its own allowUnfree — it does
+                  # not inherit this system's nixpkgs.config. See input above.
+                  freecad-wayland =
+                    (import inputs.nixpkgs-freecad {
+                      inherit system;
+                      config.allowUnfree = true;
+                    })
+                    .freecad-wayland;
                 })
               ];
             }
