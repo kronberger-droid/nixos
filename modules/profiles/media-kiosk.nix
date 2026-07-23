@@ -15,6 +15,7 @@
   ...
 }: let
   cfg = config.mediaKiosk;
+  sshKeys = import ../shared/ssh-keys.nix;
 in {
   options.mediaKiosk = {
     enable = lib.mkEnableOption "browser-kiosk media appliance (greetd autologin -> Sway -> browser)";
@@ -48,9 +49,12 @@ in {
 
     authorizedKeys = lib.mkOption {
       type = lib.types.listOf lib.types.str;
+      # Pulled from shared/ssh-keys.nix rather than copied, so a rotated key
+      # does not leave the kiosk trusting a stale one. Deliberately a subset
+      # of that file — only the two workstations, not every machine.
       default = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFijJelcEDGPlu9aDnjkLa4TWNXXJGeyHgw6ucANynAW"
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFFXI1vd+dtthymv9vLy9QuoyGHuX5ZEkDXXSPfP6NVr"
+        sshKeys.intelNuc
+        sshKeys.spectre
       ];
       description = "SSH public keys allowed to log into the kiosk user.";
     };
