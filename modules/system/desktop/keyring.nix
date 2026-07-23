@@ -59,6 +59,20 @@ in {
       _module.args.oo7-pam =
         inputs.oo7-nixos.packages.${system}.oo7-pam;
 
+      # nixpkgs' oo7-server now ships a unit with
+      # ExecStart=/run/wrappers/bin/oo7-daemon, so the daemon only starts if a
+      # wrapper grants cap_ipc_lock (it mlock()s secrets). nixpkgs' own
+      # services.oo7 module declares this, but it fires off `services.oo7.enable`
+      # which we never set, since we drive the finer-grained oo7-nixos options
+      # instead. Declare the wrapper here so the shipped unit resolves.
+      # Drop this if we ever migrate to the upstream module wholesale.
+      security.wrappers.oo7-daemon = {
+        owner = "root";
+        group = "root";
+        capabilities = "cap_ipc_lock=ep";
+        source = "${config.services.oo7.daemon.package}/libexec/oo7-daemon";
+      };
+
       services.oo7 = {
         daemon.enable = true;
         sshAgent.enable = true;
