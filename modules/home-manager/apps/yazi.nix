@@ -94,12 +94,6 @@ in {
     };
     settings = {
       flavor = "base16-transparent";
-      plugin.prepend_previewers = [
-        { mime = "*/*"; run = "noop"; }
-      ];
-      plugin.prepend_preloaders = [
-        { mime = "*/*"; run = "noop"; }
-      ];
       opener = {
         "detached-pdf" = [
           {
