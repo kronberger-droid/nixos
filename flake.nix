@@ -201,7 +201,16 @@
                 (_: _: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                   claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
-                  rio = inputs.rio-upstream.packages.${system}.rio-stable;
+                  # Upstream's flake runs the full test suite, but rio's
+                  # context tests fork a pty and the SIGHUP from tearing it
+                  # down kills the whole `cargo test` harness inside the nix
+                  # sandbox (exit 129 = 128 + SIGHUP, no assertion failure).
+                  # Upstream #1735 tried to stop forking real shells there and
+                  # it still dies. Drop the check phase until that lands
+                  # properly; nixpkgs' own rio packaging skips these too.
+                  rio =
+                    inputs.rio-upstream.packages.${system}.rio-stable.overrideAttrs
+                    (_: {doCheck = false;});
                 })
               ];
             }
