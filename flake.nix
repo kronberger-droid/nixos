@@ -77,10 +77,6 @@
       url = "github:rcambrj/nix-pia-vpn";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    arrabbiata = {
-      url = "github:kronberger-droid/arrabbiata";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     base16 = {
       url = "github:SenchoPens/base16.nix";
     };
@@ -308,7 +304,6 @@
           host = "homeserver";
           username = "kronberger";
           inherit inputs;
-          arrabbiata = inputs.arrabbiata.packages.${x86System}.default;
         };
         modules = [
           ./hosts/homeserver/configuration.nix

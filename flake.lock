@@ -23,26 +23,6 @@
         "type": "github"
       }
     },
-    "arrabbiata": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1769365719,
-        "narHash": "sha256-CTejUFSiM+1XDIA+lYjgCHFIqdHoiHQQHHOhBQ2h3A0=",
-        "owner": "kronberger-droid",
-        "repo": "arrabbiata",
-        "rev": "9ba5025b76aa903bc537ce5f0e3b3b78aeb766bb",
-        "type": "github"
-      },
-      "original": {
-        "owner": "kronberger-droid",
-        "repo": "arrabbiata",
-        "type": "github"
-      }
-    },
     "base16": {
       "inputs": {
         "fromYaml": "fromYaml"
@@ -737,7 +717,6 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
-        "arrabbiata": "arrabbiata",
         "base16": "base16",
         "claude-code": "claude-code",
         "deploy-rs": "deploy-rs",
