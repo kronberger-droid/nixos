@@ -15,8 +15,19 @@
     binfmt.emulatedSystems = ["aarch64-linux"];
     systemd-boot-defaults.enable = true;
     loader.efi.canTouchEfiVariables = true;
+    # Hibernation resume target. Raw swap partition (see hardware-configuration.nix),
+    # unencrypted, so the UUID alone is enough — no resume_offset (that's only for
+    # swapfiles) and no LUKS mapper indirection. Needed because zram is also active
+    # as swap, so the resume device can't be auto-detected and must be named.
+    resumeDevice = "/dev/disk/by-uuid/85499372-4284-4605-96da-1df3600b9f74";
     kernelParams = [
       "console=tty1"
+      # Disable memfd_secret kernel-wide. Any process holding secret memory
+      # (Electron apps like Bitwarden do) makes the kernel refuse hibernation,
+      # since secretmem pages must never hit disk but a hibernate image writes
+      # all of RAM. Swap here is unencrypted, so this trades a niche hardening
+      # feature for working hibernation while Bitwarden is open.
+      "secretmem.enable=0"
     ];
   };
 
