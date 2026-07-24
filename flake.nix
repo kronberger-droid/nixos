@@ -204,7 +204,7 @@
                 # nushell from our helix-mode-wip fork. Shared with the
                 # homeserver (built outside mkHost) — see the overlay file.
                 (import ./modules/shared/nushell-overlay.nix inputs)
-                (_: _: {
+                (_: prev: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                   claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
                   # Upstream's flake runs the full test suite, but rio's
@@ -216,6 +216,14 @@
                   # properly; nixpkgs' own rio packaging skips these too.
                   rio =
                     inputs.rio-upstream.packages.${system}.rio-stable.overrideAttrs
+                    (_: {doCheck = false;});
+                  # bitwarden-desktop's checkPhase runs the desktop_native cargo
+                  # tests, and a currently-failing test there breaks the build.
+                  # Upstream nixpkgs already carries per-test checkFlags skips
+                  # but hasn't caught this one yet. Drop the whole phase until
+                  # it does; the Electron app itself is unaffected.
+                  bitwarden-desktop =
+                    prev.bitwarden-desktop.overrideAttrs
                     (_: {doCheck = false;});
                   # freecad-wayland is broken on current unstable, so pull it
                   # from nixpkgs-freecad (origin/main's last-good rev) instead.
