@@ -1,7 +1,6 @@
 {
   pkgs,
   lib,
-  arrabbiata,
   inputs,
   username,
   ...
@@ -10,7 +9,6 @@
     ./hardware-configuration.nix
     ../../modules/system/core/nix-settings.nix
     ../../modules/system/core/locale.nix
-    ../../modules/system/services/arrabbiata.nix
     ../../modules/system/services/syncthing.nix
   ];
 
@@ -228,11 +226,6 @@
       ];
     };
   };
-  services.arrabbiata = {
-    enable = true;
-    package = arrabbiata;
-  };
-
   # CardDAV/CalDAV server — contacts sync to the phone (DAVx5 -> stock Contacts)
   # and desktop (vdirsyncer/khard -> aerc). Reached over the tailnet at
   # http://homeserver:5232, already WireGuard-encrypted, so plain HTTP is fine.
