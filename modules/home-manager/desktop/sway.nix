@@ -286,14 +286,7 @@ in {
           };
         }
         // (
-          if host == "t480s"
-          then {
-            "1267:32:Elan_Touchpad" = {
-              natural_scroll = "enabled";
-              tap = "enabled";
-            };
-          }
-          else if host == "spectre" || host == "portable"
+          if host == "spectre"
           then {
             "1739:52912:SYNA32BF:00_06CB:CEB0_Touchpad" = {
               natural_scroll = "enabled";

@@ -5,8 +5,8 @@
   # modules/system/core/packages.nix.
   #
   # ARM note: there is no aarch64 AppImage upstream, so this overlay is a no-op
-  # for usefulness on aarch64 — the mediaPi (Raspberry Pi) host stays on
-  # Chromium. Only import + reference this on x86_64-linux hosts.
+  # for usefulness on aarch64. Only import + reference this on x86_64-linux
+  # hosts; an aarch64 host would need Chromium instead.
   nixpkgs.overlays = [
     (_: prev: {
       helium = let

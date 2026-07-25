@@ -455,26 +455,6 @@
         "type": "github"
       }
     },
-    "nixos-hardware": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1784723954,
-        "narHash": "sha256-1CfD8ZUjCkTgjsneLZ/lxCHhgDfqxxE7/GX0MmsgiqA=",
-        "owner": "NixOS",
-        "repo": "nixos-hardware",
-        "rev": "a017f5b72210026af5b3ac5949f08d94380a6fbd",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixos-hardware",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1784796856,
@@ -728,7 +708,6 @@
         "niri-src": "niri-src",
         "nix-on-droid": "nix-on-droid",
         "nix-pia-vpn": "nix-pia-vpn",
-        "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs",
         "nixpkgs-freecad": "nixpkgs-freecad",
         "nixpkgs-rio": "nixpkgs-rio",

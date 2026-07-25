@@ -110,12 +110,6 @@
       url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixos-hardware = {
-      url = "github:NixOS/nixos-hardware";
-      # Dedupe onto our nixpkgs; otherwise it pins its own stale tarball
-      # nixpkgs (an unused transitive node that just bloats flake.lock).
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     starship-nerd-fonts = {
       url = "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml";
       flake = false;
@@ -263,19 +257,7 @@
         isNotebook = false;
       };
 
-      portable = mkHost {
-        hostname = "portable";
-        system = x86System;
-        isNotebook = false;
-      };
-
       # Laptops
-      t480s = mkHost {
-        hostname = "t480s";
-        system = x86System;
-        isNotebook = true;
-      };
-
       spectre = mkHost {
         hostname = "spectre";
         system = x86System;
@@ -339,20 +321,6 @@
         ];
       };
 
-      mediaPi = nixpkgs.lib.nixosSystem {
-        specialArgs = {
-          host = "mediaPi";
-          inherit inputs;
-        };
-        modules = [
-          {nixpkgs.hostPlatform = armSystem;}
-          ./hosts/mediaPi/configuration.nix
-          inputs.nixos-hardware.nixosModules.raspberry-pi-4
-          home-manager.nixosModules.home-manager
-          lixModule
-        ];
-      };
-
       # x86 notebook media box — a "focused spectre": full niri desktop
       # (waybar, rofi, mako, nemo, keyd, theming) via the shared mkHost stack,
       # but with a lean media user (no dev toolchains, no personal apps) and a
@@ -404,15 +372,6 @@
         self.nixosConfigurations.homeserver;
     };
 
-    deploy.nodes.mediaPi = {
-      hostname = "192.168.2.94";
-      sshUser = "root";
-      user = "root";
-      profiles.system.path =
-        inputs.deploy-rs.lib.${armSystem}.activate.nixos
-        self.nixosConfigurations.mediaPi;
-    };
-
     checks = nixpkgs.lib.genAttrs [x86System] (
       system:
         inputs.deploy-rs.lib.${system}.deployChecks self.deploy
@@ -462,10 +421,8 @@
 
     # Build images
     # nix build .#recovery    — USB ISO
-    # nix build .#mediaPi-sd  — Raspberry Pi 4 SD card
     packages.${x86System} = {
       recovery = self.nixosConfigurations.recovery.config.system.build.isoImage;
-      mediaPi-sd = self.nixosConfigurations.mediaPi.config.system.build.sdImage;
     };
 
     nixosConfigurations.recovery = nixpkgs.lib.nixosSystem {
