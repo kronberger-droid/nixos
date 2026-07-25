@@ -21,4 +21,8 @@ in {
   "radicale-htpasswd.age".publicKeys = [homeserver];
   # plaintext CardDAV password — the user machines (vdirsyncer) need it.
   "radicale-password.age".publicKeys = [intelNuc spectre P14E];
+  # Cloudflare Tunnel credentials JSON, written by `cloudflared tunnel create`.
+  # Contains the tunnel secret — anyone holding it can serve traffic on the
+  # tunnel's hostnames. Only the server runs cloudflared.
+  "cloudflared-website.age".publicKeys = [homeserver];
 }
