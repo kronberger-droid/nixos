@@ -2,11 +2,11 @@
 #
 # Boot chain: greetd autologin -> tuigreet -> Sway -> browser autostart.
 # Intentionally minimal: no personal workstation stack (niri, agenix, oo7,
-# rust toolchain). Both the aarch64 mediaPi and the x86 mediaBox import this;
-# they differ only in hardware/boot layer and which browser they pass in.
+# rust toolchain).
 #
-# The browser is a *parameter* because Helium ships x86_64-only — the Pi must
-# stay on Chromium while the x86 box uses Helium. See modules/system/core/helium.nix.
+# mediaBox is currently the only consumer. The browser stays a *parameter*
+# because Helium ships x86_64-only, so any future aarch64 kiosk has to pass
+# Chromium instead. See modules/system/core/helium.nix.
 {
   config,
   lib,

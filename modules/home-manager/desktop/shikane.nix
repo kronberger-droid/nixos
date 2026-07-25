@@ -15,61 +15,7 @@
     enable = host != "intelNuc"; # Disable for Intel NUC - single static display
 
     settings.profile =
-      if host == "t480s"
-      then [
-        # Laptop only profile
-        {
-          name = "laptop";
-          output = [
-            {
-              search = "n=eDP-1";
-              enable = true;
-              mode = "1920x1080";
-              position = "0,0";
-              scale = 1.0;
-            }
-          ];
-        }
-        # Docked profile with external display
-        {
-          name = "docked";
-          output = [
-            {
-              search = "n=eDP-1";
-              enable = true;
-              mode = "1920x1080";
-              position = "0,0";
-              scale = 1.0;
-            }
-            {
-              search = "n/DP-.*";
-              enable = true;
-              mode = "2560x1440";
-              position = "1920,0";
-            }
-          ];
-        }
-        # Presentation mode - mirror to external display
-        {
-          name = "presentation";
-          output = [
-            {
-              search = "n=eDP-1";
-              enable = true;
-              mode = "1920x1080";
-              position = "0,0";
-              scale = 1.0;
-            }
-            {
-              search = "n/DP-.*";
-              enable = true;
-              mode = "1920x1080";
-              position = "0,0";
-            }
-          ];
-        }
-      ]
-      else if host == "spectre"
+      if host == "spectre"
       then [
         # Standard laptop profile
         {
@@ -214,7 +160,7 @@
         }
       ]
       else [
-        # Fallback for portable or other hosts
+        # Fallback for any host without a hand-written profile
         {
           name = "default";
           output = [

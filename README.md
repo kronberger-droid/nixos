@@ -10,10 +10,13 @@ to turn.
 | Host | Arch | Description |
 |------|------|-------------|
 | `intelNuc` | x86_64 | Desktop |
-| `portable` | x86_64 | Desktop |
-| `t480s` | x86_64 | Laptop |
 | `spectre` | x86_64 | Laptop |
+| `P14E` | x86_64 | Laptop (not yet installed) |
+| `homeserver` | x86_64 | Server: DNS, RSS, photos, CalDAV, binary cache |
+| `mediaBox` | x86_64 | Media kiosk notebook |
 | `devPi` | aarch64 | ARM dev board |
+| `droid` | aarch64 | Phone, via nix-on-droid |
+| `recovery` | x86_64 | Rescue ISO, `nix build .#recovery` |
 
 ## Structure
 
