@@ -10,6 +10,7 @@
     ../../modules/system/core/nix-settings.nix
     ../../modules/system/core/locale.nix
     ../../modules/system/services/syncthing.nix
+    ../../modules/system/services/website.nix
   ];
 
   # Secrets (homeserver-specific — shared agenix.nix has desktop-only secrets)
@@ -24,6 +25,16 @@
     file = "${inputs.self}/secrets/cache-private-key.age";
     path = "/run/secrets/cache-private-key";
     mode = "0400";
+  };
+
+  # Cloudflare Tunnel credentials JSON. Stays root-owned: the cloudflared unit
+  # runs under DynamicUser but pulls this in via systemd LoadCredential, which
+  # reads it as root before dropping privileges.
+  age.secrets.cloudflared-website = {
+    file = "${inputs.self}/secrets/cloudflared-website.age";
+    path = "/run/secrets/cloudflared-website";
+    mode = "0400";
+    owner = "root";
   };
 
   # Radicale htpasswd line (`user:$2y$...`), read by the radicale service user.

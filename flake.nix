@@ -124,6 +124,18 @@
       url = "github:kronberger-droid/nushell/helix-mode-wip";
       flake = false;
     };
+    # Personal site (CV / blog / publications / projects). Its flake builds the
+    # Zola output into a store path; the homeserver's website.nix points nginx
+    # at that path. Content lives in its own repo so writing a post is not a
+    # commit against this config and a broken post cannot fail a system build
+    # any later than the flake input bump.
+    #
+    # Publishing a change is: commit + push there, then
+    #   nix flake update website && deploy .#homeserver
+    website = {
+      url = "github:kronberger-droid/website";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ {

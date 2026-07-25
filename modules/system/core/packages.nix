@@ -45,6 +45,16 @@
     # Network cli
     nmap
     wirelesstools
+    # dig, host, nslookup. Handy for checking that a Cloudflare-proxied record
+    # actually resolves — a proxied CNAME answers with Cloudflare's anycast A
+    # records rather than the CNAME itself, which is easy to misread without it.
+    dnsutils
+    # Cloudflare Tunnel CLI. Only needed here for the administrative side:
+    # `tunnel login` (writes ~/.cloudflared/cert.pem), `tunnel create`, and
+    # `tunnel route dns`. The homeserver never gets this package from here —
+    # it does not import modules/system — it gets the daemon via
+    # services.cloudflared in modules/system/services/website.nix.
+    cloudflared
 
     # Data cli
     usbutils

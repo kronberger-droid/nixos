@@ -715,7 +715,8 @@
         "oo7-nixos": "oo7-nixos",
         "rio-upstream": "rio-upstream",
         "rust-overlay": "rust-overlay_2",
-        "starship-nerd-fonts": "starship-nerd-fonts"
+        "starship-nerd-fonts": "starship-nerd-fonts",
+        "website": "website"
       }
     },
     "rust-overlay": {
@@ -862,6 +863,26 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "website": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784980794,
+        "narHash": "sha256-+l+CIyostydL+6Rwys1gguzeDMJe8+/AkToixArxMVY=",
+        "owner": "kronberger-droid",
+        "repo": "website",
+        "rev": "0d6dbbba0d0f97a5d56527b54887401cf548a165",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kronberger-droid",
+        "repo": "website",
         "type": "github"
       }
     },
