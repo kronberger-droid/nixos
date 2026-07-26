@@ -523,31 +523,53 @@ in {
 
     extraEnv = builtins.readFile ./nushell/extra_env.nu;
 
-    extraConfig =
-      (lib.optionalString hasTerminal ''
-        source ~/.config/nushell/development.nu
+    extraConfig = lib.mkMerge [
+      (
+        (lib.optionalString hasTerminal ''
+          source ~/.config/nushell/development.nu
+        '')
+        + builtins.readFile ./nushell/extra_config.nu
+        # Layer the edit mode on after the base record. The helix edit-mode and
+        # its cursor shapes only exist in our nushell fork; on stock nushell
+        # (mediaBox, which uses the prebuilt package to skip the source build)
+        # fall back to vi so the config stays error-free.
+        + (
+          if lib.hasInfix "helix" (config.programs.nushell.package.version or "")
+          then ''
+
+            $env.config.edit_mode = 'helix'
+            $env.config.cursor_shape = ($env.config.cursor_shape | merge {
+              helix_normal: block
+              helix_select: underscore
+              helix_insert: line
+            })
+          ''
+          else ''
+
+            $env.config.edit_mode = 'vi'
+          ''
+        )
+      )
+
+      # Make the prompt itself end in a newline, so *every* indicator reedline
+      # can swap in (vi mode, reverse-search, menu markers) starts on line two.
+      # Only the vi indicators are configurable; nushell hardcodes the other two
+      # without a leading newline, so carrying it there left them rendering on
+      # the Starship row.
+      #
+      # mkAfter since starship's enableNushellIntegration writes into this same
+      # option and its export-env `load-env` installs PROMPT_COMMAND, so we can
+      # only wrap the closure once that has run.
+      #
+      # The "\n" has to be appended in nushell rather than via starship's
+      # `format`, since nushell strips one trailing newline off external command
+      # output and would eat it.
+      (lib.mkAfter ''
+
+        let starship_prompt = $env.PROMPT_COMMAND
+        $env.PROMPT_COMMAND = {|| (do $starship_prompt) + "\n" }
       '')
-      + builtins.readFile ./nushell/extra_config.nu
-      # Layer the edit mode on after the base record. The helix edit-mode and
-      # its cursor shapes only exist in our nushell fork; on stock nushell
-      # (mediaBox, which uses the prebuilt package to skip the source build)
-      # fall back to vi so the config stays error-free.
-      + (
-        if lib.hasInfix "helix" (config.programs.nushell.package.version or "")
-        then ''
-
-          $env.config.edit_mode = 'helix'
-          $env.config.cursor_shape = ($env.config.cursor_shape | merge {
-            helix_normal: block
-            helix_select: underscore
-            helix_insert: line
-          })
-        ''
-        else ''
-
-          $env.config.edit_mode = 'vi'
-        ''
-      );
+    ];
 
     shellAliases =
       {
@@ -587,9 +609,10 @@ in {
         # *includes* a `$line_break` (after cmd_duration, pushing time/status to
         # a 2nd line) and a trailing `$character` caret. Disable both: line_break
         # so all modules stay on one row, character to drop the caret. The real
-        # 2nd line (the input line) comes from nushell's vi indicators carrying a
-        # leading newline (see extra_config.nu) — reedline trims a *trailing*
-        # newline off the prompt but keeps a *leading* one on the indicator.
+        # 2nd line (the input line) comes from the PROMPT_COMMAND wrapper above,
+        # which appends the newline in nushell. Don't move that newline into this
+        # format string: nushell strips one trailing newline off external command
+        # output, so starship's own would never reach reedline.
         format = "$all";
         line_break.disabled = true;
         character.disabled = true;
