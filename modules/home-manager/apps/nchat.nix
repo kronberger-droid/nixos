@@ -45,9 +45,15 @@
       attachment_open_command=xdg-open %1
       link_open_command=xdg-open %1
 
-      # Clipboard integration
-      clipboard_copy_command=${pkgs.wl-clipboard}/bin/wl-copy
-      clipboard_paste_command=${pkgs.wl-clipboard}/bin/wl-paste
+      # Clipboard integration — left empty on purpose. nchat falls back to bare
+      # wl-copy/wl-paste when it detects Wayland, resolved via PATH (which has
+      # wl-clipboard from desktop/session-services.nix), and to its built-in clip
+      # library otherwise. Interpolating an absolute wl-clipboard store path here
+      # would bake it into a file that is seeded once and never rewritten, so it
+      # would keep pointing at that path until a GC removes it and the clipboard
+      # silently stops working.
+      # clipboard_copy_command=
+      # clipboard_paste_command=
 
       # File picker (optional)
       # file_picker_command=yazi --chooser-file=%1
@@ -170,9 +176,18 @@ in {
   };
 
   # Seed nchat's config once, then leave it to nchat (see comment above).
+  #
+  # Deliberately no `mkdir -p` here. nchat decides whether it has been set up
+  # solely by whether its confdir exists (main.cpp: `if (!Exists(dir)) { … }`),
+  # and only in that branch does it write the `version` marker the next startup
+  # validates. Creating the dir on our side means nchat never takes that branch,
+  # never writes `version`, and every later run dies with "invalid config dir
+  # content, exiting. use -s to setup nchat." So let nchat create the dir, and
+  # only seed into one it has already initialised.
   home.activation.nchatSeedConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
     confdir="${config.xdg.configHome}/nchat"
-    $DRY_RUN_CMD mkdir -p "$confdir"
-    ${seedScript}
+    if [ -d "$confdir" ]; then
+      ${seedScript}
+    fi
   '';
 }
