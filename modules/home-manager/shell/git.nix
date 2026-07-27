@@ -1,4 +1,10 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: let
+  s = config.scheme;
+in {
   programs = {
     delta = {
       enable = true;
@@ -133,6 +139,39 @@
             table = {
               showSeparator = true;
               compact = false;
+            };
+          };
+          # base16 mapping. gh-dash falls back to its built-in ANSI defaults per
+          # field, so anything left out here still renders sanely.
+          colors = {
+            text = {
+              primary = "#${s.base05}";
+              secondary = "#${s.base04}";
+              # Drawn on top of the faint/selected backgrounds, so it has to be
+              # the background colour, not a lighter foreground.
+              inverted = "#${s.base00}";
+              faint = "#${s.base03}";
+              warning = "#${s.base0A}";
+              success = "#${s.base0B}";
+              error = "#${s.base08}";
+              actor = "#${s.base0D}";
+            };
+            background.selected = "#${s.base02}";
+            border = {
+              primary = "#${s.base03}";
+              secondary = "#${s.base04}";
+              # Not only a border: gh-dash also uses this slot as the *background*
+              # for the tab bar and footer, which is exactly base01's role.
+              faint = "#${s.base01}";
+            };
+            # Author role icons, ordered least to most privileged.
+            icon = {
+              newcontributor = "#${s.base0C}";
+              contributor = "#${s.base0D}";
+              collaborator = "#${s.base0B}";
+              member = "#${s.base0E}";
+              owner = "#${s.base0F}";
+              unknownrole = "#${s.base03}";
             };
           };
         };

@@ -9,6 +9,12 @@ in {
   "tuwien-vpn-password.age".publicKeys = [intelNuc spectre P14E];
   "github-token.age".publicKeys = [intelNuc spectre P14E];
   "nix-github-token.age".publicKeys = [intelNuc spectre P14E];
+  # Classic PAT (repo + read:org) for the `gh` CLI, and thus gh-dash. Kept apart
+  # from github-token so the Claude Code GitHub plugin and gh don't have to
+  # share a scope set. Classic rather than fine-grained since gh-dash queries
+  # `repository.branchProtectionRules`, which fine-grained PATs can't reach on
+  # repos you don't administer (dlvhdr/gh-dash#562).
+  "gh-dash-token.age".publicKeys = [intelNuc spectre P14E];
   "tunet-credentials.age".publicKeys = [intelNuc spectre P14E];
   "tuwien-vpn-totp.age".publicKeys = [intelNuc spectre P14E];
   "spotify-password.age".publicKeys = [intelNuc spectre P14E];

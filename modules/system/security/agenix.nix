@@ -25,7 +25,8 @@
 
   # Decrypted for the primary user (read directly from their session/tools).
   userSecrets = [
-    "github-token"
+    "github-token" # read as GITHUB_PERSONAL_ACCESS_TOKEN by the Claude Code GitHub plugin
+    "gh-dash-token" # read as GH_TOKEN by the `gh` CLI / gh-dash
     "radicale-password" # plaintext CardDAV password, read by vdirsyncer
     "spotify-password"
     "sftp-password" # single-line SFTP password, read by the sftp-mount nushell helper

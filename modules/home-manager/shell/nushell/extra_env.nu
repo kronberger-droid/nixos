@@ -17,7 +17,17 @@ $env.NAVI_FINDER = "skim"
 # Add ~/.local/bin to PATH
 $env.PATH = ($env.PATH | prepend ($env.HOME | path join ".local" "bin"))
 
-# Load GitHub token from agenix secret (for Claude Code GitHub plugin)
+# Load GitHub tokens from agenix secrets. Two separate tokens on purpose, so the
+# scope sets stay independent.
 if ("/run/secrets/github-token" | path exists) {
+    # Claude Code GitHub plugin.
     $env.GITHUB_PERSONAL_ACCESS_TOKEN = (open /run/secrets/github-token | str trim)
+}
+
+# `gh` resolves GH_TOKEN ahead of ~/.config/gh/hosts.yml, so setting it here also
+# means `gh auth login` is never needed — which matters, since that flow would
+# try to write ~/.config/gh/config.yml, a read-only home-manager store symlink.
+# Note this covers every `gh` invocation, not only gh-dash.
+if ("/run/secrets/gh-dash-token" | path exists) {
+    $env.GH_TOKEN = (open /run/secrets/gh-dash-token | str trim)
 }
