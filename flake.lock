@@ -681,11 +681,11 @@
         "systems": "systems_4"
       },
       "locked": {
-        "lastModified": 1784799393,
-        "narHash": "sha256-tyGLGnQfVQ66sIcsv+gt77D8mczL1Aj/ECFSbnOLiSE=",
+        "lastModified": 1785230530,
+        "narHash": "sha256-DLvRQBt/ur7xV6zq+oHY7FdNQIIJmq49eqko1CZmQcQ=",
         "owner": "raphamorim",
         "repo": "rio",
-        "rev": "d656326020ffe5959e221af7a7d1d8d82a6ab2db",
+        "rev": "2fea6b78749f0d8c8a8926f1b5e5935fbe558998",
         "type": "github"
       },
       "original": {
