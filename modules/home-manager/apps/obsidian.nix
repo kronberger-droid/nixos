@@ -91,6 +91,14 @@ in {
     .obsidian/cache
     .obsidian/cache.json
 
+    # Rewritten by the obsidianAccentColor activation script above, on every
+    # host, at every activation. Two hosts activating between syncs each
+    # register a local edit and Syncthing has no way to reconcile them, so this
+    # produced a steady drip of appearance.sync-conflict-* files. The accent is
+    # derived from each host's own base16 scheme, so it is device-local by
+    # nature and there is nothing to gain from syncing it.
+    .obsidian/appearance.json
+
     # Trash and OS junk.
     .trash/
     .DS_Store
