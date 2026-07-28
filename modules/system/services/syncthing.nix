@@ -23,11 +23,12 @@
   # All peers including mobile
   allPeerDevices = otherDevices // mobileDevices;
 
-  # The vault is synced as its own Syncthing folder, so exclude it from
-  # the parent `documents` folder to avoid double-indexing every change.
-  documentsIgnore = pkgs.writeText "documents-stignore" ''
-    notes/general-vault
-  '';
+  # Patterns come from shared/ so this and the home-manager module, which both
+  # render ~/Documents/.stignore, cannot drift apart. See that file for why
+  # each pattern is there.
+  documentsIgnore =
+    pkgs.writeText "documents-stignore"
+    (import ../../shared/syncthing-ignores.nix).documents;
 in
   lib.mkIf enabled {
     services.syncthing = {

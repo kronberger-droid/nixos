@@ -61,9 +61,9 @@ in
       };
     };
 
-    # The vault is synced as its own Syncthing folder, so exclude it from
-    # the parent `documents` folder to avoid double-indexing every change.
-    home.file."Documents/.stignore".text = ''
-      notes/general-vault
-    '';
+    # Patterns come from shared/ so this and the NixOS-level module, which both
+    # render ~/Documents/.stignore, cannot drift apart. See that file for why
+    # each pattern is there.
+    home.file."Documents/.stignore".text =
+      (import ../../shared/syncthing-ignores.nix).documents;
   }
