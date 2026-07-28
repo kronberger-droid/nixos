@@ -6,6 +6,7 @@
 
     # Messaging
     thunderbird
+    aerion
     # gurk-rs
     element-desktop
     zapzap
