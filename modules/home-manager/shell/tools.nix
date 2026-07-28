@@ -19,6 +19,9 @@
 
   home.packages = with pkgs; [
     bat
+    # batman/batgrep/batdiff resolve `bat` from PATH rather than a baked store
+    # path, so they have to sit in the same layer as bat itself.
+    bat-extras.core
     rip2
     fastfetch
     translate-shell

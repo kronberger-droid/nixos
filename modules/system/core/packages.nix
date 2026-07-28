@@ -28,8 +28,6 @@
 
     # Basic cli tools
     eza
-    bat
-    bat-extras.core
     erdtree
     ripgrep
     rip2
