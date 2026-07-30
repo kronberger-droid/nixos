@@ -46,6 +46,8 @@ in {
 
       claude.skills.rust-to-cpp.content = builtins.readFile ../apps/skills/rust-to-cpp.md;
       claude.skills.vault.content = builtins.readFile ../apps/skills/vault.md;
+      claude.skills.typst.content = builtins.readFile ../apps/skills/typst.md;
+      claude.skills.scientific-writing.content = builtins.readFile ../apps/skills/scientific-writing.md;
 
       # Matt Pocock's skills collection (github:mattpocock/skills), whole-folder
       # symlinked into ~/.claude/skills/. See mattSkills above for derivation.
