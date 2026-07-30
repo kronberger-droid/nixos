@@ -36,7 +36,11 @@
     vlc
     obs-studio
     ipe
+    # 2.70 (GTK2) kept as the fallback — it goes through XWayland and renders
+    # at half size on scaled outputs. `gwyddion3` is the GTK3/Wayland-native
+    # build and is the one to reach for; see modules/shared/gwyddion3.nix.
     gwyddion
+    (pkgs.callPackage ../../shared/gwyddion3.nix {})
 
     # PDF
     ghostscript
