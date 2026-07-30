@@ -48,6 +48,8 @@ in {
       claude.skills.vault.content = builtins.readFile ../apps/skills/vault.md;
       claude.skills.typst.content = builtins.readFile ../apps/skills/typst.md;
       claude.skills.scientific-writing.content = builtins.readFile ../apps/skills/scientific-writing.md;
+      claude.skills.commit-writer.content = builtins.readFile ../apps/skills/commit-writer.md;
+      claude.skills.github-voice.content = builtins.readFile ../apps/skills/github-voice.md;
 
       # Matt Pocock's skills collection (github:mattpocock/skills), whole-folder
       # symlinked into ~/.claude/skills/. See mattSkills above for derivation.
