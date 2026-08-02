@@ -16,12 +16,15 @@
     enable = true;
     gtk4.theme = null;
     theme = {
-      name = "Fluent-round-Dark-compact";
-      package = pkgs.fluent-gtk-theme.override {
+      # Colloid, not Fluent: nixpkgs dropped gtk-engine-murrine, which took
+      # fluent-gtk-theme (and most other classic themes) with it. Same
+      # upstream author and the same override arguments; Fluent's "round"
+      # tweak has no counterpart since Colloid is rounded by default.
+      name = "Colloid-Dark-Compact";
+      package = pkgs.colloid-gtk-theme.override {
         themeVariants = ["default"];
         colorVariants = ["dark"];
         sizeVariants = ["compact"];
-        tweaks = ["round"];
       };
     };
     iconTheme = {
@@ -34,6 +37,6 @@
 
   dconf.settings."org/gnome/desktop/interface" = {
     color-scheme = "prefer-dark";
-    gtk-theme = "Fluent-round-Dark-compact";
+    gtk-theme = "Colloid-Dark-Compact";
   };
 }
