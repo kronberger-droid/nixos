@@ -31,9 +31,11 @@ in {
       services.gnome.gnome-keyring.enable = true;
       services.gnome.gcr-ssh-agent.enable = true;
 
+      # No greetd entry, for the same reason as the oo7 branch below: its PAM
+      # stack is `substack login`, so nixpkgs' per-service toggles add no
+      # rules there. gnome-keyring reaches the greeter through login.
       security.pam.services = {
         swaylock.enableGnomeKeyring = true;
-        greetd.enableGnomeKeyring = true;
         login.enableGnomeKeyring = true;
         passwd.enableGnomeKeyring = true;
       };
@@ -71,7 +73,13 @@ in {
         sshAgent.enable = true;
         pam = {
           enable = true;
-          services = ["login" "greetd" "swaylock" "passwd"];
+          # No "greetd" here: nixpkgs' greetd module sets useDefaultRules =
+          # false and replaces the whole stack with `substack login`, so
+          # greetd picks up pam_oo7 (and our socket-wait rule) through the
+          # login service. Naming it directly is also an eval error now,
+          # since oo7-nixos orders its wait rule against greetd's own
+          # rules.session.oo7, which no longer exists.
+          services = ["login" "swaylock" "passwd"];
         };
         portal.enable = true;
       };
