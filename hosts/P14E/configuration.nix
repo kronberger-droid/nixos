@@ -7,21 +7,22 @@
   imports = [
     ./hardware-configuration.nix
     ../common.nix
-    ../../modules/system/hardware/ipu6-camera.nix
+    ../../modules/system/hardware/uvc-camera.nix
     ../../modules/system/scx-schedulers.nix
     ../../modules/profiles/vpn-workstation.nix
     ../../modules/system/hardware/droidcam.nix
   ];
 
-  # NOTE: this host is prepared ahead of the actual hardware arriving.
-  # Everything below is a starting point copied from spectre (same 11th-gen
-  # Tiger Lake / Iris Xe / IPU6 camera generation) — revisit once the real
-  # Compute Element (CPU) and camera sensors are known. In particular:
+  # NOTE: this host was prepared ahead of the actual hardware arriving, and
+  # much below is still a starting point copied from spectre. In particular:
   #   - nix.settings.cores below assumes a 4-core/8-thread CPU (the common
   #     case across the Celeron 6305..i7-1185G7 Compute Element range) —
   #     check `nproc` after install and adjust.
   #   - hosts/P14E/hardware-configuration.nix is a placeholder; replace it
   #     with the real `nixos-generate-config` output.
+  # Resolved since: the webcam is not IPU6. It is a USB UVC module
+  # (Foxlink 05c8:03e9) on uvcvideo, so this host imports uvc-camera.nix
+  # rather than spectre's ipu6-camera.nix.
   # Deliberately NOT carried over from spectre:
   #   - modules/system/hardware/firmware/vbt.nix — that ships a firmware
   #     blob hand-patched for spectre's exact VBT dump; using it on
