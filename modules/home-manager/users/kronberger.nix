@@ -9,19 +9,6 @@
   ...
 }: let
   dropkittenPkg = inputs.dropkitten.packages.${pkgs.stdenv.hostPlatform.system}.dropkitten;
-
-  # Matt Pocock's skills, derived straight from the repo's plugin manifest so
-  # the set tracks upstream exactly (a flake update adds/removes skills with it).
-  # plugin.json lists relative paths like "./skills/engineering/tdd"; we map each
-  # to { <foldername> = <store path to that folder>; } for claude.skillDirs.
-  mattSkills = let
-    manifest = builtins.fromJSON (builtins.readFile "${inputs.mattpocock-skills}/.claude-plugin/plugin.json");
-    toEntry = rel: let
-      clean = lib.removePrefix "./" rel;
-    in
-      lib.nameValuePair (builtins.baseNameOf clean) (inputs.mattpocock-skills + "/${clean}");
-  in
-    builtins.listToAttrs (map toEntry manifest.skills);
 in {
   home-manager = {
     extraSpecialArgs = {
@@ -33,28 +20,13 @@ in {
     users.${username} = {
       imports = [
         ../.
+        # Claude Code config shared with the homeserver — see that file for why
+        # it is imported by path rather than through apps/default.nix.
+        ../apps/claude-settings.nix
       ];
 
-      # Claude Code
-      claude.statusline.enable = true;
-      claude.plugins = [
-        "context7@claude-plugins-official"
-        "github@claude-plugins-official"
-        "explanatory-output-style@claude-plugins-official"
-      ];
-      claude.claudeMd = builtins.readFile ../apps/claude-md.md;
-
-      claude.skills.rust-to-cpp.content = builtins.readFile ../apps/skills/rust-to-cpp.md;
-      claude.skills.vault.content = builtins.readFile ../apps/skills/vault.md;
-      claude.skills.typst.content = builtins.readFile ../apps/skills/typst.md;
-      claude.skills.scientific-writing.content = builtins.readFile ../apps/skills/scientific-writing.md;
-      claude.skills.commit-writer.content = builtins.readFile ../apps/skills/commit-writer.md;
-      claude.skills.github-voice.content = builtins.readFile ../apps/skills/github-voice.md;
-
-      # Matt Pocock's skills collection (github:mattpocock/skills), whole-folder
-      # symlinked into ~/.claude/skills/. See mattSkills above for derivation.
-      claude.skillDirs = mattSkills;
-
+      # Desktop-only: inpdf comes from the overlay in system/core/packages.nix,
+      # which the homeserver does not import, so it cannot live in the shared file.
       claude.mcpServers.inpdf = {
         command = "${pkgs.inpdf}/bin/inpdf";
         args = ["mcp"];

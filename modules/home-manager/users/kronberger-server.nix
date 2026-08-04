@@ -16,6 +16,10 @@
         ../shell/tools.nix
         ../apps/zellij.nix
         ../theming/base16-scheme.nix
+        # Same Claude Code config the desktops get: statusline, plugins,
+        # CLAUDE.md and the skill set. This host imports modules individually
+        # rather than the whole tree, so the path is explicit.
+        ../apps/claude-settings.nix
       ];
 
       home = {
