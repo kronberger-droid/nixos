@@ -31,4 +31,8 @@ in {
   # Contains the tunnel secret — anyone holding it can serve traffic on the
   # tunnel's hostnames. Only the server runs cloudflared.
   "cloudflared-website.age".publicKeys = [homeserver];
+  # ZOTERO_DAV_USER / ZOTERO_DAV_PASSWORD for the WebDAV server backing Zotero
+  # file sync. Only the server reads it — the Zotero clients hold the same
+  # password in their own settings store, not from here.
+  "webdav-zotero.age".publicKeys = [homeserver];
 }

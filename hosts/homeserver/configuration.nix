@@ -11,6 +11,7 @@
     ../../modules/system/core/locale.nix
     ../../modules/system/services/syncthing.nix
     ../../modules/system/services/website.nix
+    ../../modules/system/services/webdav.nix
   ];
 
   # Secrets (homeserver-specific — shared agenix.nix has desktop-only secrets)
@@ -43,6 +44,16 @@
     path = "/run/secrets/radicale-htpasswd";
     mode = "0400";
     owner = "radicale";
+  };
+
+  # ZOTERO_DAV_USER / ZOTERO_DAV_PASSWORD, in systemd EnvironmentFile form.
+  # Stays root-owned: systemd reads it as root before dropping to the webdav
+  # user (see the comment in services/webdav.nix).
+  age.secrets.webdav-zotero = {
+    file = "${inputs.self}/secrets/webdav-zotero.age";
+    path = "/run/secrets/webdav-zotero";
+    mode = "0400";
+    owner = "root";
   };
 
   # Bootloader
