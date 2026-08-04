@@ -304,7 +304,17 @@
           # Same Helix-mode nushell the mkHost hosts get. Needed because the
           # server's home-manager (useGlobalPkgs) and login shell both read
           # `edit_mode = "helix"`, which stock nushell rejects.
-          {nixpkgs.overlays = [(import ./modules/shared/nushell-overlay.nix inputs)];}
+          {
+            nixpkgs.overlays = [
+              (import ./modules/shared/nushell-overlay.nix inputs)
+              # This host is built by nixosSystem directly rather than mkHost,
+              # so it misses mkHost's overlay — claude-code-bin has to be
+              # redefined here, same as the droid config does for aarch64.
+              (_: _: {
+                claude-code-bin = inputs.claude-code.packages.${x86System}.claude-code;
+              })
+            ];
+          }
           home-manager.nixosModules.home-manager
           {
             home-manager.sharedModules = [
