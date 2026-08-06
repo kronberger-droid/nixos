@@ -1,0 +1,292 @@
+# ~/.config/starship.toml
+#
+# Base is the upstream `nerd-font-symbols` preset (starship master), with the
+# customisations below layered on top. The `[maven]` and `[os.symbols]` tables
+# from the preset are dropped: starship master keeps adding new os.symbols
+# variants that older starship releases don't know, and each unknown key makes
+# it warn on every prompt. The os module is off by default, so losing its
+# symbols costs nothing visible.
+
+"$schema" = "https://starship.rs/config-schema.json"
+
+command_timeout = 2000
+
+# Single-line module row. `$all` is every module in default order, which
+# *includes* a `$line_break` (after cmd_duration, pushing time/status onto a
+# second line) and a trailing `$character` caret. Both are disabled below:
+# line_break so all modules stay on one row, character to drop the caret.
+#
+# The real second line — the input line — comes from the PROMPT_COMMAND
+# wrapper in config.nu. Don't move that newline into this format string:
+# nushell strips one trailing newline off external command output, so
+# starship's own would never reach reedline.
+format = "$all"
+
+[aws]
+symbol = " "
+
+[azure]
+symbol = " "
+
+[battery]
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰂃 "
+unknown_symbol = "󰂑 "
+empty_symbol = "󰂎 "
+
+[buf]
+symbol = " "
+
+[bun]
+symbol = " "
+
+[c]
+symbol = " "
+
+[character]
+disabled = true
+
+[cmake]
+symbol = " "
+
+[cobol]
+symbol = " "
+
+[conda]
+symbol = " "
+
+[container]
+symbol = " "
+
+[cpp]
+symbol = " "
+
+[crystal]
+symbol = " "
+
+[dart]
+symbol = " "
+
+[deno]
+symbol = " "
+
+[directory]
+read_only = " 󰌾"
+
+# Relabel long, uninteresting paths to short names (git-repo-like). Applied
+# before truncation, so the label only survives within `truncation_length`
+# (default 3) folders of the root — same as how starship shows a real repo's
+# name. Matched against the ~-contracted path, so keys start with ~, not /home.
+[directory.substitutions]
+"~/Documents/notes/general-vault" = "vault"
+
+[direnv]
+symbol = " "
+
+[docker_context]
+symbol = " "
+
+[dotnet]
+symbol = " "
+
+[elixir]
+symbol = " "
+
+[elm]
+symbol = " "
+
+[erlang]
+symbol = " "
+
+[fennel]
+symbol = " "
+
+[fortran]
+symbol = " "
+
+[fossil_branch]
+symbol = " "
+
+[gcloud]
+symbol = "󱇶 "
+
+[git_branch]
+symbol = " "
+
+[git_commit]
+tag_symbol = "  "
+
+[git_status]
+ahead = "↑"
+behind = "↓"
+diverged = "↕"
+
+[gleam]
+symbol = " "
+
+[golang]
+symbol = " "
+
+[gradle]
+symbol = " "
+
+[guix_shell]
+symbol = " "
+
+[haskell]
+symbol = " "
+
+[haxe]
+symbol = " "
+
+[helm]
+symbol = " "
+
+[hg_branch]
+symbol = " "
+
+[hostname]
+ssh_symbol = " "
+
+[java]
+symbol = " "
+
+[julia]
+symbol = " "
+
+[kotlin]
+symbol = " "
+
+[kubernetes]
+symbol = "󱃾 "
+
+[line_break]
+disabled = true
+
+[lua]
+symbol = " "
+
+[memory_usage]
+symbol = "󰍛 "
+
+[meson]
+symbol = "󰔷 "
+
+[mojo]
+symbol = "󰈸 "
+
+[nats]
+symbol = " "
+
+[netns]
+symbol = "󰛳 "
+
+[nim]
+symbol = " "
+
+[nix_shell]
+symbol = " "
+impure_msg = ""
+pure_msg = "pure"
+format = "via [$symbol$state( $name)](bold blue) "
+
+[nodejs]
+symbol = " "
+
+[ocaml]
+symbol = " "
+
+[odin]
+symbol = "󰟢 "
+
+[opa]
+symbol = " "
+
+[openstack]
+symbol = " "
+
+[package]
+symbol = "󰏗 "
+
+[perl]
+symbol = " "
+
+[php]
+symbol = " "
+
+[pijul_channel]
+symbol = " "
+
+[pixi]
+symbol = "󰏗 "
+
+[pulumi]
+symbol = " "
+
+[purescript]
+symbol = " "
+
+[python]
+symbol = " "
+
+[raku]
+symbol = "󱖊 "
+
+[red]
+symbol = "󱍼 "
+
+[rlang]
+symbol = "󰟔 "
+
+[ruby]
+symbol = " "
+
+[rust]
+symbol = "󱘗 "
+
+[scala]
+symbol = " "
+
+[shlvl]
+symbol = "󰹍 "
+
+[singularity]
+symbol = " "
+
+[solidity]
+symbol = " "
+
+[spack]
+symbol = " "
+
+[status]
+symbol = " "
+
+[sudo]
+symbol = " "
+
+[swift]
+symbol = " "
+
+[terraform]
+symbol = " "
+
+[time]
+disabled = false
+format = "at [$time]($style) "
+
+[typst]
+symbol = " "
+
+[vagrant]
+symbol = " "
+
+[vlang]
+symbol = " "
+
+[xmake]
+symbol = " "
+
+[zig]
+symbol = " "
