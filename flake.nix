@@ -84,8 +84,18 @@
       url = "github:kronberger-droid/niri";
       flake = false;
     };
+    # epireyn's fork, not sodiboo's original. sodiboo's last human commit is
+    # 2026-01-04 (c991f50d); everything since is the lockfile bot, and 74
+    # issues sit open. That staleness is what broke us: sodiboo pinned
+    # libdisplay-info 0.2.0 in dc61e1e6 and never followed nixpkgs to _0_3,
+    # so the 2026-08-05 removal of the alias was a hard eval error. The fork
+    # fixed exactly that on 2026-07-30 (2a55039d), a week before it hit us.
+    # Same input names and same outputs, so this is a URL swap.
+    # If this fork goes quiet too, the exit is home-manager's own
+    # `wayland.windowManager.niri`, but its `settings` is an untyped KDL
+    # serializer, so that's a rewrite of desktop/niri.nix, not a swap.
     niri = {
-      url = "github:sodiboo/niri-flake";
+      url = "github:epireyn/niri-flake";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixpkgs-stable.follows = "nixpkgs";
       inputs.niri-unstable.follows = "niri-src";
