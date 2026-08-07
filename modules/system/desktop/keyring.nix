@@ -67,6 +67,17 @@ in {
       _module.args.oo7-ssh-agent =
         inputs.oo7-nixos.packages.${system}.oo7-ssh-agent;
 
+      # Survive `nixos-rebuild switch` without relocking the Login collection.
+      # The collection key only ever reaches the daemon via pam_oo7 during a
+      # PAM auth (login/greetd/swaylock) and lives in its memory; a restart
+      # drops it, so the next Secret Service call pops the gcr unlock prompt.
+      # And a restart is near-guaranteed: the unit's env drop-in pins PATH,
+      # LOCALE_ARCHIVE and TZDIR to store paths, so any nixpkgs bump rewrites
+      # the unit even when oo7 itself is unchanged.
+      #
+      # Cost: an actual oo7 update only takes effect at the next login.
+      systemd.user.services.oo7-daemon.restartIfChanged = false;
+
       services.oo7 = {
         enable = true;
         daemon.enable = true;
