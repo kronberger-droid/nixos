@@ -9,10 +9,10 @@
         # base16 module declares the `scheme` option, base16-scheme.nix fills
         # it in; git.nix reads it to colour gh-dash.
         inputs.base16.homeManagerModule
-        ./theming/base16-scheme.nix
+        ../theming/base16-scheme.nix
 
-        ./shell/nushell.nix
-        ./shell/git.nix
+        ../shell/nushell.nix
+        ../shell/git.nix
       ];
 
       home = {

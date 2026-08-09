@@ -6,7 +6,7 @@
   imports = [
     ./hardware-configuration.nix
     ../common.nix
-    ../../modules/system/scx-schedulers.nix
+    ../../modules/system/hardware/scx-schedulers.nix
     ../../modules/profiles/vpn-workstation.nix
     ../../modules/system/hardware/droidcam.nix
   ];

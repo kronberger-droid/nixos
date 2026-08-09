@@ -348,7 +348,7 @@
         modules = [
           ./hosts/devPi/configuration.nix
           home-manager.nixosModules.home-manager
-          ./modules/home-manager/devPi.nix
+          ./modules/home-manager/users/devPi.nix
           lixModule
         ];
       };
