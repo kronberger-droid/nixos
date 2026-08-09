@@ -10,7 +10,7 @@
     ../common.nix
     ../../modules/system/hardware/firmware/vbt.nix
     ../../modules/system/hardware/ipu6-camera.nix
-    ../../modules/system/scx-schedulers.nix
+    ../../modules/system/hardware/scx-schedulers.nix
     ../../modules/profiles/vpn-workstation.nix
     ../../modules/system/hardware/droidcam.nix
   ];
