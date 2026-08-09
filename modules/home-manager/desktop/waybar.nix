@@ -17,6 +17,25 @@
   # nmtui color scheme matching kitty theme
   nmtui_colors = "root=white,black:window=white,black:border=blue,black:listbox=white,black:actlistbox=black,blue:label=white,black:title=brightblue,black:button=white,black:actbutton=black,blue:compactbutton=white,black:checkbox=white,black:actcheckbox=black,blue:entry=white,black:textbox=white,black";
 
+  # Helper scripts live as real .sh files under ./waybar/ instead of inline Nix
+  # strings, so they stay syntax-highlighted and shellcheck-able and need no
+  # ''${} escaping. Store paths arrive as replaceVars placeholders (@bash@,
+  # @procps@, …), which is a plain textual substitution — the generated scripts
+  # are byte-identical to the inlined ones. replaceVars fails the build both on
+  # an unfilled @var@ and on an unused attr, so the lists below cannot drift
+  # away from the scripts they fill in.
+  script = name: vars: {
+    executable = true;
+    source = pkgs.replaceVars ./waybar/${name} vars;
+  };
+
+  # scratchpad-toggle and ncspot-toggle both spawn the configured terminal.
+  terminalVars = {
+    terminalBin = config.terminal.bin;
+    terminalAppIdFlag = config.terminal.appIdFlag;
+    terminalExecFlag = config.terminal.execFlag;
+  };
+
   tui = {
     bluetooth = "${pkgs.bluetuith}/bin/bluetuith";
     wifi = "${pkgs.bash}/bin/bash -c 'NEWT_COLORS=\"${nmtui_colors}\" ${pkgs.networkmanager}/bin/nmtui connect'";
@@ -34,377 +53,53 @@ in {
   xdg.configFile = {
     "waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
 
-    "waybar/rotation-status.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-
-        # Check if rotation is disabled (state file exists)
-        if [ -f "$HOME/.cache/rotation-state" ]; then
-            echo '{"icon":"disabled","alt":"disabled","tooltip":"Auto-rotation Disabled","class":"disabled"}'
-        else
-            echo '{"icon":"enabled","alt":"enabled","tooltip":"Auto-rotation Enabled","class":"enabled"}'
-        fi
-      '';
+    "waybar/rotation-status.sh" = script "rotation-status.sh" {
+      inherit (pkgs) bash;
     };
 
-    "waybar/rotation-toggle.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-
-        STATE_FILE="$HOME/.cache/rotation-state"
-
-        # Toggle rotation state
-        if [ -f "$STATE_FILE" ]; then
-            # Enable rotation
-            ${pkgs.coreutils}/bin/rm -f "$STATE_FILE"
-            ${pkgs.rot8}/bin/rot8 &
-            ${pkgs.libnotify}/bin/notify-send "Auto-rotation" "Screen auto-rotation enabled" -i display-brightness
-        else
-            # Disable rotation
-            ${pkgs.coreutils}/bin/touch "$STATE_FILE"
-            ${pkgs.procps}/bin/pkill rot8
-            ${pkgs.libnotify}/bin/notify-send "Auto-rotation" "Screen auto-rotation disabled" -i display-brightness
-        fi
-
-        # Refresh waybar
-        ${pkgs.procps}/bin/pkill -RTMIN+9 waybar 2>/dev/null || true
-      '';
+    "waybar/rotation-toggle.sh" = script "rotation-toggle.sh" {
+      inherit (pkgs) bash coreutils rot8 libnotify procps;
     };
 
-    "waybar/screenrec-toggle.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-        if ${pkgs.procps}/bin/pgrep -x wl-screenrec >/dev/null 2>&1; then
-          ${pkgs.procps}/bin/pkill wl-screenrec
-          ${pkgs.libnotify}/bin/notify-send "Screen Recording" "Recording stopped"
-        else
-          # Choose: area selection or full output
-          MODE=$(printf "area\noutput" | ${pkgs.rofi}/bin/rofi -dmenu -p "Record" -theme-str 'listview {lines: 2;}')
-          case "$MODE" in
-            area)
-              GEOMETRY=$(${pkgs.slurp}/bin/slurp 2>/dev/null)
-              [ -z "$GEOMETRY" ] && exit 0
-              SELECTION="-g $GEOMETRY"
-              ;;
-            output)
-              OUTPUT=$(niri msg outputs 2>/dev/null | ${pkgs.gnugrep}/bin/grep -oP '\(\K[^)]+' | ${pkgs.rofi}/bin/rofi -dmenu -p "Output" -theme-str 'listview {lines: 3;}')
-              [ -z "$OUTPUT" ] && exit 0
-              SELECTION="-o $OUTPUT"
-              ;;
-            *) exit 0 ;;
-          esac
-          ${pkgs.coreutils}/bin/mkdir -p "$HOME/Videos"
-          FILENAME="$HOME/Videos/recording-$(${pkgs.coreutils}/bin/date +%Y-%m-%d-%H-%M-%S).mp4"
-          ${pkgs.wl-screenrec}/bin/wl-screenrec $SELECTION -f "$FILENAME" &
-          disown
-          ${pkgs.libnotify}/bin/notify-send "Screen Recording" "Recording started: $(${pkgs.coreutils}/bin/basename "$FILENAME")"
-        fi
-        ${pkgs.procps}/bin/pkill -RTMIN+10 waybar 2>/dev/null || true
-      '';
+    "waybar/screenrec-toggle.sh" = script "screenrec-toggle.sh" {
+      inherit (pkgs) bash procps libnotify rofi slurp gnugrep coreutils;
+      wlScreenrec = pkgs.wl-screenrec;
     };
 
-    "waybar/screenrec-status.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-        if ${pkgs.procps}/bin/pgrep -x wl-screenrec >/dev/null 2>&1; then
-          echo '{"text":"REC","class":"recording"}'
-        else
-          echo ""
-        fi
-      '';
+    "waybar/screenrec-status.sh" = script "screenrec-status.sh" {
+      inherit (pkgs) bash procps;
     };
 
-    "waybar/vpn-status.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-
-        ACTIVE=()
-        TOOLTIPS=()
-
-        # Check Tailscale
-        if ${pkgs.tailscale}/bin/tailscale status >/dev/null 2>&1; then
-            ACTIVE+=("TAIL")
-            TOOLTIPS+=("Tailscale: Connected")
-        fi
-
-        # Check PIA VPN
-        if ${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1; then
-            ACTIVE+=("PIA")
-            TOOLTIPS+=("PIA VPN: Connected")
-        fi
-
-        # Check TU Wien VPN
-        if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
-            ACTIVE+=("TU")
-            TOOLTIPS+=("TU Wien VPN: Connected")
-        fi
-
-        if [ ''${#ACTIVE[@]} -gt 0 ]; then
-            LABEL=$(IFS=/; echo "''${ACTIVE[*]}")
-            # Join tooltips with literal \n for waybar tooltip rendering
-            TOOLTIP=""
-            for i in "''${!TOOLTIPS[@]}"; do
-                [ -n "$TOOLTIP" ] && TOOLTIP+="\\n"
-                TOOLTIP+="''${TOOLTIPS[$i]}"
-            done
-            echo "{\"text\":\" $LABEL\",\"alt\":\"connected\",\"tooltip\":\"$TOOLTIP\",\"class\":\"connected\"}"
-        else
-            echo '{"text":" off","alt":"disconnected","tooltip":"No VPN active","class":"disconnected"}'
-        fi
-      '';
+    "waybar/vpn-status.sh" = script "vpn-status.sh" {
+      inherit (pkgs) bash tailscale systemd;
     };
 
-    "waybar/vpn-disconnect-all.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-
-        NOTIFY="${pkgs.libnotify}/bin/notify-send"
-        ANY_ACTIVE=false
-
-        # Disconnect Tailscale
-        if ${pkgs.tailscale}/bin/tailscale status >/dev/null 2>&1; then
-            ${pkgs.tailscale}/bin/tailscale down
-            ANY_ACTIVE=true
-        fi
-
-        # Disconnect PIA
-        if ${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1; then
-            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop pia-vpn.service
-            ANY_ACTIVE=true
-        fi
-
-        # Disconnect TU Wien
-        if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
-            /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop openconnect-tuwien.service
-            ANY_ACTIVE=true
-        fi
-
-        if [ "$ANY_ACTIVE" = true ]; then
-            $NOTIFY "VPN" "All VPNs disconnected" -i network-vpn-disconnected
-        else
-            $NOTIFY "VPN" "No VPNs were active" -i network-vpn-disconnected
-        fi
-
-        ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
-      '';
+    "waybar/vpn-disconnect-all.sh" = script "vpn-disconnect-all.sh" {
+      inherit (pkgs) bash libnotify tailscale systemd procps;
     };
 
-    "waybar/vpn-picker.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-
-        NOTIFY="${pkgs.libnotify}/bin/notify-send"
-        SIGNAL="${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true"
-        SUDO="/run/wrappers/bin/sudo"
-        SCTL="/run/current-system/sw/bin/systemctl"
-
-        # Check current state of each VPN
-        TAIL_ON=$(${pkgs.tailscale}/bin/tailscale status >/dev/null 2>&1 && echo "yes" || echo "no")
-        PIA_ON=$(${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1 && echo "yes" || echo "no")
-        TU_ON=$(${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1 && echo "yes" || echo "no")
-
-        # Build menu with status indicators
-        MENU=""
-        [ "$TAIL_ON" = "yes" ] && MENU+="[ON]  Tailscale\n" || MENU+="[OFF] Tailscale\n"
-        [ "$PIA_ON"  = "yes" ] && MENU+="[ON]  PIA VPN\n"   || MENU+="[OFF] PIA VPN\n"
-        [ "$TU_ON"   = "yes" ] && MENU+="[ON]  TU Wien VPN" || MENU+="[OFF] TU Wien VPN"
-
-        SELECTED=$(echo -e "$MENU" | ${pkgs.rofi}/bin/rofi -dmenu -i -p "VPN" -theme-str 'window {width: 400px;} listview {lines: 3;}')
-
-        [ -z "$SELECTED" ] && exit 0
-
-        # Extract VPN name (strip "[ON]  " or "[OFF] " prefix)
-        VPN_NAME=$(echo "$SELECTED" | ${pkgs.sd}/bin/sd '^\[O[NF]*\] *' "")
-
-        case "$VPN_NAME" in
-            Tailscale)
-                if [ "$TAIL_ON" = "yes" ]; then
-                    ${pkgs.tailscale}/bin/tailscale down
-                    $NOTIFY "VPN" "Tailscale disconnected" -i network-vpn-disconnected
-                else
-                    ${pkgs.tailscale}/bin/tailscale up
-                    $NOTIFY "VPN" "Tailscale connected" -i network-vpn
-                fi
-                ;;
-            "PIA VPN")
-                if [ "$PIA_ON" = "yes" ]; then
-                    $SUDO $SCTL stop pia-vpn.service
-                    $NOTIFY "VPN" "PIA VPN disconnected" -i network-vpn-disconnected
-                else
-                    $NOTIFY "VPN" "Connecting to PIA VPN..." -i network-vpn
-                    $SUDO $SCTL start pia-vpn.service
-                    ${pkgs.coreutils}/bin/sleep 3
-                    if ${pkgs.systemd}/bin/systemctl is-active pia-vpn.service >/dev/null 2>&1; then
-                        $NOTIFY "VPN" "PIA VPN connected" -i network-vpn
-                    else
-                        $NOTIFY "VPN" "Failed to connect to PIA VPN" -i dialog-error
-                    fi
-                fi
-                ;;
-            "TU Wien VPN")
-                if [ "$TU_ON" = "yes" ]; then
-                    $SUDO $SCTL stop openconnect-tuwien.service
-                    $NOTIFY "VPN" "TU Wien VPN disconnected" -i network-vpn-disconnected
-                else
-                    $NOTIFY "VPN" "Connecting to TU Wien VPN..." -i network-vpn
-                    $SUDO $SCTL start openconnect-tuwien.service
-                    ${pkgs.coreutils}/bin/sleep 3
-                    if ${pkgs.systemd}/bin/systemctl is-active openconnect-tuwien.service >/dev/null 2>&1; then
-                        $NOTIFY "VPN" "TU Wien VPN connected" -i network-vpn
-                    else
-                        $NOTIFY "VPN" "Failed to connect to TU Wien VPN" -i dialog-error
-                    fi
-                fi
-                ;;
-        esac
-
-        ${pkgs.procps}/bin/pkill -RTMIN+8 waybar 2>/dev/null || true
-      '';
+    "waybar/vpn-picker.sh" = script "vpn-picker.sh" {
+      inherit (pkgs) bash libnotify procps tailscale systemd rofi sd coreutils;
     };
 
-    "waybar/scratchpad-toggle.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-        APP_ID="scratchpad"
-        SESSION_NAME="scratchpad"
-        JQ="${pkgs.jq}/bin/jq"
+    "waybar/scratchpad-toggle.sh" =
+      script "scratchpad-toggle.sh" (terminalVars
+        // {inherit (pkgs) bash jq coreutils zellij procps;});
 
-        window_exists() {
-          niri msg -j windows | $JQ -e ".[] | select(.app_id == \"$APP_ID\")" >/dev/null 2>&1
-        }
-
-        # Wait until niri's window list matches expected state
-        await_state() {
-          local want="$1"
-          for _ in $(seq 1 20); do
-            if [ "$want" = "open" ] && window_exists; then return 0; fi
-            if [ "$want" = "closed" ] && ! window_exists; then return 0; fi
-            ${pkgs.coreutils}/bin/sleep 0.05
-          done
-        }
-
-        WINDOW_JSON=$(niri msg -j windows)
-        WINDOW_ID=$(echo "$WINDOW_JSON" | $JQ -r '.[] | select(.app_id == "'"$APP_ID"'") | .id // empty')
-
-        if [ -n "$WINDOW_ID" ]; then
-          FOCUSED_APP=$(niri msg -j focused-window | $JQ -r '.app_id // empty')
-          if [ "$FOCUSED_APP" = "$APP_ID" ]; then
-            niri msg action close-window --id "$WINDOW_ID"
-            await_state "closed"
-          else
-            niri msg action focus-window --id "$WINDOW_ID"
-          fi
-        else
-          # Drop a resurrectable-but-dead session so attach --create makes a
-          # fresh one instead of restoring an empty shell where yazi used to be.
-          if ${pkgs.zellij}/bin/zellij list-sessions -n 2>/dev/null | grep -q "^$SESSION_NAME .*EXITED"; then
-            ${pkgs.zellij}/bin/zellij delete-session "$SESSION_NAME" --force >/dev/null 2>&1 || true
-          fi
-          ${config.terminal.bin} ${config.terminal.appIdFlag} "$APP_ID" ${config.terminal.execFlag} ${pkgs.zellij}/bin/zellij attach "$SESSION_NAME" --create
-          await_state "open"
-        fi
-
-        ${pkgs.procps}/bin/pkill -RTMIN+12 waybar 2>/dev/null || true
-      '';
+    "waybar/scratchpad-status.sh" = script "scratchpad-status.sh" {
+      inherit (pkgs) bash jq;
     };
 
-    "waybar/scratchpad-status.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
+    "waybar/ncspot-toggle.sh" =
+      script "ncspot-toggle.sh" (terminalVars
+        // {inherit (pkgs) bash jq coreutils zellij;});
 
-        if niri msg -j windows 2>/dev/null | ${pkgs.jq}/bin/jq -e '.[] | select(.app_id == "scratchpad")' >/dev/null 2>&1; then
-          echo '{"text":"\uf489","alt":"open","tooltip":"Scratchpad open","class":"open"}'
-        else
-          echo '{"text":"\uf489","alt":"closed","tooltip":"Scratchpad closed","class":"closed"}'
-        fi
-      '';
+    "waybar/dnd-status.sh" = script "dnd-status.sh" {
+      inherit (pkgs) bash mako ripgrep;
     };
 
-    "waybar/ncspot-toggle.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-        APP_ID="ncspot_popup"
-        SESSION_NAME="ncspot"
-        JQ="${pkgs.jq}/bin/jq"
-
-        window_exists() {
-          niri msg -j windows | $JQ -e ".[] | select(.app_id == \"$APP_ID\")" >/dev/null 2>&1
-        }
-
-        await_state() {
-          local want="$1"
-          for _ in $(seq 1 20); do
-            if [ "$want" = "open" ] && window_exists; then return 0; fi
-            if [ "$want" = "closed" ] && ! window_exists; then return 0; fi
-            ${pkgs.coreutils}/bin/sleep 0.05
-          done
-        }
-
-        WINDOW_JSON=$(niri msg -j windows)
-        WINDOW_ID=$(echo "$WINDOW_JSON" | $JQ -r '.[] | select(.app_id == "'"$APP_ID"'") | .id // empty')
-
-        if [ -n "$WINDOW_ID" ]; then
-          FOCUSED_APP=$(niri msg -j focused-window | $JQ -r '.app_id // empty')
-          if [ "$FOCUSED_APP" = "$APP_ID" ]; then
-            niri msg action close-window --id "$WINDOW_ID"
-            await_state "closed"
-          else
-            niri msg action focus-window --id "$WINDOW_ID"
-          fi
-        else
-          # Drop a resurrectable-but-dead session of the same name so we don't
-          # attach to a ghost where ncspot is no longer running.
-          if ${pkgs.zellij}/bin/zellij list-sessions -n 2>/dev/null | grep -q "^$SESSION_NAME .*EXITED"; then
-            ${pkgs.zellij}/bin/zellij delete-session "$SESSION_NAME" --force >/dev/null 2>&1 || true
-          fi
-          if ${pkgs.zellij}/bin/zellij list-sessions -s -n 2>/dev/null | grep -qx "$SESSION_NAME"; then
-            ${config.terminal.bin} ${config.terminal.appIdFlag} "$APP_ID" ${config.terminal.execFlag} ${pkgs.zellij}/bin/zellij attach "$SESSION_NAME"
-          else
-            ${config.terminal.bin} ${config.terminal.appIdFlag} "$APP_ID" ${config.terminal.execFlag} ${pkgs.zellij}/bin/zellij -s "$SESSION_NAME" -n ncspot
-          fi
-          await_state "open"
-        fi
-      '';
-    };
-
-    "waybar/dnd-status.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-
-        MODE=$(${pkgs.mako}/bin/makoctl mode)
-        if echo "$MODE" | ${pkgs.ripgrep}/bin/rg -q "do-not-disturb"; then
-            echo '{"text":"\uf1f6","alt":"on","tooltip":"Do Not Disturb: ON","class":"on"}'
-        else
-            echo '{"text":"\uf0f3","alt":"off","tooltip":"Do Not Disturb: OFF","class":"off"}'
-        fi
-      '';
-    };
-
-    "waybar/dnd-toggle.sh" = {
-      executable = true;
-      text = ''
-        #!${pkgs.bash}/bin/bash
-
-        MODE=$(${pkgs.mako}/bin/makoctl mode)
-        if echo "$MODE" | ${pkgs.ripgrep}/bin/rg -q "do-not-disturb"; then
-            ${pkgs.mako}/bin/makoctl mode -r do-not-disturb
-            ${pkgs.libnotify}/bin/notify-send "Do Not Disturb" "Notifications enabled" -i notification
-        else
-            ${pkgs.mako}/bin/makoctl mode -s do-not-disturb
-        fi
-        ${pkgs.procps}/bin/pkill -RTMIN+11 waybar 2>/dev/null || true
-      '';
+    "waybar/dnd-toggle.sh" = script "dnd-toggle.sh" {
+      inherit (pkgs) bash mako ripgrep libnotify procps;
     };
   };
 
