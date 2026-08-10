@@ -3,8 +3,9 @@ name: github-voice
 description: Draft GitHub prose as Martin — review comments, issue replies, and PR bodies.
 when_to_use: >-
   When writing anything that will be posted to GitHub under Martin's name: a
-  review comment or reply, an issue comment, or a pull request body.
-  For commit messages use `commit-writer` instead.
+  review comment or reply, an issue comment, or a pull request body. Covers
+  drafts written to a scratch file, and PRs you open yourself as one step of a
+  larger task. For commit messages use `commit-writer` instead.
 argument-hint: [review|issue|pr]
 user-invocable: true
 allowed-tools: Read Grep Bash WebFetch
@@ -59,15 +60,44 @@ underspecified.
 
 - Conventional-commit title, scope in parens, `!` for breaking:
   `feat(vi)!: visual mode on a unified Cursor + rest-policy model`.
-- `##` headers chosen per PR, not a fixed template: `Summary`, `What`, `How`,
-  `Motivation`, `Behavior Changes`, `Notes for Reviewers`, `Where to look`,
-  `Testing`, `Out of scope`, `Attributions`.
+- **The target repo's own template wins.** Before drafting, check
+  `.github/pull_request_template.md`, `PULL_REQUEST_TEMPLATE.md` at the root or
+  under `docs/`, any `.github/PULL_REQUEST_TEMPLATE/` directory, and whatever
+  `CONTRIBUTING.md` says about PRs. Fill that template's headings and tick its
+  checklists; the voice rules here apply inside it.
+- **Fall back to reedline's template** when the repo ships none, comments
+  stripped (upstream lives at
+  `nushell/reedline/.github/pull_request_template.md`):
+
+  ```markdown
+  ## Summary
+
+  ### Before
+
+  ### After
+
+  ## Additional notes
+  ```
+
+  `Summary` is mandatory: motivate the PR, say how you arrived at this
+  solution, and state the public-API or observable-behavior impact explicitly,
+  including when there is none (`No public API change (all pub(crate)).`).
+  `Before` and `After` describe behavior, function or implementation on each
+  side of the change; drop either heading when it does not apply. `Additional
+  notes` is optional and carries issue links (`closes #123`, `fixes #456`).
+- Add `##` sections on top of whichever skeleton you landed on when the change
+  wants them: `What`, `How`, `Motivation`, `Behavior Changes`, `Notes for
+  Reviewers`, `Where to look`, `Testing`, `Out of scope`, `Attributions`. A
+  skeleton is a floor, so keep its headings and extend past them.
 - **Bold-lead bullets** for vocabulary; tables for orientation; fenced `rust`
   blocks to show a proposed signature rather than describing it.
 - **Route reviewer attention**: `**Scrutinize** (densest invariants): ...` /
   `**Skim**: ... (pure bool->enum rename)`.
-- Always state test status concretely, and API/behavior impact
-  (`No public API change (all pub(crate)).`), plus `Out of scope` bullets.
-- Credit people by name at the end; preserve `Co-authored-by:`.
+- Always state test status concretely, plus `Out of scope` bullets.
 - Personal asides are welcome (`This is the last large PR from my side I
   promise...`).
+- Credit people by name at the end, and **close on `Co-Authored-By:` trailers
+  alone**: human co-authors first, then the same Claude trailer the commits
+  carry (`commit-writer`), each on its own line after a blank line. Those
+  trailers are the whole footer, and the only LLM disclosure the body needs:
+  drop the "🤖 Generated with Claude Code" line and its link.
