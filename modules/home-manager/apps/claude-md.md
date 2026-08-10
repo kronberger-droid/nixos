@@ -12,6 +12,12 @@
 - I use **Nushell** (`nu`) as my default shell.
 - When suggesting shell commands, write them in Nushell syntax, not Bash/POSIX.
 
+## LLM disclosure
+
+Disclose your involvement with a `Co-Authored-By:` trailer, on commit messages
+and PR bodies alike. That trailer is the whole footer: leave off the "🤖
+Generated with Claude Code" line and its link.
+
 ## Where my conventions live
 
 Each of these is a skill, so its rules load when the work calls for them instead
@@ -21,7 +27,9 @@ reconstructing the conventions from memory.
 - **`commit-writer`** — every commit message, including commits made as one step
   of a larger task.
 - **`github-voice`** — anything posted to GitHub under my name: review comments,
-  issue replies, PR bodies.
+  issue replies, PR bodies. Covers drafts written to a scratch file and PRs you
+  open yourself as one step of a larger task. The target repo's own PR template
+  always wins over anything in the skill; check for one before drafting.
 - **`typst`** — formulas, documents and plots. Typst, never LaTeX. Carries the
   vault's math and lilaq conventions too, since vault notes use Typst syntax.
 - **`vault`** — my Obsidian vault at `~/Documents/notes/general-vault/`. Reading
