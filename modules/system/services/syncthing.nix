@@ -1,6 +1,5 @@
 {
   lib,
-  pkgs,
   config,
   host,
   username,
@@ -23,12 +22,10 @@
   # All peers including mobile
   allPeerDevices = otherDevices // mobileDevices;
 
-  # Patterns come from shared/ so this and the home-manager module, which both
-  # render ~/Documents/.stignore, cannot drift apart. See that file for why
-  # each pattern is there.
-  documentsIgnore =
-    pkgs.writeText "documents-stignore"
-    (import ../../shared/syncthing-ignores.nix).documents;
+  # Patterns come from shared/ so this and the home-manager module, which
+  # describe the same two folders, cannot drift apart. See that file for why
+  # each pattern is there, and why they are not written out as files.
+  ignores = import ../../shared/syncthing-ignores.nix;
 in
   lib.mkIf enabled {
     services.syncthing = {
@@ -53,6 +50,7 @@ in
           "documents" = {
             path = "${homeDir}/Documents";
             devices = builtins.attrNames otherDevices;
+            ignorePatterns = ignores.documents;
             versioning = {
               type = "staggered";
               params = {
@@ -66,6 +64,7 @@ in
           "general-vault" = {
             path = "${homeDir}/Documents/notes/general-vault";
             devices = builtins.attrNames otherDevices ++ builtins.attrNames mobileDevices;
+            ignorePatterns = ignores.generalVault;
             versioning = {
               type = "staggered";
               params = {
@@ -84,10 +83,6 @@ in
         };
       };
     };
-
-    systemd.tmpfiles.rules = [
-      "L+ ${homeDir}/Documents/.stignore - - - - ${documentsIgnore}"
-    ];
 
     # Open firewall for Syncthing
     networking.firewall = {
