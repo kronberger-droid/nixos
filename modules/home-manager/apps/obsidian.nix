@@ -82,28 +82,4 @@ in {
     }
   '';
 
-  # Syncthing per-device ignores for the vault. .stignore is local-only
-  # (never propagated), so each machine reading its own copy is correct.
-  config.home.file."${vaultRel}/.stignore".text = ''
-    # Device-local Obsidian state — should not sync.
-    .obsidian/workspace.json
-    .obsidian/workspace-mobile.json
-    .obsidian/cache
-    .obsidian/cache.json
-
-    # Rewritten by the obsidianAccentColor activation script above, on every
-    # host, at every activation. Two hosts activating between syncs each
-    # register a local edit and Syncthing has no way to reconcile them, so this
-    # produced a steady drip of appearance.sync-conflict-* files. The accent is
-    # derived from each host's own base16 scheme, so it is device-local by
-    # nature and there is nothing to gain from syncing it.
-    .obsidian/appearance.json
-
-    # Trash and OS junk.
-    .trash/
-    .DS_Store
-
-    # Syncthing conflict files — never re-sync them.
-    *.sync-conflict-*
-  '';
 }

@@ -7,6 +7,11 @@
   syncDevices = import ../../shared/syncthing-devices.nix;
   inherit (syncDevices) devices mobileDevices;
 
+  # Patterns come from shared/ so this and the NixOS-level module, which
+  # describe the same two folders, cannot drift apart. See that file for why
+  # each pattern is there, and why they are not written out as files.
+  ignores = import ../../shared/syncthing-ignores.nix;
+
   enabled = builtins.hasAttr host devices;
 
   otherDevices =
@@ -29,6 +34,7 @@ in
           "documents" = {
             path = "~/Documents";
             devices = builtins.attrNames otherDevices;
+            ignorePatterns = ignores.documents;
             versioning = {
               type = "staggered";
               params = {
@@ -42,6 +48,7 @@ in
           "general-vault" = {
             path = config.vault.path;
             devices = builtins.attrNames otherDevices ++ builtins.attrNames mobileDevices;
+            ignorePatterns = ignores.generalVault;
             versioning = {
               type = "staggered";
               params = {
@@ -60,10 +67,4 @@ in
         };
       };
     };
-
-    # Patterns come from shared/ so this and the NixOS-level module, which both
-    # render ~/Documents/.stignore, cannot drift apart. See that file for why
-    # each pattern is there.
-    home.file."Documents/.stignore".text =
-      (import ../../shared/syncthing-ignores.nix).documents;
   }
