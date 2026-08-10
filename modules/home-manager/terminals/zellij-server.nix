@@ -6,13 +6,14 @@
   config,
   ...
 }: {
+  # Interactive SSH logins land in a persistent session. This host has no local
+  # user, so "main" is the only session anyone ever wants. The guard inside also
+  # keeps the nix remote builder (root@spectre) and wiesinger's non-interactive
+  # traffic out of zellij.
+  imports = [(import ./zellij-ssh-autostart.nix {session = "main";})];
+
   programs.zellij = {
     enable = true;
-    # No enable*Integration here on purpose: those inject an *ungated* autostart
-    # into the shell rc, which would wrap every SSH invocation — including the
-    # non-interactive ones the nix remote builder makes. We autostart from
-    # nushell below with an explicit guard instead. (There is no nushell
-    # integration in the HM module anyway.)
     settings = {
       # Survive reboots, not just disconnects: 0.44 defaults session
       # serialization *off*, so a detached session is lost on restart unless we
@@ -62,19 +63,4 @@
       };
     };
   };
-
-  # Auto-attach to a persistent session named "main" on interactive SSH logins.
-  # mkAfter so it runs at the very end of config.nu, once the shell is set up.
-  #
-  # The guard is load-bearing: this host is also a nix remote builder (root@spectre
-  # SSHes in) and wiesinger logs in. SSH_TTY is only set when a PTY is allocated
-  # (a real interactive login), so non-interactive `ssh host 'cmd'` and builder
-  # traffic never match. The ZELLIJ check stops the inner pane shell — which
-  # re-sources config.nu — from recursively re-attaching.
-  programs.nushell.extraConfig = lib.mkAfter ''
-
-    if ('SSH_TTY' in $env) and ('ZELLIJ' not-in $env) {
-        zellij attach --create main
-    }
-  '';
 }

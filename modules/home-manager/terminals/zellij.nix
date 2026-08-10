@@ -1,4 +1,11 @@
 {config, pkgs, ...}: {
+  # Interactive SSH logins land in a persistent session, same as the homeserver.
+  # Named "remote" rather than the local session's name on purpose: zellij
+  # multi-attach forces every client to the smallest attached terminal's size, so
+  # sharing one session would resize and mirror whatever is on the physical
+  # screen. Keeping them separate means SSH gets its own long-lived workspace.
+  imports = [(import ./zellij-ssh-autostart.nix {session = "remote";})];
+
   home.packages = [pkgs.zellij];
 
   xdg.configFile."zellij/layouts/ncspot.kdl".text = ''
@@ -14,6 +21,17 @@
     default_layout "compact"
     pane_frames false
     theme "base16"
+
+    // Survive reboots, not just disconnects: zellij defaults session
+    // serialization *off*, so a detached session is lost on restart unless we
+    // opt in. serialize_pane_viewport also restores each pane's contents.
+    // Matters most for the SSH session above, which is only ever detached.
+    session_serialization true
+    serialize_pane_viewport true
+
+    // Don't pop the release-notes screen after a version bump on every attach.
+    show_release_notes false
+    show_startup_tips false
 
     keybinds clear-defaults=true {
         locked {
