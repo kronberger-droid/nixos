@@ -12,6 +12,11 @@
 #
 # Comment lines use `//`. `#` is not a comment in .stignore; it is a pattern
 # matching a file whose name starts with `#`.
+#
+# No apostrophes anywhere in these strings, comments included. The syncthing
+# module drops the JSON into a single-quoted shell word without escaping it, so
+# one `'` truncates the curl call and syncthing-init dies on a syntax error,
+# which on homeserver means deploy-rs rolls the whole generation back.
 {
   documents = [
     "// The vault is its own Syncthing folder, so excluding it here avoids"
@@ -35,9 +40,9 @@
     "// Rewritten by the obsidianAccentColor activation script, on every host, at"
     "// every activation. Two hosts activating between syncs each register a local"
     "// edit and Syncthing has no way to reconcile them, so this produced a steady"
-    "// drip of appearance.sync-conflict-* files. The accent is derived from each"
-    "// host's own base16 scheme, so it is device-local by nature and there is"
-    "// nothing to gain from syncing it."
+    "// drip of appearance.sync-conflict-* files. The accent is derived from the"
+    "// base16 scheme of the host it runs on, so it is device-local by nature and"
+    "// there is nothing to gain from syncing it."
     ".obsidian/appearance.json"
 
     "// Trash and OS junk."
