@@ -10,8 +10,19 @@
   # startup on /sys/kernel/sched_ext existing.
   services.scx = {
     enable = true;
-    # scx_lavd (Latency-Aware Virtual Deadline) prioritizes latency-critical
-    # tasks for snappier interactive use (browsing, editing, gaming).
-    scheduler = "scx_lavd";
+    # scx_bpfland targets the same interactive workloads scx_lavd did, but
+    # with a much smaller design: no autopilot, topology or power-mode
+    # machinery, and all policy in BPF with Rust only handling CLI and stats.
+    #
+    # The move off scx_lavd is about shutdown. Tearing down a sched_ext
+    # struct_ops calls synchronize_rcu_tasks(), which blocks in
+    # TASK_UNINTERRUPTIBLE, so the process cannot be signalled and SIGKILL
+    # bounces off it. During shutdown, tasks are being frozen at the same
+    # moment the scheduler unloads, so the grace period cannot close and the
+    # unload cannot finish. systemd burned 41s on scx.service in three of the
+    # last five shutdowns, and the stalled grace period took /boot's unmount
+    # and the final systemd-shutdown phase down with it (~2 min total).
+    # Fewer BPF programs and maps means less struct_ops teardown work.
+    scheduler = "scx_bpfland";
   };
 }
