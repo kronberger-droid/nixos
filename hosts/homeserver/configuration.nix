@@ -203,7 +203,36 @@
     };
   };
 
-  services.tailscale.enable = true;
+  # Subnet router for the LAN. Advertising 192.168.2.0/24 lets every tailnet
+  # device reach hardware that will never run Tailscale itself: the EdgeRouter
+  # at .1, the AP at .38, and the Bambu printer at .39, whose MQTT, FTPS and
+  # camera ports are LAN-only by design once cloud mode is off. So the printer
+  # keeps its prints off Bambu's servers and stays reachable from a phone.
+  #
+  # Without this, administering the network requires being physically on it.
+  # That gap showed up concretely while debugging the DNS outage: homeserver
+  # stayed reachable over the tailnet the whole time, but the router did not,
+  # so the one box that needed looking at was the one box unreachable.
+  #
+  # Two manual steps this cannot express. The route needs approving once in the
+  # admin console, and Linux peers need `--accept-routes` to use it (iOS and
+  # Android accept advertised routes automatically).
+  services.tailscale = {
+    enable = true;
+
+    # Sets net.ipv4.conf.all.forwarding and the v6 equivalent, which is all a
+    # subnet router needs. It deliberately leaves reverse-path filtering strict:
+    # nixpkgs only loosens that for "client"/"both", since neither direction
+    # here is asymmetric. Inbound arrives on tailscale0 from 100.x and replies
+    # leave the same way, while LAN replies arrive on enp86s0 from a prefix
+    # routed back out enp86s0. If routing ever misbehaves, that is the knob.
+    useRoutingFeatures = "server";
+
+    # `tailscale set` rather than `tailscale up`, since extraUpFlags only
+    # applies when a node authenticates from an authKeyFile and this one is
+    # already enrolled. `set` reconfigures a running node in place.
+    extraSetFlags = ["--advertise-routes=192.168.2.0/24"];
+  };
 
   # Binary cache — serves /nix/store to other machines on the network
   services.nix-serve = {
