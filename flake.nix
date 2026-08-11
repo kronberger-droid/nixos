@@ -234,9 +234,27 @@
                   # Upstream nixpkgs already carries per-test checkFlags skips
                   # but hasn't caught this one yet. Drop the whole phase until
                   # it does; the Electron app itself is unaffected.
-                  bitwarden-desktop =
-                    prev.bitwarden-desktop.overrideAttrs
-                    (_: {doCheck = false;});
+                  #
+                  # 2026.7.0 also picks its clipboard backend off
+                  # XDG_CURRENT_DESKTOP and takes the RemoteDesktop portal
+                  # whenever it spots GNOME, which our niri session appends for
+                  # Chromium's keyring. That portal call then always fails:
+                  # desktop_core marks the process PR_SET_DUMPABLE(0) for
+                  # anti-memory-dump hardening, so xdg-desktop-portal cannot
+                  # read /proc/$pid/root to identify the caller and refuses it
+                  # (flatpak/xdg-desktop-portal#785). Hide the GNOME token from
+                  # this one app to get the working X11 backend back. Drop the
+                  # wrapper at 2026.8.0, which makes X11 the default and the
+                  # portal a fallback (bitwarden/clients#22062).
+                  bitwarden-desktop = prev.bitwarden-desktop.overrideAttrs (old: {
+                    doCheck = false;
+                    nativeBuildInputs = (old.nativeBuildInputs or []) ++ [prev.makeWrapper];
+                    postFixup =
+                      (old.postFixup or "")
+                      + ''
+                        wrapProgram $out/bin/bitwarden --set XDG_CURRENT_DESKTOP niri
+                      '';
+                  });
                   # freecad-wayland is broken on current unstable, so pull it
                   # from nixpkgs-freecad (origin/main's last-good rev) instead.
                   # Fresh nixpkgs import needs its own allowUnfree — it does
