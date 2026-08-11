@@ -62,6 +62,13 @@ the wrong reason.
 ## DPI stays off
 
 `traffic-analysis dpi disable`. `tdts` is a 441 KB Trend Micro module on a 256 MB
-MIPS box and only feeds the GUI graphs. Disabling it in the config stops traffic
-reaching the engine but does not unload the kernel hook, which needs
-`rmmod ubnt_nf_app tdts` or a reboot.
+MIPS box and only feeds the GUI graphs.
+
+The config setting stops traffic being fed to the engine but does not stop the
+modules loading: `ubnt_nf_app` and `tdts` are back in `lsmod` after every boot
+regardless. `rmmod ubnt_nf_app tdts` unloads them until the next reboot, and
+there is no config knob that makes it stick.
+
+Not worth automating. DPI was a suspect during the UDP/53 investigation and was
+cleared: unloading both modules changed nothing, so they are inert here and cost
+only the memory.
