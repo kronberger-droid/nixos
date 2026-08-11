@@ -462,7 +462,9 @@ in {
 
       # Bitwarden
       {
-        matches = [{app-id = "^Bitwarden$";}];
+        # Case-insensitive: the app-id has flipped between "Bitwarden" and
+        # "bitwarden" across releases.
+        matches = [{app-id = "(?i)^bitwarden$";}];
         open-floating = true;
         default-column-width = {proportion = 0.6;};
         default-window-height = {proportion = 0.7;};
