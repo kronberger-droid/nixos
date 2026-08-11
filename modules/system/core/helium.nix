@@ -16,7 +16,10 @@
           url = "https://github.com/imputnet/helium-linux/releases/download/${version}/helium-${version}-x86_64.AppImage";
           hash = "sha256-VnOhzhAulvFNBB/0AD1d+K/TzfFL9Zwtk/vcm5vWl+I=";
         };
-        appimageContents = prev.appimageTools.extractType2 {inherit pname version src;};
+        # `extract`, not `extractType2`: the latter is a deprecated alias for
+        # exactly this function and warns on every eval. `wrapType2` below is
+        # not deprecated, only `wrapType1` is, so it stays as-is.
+        appimageContents = prev.appimageTools.extract {inherit pname version src;};
       in
         prev.appimageTools.wrapType2 {
           inherit pname version src;
