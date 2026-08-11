@@ -8,5 +8,6 @@
     ./fonts.nix
     ./systemd-tweaks.nix
     ./kernel.nix
+    ./esp-permissions.nix
   ];
 }

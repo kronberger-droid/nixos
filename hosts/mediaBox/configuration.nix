@@ -37,6 +37,7 @@ in {
     ../../modules/system/hardware/audio.nix # pipewire
     ../../modules/system/core/fonts.nix # font set
     ../../modules/system/core/locale.nix # Europe/Vienna + de_AT locale
+    ../../modules/system/core/esp-permissions.nix # ESP not world readable
   ];
 
   # ── Boot / hardware ───────────────────────────────────
