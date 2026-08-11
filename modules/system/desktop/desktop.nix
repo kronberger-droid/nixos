@@ -29,6 +29,11 @@ in {
         # gtk has no ScreenCast impl, so window sharing (Helium/Teams) needs this.
         "org.freedesktop.impl.portal.ScreenCast" = ["gnome"];
         "org.freedesktop.impl.portal.Screenshot" = ["gnome"];
+        # Same story for Clipboard and the RemoteDesktop session it rides on:
+        # gtk implements neither, and Bitwarden falls back to them whenever its
+        # X11 clipboard backend is unavailable.
+        "org.freedesktop.impl.portal.RemoteDesktop" = ["gnome"];
+        "org.freedesktop.impl.portal.Clipboard" = ["gnome"];
       };
     };
     wlr = {
@@ -43,6 +48,12 @@ in {
       };
     };
   };
+
+  # nixpkgs wraps every Electron/Chromium app so that this variable, and only
+  # this variable, adds the ozone Wayland flags. Without it they all default to
+  # X11 and run through xwayland-satellite. Set at the system level so it lands
+  # in the PAM environment, which greetd's niri-session inherits.
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   virtualisation.spiceUSBRedirection.enable = true;
 
