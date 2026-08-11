@@ -4,6 +4,7 @@
   inputs,
   host,
   isNotebook,
+  hasAccelerometer,
   primaryCompositor,
   username,
   ...
@@ -12,7 +13,7 @@
 in {
   home-manager = {
     extraSpecialArgs = {
-      inherit inputs host isNotebook dropkittenPkg primaryCompositor;
+      inherit inputs host isNotebook hasAccelerometer dropkittenPkg primaryCompositor;
     };
     useGlobalPkgs = true;
     useUserPackages = true;

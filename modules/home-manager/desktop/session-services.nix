@@ -3,6 +3,7 @@
   pkgs,
   lib,
   isNotebook,
+  hasAccelerometer,
   ...
 }: let
   # DPMS control, dispatching on whichever compositor's socket is live. The niri
@@ -25,13 +26,14 @@
   dpmsOff = dpms "dpms-off" "power-off-monitors" "off";
   dpmsOn = dpms "dpms-on" "power-on-monitors" "on";
 
-  # rot8 needs a real accelerometer, and `isNotebook` is a much broader gate
-  # than that: P14E exposes only an ambient light sensor over the Intel ISH,
-  # so rot8 dies with "Unknown Accelerometer Device" the instant it starts.
-  # Paired with Restart=on-failure that became an endless respawn loop,
-  # 983 restarts in a single session. Probing the hardware here turns the
-  # loop into a clean one-shot skip, since a non-zero ExecCondition marks the
-  # unit skipped rather than failed and Restart never applies.
+  # Second line of defence behind `hasAccelerometer`, which already keeps this
+  # whole block off hosts without the sensor. Kept because it still carries
+  # the waybar opt-out toggle, and because a host can claim the sensor while
+  # firmware declines to enumerate it, which is the case rot8 handles worst:
+  # it exits 1 with "Unknown Accelerometer Device" immediately, and
+  # Restart=on-failure turns that into an endless respawn loop. A non-zero
+  # ExecCondition marks the unit skipped rather than failed, so Restart never
+  # applies and the loop becomes a single clean skip.
   rot8Condition = pkgs.writeShellScript "rot8-condition" ''
     # Explicit opt-out via the waybar rotation toggle.
     [ -f "$HOME/.cache/rotation-state" ] && exit 1
@@ -191,8 +193,8 @@ in {
     };
   };
 
-  # ── Rot8 (notebooks only) ──────────────────────────────────────
-  xdg.configFile."rot8/rot8.toml" = lib.mkIf isNotebook {
+  # ── Rot8 (hosts with an accelerometer only) ────────────────────
+  xdg.configFile."rot8/rot8.toml" = lib.mkIf hasAccelerometer {
     text = ''
       # rot8 configuration for HP Spectre x360
       # Auto-rotation daemon
@@ -224,7 +226,7 @@ in {
     '';
   };
 
-  systemd.user.services.rot8 = lib.mkIf isNotebook {
+  systemd.user.services.rot8 = lib.mkIf hasAccelerometer {
     Unit = {
       Description = "Auto-rotate screen based on accelerometer";
       After = ["graphical-session.target"];

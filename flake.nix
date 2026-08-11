@@ -170,6 +170,11 @@
       hostname,
       system,
       isNotebook,
+      # Whether the machine actually has an accelerometer, which is a much
+      # narrower question than `isNotebook`: a touchscreen clamshell has no
+      # reason to carry one. Gates rot8 and its waybar toggle at eval, so
+      # hosts without the sensor never pull rot8 into their closure.
+      hasAccelerometer ? false,
       primaryCompositor ? "niri",
       # Primary local-account username. Single source of truth: threaded into
       # both the NixOS modules (via specialArgs) and the home-manager user
@@ -184,7 +189,7 @@
         inherit system;
         specialArgs = {
           host = hostname;
-          inherit isNotebook inputs primaryCompositor username;
+          inherit isNotebook hasAccelerometer inputs primaryCompositor username;
         };
         modules =
           [
@@ -302,6 +307,9 @@
         hostname = "spectre";
         system = x86System;
         isNotebook = true;
+        # The only convertible in the fleet, thus the only host with an
+        # accelerometer to drive screen rotation.
+        hasAccelerometer = true;
         extraModules = [
           inputs.lanzaboote.nixosModules.lanzaboote
         ];

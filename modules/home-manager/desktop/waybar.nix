@@ -3,6 +3,7 @@
   config,
   pkgs,
   isNotebook,
+  hasAccelerometer,
   lib,
   ...
 }: let
@@ -53,6 +54,12 @@ in {
   xdg.configFile = {
     "waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
 
+    # Gated on the sensor rather than emitted unconditionally: the toggle
+    # script substitutes `pkgs.rot8`, so leaving it in place on a host with no
+    # accelerometer would keep rot8 in that host's closure to drive a button
+    # that can only ever toggle a service which declines to start.
+  }
+  // lib.optionalAttrs hasAccelerometer {
     "waybar/rotation-status.sh" = script "rotation-status.sh" {
       inherit (pkgs) bash;
     };
@@ -60,6 +67,8 @@ in {
     "waybar/rotation-toggle.sh" = script "rotation-toggle.sh" {
       inherit (pkgs) bash coreutils rot8 libnotify procps;
     };
+  }
+  // {
 
     "waybar/screenrec-toggle.sh" = script "screenrec-toggle.sh" {
       inherit (pkgs) bash procps libnotify rofi slurp gnugrep coreutils;
@@ -269,7 +278,7 @@ in {
           };
           modules =
             ["custom/toggles-handle" "custom/screenrec" "idle_inhibitor" "custom/dnd"]
-            ++ lib.optionals isNotebook ["custom/rotation"];
+            ++ lib.optionals hasAccelerometer ["custom/rotation"];
         };
 
         "custom/toggles-handle" = {
