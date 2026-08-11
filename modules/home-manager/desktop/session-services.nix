@@ -24,6 +24,22 @@
     '';
   dpmsOff = dpms "dpms-off" "power-off-monitors" "off";
   dpmsOn = dpms "dpms-on" "power-on-monitors" "on";
+
+  # rot8 needs a real accelerometer, and `isNotebook` is a much broader gate
+  # than that: P14E exposes only an ambient light sensor over the Intel ISH,
+  # so rot8 dies with "Unknown Accelerometer Device" the instant it starts.
+  # Paired with Restart=on-failure that became an endless respawn loop,
+  # 983 restarts in a single session. Probing the hardware here turns the
+  # loop into a clean one-shot skip, since a non-zero ExecCondition marks the
+  # unit skipped rather than failed and Restart never applies.
+  rot8Condition = pkgs.writeShellScript "rot8-condition" ''
+    # Explicit opt-out via the waybar rotation toggle.
+    [ -f "$HOME/.cache/rotation-state" ] && exit 1
+    for f in /sys/bus/iio/devices/iio:device*/in_accel_*_raw; do
+      [ -e "$f" ] && exit 0
+    done
+    exit 1
+  '';
 in {
   imports = [
     ./sway/swaylock.nix
@@ -213,11 +229,16 @@ in {
       Description = "Auto-rotate screen based on accelerometer";
       After = ["graphical-session.target"];
       PartOf = ["graphical-session.target"];
+      # Backstop for any *other* persistent failure. The default burst of 5 is
+      # useless next to RestartSec=5, because five restarts span 25s and the
+      # default 10s window never sees more than two.
+      StartLimitIntervalSec = 300;
+      StartLimitBurst = 5;
     };
 
     Service = {
-      # Only start if rotation is not disabled
-      ExecCondition = "${pkgs.bash}/bin/bash -c '[ ! -f $HOME/.cache/rotation-state ]'";
+      # Skip cleanly unless rotation is enabled and an accelerometer exists.
+      ExecCondition = "${rot8Condition}";
       ExecStart = "${pkgs.rot8}/bin/rot8";
       Restart = "on-failure";
       RestartSec = 5;
