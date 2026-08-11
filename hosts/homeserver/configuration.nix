@@ -12,6 +12,7 @@
     ../../modules/system/services/syncthing.nix
     ../../modules/system/services/website.nix
     ../../modules/system/services/webdav.nix
+    ../../modules/system/services/dns-healthcheck.nix
   ];
 
   # Secrets (homeserver-specific — shared agenix.nix has desktop-only secrets)
