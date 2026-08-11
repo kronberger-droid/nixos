@@ -238,11 +238,25 @@
       dns = {
         bind_hosts = ["0.0.0.0"];
         port = 53;
+        # IP-literal DoH endpoints on purpose. The ISP blocks outbound UDP/53
+        # entirely (every destination, including their own resolver), so a
+        # hostname upstream like https://dns.cloudflare.com/dns-query can never
+        # resolve its own bootstrap and AdGuard then answers nothing at all,
+        # not even on loopback. Bare IPs need no bootstrap, and DoH rides
+        # TCP/443, which the block does not touch. Google is deliberately
+        # absent: https://8.8.8.8/dns-query serves HTML without the dns.google
+        # SNI, so it is unusable as an IP literal. Cloudflare and Quad9 both
+        # answer correctly on their bare addresses.
         upstream_dns = [
-          "https://dns.cloudflare.com/dns-query"
-          "https://dns.google/dns-query"
+          "https://1.1.1.1/dns-query"
+          "https://1.0.0.1/dns-query"
+          "https://9.9.9.9/dns-query"
+          "https://149.112.112.112/dns-query"
         ];
-        bootstrap_dns = ["1.1.1.1" "8.8.8.8"];
+        # Unused now that no upstream carries a hostname, but AdGuard wants a
+        # value. Keep it non-empty so adding a hostname upstream later fails
+        # loudly rather than silently.
+        bootstrap_dns = ["1.1.1.1" "9.9.9.9"];
       };
       filtering.rewrites = [
         # Local DNS — add your services here
