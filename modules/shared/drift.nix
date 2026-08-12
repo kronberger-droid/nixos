@@ -58,6 +58,16 @@ rustPlatform.buildRustPackage rec {
   # second compile of the tree but keeps upstream's tests actually running.
   checkType = "debug";
 
+  # all_includes_untracked and rev_single_commit_renders_patch each save the cwd,
+  # chdir into their own fixture repo, chdir back, then delete it. cwd is
+  # per-process and libtest is threaded, so on a machine with enough cores one
+  # test's saved cwd is the other's fixture, already removed by the time it
+  # restores, and rev_single_commit_renders_patch dies at src/git.rs:338 with
+  # ENOENT. Serializing is the honest fix: the flag sets RUST_TEST_THREADS=1,
+  # and 40 tests that finish in 3.5s can afford it. Drop this once the fixtures
+  # stop leaning on the process cwd.
+  dontUseCargoParallelTests = true;
+
   # git::tests shell out to a real git to build fixture repos, so without this
   # two of the 40 tests fail on ENOENT. git also wants an identity before it
   # will commit, and the sandbox has neither a HOME nor a global config.
