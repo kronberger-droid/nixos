@@ -38,6 +38,18 @@ rustPlatform.buildRustPackage rec {
   # Bump it alongside `version` (build once, copy the hash from the mismatch).
   cargoHash = "sha256-OqXAkMKztCMXJDlZkxTn9l1LcOhvd1e2bixvyE/RSXg=";
 
+  # Lets `theme` name a .tmTheme file on disk. Both the built-in palettes and
+  # syntect's bundled set are fixed at compile time, so without this there is
+  # no way to highlight with a palette drift wasn't compiled against — and all
+  # of its bundled options are visibly duller than our base16 scheme (mean
+  # saturation 0.29-0.38 against ours at 0.50). Consumed by the generated
+  # theme in modules/home-manager/shell/drift.nix.
+  #
+  # Not upstream: there is no issue for it (#7/#10 are a theme *picker*), so
+  # this is a local feature, not a backport. Rebase on version bumps; if it
+  # ever stops applying, dropping it costs syntax color fidelity, nothing else.
+  patches = [./drift-tmtheme-path.patch];
+
   nativeBuildInputs = [makeWrapper];
 
   # [profile.release] sets panic = "abort", and libtest needs unwinding, so
