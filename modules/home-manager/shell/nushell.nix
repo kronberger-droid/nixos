@@ -526,6 +526,52 @@ in {
               compositorDevSetup
           }
       }
+
+      # The `[[package]]` stanza for reedline, blocks being blank-line separated
+      def reedlineBlock [lock: string] {
+          let hits = ($lock | split row "\n\n" | where {|b| $b | str starts-with "[[package]]\nname = \"reedline\"\n" })
+          if ($hits | is-empty) { "" } else { $hits | first }
+      }
+
+      def blockRev [block: string] {
+          let revs = ($block | parse --regex '#(?<rev>[0-9a-f]{40})' | get rev)
+          if ($revs | is-empty) { "?" } else { $revs | first | str substring 0..<7 }
+      }
+
+      # Move reedline's pin in the nushell repo to its branch head. A plain
+      # `cargo update -p reedline` also rewrites ~26 lines of windows-sys edges,
+      # since rustix, tempfile and friends accept `>=0.52, <0.62` and every lock
+      # rewrite collapses them onto the oldest locked version. That drift is
+      # unrelated to the bump, so keep reedline's block and drop the rest.
+      def bump-reedline [] {
+          let repo = (^git rev-parse --show-toplevel | complete)
+          let root = ($repo.stdout | str trim)
+          if $repo.exit_code != 0 or ($root | path basename) != "nushell" {
+              print $"(ansi red)Not in the nushell repo.(ansi reset)"
+              return
+          }
+
+          cd $root
+          let lock = ($root | path join "Cargo.lock")
+          let old = (reedlineBlock (open --raw $lock))
+          if ($old | is-empty) {
+              print $"(ansi red)Cargo.lock has no git-pinned reedline.(ansi reset)"
+              return
+          }
+
+          ^cargo update -p reedline
+          let new = (reedlineBlock (open --raw $lock))
+
+          ^git checkout -- $lock
+          let patched = (open --raw $lock | str replace $old $new)
+          $patched | save -f $lock
+
+          if $old == $new {
+              print $"(ansi yellow)reedline already at (blockRev $old)(ansi reset)"
+          } else {
+              print $"(ansi green)reedline (blockRev $old) -> (blockRev $new)(ansi reset)"
+          }
+      }
     '';
   };
 
