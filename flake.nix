@@ -16,27 +16,37 @@
     # The overlay below pulls only `freecad-wayland` out of this input.
     # Drop it once unstable's freecad builds again, then bump/remove here.
     nixpkgs-freecad.url = "github:NixOS/nixpkgs/d407951447dcd00442e97087bf374aad70c04cea";
-    # Rio "nightly": upstream main built with Rio's own flake.
-    # We pick `.rio-stable` (latest released Rust) rather than `.default`
-    # (= Rio's MSRV), because upstream pins MSRV to unreleased Rust versions
-    # and rust-overlay only carries shipped stable channels. Switch back to
-    # `.default` once Rio's MSRV is at or below the latest released stable.
-    # `packages.${system}.rio-nightly` is the Rust-nightly compiler variant.
-    # rust-overlay is hoisted from rio-upstream so we control its lock.
-    # Rio's `.rio-stable` resolves to `rust-bin.stable.latest.minimal` against
-    # rust-overlay's pinned rev — when rio's own flake.lock lags behind a Rust
-    # release, `latest.stable` returns the old toolchain and rio's MSRV-bumped
-    # source fails to compile. Locking rust-overlay here lets us refresh it
-    # with `nix flake update rust-overlay` without waiting on upstream rio.
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    rio-upstream = {
-      url = "github:raphamorim/rio";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.rust-overlay.follows = "rust-overlay";
-    };
+    # Rio "nightly": upstream main built with Rio's own flake.
+    #
+    # Deliberately unfollowed. Rio's CI pushes builds to rioterm.cachix.org
+    # (wired up in modules/system/core/nix-caches.nix), and a substituter hit
+    # needs the output hash to match upstream's byte for byte. Any `follows`
+    # here rewrites an input, which rewrites the hash, which turns every build
+    # into a local rustc run over the whole workspace. Verified: with nixpkgs
+    # and rust-overlay followed, our rio path 404s against the cache; the
+    # unfollowed `.default` hits.
+    #
+    # Cost of unfollowing is a second nixpkgs at eval time and a parallel set
+    # of runtime libs (rio pulls its own libxkbcommon etc). Rio's closure is
+    # ~95M and those deps come from cache.nixos.org anyway, so the disk hit is
+    # noise next to the build it saves.
+    #
+    # Two constraints follow from how upstream CI publishes:
+    #
+    #   - Use `.default`, not `.rio-stable`. CI only ever builds `.default`.
+    #     Unfollowing also removes the reason we picked `.rio-stable` in the
+    #     first place: that was to dodge Rio pinning its MSRV to unreleased
+    #     Rust, which only bit us because we forced rust-overlay to our lock.
+    #     Rio's own lock resolves its MSRV fine. `.rio-nightly` is the
+    #     Rust-nightly compiler variant, likewise uncached.
+    #   - Track main closely. Only the current main is in the cache; revs a
+    #     few days old already 404. Bump this input often, and expect a cache
+    #     miss to mean a full local build.
+    rio-upstream.url = "github:raphamorim/rio";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -124,14 +134,14 @@
       url = "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml";
       flake = false;
     };
-    # nushell built from our fork's helix-mode-wip branch: current upstream
-    # (v0.114.0) + the glue wiring reedline's selection-first Helix edit mode
-    # (`edit_mode = "helix"`). Its Cargo.lock pins reedline to our fork's
-    # helix-mode-wip rev, fetched as a FOD via outputHashes in the overlay
-    # below (same pattern as niri-src/smithay). The reedline branch also carries
-    # #1097, the leading-CRLF prompt fix our two-line prompt needs.
+    # nushell built from our fork's helix-mode branch: current upstream
+    # (v0.114.2) + the glue wiring reedline's selection-first Helix edit mode
+    # (`edit_mode = "helix"`), which lives in reedline#1138. Its Cargo.lock pins
+    # reedline to that PR's branch, fetched as a FOD via outputHashes in the
+    # overlay below (same pattern as niri-src/smithay). Both sides gate the mode
+    # behind a cargo feature, so the overlay builds with `--features helix`.
     nushell-helix = {
-      url = "github:kronberger-droid/nushell/helix-mode-wip";
+      url = "github:kronberger-droid/nushell/helix-mode";
       flake = false;
     };
     # Personal site (CV / blog / publications / projects). Its flake builds the
@@ -224,16 +234,26 @@
                 (_: prev: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                   claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
-                  # Upstream's flake runs the full test suite, but rio's
-                  # context tests fork a pty and the SIGHUP from tearing it
-                  # down kills the whole `cargo test` harness inside the nix
-                  # sandbox (exit 129 = 128 + SIGHUP, no assertion failure).
-                  # Upstream #1735 tried to stop forking real shells there and
-                  # it still dies. Drop the check phase until that lands
-                  # properly; nixpkgs' own rio packaging skips these too.
-                  rio =
-                    inputs.rio-upstream.packages.${system}.rio-stable.overrideAttrs
-                    (_: {doCheck = false;});
+                  # Taken verbatim so it matches what upstream CI pushed to
+                  # rioterm.cachix.org. See the rio-upstream input for why
+                  # nothing here may be overridden or followed.
+                  #
+                  # This used to carry `doCheck = false`: rio's context tests
+                  # fork a pty and the SIGHUP from tearing it down killed the
+                  # whole `cargo test` harness inside the nix sandbox (exit
+                  # 129 = 128 + SIGHUP, no assertion failure). Upstream fixed
+                  # the sandbox PID 1 detection behind it in d52809a (#1855)
+                  # and CI now builds with checks on, so the override is gone
+                  # (it would also have cost us the cache). If a cache miss
+                  # ever drops you into a local build that dies at exit 129,
+                  # this is the one-liner that brings it back:
+                  #
+                  #   rio = inputs.rio-upstream.packages.${system}.default
+                  #     .overrideAttrs (_: {doCheck = false;});
+                  #
+                  # Note that reinstating it forfeits the cache permanently,
+                  # not just for the broken rev.
+                  rio = inputs.rio-upstream.packages.${system}.default;
                   # bitwarden-desktop's checkPhase runs the desktop_native cargo
                   # tests, and a currently-failing test there breaks the build.
                   # Upstream nixpkgs already carries per-test checkFlags skips
