@@ -316,7 +316,7 @@ in {
 
       # Niri development layout setup
       # Layout: left tabbed column = helix + shell, right column = claude
-      # Typst: left tabbed column = helix + typst watch, right column = zathura
+      # Typst: left tabbed column = zathura + typst watch, right tabbed column = helix + claude
       def niriDevSetup [] {
           let cwd = $env.PWD
           let dev_env = detectDevEnv
@@ -332,16 +332,27 @@ in {
           ^niri msg action toggle-column-tabbed-display
 
           if $is_typst {
-              # Spawn typst watch terminal (receives focus)
+              # typst watch goes up first so main.pdf exists when zathura opens
               ^niri msg action spawn -- sh -c (termCmd $cwd $dev_env $"typst watch ($cwd)/main.typ ($cwd)/main.pdf")
               sleep 500ms
 
-              # Move typst watch into the tabbed column
-              ^niri msg action consume-or-expel-window-left
-
-              # Spawn zathura as the right column
               ^niri msg action spawn -- zathura ($cwd + "/main.pdf")
               sleep 500ms
+
+              # Pair zathura with typst watch, zathura on top, then tab the column
+              ^niri msg action consume-or-expel-window-left
+              ^niri msg action move-window-up
+              ^niri msg action toggle-column-tabbed-display
+
+              # Park that column left of the original terminal and focus back to it
+              ^niri msg action move-column-left
+              ^niri msg action focus-column-right
+
+              # Claude joins the original terminal's tabbed column, helix stays visible
+              ^niri msg action spawn -- sh -c (claudeCmd $cwd $dev_env)
+              sleep 500ms
+              ^niri msg action consume-or-expel-window-left
+              ^niri msg action focus-window-up
           } else {
               # Spawn shell terminal (receives focus)
               ^niri msg action spawn -- sh -c (termCmd $cwd $dev_env "nu --login")
@@ -353,11 +364,11 @@ in {
               # Spawn Claude terminal as the right column
               ^niri msg action spawn -- sh -c (claudeCmd $cwd $dev_env)
               sleep 500ms
-          }
 
-          # Focus back to left column, top window (original terminal for helix)
-          ^niri msg action focus-column-left
-          ^niri msg action focus-window-up
+              # Focus back to left column, top window (original terminal for helix)
+              ^niri msg action focus-column-left
+              ^niri msg action focus-window-up
+          }
 
           if $dev_env.has_direnv or not $dev_env.has_flake {
               ^sh -c 'exec hx .'
