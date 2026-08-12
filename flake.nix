@@ -212,17 +212,7 @@
                 # pull a toolchain from rust-overlay instead of nixpkgs' rustc,
                 # which lags Rust stable. See modules/home-manager/editors/dev-tools.nix.
                 inputs.rust-overlay.overlays.default
-                # Pin smithay git deps as FODs to avoid re-fetching on every eval.
-                # Update the hash when niri-src bumps its smithay rev in Cargo.lock.
-                (final: prev: {
-                  niri-unstable = prev.niri-unstable.overrideAttrs (old: {
-                    cargoDeps = final.rustPlatform.importCargoLock {
-                      lockFile = "${inputs.niri-src}/Cargo.lock";
-                      outputHashes = {
-                        "smithay-0.7.0" = "sha256-TV/GTfSvgfVwIFUGoASU7xm38opIBLjLMf1HeNTW07U=";
-                      };
-                    };
-                  });
+                (final: _prev: {
                   # Make pkgs.niri resolve to the same fork build — collapses
                   # the closure so scripts using `pkgs.niri/bin/niri msg` don't
                   # pull in a parallel nixpkgs niri build.

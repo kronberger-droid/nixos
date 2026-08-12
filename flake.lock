@@ -333,11 +333,11 @@
     "niri-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1786007235,
-        "narHash": "sha256-eUIjjEQX6wZi+m0PKgAeSDavKEVKcGDFD7Lz5EKH6Uo=",
+        "lastModified": 1786562448,
+        "narHash": "sha256-iVewTIIpZnapeDW+nF+M1F7IPp5Jc8b7lqObSydct74=",
         "owner": "kronberger-droid",
         "repo": "niri",
-        "rev": "dbbc112f7d914e2895e72bea0bf43aaab8faa50d",
+        "rev": "cdf89dfe40e6fd3fa911a2ba0ea8fb0f5ce01f0a",
         "type": "github"
       },
       "original": {
