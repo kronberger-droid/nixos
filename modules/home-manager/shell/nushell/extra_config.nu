@@ -15,11 +15,15 @@ $env.config = {
 		vi_normal: block
 		emacs: line
 	}
-	# Visual/select highlight (helix-style gray). Only `bg` is set so selected
-	# text keeps its syntax color. Read by the fork's with_visual_selection_style
-	# (color_config.selection); other shapes still use nushell defaults.
+	# Visual/select highlight, matching helix's ui.selection: bg = gray, which
+	# the generated palette maps to base03 (#555555). Only `bg` is set so
+	# selected text keeps its syntax color, and it's light enough that the
+	# underscore/block cursors stay visible inside a selection. Upstream
+	# nushell still hardcodes the selection style to reverse-video and
+	# ignores this key; it takes effect once the configurable-selection PR
+	# lands. Other shapes still use nushell defaults.
 	color_config: {
-		selection: { bg: "#45475a" }
+		selection: { bg: "#555555" }
 	}
 	shell_integration: {
 		osc133: true
