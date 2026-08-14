@@ -44,7 +44,6 @@
     rip2
     fd
     skim
-    fzf
     xcp
     dust
     ouch
