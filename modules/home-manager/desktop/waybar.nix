@@ -32,10 +32,10 @@
   # consumers go through `scriptPath`, so flipping one touches nothing else.
   scriptLangDefault = "nu";
 
-  scriptLang = {
-    # Stub waiting to be written; see the header in the file.
-    vpn-status = "bash";
-  };
+  # Per-script override of scriptLangDefault. Empty because every helper is on
+  # nushell; setting one to "bash" swaps in its `.sh` twin, which stays in the
+  # tree as the escape hatch.
+  scriptLang = {};
 
   script = name: varsByLang: let
     lang = scriptLang.${name} or scriptLangDefault;
