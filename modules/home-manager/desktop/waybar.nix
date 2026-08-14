@@ -33,8 +33,7 @@
   scriptLangDefault = "nu";
 
   scriptLang = {
-    # Stubs waiting to be written; see the header in each file.
-    rotation-toggle = "bash";
+    # Stub waiting to be written; see the header in the file.
     vpn-status = "bash";
   };
 
@@ -87,10 +86,9 @@ in {
   xdg.configFile = {
     "waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
 
-    # Gated on the sensor rather than emitted unconditionally: the toggle
-    # script substitutes `pkgs.rot8`, so leaving it in place on a host with no
-    # accelerometer would keep rot8 in that host's closure to drive a button
-    # that can only ever toggle a service which declines to start.
+    # Gated on the sensor rather than emitted unconditionally: the button
+    # drives rot8.service, which session-services.nix only defines on hosts
+    # that have an accelerometer.
   }
   // lib.optionalAttrs hasAccelerometer {
     "waybar/rotation-status" = script "rotation-status" {
@@ -99,8 +97,8 @@ in {
     };
 
     "waybar/rotation-toggle" = script "rotation-toggle" {
-      bash = {inherit coreutils; inherit (pkgs) rot8 libnotify procps;};
-      nu = {inherit utilLinux; inherit (pkgs) rot8 libnotify procps;};
+      bash = {inherit coreutils; inherit (pkgs) systemd libnotify procps;};
+      nu = {inherit (pkgs) systemd libnotify procps;};
     };
   }
   // {
