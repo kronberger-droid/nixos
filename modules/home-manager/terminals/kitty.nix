@@ -40,7 +40,7 @@ in {
 
       if [[ "$app_id" =~ ^($relevant_apps) ]]; then
           ppid=$(${pkgs.procps}/bin/pgrep --newest --parent "$pid")
-          cwd=$(${pkgs.coreutils}/bin/readlink "/proc/''${ppid}/cwd" 2>/dev/null || true)
+          cwd=$(${pkgs.uutils-coreutils-noprefix}/bin/readlink "/proc/''${ppid}/cwd" 2>/dev/null || true)
           echo "''${cwd:-$HOME}"
       else
           echo "$HOME"

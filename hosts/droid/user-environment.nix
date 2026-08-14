@@ -23,9 +23,15 @@
 # This replacement is needed (rather than a plain option override) because
 # build.activation is types.attrs: last definition wins and upstream's
 # modules are evaluated after this config, so a user-level redefinition of
-# build.activation.installPackages silently loses. Everything except the
-# nix-env branch is upstream-verbatim; drop this file and its import if
-# upstream fixes #423.
+# build.activation.installPackages silently loses. Drop this file and its
+# import if upstream fixes #423.
+#
+# Two deviations from upstream, marked inline:
+#   1. the nix-env --set branch, the whole reason for the file;
+#   2. uutils in place of GNU coreutils. Has to happen here rather than in
+#      nix-on-droid.nix: environment.packages is a merged list and
+#      environment.path is a buildEnv without ignoreCollisions, so a second
+#      provider of `ls` is a build error. Swap, not shadow.
 {
   config,
   lib,
@@ -96,7 +102,8 @@ in {
         (pkgs.callPackage "${inputs.nix-on-droid}/nix-on-droid" {nix = config.nix.package;})
         pkgs.bashInteractive
         pkgs.cacert
-        pkgs.coreutils
+        # Deviation from upstream (which has pkgs.coreutils). See header.
+        pkgs.uutils-coreutils-noprefix
         pkgs.less # since nix tools really want a pager available, #27
         config.nix.package
       ];
