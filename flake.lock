@@ -586,19 +586,18 @@
         "type": "gitlab"
       }
     },
-    "nushell-helix": {
+    "nushell-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1786544858,
-        "narHash": "sha256-G2G5OAuR1dx4NmPiH8PgTTB3EPgcCTw2cxy9EZJesAs=",
-        "owner": "kronberger-droid",
+        "lastModified": 1786668096,
+        "narHash": "sha256-G2dnKwOkhgK6QVEfRcj9b4cSRsp8Aj9ZcxKVAgKfODg=",
+        "owner": "nushell",
         "repo": "nushell",
-        "rev": "f9a87af4b20ac966ce73ce9ee0cd5e8a349f760c",
+        "rev": "cb62a48ce30006ece43d191549a02340e1c6a407",
         "type": "github"
       },
       "original": {
-        "owner": "kronberger-droid",
-        "ref": "helix-mode",
+        "owner": "nushell",
         "repo": "nushell",
         "type": "github"
       }
@@ -705,7 +704,7 @@
         "nixpkgs": "nixpkgs",
         "nixpkgs-freecad": "nixpkgs-freecad",
         "nixpkgs-rio": "nixpkgs-rio",
-        "nushell-helix": "nushell-helix",
+        "nushell-src": "nushell-src",
         "oo7-nixos": "oo7-nixos",
         "rio-upstream": "rio-upstream",
         "rust-overlay": "rust-overlay_3",

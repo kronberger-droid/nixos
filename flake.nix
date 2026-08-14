@@ -134,14 +134,14 @@
       url = "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml";
       flake = false;
     };
-    # nushell built from our fork's helix-mode branch: current upstream
-    # (v0.114.2) + the glue wiring reedline's selection-first Helix edit mode
-    # (`edit_mode = "helix"`), which lives in reedline#1138. Its Cargo.lock pins
-    # reedline to that PR's branch, fetched as a FOD via outputHashes in the
-    # overlay below (same pattern as niri-src/smithay). Both sides gate the mode
-    # behind a cargo feature, so the overlay builds with `--features helix`.
-    nushell-helix = {
-      url = "github:kronberger-droid/nushell/helix-mode";
+    # nushell built from upstream main: the Helix edit mode
+    # (`edit_mode = "helix"`, reedline#1138 + nushell#18830) merged there but
+    # hasn't shipped in a release yet, so build from source until nixpkgs
+    # carries a version with it. Its Cargo.lock pins reedline to a git rev,
+    # fetched as a FOD via outputHashes in the overlay below (same pattern as
+    # niri-src/smithay).
+    nushell-src = {
+      url = "github:nushell/nushell";
       flake = false;
     };
     # Personal site (CV / blog / publications / projects). Its flake builds the
