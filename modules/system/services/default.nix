@@ -1,6 +1,6 @@
 {...}: {
   imports = [
-    ./transmission.nix
+    ./torrent.nix
     ./virtualisation.nix
   ];
 }

@@ -18,17 +18,50 @@
   # nmtui color scheme matching kitty theme
   nmtui_colors = "root=white,black:window=white,black:border=blue,black:listbox=white,black:actlistbox=black,blue:label=white,black:title=brightblue,black:button=white,black:actbutton=black,blue:compactbutton=white,black:checkbox=white,black:actcheckbox=black,blue:entry=white,black:textbox=white,black";
 
-  # Helper scripts live as real .sh files under ./waybar/ instead of inline Nix
-  # strings, so they stay syntax-highlighted and shellcheck-able and need no
-  # ''${} escaping. Store paths arrive as replaceVars placeholders (@bash@,
-  # @procps@, …), which is a plain textual substitution — the generated scripts
-  # are byte-identical to the inlined ones. replaceVars fails the build both on
-  # an unfilled @var@ and on an unused attr, so the lists below cannot drift
-  # away from the scripts they fill in.
-  script = name: vars: {
-    executable = true;
-    source = pkgs.replaceVars ./waybar/${name} vars;
+  # Helper scripts live as real files under ./waybar/ instead of inline Nix
+  # strings, so they stay syntax-highlighted and lintable and need no ''${}
+  # escaping. Store paths arrive as replaceVars placeholders (@bash@, @procps@,
+  # …), which is a plain textual substitution, so the generated scripts are
+  # byte-identical to the inlined ones. replaceVars fails the build both on an
+  # unfilled @var@ and on an unused attr, so the lists below cannot drift away
+  # from the scripts they fill in.
+  #
+  # Each helper exists twice: bash at ./waybar/<name>.sh and nushell at
+  # ./waybar/nu/<name>.nu (see the README there). Which one backs a button is
+  # this table's business alone. The installed file carries no extension and
+  # consumers go through `scriptPath`, so flipping one touches nothing else.
+  scriptLangDefault = "nu";
+
+  scriptLang = {
+    # Stubs waiting to be written; see the header in each file.
+    rotation-toggle = "bash";
+    vpn-status = "bash";
   };
+
+  script = name: varsByLang: let
+    lang = scriptLang.${name} or scriptLangDefault;
+    src =
+      if lang == "nu"
+      then ./waybar/nu + "/${name}.nu"
+      else ./waybar + "/${name}.sh";
+    # The one var that follows from the language, so the helper owns it.
+    interpreter =
+      if lang == "nu"
+      then {nu = pkgs.nushell;}
+      else {inherit (pkgs) bash;};
+  in {
+    executable = true;
+    source = pkgs.replaceVars src (varsByLang.${lang} // interpreter);
+  };
+
+  scriptPath = name: "${config.xdg.configHome}/waybar/${name}";
+
+  # The bash scripts substitute @coreutils@; point it at uutils. The nu ports
+  # need none: sleep/date/mkdir/rm/touch/path basename are builtins.
+  coreutils = pkgs.uutils-coreutils-noprefix;
+
+  # setsid, for the nu scripts' `detach` helper. Nushell has no `&`.
+  utilLinux = pkgs.util-linux;
 
   # scratchpad-toggle and ncspot-toggle both spawn the configured terminal.
   terminalVars = {
@@ -60,55 +93,74 @@ in {
     # that can only ever toggle a service which declines to start.
   }
   // lib.optionalAttrs hasAccelerometer {
-    "waybar/rotation-status.sh" = script "rotation-status.sh" {
-      inherit (pkgs) bash;
+    "waybar/rotation-status" = script "rotation-status" {
+      bash = {};
+      nu = {};
     };
 
-    "waybar/rotation-toggle.sh" = script "rotation-toggle.sh" {
-      inherit (pkgs) bash coreutils rot8 libnotify procps;
+    "waybar/rotation-toggle" = script "rotation-toggle" {
+      bash = {inherit coreutils; inherit (pkgs) rot8 libnotify procps;};
+      nu = {inherit utilLinux; inherit (pkgs) rot8 libnotify procps;};
     };
   }
   // {
 
-    "waybar/screenrec-toggle.sh" = script "screenrec-toggle.sh" {
-      inherit (pkgs) bash procps libnotify rofi slurp gnugrep coreutils;
-      wlScreenrec = pkgs.wl-screenrec;
+    "waybar/screenrec-toggle" = script "screenrec-toggle" {
+      bash = {
+        inherit coreutils;
+        inherit (pkgs) procps libnotify rofi slurp gnugrep;
+        wlScreenrec = pkgs.wl-screenrec;
+      };
+      nu = {
+        inherit utilLinux;
+        inherit (pkgs) procps libnotify rofi slurp;
+        wlScreenrec = pkgs.wl-screenrec;
+      };
     };
 
-    "waybar/screenrec-status.sh" = script "screenrec-status.sh" {
-      inherit (pkgs) bash procps;
+    "waybar/screenrec-status" = script "screenrec-status" {
+      bash = {inherit (pkgs) procps;};
+      nu = {inherit (pkgs) procps;};
     };
 
-    "waybar/vpn-status.sh" = script "vpn-status.sh" {
-      inherit (pkgs) bash tailscale systemd;
+    "waybar/vpn-status" = script "vpn-status" {
+      bash = {inherit (pkgs) tailscale systemd;};
+      nu = {inherit (pkgs) tailscale systemd;};
     };
 
-    "waybar/vpn-disconnect-all.sh" = script "vpn-disconnect-all.sh" {
-      inherit (pkgs) bash libnotify tailscale systemd procps;
+    "waybar/vpn-disconnect-all" = script "vpn-disconnect-all" {
+      bash = {inherit (pkgs) libnotify tailscale systemd procps;};
+      nu = {inherit (pkgs) libnotify tailscale systemd procps;};
     };
 
-    "waybar/vpn-picker.sh" = script "vpn-picker.sh" {
-      inherit (pkgs) bash libnotify procps tailscale systemd rofi sd coreutils;
+    "waybar/vpn-picker" = script "vpn-picker" {
+      bash = {inherit coreutils; inherit (pkgs) libnotify procps tailscale systemd rofi sd;};
+      nu = {inherit (pkgs) libnotify procps tailscale systemd rofi;};
     };
 
-    "waybar/scratchpad-toggle.sh" =
-      script "scratchpad-toggle.sh" (terminalVars
-        // {inherit (pkgs) bash jq coreutils zellij procps;});
-
-    "waybar/scratchpad-status.sh" = script "scratchpad-status.sh" {
-      inherit (pkgs) bash jq;
+    "waybar/scratchpad-toggle" = script "scratchpad-toggle" {
+      bash = terminalVars // {inherit coreutils; inherit (pkgs) jq zellij procps;};
+      nu = terminalVars // {inherit (pkgs) zellij procps;};
     };
 
-    "waybar/ncspot-toggle.sh" =
-      script "ncspot-toggle.sh" (terminalVars
-        // {inherit (pkgs) bash jq coreutils zellij;});
-
-    "waybar/dnd-status.sh" = script "dnd-status.sh" {
-      inherit (pkgs) bash mako ripgrep;
+    "waybar/scratchpad-status" = script "scratchpad-status" {
+      bash = {inherit (pkgs) jq;};
+      nu = {};
     };
 
-    "waybar/dnd-toggle.sh" = script "dnd-toggle.sh" {
-      inherit (pkgs) bash mako ripgrep libnotify procps;
+    "waybar/ncspot-toggle" = script "ncspot-toggle" {
+      bash = terminalVars // {inherit coreutils; inherit (pkgs) jq zellij;};
+      nu = terminalVars // {inherit (pkgs) zellij;};
+    };
+
+    "waybar/dnd-status" = script "dnd-status" {
+      bash = {inherit (pkgs) mako ripgrep;};
+      nu = {inherit (pkgs) mako;};
+    };
+
+    "waybar/dnd-toggle" = script "dnd-toggle" {
+      bash = {inherit (pkgs) mako ripgrep libnotify procps;};
+      nu = {inherit (pkgs) mako libnotify procps;};
     };
   };
 
@@ -229,8 +281,8 @@ in {
 
         "custom/scratchpad" = {
           return-type = "json";
-          exec = "${config.xdg.configHome}/waybar/scratchpad-status.sh";
-          on-click = "${config.xdg.configHome}/waybar/scratchpad-toggle.sh";
+          exec = (scriptPath "scratchpad-status");
+          on-click = (scriptPath "scratchpad-toggle");
           # Event-driven via niri-window-watcher.service; no polling needed
           interval = "once";
           signal = 12;
@@ -242,7 +294,7 @@ in {
           return-type = "json";
           exec = ''echo '{"text":"\uf1bc","tooltip":"Open ncspot"}' '';
           interval = "once";
-          on-click = "${config.xdg.configHome}/waybar/ncspot-toggle.sh";
+          on-click = (scriptPath "ncspot-toggle");
           format = "{text}";
         };
 
@@ -300,8 +352,8 @@ in {
 
         "custom/dnd" = {
           return-type = "json";
-          exec = "${config.xdg.configHome}/waybar/dnd-status.sh";
-          on-click = "${config.xdg.configHome}/waybar/dnd-toggle.sh";
+          exec = (scriptPath "dnd-status");
+          on-click = (scriptPath "dnd-toggle");
           interval = 30;
           signal = 11;
           format = "{text}";
@@ -340,9 +392,9 @@ in {
 
         "custom/vpn" = {
           return-type = "json";
-          exec = "${config.xdg.configHome}/waybar/vpn-status.sh";
-          on-click = "${config.xdg.configHome}/waybar/vpn-picker.sh";
-          on-click-right = "${config.xdg.configHome}/waybar/vpn-disconnect-all.sh";
+          exec = (scriptPath "vpn-status");
+          on-click = (scriptPath "vpn-picker");
+          on-click-right = (scriptPath "vpn-disconnect-all");
           interval = 15;
           signal = 8;
           format = "{icon}{text}";
@@ -355,8 +407,8 @@ in {
 
         "custom/rotation" = {
           return-type = "json";
-          exec = "${config.xdg.configHome}/waybar/rotation-status.sh";
-          on-click = "${config.xdg.configHome}/waybar/rotation-toggle.sh";
+          exec = (scriptPath "rotation-status");
+          on-click = (scriptPath "rotation-toggle");
           interval = 3;
           signal = 9;
           format = "{icon}";
@@ -427,8 +479,8 @@ in {
         };
 
         "custom/screenrec" = {
-          exec = "${config.xdg.configHome}/waybar/screenrec-status.sh";
-          on-click = "${config.xdg.configHome}/waybar/screenrec-toggle.sh";
+          exec = (scriptPath "screenrec-status");
+          on-click = (scriptPath "screenrec-toggle");
           return-type = "json";
           # Toggle script signals immediately on click; 30s is a safety net
           # for the rare case where wl-screenrec exits on its own
