@@ -35,6 +35,7 @@ in {
     ../../modules/system/desktop/keyring.nix # oo7 secret service (secure Helium storage)
     ../../modules/system/desktop/keyd.nix # keyd remaps (matches main machines)
     ../../modules/system/hardware/audio.nix # pipewire
+    ../../modules/system/core/activation.nix # userborn + /etc overlay (Perl-free activation)
     ../../modules/system/core/fonts.nix # font set
     ../../modules/system/core/locale.nix # Europe/Vienna + de_AT locale
     ../../modules/system/core/esp-permissions.nix # ESP not world readable
