@@ -28,7 +28,8 @@
   # the HM profile live here.
   environment.packages = with pkgs; [
     bash
-    uutils-coreutils
+    # coreutils comes from user-environment.nix, where uutils replaced GNU.
+    # The `uu-`-prefixed build that sat here is redundant now.
     openssh
     claude-code-bin
     yazi

@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  lib,
+  pkgs,
+  ...
+}: {
   # Allow running dynamically linked executables (non-Nix binaries)
   programs.nix-ld.enable = true;
 
@@ -19,6 +23,13 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    # uutils in place of GNU coreutils for anything resolved through PATH.
+    # Does not touch stdenv, so builds keep using GNU and nothing rebuilds.
+    # hiPrio beats coreutils-full in the system-path buildEnv explicitly,
+    # rather than leaning on nixpkgs' requiredPackages priority offset.
+    # `-noprefix` is the drop-in; plain `uutils-coreutils` installs `uu-*`.
+    (lib.hiPrio uutils-coreutils-noprefix)
+
     # Essentials
     helix
     git
