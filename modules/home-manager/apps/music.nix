@@ -12,7 +12,7 @@
     enable = false;
     settings.global = {
       username = "martinkronberger";
-      password_cmd = "${pkgs.coreutils}/bin/cat /run/secrets/spotify-password";
+      password_cmd = "${pkgs.uutils-coreutils-noprefix}/bin/cat /run/secrets/spotify-password";
       device_name = "nixos";
       backend = "pulseaudio";
       bitrate = 320;

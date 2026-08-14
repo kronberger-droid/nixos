@@ -18,7 +18,7 @@
     for name in $(${pkgs.systemd}/bin/busctl --user list --no-legend \
                   | ${pkgs.gawk}/bin/awk '/^org\.pwmt\.zathura\.PID-/ {print $1}'); do
       pid=''${name#org.pwmt.zathura.PID-}
-      if [ "$(${pkgs.coreutils}/bin/readlink "/proc/$pid/cwd" 2>/dev/null)" = "$base" ]; then
+      if [ "$(${pkgs.uutils-coreutils-noprefix}/bin/readlink "/proc/$pid/cwd" 2>/dev/null)" = "$base" ]; then
         zpid=$pid
         break
       fi
@@ -27,18 +27,18 @@
     if root=$(${pkgs.git}/bin/git -C "$base" rev-parse --show-toplevel 2>/dev/null); then
       search_root="$root"
     else
-      search_root=$(${pkgs.coreutils}/bin/dirname -- "$base")
+      search_root=$(${pkgs.uutils-coreutils-noprefix}/bin/dirname -- "$base")
     fi
     # yazi is a TUI, so host it in a throwaway floating terminal. --chooser-file
     # makes yazi write the picked path there and quit (same mechanism as the
     # helix integration); the foreground -e keeps this script blocked until yazi
     # exits, so we can read the path back. Passing an absolute search_root means
     # the chooser path is absolute too, so it goes straight to busctl.
-    chooser=$(${pkgs.coreutils}/bin/mktemp)
+    chooser=$(${pkgs.uutils-coreutils-noprefix}/bin/mktemp)
     ${config.terminal.bin} ${lib.optionalString (config.terminal.appIdFlag != null) "${config.terminal.appIdFlag} ${config.terminal.floatingAppId}"} \
       ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi --chooser-file="$chooser" "$search_root"
-    pick=$(${pkgs.coreutils}/bin/head -n1 "$chooser")
-    ${pkgs.coreutils}/bin/rm -f "$chooser"
+    pick=$(${pkgs.uutils-coreutils-noprefix}/bin/head -n1 "$chooser")
+    ${pkgs.uutils-coreutils-noprefix}/bin/rm -f "$chooser"
     [ -z "$pick" ] && exit 0
     ${pkgs.systemd}/bin/busctl --user call \
       "org.pwmt.zathura.PID-$zpid" \

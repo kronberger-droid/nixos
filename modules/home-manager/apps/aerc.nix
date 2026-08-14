@@ -85,9 +85,9 @@ in {
           # Password from agenix (declarative). See modules/system/security/agenix.nix.
           Personal = {
             source = "imaps://martin.kronberger%40gmx.at@imap.gmx.net:993";
-            source-cred-cmd = "${pkgs.coreutils}/bin/cat /run/secrets/aerc-gmx-password";
+            source-cred-cmd = "${pkgs.uutils-coreutils-noprefix}/bin/cat /run/secrets/aerc-gmx-password";
             outgoing = "smtp://martin.kronberger%40gmx.at@mail.gmx.net:587";
-            outgoing-cred-cmd = "${pkgs.coreutils}/bin/cat /run/secrets/aerc-gmx-password";
+            outgoing-cred-cmd = "${pkgs.uutils-coreutils-noprefix}/bin/cat /run/secrets/aerc-gmx-password";
             default = "INBOX";
             from = "Martin Kronberger <martin.kronberger@gmx.at>";
             cache-headers = true;
@@ -95,9 +95,9 @@ in {
           # Password from agenix (declarative).
           upTUdate = {
             source = "imaps://mkronber%40intern.tuwien.ac.at@mail.intern.tuwien.ac.at:993";
-            source-cred-cmd = "${pkgs.coreutils}/bin/cat /run/secrets/aerc-uptudate-password";
+            source-cred-cmd = "${pkgs.uutils-coreutils-noprefix}/bin/cat /run/secrets/aerc-uptudate-password";
             outgoing = "smtp://kronber%40intern.tuwien.ac.at@mail.intern.tuwien.ac.at:587";
-            outgoing-cred-cmd = "${pkgs.coreutils}/bin/cat /run/secrets/aerc-uptudate-password";
+            outgoing-cred-cmd = "${pkgs.uutils-coreutils-noprefix}/bin/cat /run/secrets/aerc-uptudate-password";
             default = "INBOX";
             from = "Martin Kronberger <kronberger@iap.tuwien.ac.at>";
             cache-headers = true;

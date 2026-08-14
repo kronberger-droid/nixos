@@ -134,7 +134,7 @@ EOF
     mkdir -p "$HOME/.termux"
 
     # Copy font if it doesn't exist or has changed
-    if [ ! -f "$fontDst" ] || ! ${pkgs.coreutils}/bin/sha1sum --status -c <(${pkgs.coreutils}/bin/sha1sum "$fontSrc" | ${pkgs.gnused}/bin/sed "s|$fontSrc|$fontDst|") 2>/dev/null; then
+    if [ ! -f "$fontDst" ] || ! ${pkgs.uutils-coreutils-noprefix}/bin/sha1sum --status -c <(${pkgs.uutils-coreutils-noprefix}/bin/sha1sum "$fontSrc" | ${pkgs.gnused}/bin/sed "s|$fontSrc|$fontDst|") 2>/dev/null; then
       $DRY_RUN_CMD cp -f "$fontSrc" "$fontDst"
       echo "Copied Nerd Font to ~/.termux/font.ttf"
       echo "Font source: $fontSrc"

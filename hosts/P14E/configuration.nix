@@ -59,8 +59,8 @@
     '';
 
     udev.extraRules = ''
-      ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.coreutils}/bin/chgrp video /sys/class/leds/%k/brightness"
-      ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.coreutils}/bin/chmod g+w /sys/class/leds/%k/brightness"
+      ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.uutils-coreutils-noprefix}/bin/chgrp video /sys/class/leds/%k/brightness"
+      ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.uutils-coreutils-noprefix}/bin/chmod g+w /sys/class/leds/%k/brightness"
 
       # Allow access to IIO devices for screen rotation (group-restricted)
       SUBSYSTEM=="iio", KERNEL=="iio:device*", MODE="0660", GROUP="video"
