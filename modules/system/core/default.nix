@@ -1,6 +1,7 @@
 {...}: {
   imports = [
     ./nix-settings.nix
+    ./activation.nix
     ./locale.nix
     ./users.nix
     ./packages.nix

@@ -8,6 +8,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/system/core/nix-settings.nix
+    ../../modules/system/core/activation.nix
     ../../modules/system/core/locale.nix
     ../../modules/system/core/esp-permissions.nix
     ../../modules/system/services/syncthing.nix
