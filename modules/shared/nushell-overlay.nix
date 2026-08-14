@@ -1,28 +1,27 @@
-# Overlay swapping nixpkgs' nushell for our helix-mode fork build:
-# current upstream (v0.114.2) + reedline's selection-first Helix edit mode
-# (`edit_mode = "helix"`, reedline#1138). See the `nushell-helix` input in
-# flake.nix for the full rationale. Factored out here so every host gets the
-# same build from a single source of truth — mkHost hosts and the homeserver
-# (which is built outside mkHost) both import this. reedline is the lone git
-# dep, pinned by the fork's Cargo.lock rev and fetched as a FOD; bump the hash
-# when that rev moves.
+# Overlay swapping nixpkgs' nushell (v0.114.2 release) for a build of upstream
+# main, which carries the Helix edit mode (`edit_mode = "helix"`, reedline#1138
+# + nushell#18830) ahead of the next release. Drop the overlay once nixpkgs
+# ships a nushell that includes it. See the `nushell-src` input in flake.nix
+# for the full rationale. Factored out here so every host gets the same build
+# from a single source of truth — mkHost hosts and the homeserver (which is
+# built outside mkHost) both import this. reedline is the lone git dep, pinned
+# by main's Cargo.lock rev and fetched as a FOD; bump the hash when that rev
+# moves.
 inputs: final: prev: {
-  nushell = prev.nushell.overrideAttrs (old: {
+  nushell = prev.nushell.overrideAttrs (_: {
+    # The "-helix" suffix is load-bearing: nushell.nix gates the helix
+    # edit-mode config on `hasInfix "helix"` in the package version, so hosts
+    # on the stock prebuilt package (mediaBox) fall back to vi.
     version = "0.114.2-helix";
-    src = inputs.nushell-helix;
+    src = inputs.nushell-src;
     cargoDeps = final.rustPlatform.importCargoLock {
-      lockFile = "${inputs.nushell-helix}/Cargo.lock";
+      lockFile = "${inputs.nushell-src}/Cargo.lock";
       outputHashes = {
-        "reedline-0.49.0" = "sha256-BxNCweg8GrCQGxWt5+D52FWTuPbls15Z+30jphhkLU4=";
+        "reedline-0.49.0" = "sha256-N5SI5kYQyydQ0WO3Tn62lVP/969KHfXCjuqZHAffJmE=";
       };
     };
-    # reedline#1138 and the fork's own glue both sit behind a cargo feature, so
-    # without this the binary builds fine and just ignores `edit_mode = "helix"`.
-    # It has to be `cargoBuildFeatures`, since that is what cargo-build-hook.sh
-    # reads; `buildFeatures` is a buildRustPackage *argument* mapped to it at
-    # eval time, thus setting it from overrideAttrs lands after the mapping and
-    # does nothing at all.
-    cargoBuildFeatures = (old.cargoBuildFeatures or []) ++ ["helix"];
+    # No feature flags needed: `helix` is in main's default feature set and
+    # nixpkgs builds nushell with default features.
     doCheck = false;
   });
 }
