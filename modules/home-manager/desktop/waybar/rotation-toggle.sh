@@ -1,19 +1,20 @@
 #!@bash@/bin/bash
 
+# Behavioural twin of nu/rotation-toggle.nu; see the comment there for why the
+# state file stays and systemd owns the process.
 STATE_FILE="$HOME/.cache/rotation-state"
 
-# Toggle rotation state
 if [ -f "$STATE_FILE" ]; then
-    # Enable rotation
     @coreutils@/bin/rm -f "$STATE_FILE"
-    @rot8@/bin/rot8 &
-    @libnotify@/bin/notify-send "Auto-rotation" "Screen auto-rotation enabled" -i display-brightness
+    # restart, not start: ExecCondition has to re-read the now-absent file.
+    @systemd@/bin/systemctl --user restart rot8.service
+    STATE=enabled
 else
-    # Disable rotation
     @coreutils@/bin/touch "$STATE_FILE"
-    @procps@/bin/pkill rot8
-    @libnotify@/bin/notify-send "Auto-rotation" "Screen auto-rotation disabled" -i display-brightness
+    @systemd@/bin/systemctl --user stop rot8.service
+    STATE=disabled
 fi
 
-# Refresh waybar
+@libnotify@/bin/notify-send "Auto-rotation" "Screen auto-rotation $STATE" -i display-brightness
+
 @procps@/bin/pkill -RTMIN+9 waybar 2>/dev/null || true
