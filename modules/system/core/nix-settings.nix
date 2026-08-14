@@ -71,9 +71,4 @@
   };
 
   nixpkgs.config.allowUnfree = true;
-
-  # vesktop 1.6.5 builds with pnpm 10.29.2, which nixpkgs flags for several CVEs.
-  nixpkgs.config.permittedInsecurePackages = [
-    "pnpm-10.29.2"
-  ];
 }
