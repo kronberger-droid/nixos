@@ -22,20 +22,9 @@ in {
     navi
   ];
 
-  # Same fork detection as the edit_mode injection in extraConfig below:
-  # stock nushell hard-errors at startup on the fork-only helix_* keybinding
-  # modes ("expected 'emacs', 'vi_insert', or 'vi_normal'"), so strip them
-  # from the mode lists when running the prebuilt stock package (mediaBox).
-  xdg.configFile."nushell/keybindings.nu".text = let
-    src = builtins.readFile ./nushell/keybindings.nu;
-  in
-    if lib.hasInfix "helix" (config.programs.nushell.package.version or "")
-    then src
-    else
-      builtins.replaceStrings
-      ["[helix_insert helix_normal vi_insert vi_normal]"]
-      ["[vi_insert vi_normal]"]
-      src;
+  # The helix_* keybinding modes need a nushell that knows them; every host
+  # gets the upstream-main build via the shared overlay, so this goes in as-is.
+  xdg.configFile."nushell/keybindings.nu".source = ./nushell/keybindings.nu;
 
   # Generated so it can use centralised path variables
   xdg.configFile."nushell/utilities.nu".text = ''
@@ -586,26 +575,33 @@ in {
           source ~/.config/nushell/development.nu
         '')
         + builtins.readFile ./nushell/extra_config.nu
-        # Layer the edit mode on after the base record. The helix edit-mode and
-        # its cursor shapes only exist in our nushell fork; on stock nushell
-        # (mediaBox, which uses the prebuilt package to skip the source build)
-        # fall back to vi so the config stays error-free.
-        + (
-          if lib.hasInfix "helix" (config.programs.nushell.package.version or "")
-          then ''
+        # Layer the edit mode on after the base record. Requires the
+        # upstream-main nushell from the shared overlay; nixpkgs' release
+        # doesn't know `helix` yet and hard-errors at startup on it.
+        + ''
 
-            $env.config.edit_mode = 'helix'
-            $env.config.cursor_shape = ($env.config.cursor_shape | merge {
-              helix_normal: block
-              helix_select: underscore
-              helix_insert: line
-            })
-          ''
-          else ''
+          $env.config.edit_mode = 'helix'
+          $env.config.cursor_shape = ($env.config.cursor_shape | merge {
+            helix_normal: block
+            helix_select: underscore
+            helix_insert: line
+          })
+        ''
+        # Visual/select highlight, generated so it tracks the palette. helix
+        # renders ui.selection as `gray` (base16_transparent), which ansi.nix
+        # maps to base03, so pinning both keys here keeps the shell and the
+        # editor on one selection color.
+        #
+        # Both get the same bg on purpose: the cell under the cursor is set
+        # apart by the terminal cursor shape, not by a second shade. `attr: n`
+        # clears nushell's default reverse video on selection_cursor, which
+        # would otherwise invert the fg/bg of that one cell, and leaving `fg`
+        # unset on both keeps selected text in its syntax color.
+        + ''
 
-            $env.config.edit_mode = 'vi'
-          ''
-        )
+          $env.config.color_config.selection = { bg: "#${config.scheme.base03}" }
+          $env.config.color_config.selection_cursor = { attr: n, bg: "#${config.scheme.base03}" }
+        ''
       )
 
       # Make the prompt itself end in a newline, so *every* indicator reedline

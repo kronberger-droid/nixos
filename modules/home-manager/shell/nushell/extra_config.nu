@@ -15,14 +15,9 @@ $env.config = {
 		vi_normal: block
 		emacs: line
 	}
-	# Visual/select highlight, matching helix's ui.selection: bg = gray, which
-	# the generated palette maps to base03 (#555555). Only `bg` is set so
-	# selected text keeps its syntax color, and it's light enough that the
-	# underscore/block cursors stay visible inside a selection. Other shapes
-	# still use nushell defaults.
-	color_config: {
-		selection: { bg: "#555555" }
-	}
+	# No `color_config` key: the selection colors are generated from the base16
+	# scheme and layered on after this record by nushell.nix, since a static
+	# .nu file can't interpolate config.scheme.
 	shell_integration: {
 		osc133: true
 		osc633: true

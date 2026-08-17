@@ -9,7 +9,6 @@
 {
   lib,
   pkgs,
-  inputs,
   ...
 }: let
   # Autologin/greeter both launch sway. Home-manager's sway config sets
@@ -19,12 +18,6 @@
   sessionWrapper = pkgs.writeShellScript "sway-session-quiet" ''
     exec ${pkgs.sway}/bin/sway 2>/tmp/sway-session.log
   '';
-
-  # Stock nushell from nixpkgs, bypassing the global helix-mode overlay so this
-  # box uses the prebuilt cache binary instead of rebuilding the fork. Must
-  # match the media user's home shell (users/media.nix) — both the login shell
-  # below and home-manager's programs.nushell point at the same package.
-  stockNushell = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nushell;
 in {
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
@@ -97,14 +90,18 @@ in {
     isNormalUser = true;
     description = "Media";
     extraGroups = ["wheel" "networkmanager" "audio" "video" "render"];
-    shell = stockNushell;
+    # pkgs.nushell is the upstream-main build from the shared overlay (mkHost
+    # applies it), same as every other host. It carries passthru.shellPath,
+    # which users.users.<n>.shell requires and upstream's own package
+    # expression does not set — see modules/shared/nushell-overlay.nix.
+    shell = pkgs.nushell;
     # No agenix on this host, so use a changeable initial password instead of a
     # hashed-password secret. Change it after first boot with `passwd`.
     initialPassword = "media";
     openssh.authorizedKeys.keys = builtins.attrValues (import ../../modules/shared/ssh-keys.nix);
   };
 
-  environment.shells = [stockNushell];
+  environment.shells = [pkgs.nushell];
 
   # ── Login: autologin straight into niri ───────────────
   services.greetd = {

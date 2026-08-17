@@ -134,12 +134,16 @@
       url = "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml";
       flake = false;
     };
-    # nushell built from upstream main: the Helix edit mode
-    # (`edit_mode = "helix"`, reedline#1138 + nushell#18830) merged there but
-    # hasn't shipped in a release yet, so build from source until nixpkgs
-    # carries a version with it. Its Cargo.lock pins reedline to a git rev,
-    # fetched as a FOD via outputHashes in the overlay below (same pattern as
-    # niri-src/smithay).
+    # nushell built from upstream main, which runs well ahead of the releases
+    # nixpkgs carries — the Helix edit mode (reedline#1138 + nushell#18830) was
+    # the original reason and has since shipped, but staying on main is cheap
+    # and keeps us off that lag. No `ref=`, so this tracks the default branch;
+    # `nix flake update nushell-src` is the bump.
+    #
+    # Consumed as a plain source tree even though upstream ships a flake at
+    # scripts/nix: the overlay callPackages their package expression against our
+    # own nixpkgs. See modules/shared/nushell-overlay.nix for why that beats
+    # taking the flake.
     nushell-src = {
       url = "github:nushell/nushell";
       flake = false;
@@ -218,8 +222,8 @@
                   # pull in a parallel nixpkgs niri build.
                   niri = final.niri-unstable;
                 })
-                # nushell from our helix-mode-wip fork. Shared with the
-                # homeserver (built outside mkHost) — see the overlay file.
+                # nushell from upstream main. Shared with the homeserver and
+                # droid (both built outside mkHost) — see the overlay file.
                 (import ./modules/shared/nushell-overlay.nix inputs)
                 (_: prev: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
@@ -347,9 +351,9 @@
         };
         modules = [
           ./hosts/homeserver/configuration.nix
-          # Same Helix-mode nushell the mkHost hosts get. Needed because the
+          # Same upstream-main nushell the mkHost hosts get. Needed because the
           # server's home-manager (useGlobalPkgs) and login shell both read
-          # `edit_mode = "helix"`, which stock nushell rejects.
+          # `edit_mode = "helix"`, which nixpkgs' release nushell still rejects.
           {
             nixpkgs.overlays = [
               (import ./modules/shared/nushell-overlay.nix inputs)
@@ -397,8 +401,9 @@
         hostname = "mediaBox";
         system = x86System;
         isNotebook = true;
-        # sway (prebuilt from cache) instead of the niri fork (built from
-        # source) — keeps this box off the Rust compile path.
+        # sway (prebuilt from cache) instead of the niri fork, which would add
+        # a second from-source Rust build on top of the nushell overlay this
+        # box now shares with every other host.
         primaryCompositor = "sway";
         username = "media";
         userModule = ./modules/home-manager/users/media.nix;
@@ -414,7 +419,7 @@
         overlays = [
           inputs.nix-on-droid.overlays.default
           inputs.rust-overlay.overlays.default
-          # Same Helix-mode nushell fork as every other host. Previously
+          # Same upstream-main nushell as every other host. Previously
           # droid stayed on stock nixpkgs nushell to avoid an on-device Rust
           # build, but the homeserver (which builds this same overlay) is
           # already droid's remote builder/substituter, so it hands back the
