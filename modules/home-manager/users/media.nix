@@ -16,12 +16,6 @@
   ...
 }: let
   dropkittenPkg = inputs.dropkitten.packages.${pkgs.stdenv.hostPlatform.system}.dropkitten;
-  # Stock nushell straight from nixpkgs, bypassing the global helix-mode overlay
-  # (modules/shared/nushell-overlay.nix). The overlay rebuilds nushell from our
-  # fork's source; this media box doesn't need the helix edit-mode, so use the
-  # prebuilt cache binary instead. nushell.nix detects the non-fork build and
-  # falls back to vi edit-mode automatically.
-  stockNushell = inputs.nixpkgs.legacyPackages.${pkgs.stdenv.hostPlatform.system}.nushell;
 in {
   home-manager = {
     extraSpecialArgs = {
@@ -52,9 +46,6 @@ in {
       terminal.emulator = "kitty";
       programs.rio.enable = lib.mkForce false;
       compositor.primary = primaryCompositor;
-
-      # Stock nushell (see stockNushell above) — no source rebuild on this host.
-      programs.nushell.package = stockNushell;
 
       # Drop the bitwarden-desktop launcher (Mod+Shift+P) — this box uses the
       # browser extension instead. Unbinding it removes the only reference to
