@@ -97,7 +97,10 @@
     # batman/batgrep/batdiff resolve `bat` from PATH rather than a baked store
     # path, so they have to sit in the same layer as bat itself.
     bat-extras.core
-    glow # markdown renderer; `glow -p file.md` for the pager TUI
+    # Markdown reader: a real TUI (ratatui), vim keys, `/` or `f` to search.
+    # Replaced glow, whose `-p` mode renders and then hands off to $PAGER, so
+    # its scrolling and search were less's rather than its own.
+    md-tui # `mdt file.md`
     rip2
     translate-shell
     wiki-tui
