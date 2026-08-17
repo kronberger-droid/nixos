@@ -9,11 +9,21 @@
     extensions = ["rust-analyzer" "rust-src"];
   };
 in {
+  # Cargo's own defaults (profiles, aliases, linker) live in cargo.nix, which
+  # hosts/droid/home.nix imports too — the phone has a toolchain but no
+  # dev-tools.nix.
+  imports = [./cargo.nix];
+
   # rustfmt uses its default max_width (100); per-project rustfmt.toml still wins.
   home.packages = with pkgs; [
     rustToolchain
     tokei
     cargo-generate
+    # One process per test instead of one thread per test in a shared binary:
+    # real parallelism, per-test timeouts, and a failing test can't poison the
+    # rest of the run. `cargo test` stays available for doctests, which nextest
+    # deliberately does not run.
+    cargo-nextest
     serpl
 
     (python3.withPackages (ps:
