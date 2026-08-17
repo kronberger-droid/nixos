@@ -484,7 +484,7 @@
 
       rust-package = {
         path = ./templates/rust-package;
-        description = "Rust project with naersk packaging and dual dev shells";
+        description = "Rust project with rustPlatform packaging and a dev shell";
       };
 
       c-cpp = {
