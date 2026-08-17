@@ -76,6 +76,10 @@ in {
     ../../modules/home-manager/shell/nushell.nix
     ../../modules/home-manager/shell/git.nix
     ../../modules/home-manager/editors/helix.nix
+    # Cargo profile defaults + the aarch64 mold linker block. Deliberately not
+    # gated on rust.nix being enabled in nix-on-droid.nix: it only writes
+    # ~/.cargo/config.toml, which is inert without a toolchain.
+    ../../modules/home-manager/editors/cargo.nix
 
     # Droid-local trimmed CLI tools (lean subset of shell/tools.nix)
     ./tools.nix
