@@ -12,7 +12,9 @@
       niri = "niri-session";
       sway = "sway";
     }
-    .${primaryCompositor};
+    .${
+      primaryCompositor
+    };
 
   # Wrapper that redirects stderr so TTY stays clean on login.
   # Warnings/errors still readable at /tmp/${sessionBin}.log.

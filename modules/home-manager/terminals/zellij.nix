@@ -1,4 +1,8 @@
-{config, pkgs, ...}: {
+{
+  config,
+  pkgs,
+  ...
+}: {
   # Interactive SSH logins land in a persistent session, same as the homeserver.
   # Named "remote" rather than the local session's name on purpose: zellij
   # multi-attach forces every client to the smallest attached terminal's size, so

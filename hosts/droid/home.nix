@@ -91,24 +91,24 @@ in {
   # Copy Termux properties to ~/.termux/termux.properties
   # Termux requires a regular file, not a symlink
   home.activation.copyTermuxProperties = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    propertiesDst="$HOME/.termux/termux.properties"
+        propertiesDst="$HOME/.termux/termux.properties"
 
-    # Create .termux directory if it doesn't exist
-    mkdir -p "$HOME/.termux"
+        # Create .termux directory if it doesn't exist
+        mkdir -p "$HOME/.termux"
 
-    # Remove existing file/symlink if it exists
-    if [ -e "$propertiesDst" ] || [ -L "$propertiesDst" ]; then
-      $DRY_RUN_CMD rm -f "$propertiesDst"
-    fi
+        # Remove existing file/symlink if it exists
+        if [ -e "$propertiesDst" ] || [ -L "$propertiesDst" ]; then
+          $DRY_RUN_CMD rm -f "$propertiesDst"
+        fi
 
-    # Create the properties file with extra keys configuration
-    $DRY_RUN_CMD cat > "$propertiesDst" << 'EOF'
-### Extra keys configuration
-extra-keys = [['ESC','TAB','/',';','|','UP','{'],['CTRL','ALT','&','"','LEFT','DOWN','RIGHT']]
-EOF
+        # Create the properties file with extra keys configuration
+        $DRY_RUN_CMD cat > "$propertiesDst" << 'EOF'
+    ### Extra keys configuration
+    extra-keys = [['ESC','TAB','/',';','|','UP','{'],['CTRL','ALT','&','"','LEFT','DOWN','RIGHT']]
+    EOF
 
-    echo "Created termux.properties with extra keys configuration"
-    echo "Please restart Termux to apply the extra keys"
+        echo "Created termux.properties with extra keys configuration"
+        echo "Please restart Termux to apply the extra keys"
   '';
 
   # Copy Nerd Font to ~/.termux/font.ttf

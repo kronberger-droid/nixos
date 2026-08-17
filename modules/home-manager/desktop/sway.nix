@@ -41,7 +41,11 @@ in {
     extraConfig =
       ''
         # Limit default floating window size
-        floating_maximum_size ${if isNotebook then "1000 x 650" else "1200 x 800"}
+        floating_maximum_size ${
+          if isNotebook
+          then "1000 x 650"
+          else "1200 x 800"
+        }
 
         mouse_warping container
 
@@ -123,15 +127,15 @@ in {
         ];
       };
       startup = [
-          {
-            command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.95 --focused 1.0";
-            always = false;
-          }
-          {
-            command = "${pkgs.autotiling}/bin/autotiling";
-            always = false;
-          }
-        ];
+        {
+          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.95 --focused 1.0";
+          always = false;
+        }
+        {
+          command = "${pkgs.autotiling}/bin/autotiling";
+          always = false;
+        }
+      ];
       # Base16 colors with custom brown accent for focused windows
       colors = {
         background = "#${config.scheme.base00}";

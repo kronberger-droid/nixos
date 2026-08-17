@@ -18,8 +18,8 @@
         # LSP and linting
         analysisTools = with pkgs; [
           clang-tools # clangd (LSP) + clang-tidy (linter)
-          cppcheck    # static analysis
-          bear        # generates compile_commands.json from Makefile builds
+          cppcheck # static analysis
+          bear # generates compile_commands.json from Makefile builds
         ];
 
         # Build tools

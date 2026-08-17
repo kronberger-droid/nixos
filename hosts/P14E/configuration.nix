@@ -131,7 +131,10 @@
   };
 
   swapDevices = [
-    { device = "/swapfile"; size = 16 * 1024; }
+    {
+      device = "/swapfile";
+      size = 16 * 1024;
+    }
   ];
 
   systemd.sleep.settings.Sleep = {

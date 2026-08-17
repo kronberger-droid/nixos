@@ -92,11 +92,11 @@ in {
         			${pkgs.systemd}/bin/systemctl suspend
         		elif [[ $1 == '--logout' ]]; then
         			${lib.optionalString niriPrimary ''
-            if [[ -n "$NIRI_SOCKET" ]]; then
-        				${pkgs.niri}/bin/niri msg action quit
-        				exit 0
-        			fi
-          ''}
+           if [[ -n "$NIRI_SOCKET" ]]; then
+          	${pkgs.niri}/bin/niri msg action quit
+          	exit 0
+          fi
+        ''}
         			if [[ -n "$SWAYSOCK" ]]; then
         				${pkgs.sway}/bin/swaymsg exit
         			fi

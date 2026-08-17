@@ -7,7 +7,6 @@
   lib,
   ...
 }: let
-
   dropkitten_size = {
     width = "0.35";
     height = "0.45";
@@ -83,84 +82,100 @@ in {
     rofi
   ];
 
-  xdg.configFile = {
-    "waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
+  xdg.configFile =
+    {
+      "waybar/toggle-waybar.sh".source = ./waybar/toggle-waybar.sh;
 
-    # Gated on the sensor rather than emitted unconditionally: the button
-    # drives rot8.service, which session-services.nix only defines on hosts
-    # that have an accelerometer.
-  }
-  // lib.optionalAttrs hasAccelerometer {
-    "waybar/rotation-status" = script "rotation-status" {
-      bash = {};
-      nu = {};
-    };
-
-    "waybar/rotation-toggle" = script "rotation-toggle" {
-      bash = {inherit coreutils; inherit (pkgs) systemd libnotify procps;};
-      nu = {inherit (pkgs) systemd libnotify procps;};
-    };
-  }
-  // {
-
-    "waybar/screenrec-toggle" = script "screenrec-toggle" {
-      bash = {
-        inherit coreutils;
-        inherit (pkgs) procps libnotify rofi slurp gnugrep;
-        wlScreenrec = pkgs.wl-screenrec;
+      # Gated on the sensor rather than emitted unconditionally: the button
+      # drives rot8.service, which session-services.nix only defines on hosts
+      # that have an accelerometer.
+    }
+    // lib.optionalAttrs hasAccelerometer {
+      "waybar/rotation-status" = script "rotation-status" {
+        bash = {};
+        nu = {};
       };
-      nu = {
-        inherit utilLinux;
-        inherit (pkgs) procps libnotify rofi slurp;
-        wlScreenrec = pkgs.wl-screenrec;
+
+      "waybar/rotation-toggle" = script "rotation-toggle" {
+        bash = {
+          inherit coreutils;
+          inherit (pkgs) systemd libnotify procps;
+        };
+        nu = {inherit (pkgs) systemd libnotify procps;};
+      };
+    }
+    // {
+      "waybar/screenrec-toggle" = script "screenrec-toggle" {
+        bash = {
+          inherit coreutils;
+          inherit (pkgs) procps libnotify rofi slurp gnugrep;
+          wlScreenrec = pkgs.wl-screenrec;
+        };
+        nu = {
+          inherit utilLinux;
+          inherit (pkgs) procps libnotify rofi slurp;
+          wlScreenrec = pkgs.wl-screenrec;
+        };
+      };
+
+      "waybar/screenrec-status" = script "screenrec-status" {
+        bash = {inherit (pkgs) procps;};
+        nu = {inherit (pkgs) procps;};
+      };
+
+      "waybar/vpn-status" = script "vpn-status" {
+        bash = {inherit (pkgs) tailscale systemd;};
+        nu = {inherit (pkgs) tailscale systemd;};
+      };
+
+      "waybar/vpn-disconnect-all" = script "vpn-disconnect-all" {
+        bash = {inherit (pkgs) libnotify tailscale systemd procps;};
+        nu = {inherit (pkgs) libnotify tailscale systemd procps;};
+      };
+
+      "waybar/vpn-picker" = script "vpn-picker" {
+        bash = {
+          inherit coreutils;
+          inherit (pkgs) libnotify procps tailscale systemd rofi sd;
+        };
+        nu = {inherit (pkgs) libnotify procps tailscale systemd rofi;};
+      };
+
+      "waybar/scratchpad-toggle" = script "scratchpad-toggle" {
+        bash =
+          terminalVars
+          // {
+            inherit coreutils;
+            inherit (pkgs) jq zellij procps;
+          };
+        nu = terminalVars // {inherit (pkgs) zellij procps;};
+      };
+
+      "waybar/scratchpad-status" = script "scratchpad-status" {
+        bash = {inherit (pkgs) jq;};
+        nu = {};
+      };
+
+      "waybar/ncspot-toggle" = script "ncspot-toggle" {
+        bash =
+          terminalVars
+          // {
+            inherit coreutils;
+            inherit (pkgs) jq zellij;
+          };
+        nu = terminalVars // {inherit (pkgs) zellij;};
+      };
+
+      "waybar/dnd-status" = script "dnd-status" {
+        bash = {inherit (pkgs) mako ripgrep;};
+        nu = {inherit (pkgs) mako;};
+      };
+
+      "waybar/dnd-toggle" = script "dnd-toggle" {
+        bash = {inherit (pkgs) mako ripgrep libnotify procps;};
+        nu = {inherit (pkgs) mako libnotify procps;};
       };
     };
-
-    "waybar/screenrec-status" = script "screenrec-status" {
-      bash = {inherit (pkgs) procps;};
-      nu = {inherit (pkgs) procps;};
-    };
-
-    "waybar/vpn-status" = script "vpn-status" {
-      bash = {inherit (pkgs) tailscale systemd;};
-      nu = {inherit (pkgs) tailscale systemd;};
-    };
-
-    "waybar/vpn-disconnect-all" = script "vpn-disconnect-all" {
-      bash = {inherit (pkgs) libnotify tailscale systemd procps;};
-      nu = {inherit (pkgs) libnotify tailscale systemd procps;};
-    };
-
-    "waybar/vpn-picker" = script "vpn-picker" {
-      bash = {inherit coreutils; inherit (pkgs) libnotify procps tailscale systemd rofi sd;};
-      nu = {inherit (pkgs) libnotify procps tailscale systemd rofi;};
-    };
-
-    "waybar/scratchpad-toggle" = script "scratchpad-toggle" {
-      bash = terminalVars // {inherit coreutils; inherit (pkgs) jq zellij procps;};
-      nu = terminalVars // {inherit (pkgs) zellij procps;};
-    };
-
-    "waybar/scratchpad-status" = script "scratchpad-status" {
-      bash = {inherit (pkgs) jq;};
-      nu = {};
-    };
-
-    "waybar/ncspot-toggle" = script "ncspot-toggle" {
-      bash = terminalVars // {inherit coreutils; inherit (pkgs) jq zellij;};
-      nu = terminalVars // {inherit (pkgs) zellij;};
-    };
-
-    "waybar/dnd-status" = script "dnd-status" {
-      bash = {inherit (pkgs) mako ripgrep;};
-      nu = {inherit (pkgs) mako;};
-    };
-
-    "waybar/dnd-toggle" = script "dnd-toggle" {
-      bash = {inherit (pkgs) mako ripgrep libnotify procps;};
-      nu = {inherit (pkgs) mako libnotify procps;};
-    };
-  };
 
   # Drive scratchpad/ncspot status updates from niri's event stream instead
   # of polling every 2 seconds. Signals waybar (RTMIN+12) on any window event.
@@ -279,8 +294,8 @@ in {
 
         "custom/scratchpad" = {
           return-type = "json";
-          exec = (scriptPath "scratchpad-status");
-          on-click = (scriptPath "scratchpad-toggle");
+          exec = scriptPath "scratchpad-status";
+          on-click = scriptPath "scratchpad-toggle";
           # Event-driven via niri-window-watcher.service; no polling needed
           interval = "once";
           signal = 12;
@@ -292,7 +307,7 @@ in {
           return-type = "json";
           exec = ''echo '{"text":"\uf1bc","tooltip":"Open ncspot"}' '';
           interval = "once";
-          on-click = (scriptPath "ncspot-toggle");
+          on-click = scriptPath "ncspot-toggle";
           format = "{text}";
         };
 
@@ -350,8 +365,8 @@ in {
 
         "custom/dnd" = {
           return-type = "json";
-          exec = (scriptPath "dnd-status");
-          on-click = (scriptPath "dnd-toggle");
+          exec = scriptPath "dnd-status";
+          on-click = scriptPath "dnd-toggle";
           interval = 30;
           signal = 11;
           format = "{text}";
@@ -390,9 +405,9 @@ in {
 
         "custom/vpn" = {
           return-type = "json";
-          exec = (scriptPath "vpn-status");
-          on-click = (scriptPath "vpn-picker");
-          on-click-right = (scriptPath "vpn-disconnect-all");
+          exec = scriptPath "vpn-status";
+          on-click = scriptPath "vpn-picker";
+          on-click-right = scriptPath "vpn-disconnect-all";
           interval = 15;
           signal = 8;
           format = "{icon}{text}";
@@ -405,8 +420,8 @@ in {
 
         "custom/rotation" = {
           return-type = "json";
-          exec = (scriptPath "rotation-status");
-          on-click = (scriptPath "rotation-toggle");
+          exec = scriptPath "rotation-status";
+          on-click = scriptPath "rotation-toggle";
           interval = 3;
           signal = 9;
           format = "{icon}";
@@ -477,8 +492,8 @@ in {
         };
 
         "custom/screenrec" = {
-          exec = (scriptPath "screenrec-status");
-          on-click = (scriptPath "screenrec-toggle");
+          exec = scriptPath "screenrec-status";
+          on-click = scriptPath "screenrec-toggle";
           return-type = "json";
           # Toggle script signals immediately on click; 30s is a safety net
           # for the rare case where wl-screenrec exits on its own

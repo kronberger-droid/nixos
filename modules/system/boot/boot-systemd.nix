@@ -7,7 +7,7 @@
 
   config = lib.mkMerge [
     # systemd initrd is used by both systemd-boot and lanzaboote
-    { boot.initrd.systemd.enable = lib.mkDefault true; }
+    {boot.initrd.systemd.enable = lib.mkDefault true;}
 
     (lib.mkIf config.boot.systemd-boot-defaults.enable {
       boot.loader = {

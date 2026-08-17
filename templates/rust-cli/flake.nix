@@ -9,13 +9,21 @@
     };
   };
 
-  outputs = {nixpkgs, fenix, ...}: let
+  outputs = {
+    nixpkgs,
+    fenix,
+    ...
+  }: let
     forAllSystems = nixpkgs.lib.genAttrs ["x86_64-linux" "aarch64-linux"];
   in {
     devShells = forAllSystems (system: let
       pkgs = nixpkgs.legacyPackages.${system};
       toolchain = fenix.packages.${system}.stable.withComponents [
-        "cargo" "clippy" "rust-src" "rustc" "rustfmt"
+        "cargo"
+        "clippy"
+        "rust-src"
+        "rustc"
+        "rustfmt"
       ];
     in {
       default = pkgs.mkShell {
