@@ -1,4 +1,8 @@
-{pkgs, host, ...}: let
+{
+  pkgs,
+  host,
+  ...
+}: let
   ipu6Hosts = ["spectre"];
 in {
   # Disable libcamera SPA plugin on hosts without IPU6 camera hardware.

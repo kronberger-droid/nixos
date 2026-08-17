@@ -153,11 +153,11 @@
   seedFiles = lib.mapAttrs (name: text: pkgs.writeText "nchat-${name}" text) seedConfigs;
 
   seedScript = lib.concatStringsSep "\n" (lib.mapAttrsToList (name: src: ''
-    if [ ! -e "$confdir/${name}" ]; then
-      $DRY_RUN_CMD install -m600 ${src} "$confdir/${name}"
-    fi
-  '')
-  seedFiles);
+      if [ ! -e "$confdir/${name}" ]; then
+        $DRY_RUN_CMD install -m600 ${src} "$confdir/${name}"
+      fi
+    '')
+    seedFiles);
 in {
   home.packages = with pkgs; [
     nchat

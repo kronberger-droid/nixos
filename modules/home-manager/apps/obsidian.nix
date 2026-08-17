@@ -81,5 +81,4 @@ in {
       --caret-color: #${s.base05};
     }
   '';
-
 }

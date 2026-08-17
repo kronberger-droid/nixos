@@ -48,8 +48,7 @@
       - Agc:
   '';
 
-  environment.variables.LIBCAMERA_IPA_CONFIG_PATH =
-    "/etc/libcamera/ipa:${pkgs.libcamera}/share/libcamera/ipa";
+  environment.variables.LIBCAMERA_IPA_CONFIG_PATH = "/etc/libcamera/ipa:${pkgs.libcamera}/share/libcamera/ipa";
 
   # Set digital gain on sensor probe (2x boost)
   services.udev.extraRules = ''

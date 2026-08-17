@@ -40,7 +40,7 @@ in {
           desc = "Save bookmark";
         }
         {
-          on = ["'" ];
+          on = ["'"];
           run = "plugin bookmarks jump";
           desc = "Jump to bookmark";
         }

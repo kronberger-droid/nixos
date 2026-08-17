@@ -292,9 +292,21 @@
       };
       filtering.rewrites = [
         # Local DNS — add your services here
-        {domain = "adguard.home.lan"; answer = "192.168.2.54"; enabled = true;}
-        {domain = "rss.home.lan"; answer = "192.168.2.54"; enabled = true;}
-        {domain = "photos.home.lan"; answer = "192.168.2.54"; enabled = true;}
+        {
+          domain = "adguard.home.lan";
+          answer = "192.168.2.54";
+          enabled = true;
+        }
+        {
+          domain = "rss.home.lan";
+          answer = "192.168.2.54";
+          enabled = true;
+        }
+        {
+          domain = "photos.home.lan";
+          answer = "192.168.2.54";
+          enabled = true;
+        }
       ];
     };
   };
@@ -347,13 +359,17 @@
   # sudo-rs hardening
   security.sudo-rs = {
     enable = true;
-    extraRules = [{
-      users = [username];
-      commands = [{
-        command = "ALL";
-        options = ["NOPASSWD"];
-      }];
-    }];
+    extraRules = [
+      {
+        users = [username];
+        commands = [
+          {
+            command = "ALL";
+            options = ["NOPASSWD"];
+          }
+        ];
+      }
+    ];
     extraConfig = ''
       Defaults timestamp_timeout=5
       Defaults passwd_timeout=1

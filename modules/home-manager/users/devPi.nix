@@ -1,4 +1,8 @@
-{pkgs, inputs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: {
   home-manager = {
     extraSpecialArgs = {inherit inputs;};
     useGlobalPkgs = true;

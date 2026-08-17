@@ -445,6 +445,19 @@
         inputs.deploy-rs.lib.${system}.deployChecks self.deploy
     );
 
+    # `nix fmt -- .` — alejandra, the same formatter helix runs on save (see
+    # modules/home-manager/editors/helix.nix). Declaring it here is what keeps
+    # the tree consistent: on-save formatting only ever reaches files that
+    # happen to be opened in helix, which is how 27 files had drifted before
+    # the sweep. Both systems, so it also works from the phone.
+    #
+    # The `-- .` is not optional: Lix's `nix fmt` passes no path through, and
+    # alejandra with no arguments reads stdin, so a bare `nix fmt` dies with
+    # "unexpected end of file" instead of formatting anything.
+    formatter = nixpkgs.lib.genAttrs [x86System armSystem] (
+      system: nixpkgs.legacyPackages.${system}.alejandra
+    );
+
     # Project templates
     # Use: nix flake init --template .#<name>
     # Or:  flake init <name>  (nushell alias)

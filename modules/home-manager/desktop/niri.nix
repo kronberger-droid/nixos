@@ -11,7 +11,11 @@
   cwd = "${config.xdg.configHome}/kitty/cwd.sh";
 
   # Build a terminal spawn command, optionally with floating app-id and an exec command
-  termSpawn = {floating ? false, exec ? null, cwdArg ? false}: let
+  termSpawn = {
+    floating ? false,
+    exec ? null,
+    cwdArg ? false,
+  }: let
     idPart =
       if floating && config.terminal.floatingAppId != null
       then "${config.terminal.appIdFlag} ${config.terminal.floatingAppId} "
@@ -42,7 +46,6 @@
   wsSpawn = cmd: ["${spawnOnWs}"] ++ cmd;
 
   scratchpadToggle = "${config.xdg.configHome}/waybar/scratchpad-toggle.sh";
-
 in {
   home.packages = with pkgs; [
     fuzzel
@@ -72,13 +75,13 @@ in {
       };
 
       touchpad = lib.mkIf isNotebook ({
-        tap = true;
-        natural-scroll = true;
-      }
-      # Spectre's touchpad feels sluggish; bump libinput accel-speed (-1.0..1.0).
-      // lib.optionalAttrs (host == "spectre") {
-        accel-speed = 0.3;
-      });
+          tap = true;
+          natural-scroll = true;
+        }
+        # Spectre's touchpad feels sluggish; bump libinput accel-speed (-1.0..1.0).
+        // lib.optionalAttrs (host == "spectre") {
+          accel-speed = 0.3;
+        });
 
       mouse = {
         accel-speed = 0.4;
@@ -175,9 +178,15 @@ in {
       "${modifier}+Return".action.spawn = termSpawn {cwdArg = true;};
       "${modifier}+D".action.spawn = ["${pkgs.rofi}/bin/rofi" "-show" "drun"];
       "${modifier}+Shift+S".action.spawn = wsSpawn ["${pkgs.helium}/bin/helium"];
-      "${modifier}+Shift+Return".action.spawn = termSpawn {floating = true; cwdArg = true;};
+      "${modifier}+Shift+Return".action.spawn = termSpawn {
+        floating = true;
+        cwdArg = true;
+      };
       "${modifier}+Shift+T".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} btop_monitor ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"];
-      "${modifier}+Shift+X".action.spawn = termSpawn {floating = true; exec = "${pkgs.yazi}/bin/yazi $(${cwd})";};
+      "${modifier}+Shift+X".action.spawn = termSpawn {
+        floating = true;
+        exec = "${pkgs.yazi}/bin/yazi $(${cwd})";
+      };
       "${modifier}+Shift+N".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${pkgs.nemo-with-extensions}/bin/nemo $(${cwd})"];
 
       # Scratchpad
@@ -475,7 +484,12 @@ in {
 
       # Proton Pass
       {
-        matches = [{app-id = "^electron$"; title = "^Proton Pass$";}];
+        matches = [
+          {
+            app-id = "^electron$";
+            title = "^Proton Pass$";
+          }
+        ];
         open-floating = true;
         default-column-width = {proportion = 0.6;};
         default-window-height = {proportion = 0.7;};
