@@ -24,6 +24,10 @@ in {
     # rest of the run. `cargo test` stays available for doctests, which nextest
     # deliberately does not run.
     cargo-nextest
+    # Checks Cargo.lock against the RustSec advisory DB. Pulls the DB over the
+    # network into ~/.cargo/advisory-db on first run, so it only makes sense as
+    # a thing you invoke by hand, not as part of a nix build.
+    cargo-audit
     serpl
 
     (python3.withPackages (ps:
