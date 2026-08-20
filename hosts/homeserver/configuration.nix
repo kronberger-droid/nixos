@@ -354,7 +354,6 @@
 
   # Power saving
   powerManagement.powertop.enable = true;
-  services.thermald.enable = true;
 
   # sudo-rs hardening
   security.sudo-rs = {
