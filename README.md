@@ -14,7 +14,6 @@ to turn.
 | `P14E` | x86_64 | Laptop (not yet installed) |
 | `homeserver` | x86_64 | Server: DNS, RSS, photos, CalDAV, binary cache, website |
 | `mediaBox` | x86_64 | Media kiosk notebook |
-| `devPi` | aarch64 | ARM dev board |
 | `droid` | aarch64 | Phone, via nix-on-droid |
 | `recovery` | x86_64 | Rescue ISO, `nix build .#recovery` |
 

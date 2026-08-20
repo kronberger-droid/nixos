@@ -378,21 +378,6 @@
         ];
       };
 
-      # ARM devices (special case without agenix and standard user config)
-      devPi = nixpkgs.lib.nixosSystem {
-        system = armSystem;
-        specialArgs = {
-          host = "devPi";
-          inherit inputs;
-        };
-        modules = [
-          ./hosts/devPi/configuration.nix
-          home-manager.nixosModules.home-manager
-          ./modules/home-manager/users/devPi.nix
-          lixModule
-        ];
-      };
-
       # x86 notebook media box — a "focused spectre": full niri desktop
       # (waybar, rofi, mako, nemo, keyd, theming) via the shared mkHost stack,
       # but with a lean media user (no dev toolchains, no personal apps) and a
