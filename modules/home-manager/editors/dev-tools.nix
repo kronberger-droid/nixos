@@ -28,6 +28,15 @@ in {
     # network into ~/.cargo/advisory-db on first run, so it only makes sense as
     # a thing you invoke by hand, not as part of a nix build.
     cargo-audit
+    # Reclaims target/ artifacts cargo itself will never drop. Each checkout
+    # keeps a private copy of every dependency's objects, and because the
+    # toolchain above tracks rust-overlay's latest stable, every update orphans
+    # the previous compiler's entire object set with nothing to collect it —
+    # that is how these grew to 313GB across the fleet of Rust checkouts, 226GB
+    # of it under nushell alone. Run by hand from a project (or a parent dir):
+    #   cargo sweep --installed -r     # drop artifacts from toolchains you no longer have
+    #   cargo sweep --time 30 -r       # drop anything not touched in 30 days
+    cargo-sweep
     serpl
 
     (python3.withPackages (ps:
