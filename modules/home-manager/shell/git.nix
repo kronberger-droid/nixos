@@ -180,6 +180,7 @@ in {
 
     git = {
       enable = true;
+      lfs.enable = true;
       signing.format = null;
       ignores = [
         ".rumdl_cache"
