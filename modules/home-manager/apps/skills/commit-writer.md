@@ -55,7 +55,6 @@ beats `fix(nchat): remove mkdir`.
 - backtick every identifier, file and path; reference issues bare (`#1100`)
 - prose wraps, code does not: indent code blocks by 4 and leave them long
 - no em-dashes, no emoji
-- disclose LLM involvement with the `Co-Authored-By:` trailer
 
 ## Steps
 
