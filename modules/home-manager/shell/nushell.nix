@@ -649,21 +649,28 @@ in {
 
     settings =
       lib.recursiveUpdate
-      # Nerd-font symbols preset, vendored in ./nushell/ (see its header for why
-      # it is not a flake input, and how to refresh it). The file is kept
-      # upstream-verbatim so refreshing stays a single curl, thus the pruning
-      # lives here:
+      # Nerd-font symbols preset, taken out of the very starship being
+      # installed: nixpkgs puts every preset under share/starship/presets, so
+      # the symbols and the binary that reads them come from one derivation and
+      # cannot disagree. Carrying the preset separately is what made them
+      # disagree before, whether as a flake input or vendored here: upstream
+      # only publishes it from master, which runs ahead of the release nixpkgs
+      # packages, thus starship warned `Unknown key` on every prompt for each
+      # module it did not have yet (`jj_bookmark`, starship#7643, most
+      # recently). Nothing to refresh now, and nothing to prune per release.
       #
-      #   maven        a module we don't use
-      #   os           master keeps adding os.symbols variants (InstantOS,
-      #                Bazzite, …) that our pinned starship doesn't know
-      #   jj_bookmark  a whole module (starship#7643) newer than that starship
+      # This reads a file out of a derivation, so eval realises the starship
+      # package before the build graph exists, and evaluating a host of another
+      # architecture substitutes that host's starship on whichever machine
+      # evaluates. Worth it for a cached ~5MB package that every host installs
+      # anyway; it would not be for anything that has to be compiled.
       #
-      # None of it is fatal, but starship warns per unknown key on every single
-      # prompt. The os module is off by default and jj is unused here, so
-      # dropping them costs nothing visible. Expect the list to grow: the preset
-      # tracks master while starship itself comes from a nixpkgs release.
-      (builtins.removeAttrs (builtins.fromTOML (builtins.readFile ./nushell/nerd-font-symbols.toml)) ["maven" "os" "jj_bookmark"])
+      # `maven` and `os` are dropped as modules we don't run, the os table
+      # being ~60 symbols for one that is off by default.
+      (builtins.removeAttrs
+        (builtins.fromTOML (builtins.readFile
+            "${config.programs.starship.package}/share/starship/presets/nerd-font-symbols.toml"))
+        ["maven" "os"])
       {
         command_timeout = 2000;
         # Single-line module row. `$all` is every module in default order, which
