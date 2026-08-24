@@ -649,13 +649,13 @@ in {
 
     settings =
       lib.recursiveUpdate
-      # Nerd-font symbols preset from starship master (via inputs.starship-nerd-fonts;
-      # bump its narHash in flake.lock when upstream edits the file). Drop `maven`
-      # (a module we don't use) and the whole `os` table: starship master keeps
-      # adding os.symbols variants (InstantOS, Bazzite, …) that our pinned starship
+      # Nerd-font symbols preset, vendored in ./nushell/ (see its header for why
+      # it is not a flake input, and how to refresh it). Drop `maven` (a module
+      # we don't use) and the whole `os` table: starship master keeps adding
+      # os.symbols variants (InstantOS, Bazzite, …) that our pinned starship
       # doesn't know yet, and each unknown one makes it warn on every prompt. The
       # os module is off by default, so dropping its symbols costs nothing visible.
-      (builtins.removeAttrs (builtins.fromTOML (builtins.readFile inputs.starship-nerd-fonts)) ["maven" "os"])
+      (builtins.removeAttrs (builtins.fromTOML (builtins.readFile ./nushell/nerd-font-symbols.toml)) ["maven" "os"])
       {
         command_timeout = 2000;
         # Single-line module row. `$all` is every module in default order, which
