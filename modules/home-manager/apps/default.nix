@@ -16,5 +16,6 @@
     ./qutebrowser.nix
     ./syncthing.nix
     ./obsidian.nix
+    ./steam.nix
   ];
 }
