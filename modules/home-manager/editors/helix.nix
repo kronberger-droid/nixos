@@ -71,6 +71,47 @@
   rustLsp = config.helix.rustLsp;
   glancer = rustLsp == "rust-glancer";
 
+  # Edition-aware rustfmt for helix's `formatter` hook, which pipes the buffer
+  # through stdin and takes stdout back.
+  #
+  # The wrapper exists because bare `rustfmt` defaults to edition 2015, which
+  # cannot even parse `async`/`await`. The LSPs sidestep that by reading the
+  # edition out of cargo metadata themselves (rust-glancer does it in
+  # crates/lsp/engine/src/formatting.rs), so relying on the LSP for formatting
+  # was edition-correct for free — that guarantee is what has to be rebuilt
+  # here before formatting can move off the language server.
+  #
+  # No argument needed: helix runs formatters with the working directory set to
+  # the document's own directory (helix-view/src/document.rs, `current_dir`),
+  # so walking up from `.` lands on the right Cargo.toml. Workspace members
+  # written as `edition.workspace = true` carry no concrete edition, so the walk
+  # simply continues to the workspace root that defines it.
+  rustfmtEdition = pkgs.writeShellScript "rustfmt-edition" ''
+    set -euo pipefail
+
+    # Only [package] and [workspace.package] are consulted. Reading the whole
+    # file would also match a *dependency* named `edition` — rust-glancer's own
+    # root manifest has exactly that, vendored from rust-analyzer, and a plain
+    # version string there would otherwise be mistaken for the edition.
+    edition=""
+    dir=$PWD
+    while [ "$dir" != "/" ]; do
+      if [ -f "$dir/Cargo.toml" ]; then
+        edition=$(${pkgs.gawk}/bin/awk '
+          /^[[:space:]]*\[/ { in_pkg = ($0 ~ /^[[:space:]]*\[(workspace\.)?package\]/); next }
+          in_pkg && match($0, /^[[:space:]]*edition[[:space:]]*=[[:space:]]*"[0-9]+"/) {
+            gsub(/[^0-9]/, "", $0); print; exit
+          }
+        ' "$dir/Cargo.toml")
+        [ -n "$edition" ] && break
+      fi
+      dir=$(dirname "$dir")
+    done
+
+    # Loose .rs files with no Cargo.toml anywhere above them. 2021 rather than
+    # rustfmt's own 2015 default, which would fail to parse most modern code.
+    exec rustfmt --edition "''${edition:-2021}" --emit stdout
+  '';
 in {
   imports = [
     ./helix/dprint.nix
@@ -312,6 +353,15 @@ in {
                 rustLsp
                 "harper"
               ];
+              # Formatting deliberately does not go through the language
+              # server, matching every other language here. Under rust-glancer
+              # the LSP route runs rustfmt *inside* the analysis engine behind
+              # a ~10s tarpc deadline, so a save that also invalidates the
+              # package cache makes the format race the rebuild that same save
+              # kicked off — three of those timed out before this. Going
+              # straight to rustfmt takes the engine out of the path entirely.
+              formatter.command = "${rustfmtEdition}";
+              auto-format = true;
             }
           ]
           ++ lib.optionals full [
