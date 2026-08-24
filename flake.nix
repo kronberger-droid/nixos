@@ -20,32 +20,20 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Rio "nightly": upstream main built with Rio's own flake.
+    # Rio built from upstream main via Rio's own flake. The overlay disables
+    # its checkPhase, which changes the drv hash and thus forfeits the
+    # rioterm.cachix.org cache — every bump is a local build now. The old
+    # byte-for-byte cache-matching setup (and its substituter in
+    # nix-caches.nix) lives on in git history if checks ever come back.
     #
-    # Deliberately unfollowed. Rio's CI pushes builds to rioterm.cachix.org
-    # (wired up in modules/system/core/nix-caches.nix), and a substituter hit
-    # needs the output hash to match upstream's byte for byte. Any `follows`
-    # here rewrites an input, which rewrites the hash, which turns every build
-    # into a local rustc run over the whole workspace. Verified: with nixpkgs
-    # and rust-overlay followed, our rio path 404s against the cache; the
-    # unfollowed `.default` hits.
+    # Still deliberately unfollowed: Rio's own nixpkgs/rust-overlay lock is
+    # what upstream tests against, and it resolves Rio's habit of pinning its
+    # MSRV to a just-released Rust — following our rust-overlay lock is how
+    # that bit us before. Costs a second nixpkgs at eval time and a parallel
+    # set of runtime libs, all cheap and cached.
     #
-    # Cost of unfollowing is a second nixpkgs at eval time and a parallel set
-    # of runtime libs (rio pulls its own libxkbcommon etc). Rio's closure is
-    # ~95M and those deps come from cache.nixos.org anyway, so the disk hit is
-    # noise next to the build it saves.
-    #
-    # Two constraints follow from how upstream CI publishes:
-    #
-    #   - Use `.default`, not `.rio-stable`. CI only ever builds `.default`.
-    #     Unfollowing also removes the reason we picked `.rio-stable` in the
-    #     first place: that was to dodge Rio pinning its MSRV to unreleased
-    #     Rust, which only bit us because we forced rust-overlay to our lock.
-    #     Rio's own lock resolves its MSRV fine. `.rio-nightly` is the
-    #     Rust-nightly compiler variant, likewise uncached.
-    #   - Track main closely. Only the current main is in the cache; revs a
-    #     few days old already 404. Bump this input often, and expect a cache
-    #     miss to mean a full local build.
+    # Use `.default`. `.rio-nightly` is not a fresher channel — it's the same
+    # main source built with a Rust nightly toolchain.
     rio-upstream.url = "github:raphamorim/rio";
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -242,26 +230,22 @@
                 (_: prev: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                   claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
-                  # Taken verbatim so it matches what upstream CI pushed to
-                  # rioterm.cachix.org. See the rio-upstream input for why
-                  # nothing here may be overridden or followed.
+                  # rio from upstream main, tests skipped — same policy as the
+                  # nushell overlay. Upstream keeps adding tests that assume a
+                  # real host and each one breaks the sandboxed checkPhase for
+                  # a new reason: first the pty SIGHUP (#1855, fixed), now the
+                  # URL tests spawning /bin/sleep, which the sandbox doesn't
+                  # have. Upstream CI already gates main, so running the suite
+                  # here only ever reproduces sandbox incompatibilities.
                   #
-                  # This used to carry `doCheck = false`: rio's context tests
-                  # fork a pty and the SIGHUP from tearing it down killed the
-                  # whole `cargo test` harness inside the nix sandbox (exit
-                  # 129 = 128 + SIGHUP, no assertion failure). Upstream fixed
-                  # the sandbox PID 1 detection behind it in d52809a (#1855)
-                  # and CI now builds with checks on, so the override is gone
-                  # (it would also have cost us the cache). If a cache miss
-                  # ever drops you into a local build that dies at exit 129,
-                  # this is the one-liner that brings it back:
-                  #
-                  #   rio = inputs.rio-upstream.packages.${system}.default
-                  #     .overrideAttrs (_: {doCheck = false;});
-                  #
-                  # Note that reinstating it forfeits the cache permanently,
-                  # not just for the broken rev.
-                  rio = inputs.rio-upstream.packages.${system}.default;
+                  # The override changes the drv hash, so rioterm.cachix.org
+                  # can never hit again and every bump is a full local build
+                  # (~25 min). The substituter was dropped from nix-caches.nix
+                  # along with this; restore both together if checks ever go
+                  # back on.
+                  rio =
+                    inputs.rio-upstream.packages.${system}.default.overrideAttrs
+                    (_: {doCheck = false;});
                   # bitwarden-desktop's checkPhase runs the desktop_native cargo
                   # tests, and a currently-failing test there breaks the build.
                   # Upstream nixpkgs already carries per-test checkFlags skips
