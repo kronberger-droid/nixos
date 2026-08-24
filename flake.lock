@@ -806,21 +806,6 @@
         "type": "github"
       }
     },
-<<<<<<< HEAD
-=======
-    "starship-nerd-fonts": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-3waKTHcUQnYES+4iT7ACYduaQKr4oFD+zax6oUm8xyY=",
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml"
-      }
-    },
->>>>>>> f664d6f (update: flake update)
     "systems": {
       "locked": {
         "lastModified": 1681028828,
