@@ -350,6 +350,13 @@ in {
             };
             rust-analyzer = {
               command = "rust-analyzer";
+              # Send its tracing output to its own file instead of stderr.
+              # Helix logs every stderr line a server writes at ERROR level, so
+              # rust-analyzer alone had put 322,955 lines into helix.log —
+              # enough to bury helix's own errors and, with rust-analyzer's 213
+              # genuine `request handler panicked` records among them, to make
+              # every other server's INFO chatter look like a crash.
+              args = ["--log-file" "${config.xdg.cacheHome}/rust-analyzer.log"];
               config = {
                 check.command = "clippy";
               };
@@ -383,6 +390,16 @@ in {
             };
           }
           // lib.optionalAttrs full {
+            # Only declared to quiet it: helix's built-in entry is just
+            # `{ command = "tinymist" }` and was fine otherwise. tinymist logs
+            # at info to stderr, which helix records at ERROR — 718,599 lines,
+            # 60% of a 201MB helix.log, almost all of it `notifying
+            # textDocument/didChange` and per-compile cache evictions.
+            tinymist = {
+              command = "${pkgs.tinymist}/bin/tinymist";
+              # Equivalent to its --log-filter flag; takes an EnvFilter string.
+              environment.TINYMIST_LOG = "warn";
+            };
             pyright = {
               command = "${pkgs.pyright}/bin/pyright-langserver";
               args = ["--stdio"];
