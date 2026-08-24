@@ -709,7 +709,6 @@
         "rio-upstream": "rio-upstream",
         "rust-glancer-src": "rust-glancer-src",
         "rust-overlay": "rust-overlay_3",
-        "starship-nerd-fonts": "starship-nerd-fonts",
         "website": "website"
       }
     },
@@ -805,18 +804,6 @@
         "owner": "andreymatin",
         "repo": "scss-reset",
         "type": "github"
-      }
-    },
-    "starship-nerd-fonts": {
-      "flake": false,
-      "locked": {
-        "narHash": "sha256-8KGG/K3WkSA1JR+BfkegVbSGiH5ZdyvWQgaV/oV4MPE=",
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml"
-      },
-      "original": {
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml"
       }
     },
     "systems": {

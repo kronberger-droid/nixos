@@ -130,10 +130,6 @@
       url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    starship-nerd-fonts = {
-      url = "https://raw.githubusercontent.com/starship/starship/master/docs/public/presets/toml/nerd-font-symbols.toml";
-      flake = false;
-    };
     # nushell built from upstream main, which runs well ahead of the releases
     # nixpkgs carries — the Helix edit mode (reedline#1138 + nushell#18830) was
     # the original reason and has since shipped, but staying on main is cheap
