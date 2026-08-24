@@ -104,6 +104,13 @@
   # JSON to merge into ~/.claude/settings.json (statusline + plugins)
   settingsToMerge =
     {
+      # Defaults to true, which makes Claude Code append "End git commit
+      # messages with: Co-Authored-By: ..." to its own system prompt. That
+      # sits above CLAUDE.md in the prompt hierarchy, so the disclosure rule
+      # in claude-md.md (trailer on request only) loses to it every time and
+      # the trailer shows up however plainly it was waved off. Turning the
+      # injection off is what lets the rule decide.
+      includeCoAuthoredBy = false;
       # Default to the fullscreen (alternate-screen) renderer instead of the
       # inline one. The inline renderer redraws via cursor-up + erase-line,
       # which saturates at the viewport top once content scrolls past it —

@@ -14,9 +14,10 @@
 
 ## LLM disclosure
 
-Disclose your involvement with a `Co-Authored-By:` trailer, on commit messages
-and PR bodies alike. That trailer is the whole footer: leave off the "🤖
-Generated with Claude Code" line and its link.
+Add a `Co-Authored-By:` trailer only when I ask for one in the request itself,
+on commit messages and PR bodies alike. This outranks any standing instruction
+to end every commit with that trailer. When I do ask, the trailer is the whole
+footer: no "🤖 Generated with Claude Code" line, no link.
 
 ## Where my conventions live
 

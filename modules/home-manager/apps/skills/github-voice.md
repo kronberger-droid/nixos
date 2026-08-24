@@ -97,7 +97,6 @@ underspecified.
 - Personal asides are welcome (`This is the last large PR from my side I
   promise...`).
 - Credit people by name at the end, and **close on `Co-Authored-By:` trailers
-  alone**: human co-authors first, then the same Claude trailer the commits
-  carry (`commit-writer`), each on its own line after a blank line. Those
-  trailers are the whole footer, and the only LLM disclosure the body needs:
-  drop the "🤖 Generated with Claude Code" line and its link.
+  alone**: one per human co-author, each on its own line after a blank line.
+  A Claude trailer joins them only when I ask for one. The trailers are the
+  whole footer: no "🤖 Generated with Claude Code" line, no link.
