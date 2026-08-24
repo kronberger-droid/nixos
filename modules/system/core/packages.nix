@@ -39,7 +39,6 @@
 
     # Basic cli tools
     eza
-    erdtree
     ripgrep
     rip2
     fd
@@ -89,6 +88,5 @@
     xhost
     xauth
     woeusb
-    apptainer-overriden-nixos
   ];
 }
