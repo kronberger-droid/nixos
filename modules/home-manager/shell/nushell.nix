@@ -650,12 +650,20 @@ in {
     settings =
       lib.recursiveUpdate
       # Nerd-font symbols preset, vendored in ./nushell/ (see its header for why
-      # it is not a flake input, and how to refresh it). Drop `maven` (a module
-      # we don't use) and the whole `os` table: starship master keeps adding
-      # os.symbols variants (InstantOS, Bazzite, …) that our pinned starship
-      # doesn't know yet, and each unknown one makes it warn on every prompt. The
-      # os module is off by default, so dropping its symbols costs nothing visible.
-      (builtins.removeAttrs (builtins.fromTOML (builtins.readFile ./nushell/nerd-font-symbols.toml)) ["maven" "os"])
+      # it is not a flake input, and how to refresh it). The file is kept
+      # upstream-verbatim so refreshing stays a single curl, thus the pruning
+      # lives here:
+      #
+      #   maven        a module we don't use
+      #   os           master keeps adding os.symbols variants (InstantOS,
+      #                Bazzite, …) that our pinned starship doesn't know
+      #   jj_bookmark  a whole module (starship#7643) newer than that starship
+      #
+      # None of it is fatal, but starship warns per unknown key on every single
+      # prompt. The os module is off by default and jj is unused here, so
+      # dropping them costs nothing visible. Expect the list to grow: the preset
+      # tracks master while starship itself comes from a nixpkgs release.
+      (builtins.removeAttrs (builtins.fromTOML (builtins.readFile ./nushell/nerd-font-symbols.toml)) ["maven" "os" "jj_bookmark"])
       {
         command_timeout = 2000;
         # Single-line module row. `$all` is every module in default order, which
