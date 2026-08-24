@@ -67,6 +67,10 @@
   # When false, drop the heavyweight language tooling (Typst, Python, CSV,
   # GLSL, PDF viewer, compilers) and keep only Nix + Markdown + Rust editing.
   full = !config.helix.minimal;
+
+  rustLsp = config.helix.rustLsp;
+  glancer = rustLsp == "rust-glancer";
+
 in {
   imports = [
     ./helix/dprint.nix
@@ -93,6 +97,26 @@ in {
         CSV, GLSL, PDF viewer, compilers). For constrained targets like
         nix-on-droid. Also prunes the matching languages.toml entries so the
         omitted tools don't get pulled into the closure by store-path refs.
+      '';
+    };
+
+    rustLsp = lib.mkOption {
+      type = lib.types.enum ["rust-analyzer" "rust-glancer"];
+      default = "rust-analyzer";
+      description = ''
+        Which language server the `rust` language uses. Both server blocks are
+        always declared, so this is a one-word flip in either direction.
+
+        "rust-glancer" is the experimental low-memory alternative (see
+        modules/shared/rust-glancer-overlay.nix). It is not a drop-in: it
+        re-analyzes the workspace on save rather than incrementally, so a new
+        import or declaration stays unresolved until the buffer is written,
+        and it advertises no code actions or signature help — `<space>a` goes
+        dead in Rust buffers. What it buys is a footprint under ~100MB and an
+        index that survives an editor restart instead of being rebuilt.
+
+        Selecting it is also what first pulls the ~400-crate build into the
+        closure; leaving it on rust-analyzer costs nothing.
       '';
     };
   };
@@ -147,7 +171,12 @@ in {
 
           # JSON / web (Biome: LSP + formatter)
           biome
-        ];
+        ]
+        # Appended rather than slotted in with the other Rust tools so the
+        # default (rust-analyzer) profile stays byte-identical: an empty
+        # optional appends nothing. Installed independently of `full` — the
+        # option is meant to be flippable on lean hosts too.
+        ++ lib.optional glancer pkgs.rust-glancer;
 
       file = {
         # Nix-generated palette (inherits base16_transparent + scheme colors)
@@ -280,7 +309,7 @@ in {
             {
               name = "rust";
               language-servers = [
-                "rust-analyzer"
+                rustLsp
                 "harper"
               ];
             }
@@ -387,6 +416,43 @@ in {
             rumdl = {
               command = "${pkgs.rumdl}/bin/rumdl";
               args = ["server" "--stdio"];
+            };
+          }
+          // lib.optionalAttrs glancer {
+            rust-glancer = {
+              command = "${pkgs.rust-glancer}/bin/rust-glancer";
+              # The binary is also an `analyze` / `compare-lsp` CLI; `lsp` is
+              # the subcommand that serves over stdio.
+              args = ["lsp"];
+              # The server writes its tracing output to stderr as JSON, meant
+              # for the VS Code extension to parse into a log channel. Helix
+              # has no such channel and stamps every stderr line `[ERROR]`, so
+              # the default `info` filter renders each memory report and
+              # indexing milestone as an editor error. Drop to warn: real
+              # problems still surface, the per-phase telemetry doesn't.
+              # RUST_GLANCER_LOG takes an EnvFilter string, so bump it back to
+              # "info" (or a target like "rg_lsp_engine=debug") when debugging.
+              environment.RUST_GLANCER_LOG = "warn";
+              config = {
+                # Helix sends this block as initializationOptions, which is
+                # the same channel the VS Code extension uses — the keys are
+                # its `rust-glancer.*` settings minus the prefix.
+                diagnostics = {
+                  # Defaults to false in the server *and* in the extension, so
+                  # leaving this out means no compiler diagnostics at all —
+                  # the LSP side only ever supplies navigation and completion.
+                  onSave = true;
+                  # Matches rust-analyzer's check.command above.
+                  command = "clippy";
+                  # `onStartup` deliberately left off. It fires that clippy run
+                  # against the same engine process that is still indexing, and
+                  # rustfmt and completion are served *from* that process behind
+                  # a ~10s tarpc deadline — on nushell the startup run took 28.8s
+                  # and every format-on-save and completion inside that window
+                  # died with "the request exceeded its deadline". Waiting for
+                  # the first :w costs far less than that.
+                };
+              };
             };
           }
           // lib.optionalAttrs full {

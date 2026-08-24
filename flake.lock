@@ -707,9 +707,26 @@
         "nushell-src": "nushell-src",
         "oo7-nixos": "oo7-nixos",
         "rio-upstream": "rio-upstream",
+        "rust-glancer-src": "rust-glancer-src",
         "rust-overlay": "rust-overlay_3",
         "starship-nerd-fonts": "starship-nerd-fonts",
         "website": "website"
+      }
+    },
+    "rust-glancer-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787336156,
+        "narHash": "sha256-JuY7HJ3aiKuQgZ1Cl8p1Rtvzj8z+jrg1GN0TBi8pO2o=",
+        "owner": "rust-glancer",
+        "repo": "rust-glancer",
+        "rev": "110b2df8aba6c2db340041aa03a6bd6c7102f37b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rust-glancer",
+        "repo": "rust-glancer",
+        "type": "github"
       }
     },
     "rust-overlay": {
