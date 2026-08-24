@@ -148,6 +148,20 @@
       url = "github:nushell/nushell";
       flake = false;
     };
+    # rust-glancer: an alternative Rust LSP trading incremental analysis for a
+    # sub-100MB footprint and an index that survives editor restarts. Consumed
+    # as a source tree because upstream ships only VS Code `.vsix` bundles and
+    # is not in nixpkgs — modules/shared/rust-glancer-overlay.nix builds the
+    # server binary out of it, and helix.nix wires it in behind `helix.rustLsp`.
+    #
+    # Tracks the default branch, like nushell-src: the project is young enough
+    # that the tagged releases lag the fixes, and nothing here is load-bearing
+    # (the toggle defaults to rust-analyzer). If a bad main ever blocks a
+    # rebuild, `git checkout flake.lock` on this input is the whole recovery.
+    rust-glancer-src = {
+      url = "github:rust-glancer/rust-glancer";
+      flake = false;
+    };
     # Personal site (CV / blog / publications / projects). Its flake builds the
     # Zola output into a store path; the homeserver's website.nix points nginx
     # at that path. Content lives in its own repo so writing a post is not a
@@ -225,6 +239,10 @@
                 # nushell from upstream main. Shared with the homeserver and
                 # droid (both built outside mkHost) — see the overlay file.
                 (import ./modules/shared/nushell-overlay.nix inputs)
+                # Exposes `pkgs.rust-glancer` for helix.nix. Lazy: no host
+                # builds it unless `helix.rustLsp` selects it. Also applied to
+                # droid, the only other config that imports the helix module.
+                (import ./modules/shared/rust-glancer-overlay.nix inputs)
                 (_: prev: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                   claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
@@ -410,6 +428,10 @@
           # already droid's remote builder/substituter, so it hands back the
           # prebuilt output instead of compiling on the phone.
           (import ./modules/shared/nushell-overlay.nix inputs)
+          # droid imports the helix module too (with helix.minimal = true), so
+          # it needs the attribute to exist for `helix.rustLsp` to be flippable
+          # here at all. Unreferenced while the option stays on rust-analyzer.
+          (import ./modules/shared/rust-glancer-overlay.nix inputs)
           (_: _: {
             claude-code-bin = inputs.claude-code.packages.${armSystem}.claude-code;
           })
