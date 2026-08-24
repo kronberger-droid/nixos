@@ -1,14 +1,11 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
     # Browsers
-    brave
     helium
 
     # Messaging
     thunderbird
     aerion
-    # gurk-rs
-    element-desktop
     zapzap
     signal-desktop
     # Replaces vesktop, which could not render incoming webcams on P14E.
