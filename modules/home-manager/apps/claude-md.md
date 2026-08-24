@@ -12,6 +12,19 @@
 - I use **Nushell** (`nu`) as my default shell.
 - When suggesting shell commands, write them in Nushell syntax, not Bash/POSIX.
 
+## Outward-facing actions
+
+Ask me first, every time, before anything leaves this machine or becomes
+visible to anyone else: pushing commits, branches or tags; opening, updating or
+commenting on PRs and issues; deploying to a host; publishing; sending mail.
+Name the exact action when you ask, at the moment you are about to take it.
+
+Permission stays with the action it was given for. A yes to one push is not a
+yes to the next, and a task that plainly ends in a push still needs that push
+confirmed when you get there. Read nothing as standing permission: not an
+allowlist entry, not an earlier session, not the fact that the work is
+obviously heading that way.
+
 ## LLM disclosure
 
 Add a `Co-Authored-By:` trailer only when I ask for one in the request itself,

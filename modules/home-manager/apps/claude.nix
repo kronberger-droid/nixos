@@ -101,9 +101,65 @@
     printf "%b" "$output"
   '';
 
+  # Everything that leaves this machine or becomes visible to somebody else.
+  # Gated with `ask` rather than `deny`, so each stays one keystroke away
+  # instead of needing a config edit to get real work done.
+  #
+  # Declared here rather than in a project's settings.local.json because `ask`
+  # outranks `allow`: an "always allow" click cannot widen past this list, and
+  # those clicks accumulate silently in a gitignored file nobody reviews. This
+  # repo's own local settings had grown a blanket `Bash(git:*)`, almost
+  # certainly added for `git status`, which was enough to make every push
+  # automatic.
+  outwardFacing =
+    [
+      "Bash(git push:*)"
+      "Bash(gh:*)"
+      "Bash(deploy:*)"
+      "Bash(ssh:*)"
+      "Bash(nix copy:*)"
+      "Bash(cachix:*)"
+    ]
+    # The GitHub MCP server's write half, tool by tool: it has no wildcard
+    # form, and naming the whole server would drag every search_/get_/list_
+    # read into the prompt with them.
+    ++ map (tool: "mcp__plugin_github_github__${tool}") [
+      "add_comment_to_pending_review"
+      "add_issue_comment"
+      "add_reply_to_pull_request_comment"
+      "create_branch"
+      "create_or_update_file"
+      "create_pull_request"
+      "create_repository"
+      "delete_file"
+      "delete_repository"
+      "fork_repository"
+      "issue_write"
+      "merge_pull_request"
+      "pull_request_review_write"
+      "push_files"
+      "sub_issue_write"
+      "update_pull_request"
+      "update_pull_request_branch"
+    ];
+
   # JSON to merge into ~/.claude/settings.json (statusline + plugins)
   settingsToMerge =
     {
+      permissions.ask = outwardFacing;
+
+      # The rules above match a command's leading text, which `nu -c "git
+      # push"`, a `git -C` elsewhere, or a one-line script all walk straight
+      # past. Auto mode's classifier reads a command for what it does instead,
+      # so the same rule is restated for it in prose and catches the spellings
+      # no prefix can enumerate. Soft rather than hard, since a hard block is
+      # one that asking cannot clear: the point is a prompt, not a wall.
+      # `$defaults` keeps the built-in rules, which this only adds to.
+      autoMode.soft_deny = [
+        "$defaults"
+        "Anything that leaves this machine or becomes visible to someone else: pushing commits, branches or tags; opening, updating, merging or commenting on pull requests and issues; deploying to another host; publishing a package or release; sending mail. Confirm each one on its own, however the command is written. Permission granted for one such action does not carry to the next, and a task that plainly ends in one of these still needs that step confirmed when it arrives."
+      ];
+
       # Defaults to true, which makes Claude Code append "End git commit
       # messages with: Co-Authored-By: ..." to its own system prompt. That
       # sits above CLAUDE.md in the prompt hierarchy, so the disclosure rule
@@ -258,7 +314,12 @@ in {
     ];
 
     # Activation script to merge settings (statusline + plugins) into ~/.claude/settings.json
-    home.activation.claudeSettings = lib.mkIf (cfg.statusline.enable || cfg.plugins != [] || cfg.disableAutoMemory) (lib.hm.dag.entryAfter ["writeBoundary"] ''
+    #
+    # Unconditional now. The guard used to name each option that contributed a
+    # key, which meant a host with the statusline off and no plugins silently
+    # got none of the permission or attribution settings either. Those go in
+    # for every host, so there is nothing left to guard on.
+    home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
       SETTINGS_FILE="$HOME/.claude/settings.json"
       mkdir -p "$HOME/.claude"
 
@@ -270,7 +331,7 @@ in {
       else
         echo "$MERGE_JSON" | ${pkgs.jq}/bin/jq . > "$SETTINGS_FILE"
       fi
-    '');
+    '';
 
     # Activation script to merge MCP servers into ~/.claude.json (user scope)
     home.activation.claudeMcpServers = lib.mkIf (cfg.mcpServers != {}) (lib.hm.dag.entryAfter ["writeBoundary"] ''
