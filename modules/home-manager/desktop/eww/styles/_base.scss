@@ -22,3 +22,23 @@
 .backdrop-clear {
   background-color: transparent;
 }
+
+// Tooltips. GTK draws these in their own windows, but the same style provider
+// reaches them, which means the `* { all: unset }` above strips their default
+// background too. Without this they render as bare text over whatever is
+// behind them, which is unreadable over anything busy.
+//
+// Styled like the VPN dropdown rather than like the translucent panels: a
+// tooltip is small and transient, and at 90% the desktop stayed legible
+// through it.
+tooltip,
+tooltip.background {
+  background-color: $base00;
+  border: 1px solid $base02;
+  border-radius: $launcher-radius;
+}
+
+tooltip label {
+  color: $base05;
+  padding: 6px 8px;
+}
