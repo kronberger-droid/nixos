@@ -1,0 +1,94 @@
+
+;; ─────────────────────────────────────────────────────────────────
+;; Reveal clusters — waybar's `drawer` groups.
+;;
+;; waybar: transition-duration 300, click-to-reveal true,
+;; transition-left-to-right false, so the children sit to the LEFT of
+;; the handle and the handle is the rightmost thing in the group.
+;;
+;; The improvement over waybar: waybar's drawer is click-only, so a
+;; peek at the tray costs two clicks and the drawer sits open until
+;; you remember to close it. Here hover peeks and click pins, so the
+;; common case (glance at the tray) needs no click at all, and the
+;; uncommon case (actually click a tray icon) stays open because a
+;; click pins it. Pointer leaving retracts it unless pinned.
+;;
+;; The commands are parameters rather than being baked in because yuck
+;; cannot parameterize a defvar name; each cluster owns its own pair of
+;; state variables and passes the `eww update` calls in.
+;; ─────────────────────────────────────────────────────────────────
+
+(defwidget cluster [reveal pinned handle onenter onleave onpin]
+  (eventbox :class {pinned ? "cluster pinned" : "cluster"}
+            :onhover onenter
+            :onhoverlost onleave
+    (box :space-evenly false :spacing 0
+      ;; Children first: the drawer opens leftward from the handle.
+      (revealer :transition "slideleft" :duration "300ms" :reveal reveal
+        (box :space-evenly false :spacing 0
+          (children)))
+      (eventbox :cursor "pointer"
+        (button :class "handle" :onclick onpin
+          (label :text handle))))))
+
+;; ── Tray cluster ─────────────────────────────────────────────────
+;; waybar: modules = [custom/tray-handle, custom/ncspot, tray]. ncspot
+;; is not ported yet, so this is the handle and the tray.
+
+(defvar tray_pinned false)
+(defvar tray_hover false)
+
+(defwidget tray-cluster []
+  (cluster :reveal {tray_pinned || tray_hover}
+           :pinned tray_pinned
+           :handle ""
+           :onenter "${EWW_CMD} update tray_hover=true"
+           :onleave "${EWW_CMD} update tray_hover=false"
+           :onpin "${EWW_CMD} update tray_pinned=${!tray_pinned}"
+    ;; waybar: modules = [custom/tray-handle, custom/ncspot, tray].
+    (eventbox :cursor "pointer"
+      (button :class "mod" :tooltip "Open ncspot"
+              :onclick "${EWW_CONFIG_DIR}/scripts/ncspot"
+        (label :class "ncspot" :text "")))
+    (tray)))
+
+;; ── Toggles cluster ──────────────────────────────────────────────
+;; waybar: modules = [custom/toggles-handle, custom/screenrec,
+;; idle_inhibitor, custom/dnd] (+ custom/rotation where there is an
+;; accelerometer, which this host has not).
+;;
+;; Its own hover/pin pair: yuck cannot parameterize a defvar name, so
+;; each cluster owns its state and passes the update commands in.
+
+(defvar toggles_pinned false)
+(defvar toggles_hover false)
+
+(defpoll screenrec_state :interval "30s"
+  :initial '{"text": "", "class": "idle"}' "scripts/screenrec")
+(defpoll idle_state :interval "30s"
+  :initial '{"text": "", "tooltip": "", "class": ""}' "scripts/idle")
+(defpoll dnd_state :interval "30s"
+  :initial '{"text": "", "tooltip": "", "class": ""}' "scripts/dnd")
+
+(defwidget toggles-cluster []
+  (cluster :reveal {toggles_pinned || toggles_hover}
+           :pinned toggles_pinned
+           :handle ""
+           :onenter "${EWW_CMD} update toggles_hover=true"
+           :onleave "${EWW_CMD} update toggles_hover=false"
+           :onpin "${EWW_CMD} update toggles_pinned=${!toggles_pinned}"
+    ;; waybar hides custom/screenrec when not recording by emitting an
+    ;; empty string; :visible is the eww equivalent.
+    (eventbox :cursor "pointer"
+      (button :class {screenrec_state.class == "recording" ? "mod recording" : "mod"}
+              :visible {screenrec_state.text != ""}
+              :onclick "${EWW_CONFIG_DIR}/scripts/screenrec toggle"
+        (label :text {screenrec_state.text})))
+    (eventbox :cursor "pointer"
+      (button :class "mod" :tooltip {idle_state.tooltip}
+              :onclick "${EWW_CONFIG_DIR}/scripts/idle toggle"
+        (label :text {idle_state.text})))
+    (eventbox :cursor "pointer"
+      (button :class "mod" :tooltip {dnd_state.tooltip}
+              :onclick "${EWW_CONFIG_DIR}/scripts/dnd toggle"
+        (label :text {dnd_state.text})))))

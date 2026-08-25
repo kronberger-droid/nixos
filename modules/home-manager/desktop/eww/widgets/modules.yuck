@@ -1,0 +1,210 @@
+
+;; ─────────────────────────────────────────────────────────────────
+;; Bar modules, ported from waybar.nix's right-hand cluster.
+;;
+;; waybar's built-in modules become a magic variable plus a format
+;; string. The shapes below were read off a live daemon, not guessed:
+;;   EWW_CPU   {avg: 3.79, cores: [{core, freq, usage}, ...]}
+;;   EWW_RAM   {used_mem_perc: 72.1, total_mem, free_mem, ...}
+;;   EWW_TEMPS {CORETEMP_PACKAGE_ID_0: "46", CORETEMP_CORE_0: "43", ...}
+;;
+;; They are lazily started: a magic variable does not exist until some
+;; widget references it, which is why `eww state` showed nothing before
+;; these were written.
+;;
+;; round() is simplexpr's own, not jq's. Verified by rendering all four
+;; candidates side by side: raw gives 5.144612789154053, round(x, 0) gives
+;; 5, and both jq spellings (`round`, `tonumber|round`) come back as "5.0".
+;; eww stringifies the value before jq sees it and re-renders the result as
+;; a float, so the jq route cannot produce an integer here at all.
+;; ─────────────────────────────────────────────────────────────────
+
+;; ── padded numbers ───────────────────────────────────────────────
+;; Leading zeroes in a dim colour, so 7% and 100% occupy the same width
+;; and the digits stay column-aligned. This also makes the reserved
+;; min-widths in bar.scss redundant for these modules: the string is now
+;; always three digits wide, so there is nothing left to reserve.
+
+(defwidget padnum [value ?visible]
+  (box :space-evenly false :spacing 0 :visible {visible ?: true}
+    (label :class "pad" :text {value < 10 ? "00" : (value < 100 ? "0" : "")})
+    (label :text value)))
+
+;; custom/separator: format = "|"
+(defwidget sep []
+  (label :class "sep" :text "|"))
+
+;; cpu: format = "{usage}% "
+(defwidget cpu []
+  (eventbox :cursor "pointer"
+    (button :class "mod" :onclick "${EWW_CONFIG_DIR}/scripts/tui monitor"
+      (box :space-evenly false :spacing 0
+        (padnum :value {round(EWW_CPU.avg, 0)})
+        (label :text "% ")))))
+
+;; memory: format = "{}% "
+(defwidget memory []
+  (box :class "mod" :space-evenly false :spacing 0
+    (padnum :value {round(EWW_RAM.used_mem_perc, 0)})
+    (label :text "% ")))
+
+;; temperature: format = "{temperatureC}°C {icon}", critical-threshold 80.
+;; waybar reads the package sensor, which `sensors` prints as
+;; "Package id 0" and eww exposes as CORETEMP_PACKAGE_ID_0. Note the
+;; values arrive as strings, hence the cast before comparing.
+(defwidget temperature []
+  (box :space-evenly false :spacing 0
+       :class {(EWW_TEMPS.CORETEMP_PACKAGE_ID_0 ?: "0") + 0 >= 80 ? "mod critical" : "mod"}
+    (padnum :value {(EWW_TEMPS.CORETEMP_PACKAGE_ID_0 ?: "0") + 0})
+    (label :text "°C ")))
+
+;; tray: spacing = 10, icon-size = 14
+(defwidget tray []
+  (systray :class "tray" :spacing 10 :icon-size 14 :prepend-new true))
+
+
+;; ── network ──────────────────────────────────────────────────────
+;; waybar: interval = 5. The script picks the interface carrying the
+;; default route and reports wifi signal, ethernet name, or nothing.
+
+(defpoll net_state :interval "5s"
+  :initial '{"text": "", "tooltip": "", "class": ""}'
+  "scripts/network")
+
+(defwidget network []
+  (eventbox :cursor "pointer"
+    (button :class "mod" :tooltip {net_state.tooltip}
+            :onclick "${EWW_CONFIG_DIR}/scripts/tui wifi"
+      (label :text {net_state.text}))))
+
+;; ── vpn ──────────────────────────────────────────────────────────
+;; waybar: interval = 15, format = "{icon}{text}", and format-icons gives
+;; connected and disconnected the same glyph, so only the text differs.
+;; The script is waybar/nu/vpn-status.nu copied across unchanged.
+;;
+;; waybar binds on-click to vpn-picker (rofi -dmenu over three fixed
+;; entries) and on-click-right to vpn-disconnect-all. The right-click
+;; ports straight across; the picker is now the dropdown below instead,
+;; since rofi is a lot of machinery for a three-item list.
+
+(defpoll vpn_state :interval "15s"
+  :initial '{"text": "", "tooltip": "", "class": ""}'
+  "scripts/vpn")
+
+(defpoll vpn_list :interval "15s" :initial "[]" "scripts/vpn list")
+
+(defwidget vpn []
+  (eventbox :cursor "pointer"
+    (button :class "mod"
+            :tooltip {vpn_state.tooltip}
+            ;; The window's own open/closed state is the state; a defvar
+            ;; mirroring it would just be a second source of truth to keep
+            ;; in sync.
+            :onclick "${EWW_CMD} open --toggle vpn-menu"
+            :onrightclick "${EWW_CONFIG_DIR}/scripts/vpn disconnect-all"
+      (label :text "󰖂${vpn_state.text}"))))
+
+;; ── VPN dropdown ─────────────────────────────────────────────────
+;; Replaces the rofi picker. Same pattern as the powermenu: a fullscreen
+;; transparent surface so a click anywhere dismisses, with the panel
+;; pinned under the bar on the right rather than centred.
+;;
+;; Positioned by alignment plus a margin instead of pixel coordinates,
+;; because the module's own x position moves as the label grows from
+;; " off" to " TAIL/PIA".
+
+(defwidget vpn-menu-panel []
+  ;; The `for` is wrapped in its own box: eww appends loop-generated children
+  ;; after the statically declared ones, so with both as direct children the
+  ;; "disconnect all" button rendered above the list instead of below it.
+  (box :class "dropdown" :orientation "v" :space-evenly false :spacing 4
+       :halign "end" :valign "start"
+    (box :orientation "v" :space-evenly false :spacing 4
+      (for v in vpn_list
+        (eventbox :cursor "pointer"
+          (button :class {v.on ? "drop-row on" : "drop-row"}
+                  :onclick "${EWW_CONFIG_DIR}/scripts/vpn toggle '${v.name}'"
+            (box :space-evenly false :spacing 10 :halign "start"
+              (label :class "dot" :text {v.on ? "●" : "○"})
+              (label :text {v.name}))))))
+    (eventbox :cursor "pointer"
+      (button :class "drop-row danger"
+              :onclick "${EWW_CONFIG_DIR}/scripts/vpn disconnect-all"
+        (box :space-evenly false :spacing 10 :halign "start"
+          (label :class "dot" :text "✕")
+          (label :text "disconnect all"))))))
+
+(defwindow vpn-menu
+  :monitor 0
+  :namespace "eww-vpn-menu"
+  :stacking "overlay"
+  :focusable "none"
+  :geometry (geometry :width "100%" :height "100%")
+  (eventbox :class "backdrop-clear" :onclick "${EWW_CMD} close vpn-menu"
+    (box :halign "end" :valign "start"
+      (eventbox :onclick "true" :halign "end" :valign "start"
+        (vpn-menu-panel)))))
+
+;; ── pulseaudio ───────────────────────────────────────────────────
+;; waybar: on-click = wiremix in a dropdown terminal. Its scroll-to-change
+;; -volume is not ported: eww has no scroll event on a widget, so the
+;; volume keys stay the way to change it.
+
+(defpoll audio_state :interval "2s"
+  :initial '{"vol": 0, "muted": false, "suffix": "", "tooltip": "", "class": ""}'
+  "scripts/audio")
+
+(defwidget pulseaudio []
+  (eventbox :cursor "pointer"
+    (button :class "mod" :tooltip {audio_state.tooltip}
+            :onclick "${EWW_CONFIG_DIR}/scripts/tui audio"
+            :onrightclick "${EWW_CONFIG_DIR}/scripts/audio toggle-mute"
+      (box :space-evenly false :spacing 0
+        ;; Muted hides the number entirely, as waybar's format-muted does.
+        (padnum :value {audio_state.vol} :visible {!audio_state.muted})
+        (label :text {audio_state.suffix})))))
+
+;; ── bluetooth ────────────────────────────────────────────────────
+;; waybar: on-click = bluetuith, on-click-right = power toggle over D-Bus.
+
+(defpoll bt_state :interval "5s"
+  :initial '{"text": "", "tooltip": "", "class": ""}'
+  "scripts/bluetooth")
+
+(defwidget bluetooth []
+  (eventbox :cursor "pointer"
+    (button :class "mod" :tooltip {bt_state.tooltip}
+            :onclick "${EWW_CONFIG_DIR}/scripts/tui bluetooth"
+            :onrightclick "${EWW_CONFIG_DIR}/scripts/bluetooth toggle"
+      (label :text {bt_state.text}))))
+
+;; ── mpris ────────────────────────────────────────────────────────
+;; deflisten, not defpoll: playerctl --follow blocks and emits on change,
+;; which is exactly the shape deflisten wants and means no polling.
+
+(deflisten mpris_state :initial '{"text": "", "tooltip": "", "class": "none"}'
+  "scripts/mpris")
+
+(defwidget mpris []
+  (eventbox :cursor "pointer"
+    (button :class "mod mpris" :tooltip {mpris_state.tooltip}
+            :visible {mpris_state.text != ""}
+            :onclick "${EWW_CONFIG_DIR}/scripts/mpris toggle"
+            :onrightclick "${EWW_CONFIG_DIR}/scripts/mpris next"
+      (label :text {mpris_state.text}))))
+
+;; ── scratchpad ───────────────────────────────────────────────────
+;; waybar: interval = "once" plus signal 12, refreshed by
+;; niri-window-watcher.service. deflisten replaces both: the script
+;; tails niri's event stream itself, so the systemd unit is not needed.
+
+(deflisten scratchpad_state
+  :initial '{"text": "", "tooltip": "", "class": "closed"}'
+  "scripts/scratchpad")
+
+(defwidget scratchpad []
+  (eventbox :cursor "pointer"
+    (button :class "scratchpad ${scratchpad_state.class}"
+            :tooltip {scratchpad_state.tooltip}
+            :onclick "${EWW_CONFIG_DIR}/scripts/scratchpad toggle"
+      (label :text {scratchpad_state.text}))))

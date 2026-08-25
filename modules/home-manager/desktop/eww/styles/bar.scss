@@ -1,0 +1,129 @@
+// Ported from waybar/style.css. Two things carry over that are easy to miss:
+// the bar itself is transparent (window#waybar { background: transparent }) and
+// every visible pill is a per-module background, and the bar runs at 14px while
+// the rest of the config sits at 13px.
+//
+// Dimensions and the accent-pill mixin live in styles/_metrics.scss.
+
+.bar {
+  background-color: transparent;
+  color: $base05;
+
+  // Measured: waybar's outermost pixel sits 7px from each screen edge, ours sat
+  // at 5px. The 5px comes from the pill margins; waybar's extra 2px come from
+  // the `padding: 1px` in its own `*` rule, which our reset drops. Rather than
+  // reintroduce a universal padding, the 2px goes on the bar itself.
+  padding: 0 2px;
+}
+
+// Note the `.bar *`. GTK CSS applies the `* { font-size: 13px }` reset in
+// _base.scss directly to every node, so a label inside .bar matches that rule
+// itself and never inherits .bar's size. Setting it on .bar alone silently did
+// nothing. Specificity 0-1-0 here beats the universal selector's 0-0-0.
+//
+// waybar: "Symbols Nerd Font Mono", "JetBrainsMono Nerd Font Mono" at 14px. The
+// symbols font goes first so glyphs present in both come from it.
+.bar,
+.bar * {
+  font-family: "Symbols Nerd Font Mono", "JetBrains Mono Nerd Font";
+  font-size: 14px;
+}
+
+// waybar's accent-widget group: "#mode, #custom-menu, #custom-power, #clock,
+// #scratchpad — brown background with white text". Same three here, so they
+// share one mixin rather than three copies of the same six declarations.
+//
+// Scoped as `.bar .menu` rather than `.menu`: bar.scss is imported last and its
+// `.bar *` rule would otherwise tie on specificity and win on order.
+.bar .menu,
+.bar .clock,
+.bar .power {
+  @include bar-pill;
+}
+
+// Hover changes the text colour, never the background. The bar already uses
+// background to mean "this is an accent widget" (the brown pills) and "this
+// workspace is active", so reusing it for hover would overload it.
+//
+// The convention runs in both directions, deliberately:
+//   handle  dim  -> bright   (it is inert until you approach it)
+//   module  bright -> dim    (it is live, and dimming acknowledges the pointer)
+//
+// waybar has no hover feedback at all, so this is an addition rather than a
+// port: without it there is no way to tell which parts of the bar do anything
+// short of clicking them.
+.bar .mod:hover,
+.bar .mod:hover label,
+.bar .menu:hover label,
+.bar .power:hover label,
+.bar .clock:hover label {
+  color: $base03;
+}
+
+// Plain modules: no background, unlike the accent group above.
+.bar .mod,
+.bar .tray {
+  @include bar-module;
+}
+
+// #custom-separator { padding: 0px 2px; margin: 0px; color: @base03 }
+.bar .sep {
+  padding: 0 2px;
+  margin: 0;
+  color: $base03;
+}
+
+// temperature { critical-threshold = 80 }
+.bar .critical {
+  color: $base08;
+}
+
+// #custom-tray-handle / #custom-toggles-handle: dim until hovered, so the
+// handle reads as an affordance rather than as another status readout.
+.bar .handle {
+  @include bar-module;
+  color: $base03;
+
+  // Dim -> bright, the opposite of the modules above. A handle is inert until
+  // you reach for it; a module is already showing you something.
+  &:hover { color: $base05; }
+}
+
+// Pinned open. waybar has no equivalent because its drawer has no pinned
+// state; the handle brightening is what tells you a click did something
+// beyond what the hover was already showing.
+.bar .cluster.pinned .handle {
+  color: $base05;
+}
+
+// Dim leading zeroes. The number keeps a constant three-digit width, which is
+// what removed the need for the per-module min-widths that used to live here:
+// padding the string is a stricter guarantee than reserving space for it.
+.bar .pad {
+  color: $base03;
+}
+
+// #custom-scratchpad. Unlike the other modules this one is always filled: the
+// background carries the open/closed state rather than saying "accent widget",
+// which is why it is not just @include bar-pill.
+.bar .scratchpad {
+  color: $base05;
+  border-radius: $pill-radius;
+  padding: $pill-padding;
+  margin: $pill-margin;
+  min-height: $bar-pill-height;
+}
+
+.bar .scratchpad.open {
+  background-color: $accent-bg;
+}
+
+.bar .scratchpad.closed {
+  background-color: $panel-bg;
+}
+
+// #custom-ncspot { color: @base0B } — the one module waybar gives its own
+// colour rather than the default foreground.
+.bar .ncspot {
+  color: $base0B;
+}

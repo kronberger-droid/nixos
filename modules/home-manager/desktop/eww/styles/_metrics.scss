@@ -1,0 +1,62 @@
+// Shared dimensions. Every number here was measured off a grim capture of
+// waybar and rofi running side by side, so this file is the single place a
+// value gets corrected when it turns out to be a pixel off.
+//
+// The mixins matter more than the variables: waybar groups #mode, #custom-menu,
+// #custom-power, #clock and #scratchpad under one comment ("Accent widgets —
+// brown background with white text") and styles them identically. `bar-pill`
+// is that group. Same for the rows shared by the power menu and the launcher.
+
+// ── Bar ───────────────────────────────────────────────────────────
+$bar-height: 30px;      // waybar.nix: height = 30
+$pill-radius: 15px;     // style.css: border-radius on every module
+$pill-padding: 0 10px;
+$pill-margin: 0 5px;
+$bar-pill-height: 26px; // measured: clock and power pills
+$ws-pill-height: 24px;  // measured: workspace buttons are 2px shorter
+$ws-pill-width: 32px;   // content box; + 2 * 10px padding = the 52px measured
+
+// waybar's accent widgets: brown fill, foreground text.
+@mixin bar-pill {
+  color: $base05;
+  background-color: $accent-bg;
+  border-radius: $pill-radius;
+  padding: $pill-padding;
+  margin: $pill-margin;
+  min-height: $bar-pill-height;
+}
+
+// A plain bar module: no fill, just breathing room. waybar lists #battery,
+// #cpu, #memory, #network, #pulseaudio, #temperature, #bluetooth, #tray and
+// the custom ones together with exactly these two declarations.
+@mixin bar-module {
+  padding: 0 5px;
+  margin: 0 5px;
+  min-height: $bar-pill-height;
+}
+
+// ── Popups ────────────────────────────────────────────────────────
+$popup-radius: 12px;    // powermenu: rofi window { border-radius: 12px }
+$launcher-radius: 8px;  // launcher: rofi window { border-radius: 8px }
+$popup-padding: 20px;   // powermenu mainbox
+$launcher-padding: 40px;
+
+// A selectable row in a popup list. The two menus differ only in their
+// radius and padding, which rofi's own two rasi files also differ on.
+@mixin menu-row($radius, $pad) {
+  background-color: transparent;
+  border-radius: $radius;
+  padding: $pad;
+  color: $base05;
+
+  &:hover { background-color: $base02; }
+}
+
+// The highlighted row: base0F fill with dark text, the same accent the bar
+// pills use, so the three widgets read as one system.
+@mixin menu-row-selected {
+  background-color: $base0F;
+  color: $base00;
+
+  &:hover { background-color: $base0F; }
+}

@@ -1,0 +1,47 @@
+// Ported from waybar/style.css (#workspaces), so the pills read the same.
+// waybar composites alpha into the hex there (@base00E6, @base0FE6); GTK CSS
+// needs rgba(), and the shared translucent values live in _colors.scss.
+
+// Every rule below is nested inside the widget's root class, deliberately.
+// One eww daemon means one global CSS namespace across every widget, and
+// `.search`, `.top` and `.rows` all exist in more than one of them. Scoping
+// under the root is what stops the launcher's 720px `.rows` from resizing the
+// power menu, which is exactly what happened before this.
+
+.workspaces {
+  background-color: $panel-bg;
+  border-radius: $pill-radius;
+  margin: $pill-margin;
+
+  .ws {
+    color: $base05;
+    border-radius: $pill-radius;
+    padding: $pill-padding;
+
+    // `all: unset` in _base.scss discards the natural minimum a GTK button
+    // would otherwise carry, so both dimensions have to be stated. 24px
+    // rather than $bar-pill-height: waybar's workspace buttons measure 2px
+    // shorter than its other accent widgets.
+    min-width: $ws-pill-width;
+    min-height: $ws-pill-height;
+
+    &:hover { background-color: $base02; }
+  }
+
+  // waybar styles .focused and .active identically (only one of the two class
+  // names ever appears, depending on the compositor), so these match it exactly.
+  //
+  // Unlike waybar, both can be true at once here, so on a multi-monitor setup you
+  // could give .active a dimmer fill and see at a glance which screen has the
+  // keyboard. Deliberately not doing that, because it would not look like waybar.
+  .focused,
+  .active {
+    background-color: $accent-bg;
+    color: $base05;
+  }
+
+  .urgent {
+    color: $base08;
+    background-color: transparent;
+  }
+}

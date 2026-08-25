@@ -1,0 +1,38 @@
+// Dropdown panels hung off a bar module. Shared rather than per-module: the
+// VPN picker is the first, but bluetooth and audio want the same thing.
+
+.dropdown {
+  background-color: $base00;
+  border: 1px solid $base02;
+  border-radius: $launcher-radius;
+  padding: 8px;
+  color: $base05;
+  min-width: 180px;
+
+  // Top margin is only the gap, not the bar height: the bar sets an exclusive
+  // zone, so a fullscreen layer surface already starts below it. Hardcoding
+  // 34px put the panel 60px too low while waybar was also reserving space.
+  //
+  // The right margin aligns the panel's right edge with the VPN module's,
+  // measured at 459px from the screen edge by temporarily giving the module a
+  // bright background and finding it in a grim capture. It is a fixed offset,
+  // so it drifts if the modules to its right change width; eww has no way to
+  // anchor a window to a widget.
+  margin: 4px 460px 0 0;
+}
+
+.drop-row {
+  @include menu-row(6px, 8px);
+
+  .dot { color: $base03; }
+}
+
+.drop-row.on .dot {
+  color: $base0B;
+}
+
+.drop-row.danger {
+  color: $base08;
+
+  .dot { color: $base08; }
+}

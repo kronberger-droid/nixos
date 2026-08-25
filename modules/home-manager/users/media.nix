@@ -1,4 +1,4 @@
-# Lean "media box" user: the full niri desktop (waybar, rofi, mako, nemo,
+# Lean "media box" user: the full niri desktop (eww, rofi, mako, nemo,
 # theming, terminals) but none of the development tooling or personal apps.
 #
 # Contrast with kronberger.nix, which imports `../.` (the whole module tree:
@@ -26,7 +26,7 @@ in {
     backupFileExtension = "backup";
     users.media = {
       imports = [
-        ../desktop # sway, waybar, rofi, mako (session-services), udiskie, shikane, xdg
+        ../desktop # sway, eww, rofi, mako (session-services), udiskie, shikane, xdg
         ../theming # base16 colors, fonts
         ../terminals # rio/kitty/zellij + the terminal.* options the desktop reads
         ../editors/helix.nix # helix only (the EDITOR); no neovim, no dev-tools
