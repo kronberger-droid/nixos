@@ -178,9 +178,7 @@ in {
     binds = {
       # Applications
       "${modifier}+Return".action.spawn = termSpawn {cwdArg = true;};
-      # eww's launcher replaces `rofi -show drun`. rofi stays installed:
-      # rofi-rbw below still uses it, and it is the fallback if eww misbehaves.
-      "${modifier}+D".action.spawn = ["${config.programs.eww.package}/bin/eww" "open" "--toggle" "launcher"];
+      "${modifier}+D".action.spawn = ["${pkgs.rofi}/bin/rofi" "-show" "drun"];
       "${modifier}+Shift+S".action.spawn = wsSpawn ["${pkgs.helium}/bin/helium"];
       "${modifier}+Shift+Return".action.spawn = termSpawn {
         floating = true;
@@ -198,7 +196,7 @@ in {
 
       # Session
       "${modifier}+Shift+Q".action.close-window = [];
-      "${modifier}+Shift+E".action.spawn = ["${config.programs.eww.package}/bin/eww" "open" "--toggle" "powermenu"];
+      "${modifier}+Shift+E".action.spawn = ["${config.xdg.configHome}/rofi/powermenu/powermenu.sh"];
       "${modifier}+Shift+P".action.spawn = ["${pkgs.bitwarden-desktop}/bin/bitwarden"];
       "${modifier}+Shift+W".action.spawn = ["${pkgs.rofi-rbw-wayland}/bin/rofi-rbw"];
       "${modifier}+Shift+B".action.spawn = ["qutebrowser"];

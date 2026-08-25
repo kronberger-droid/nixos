@@ -183,9 +183,7 @@ in {
 
       focus.mouseWarping = "container";
 
-      # eww's launcher replaces `rofi -show drun`; rofi stays installed as the
-      # fallback and for rofi-rbw.
-      menu = "${config.programs.eww.package}/bin/eww open --toggle launcher";
+      menu = "${pkgs.rofi}/bin/rofi -show drun";
 
       defaultWorkspace = "workspace ${ws1}";
 
@@ -199,7 +197,7 @@ in {
         # reload sway
         "${modifier}+Shift+c" = "exec swaymsg reload";
         # open powermenu
-        "${modifier}+Shift+e" = "exec ${config.programs.eww.package}/bin/eww open --toggle powermenu";
+        "${modifier}+Shift+e" = "exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
         # open local send app
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
         # open rbw-rofi for password selection
