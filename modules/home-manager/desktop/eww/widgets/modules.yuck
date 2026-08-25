@@ -140,7 +140,7 @@
   :stacking "overlay"
   :focusable "none"
   :geometry (geometry :width "100%" :height "100%")
-  (eventbox :class "backdrop-clear" :onclick "${EWW_CMD} close vpn-menu"
+  (eventbox :class "backdrop" :onclick "${EWW_CMD} close vpn-menu"
     (box :halign "end" :valign "start"
       (eventbox :onclick "true" :halign "end" :valign "start"
         (vpn-menu-panel)))))

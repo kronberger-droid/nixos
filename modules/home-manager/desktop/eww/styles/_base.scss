@@ -8,19 +8,15 @@
   font-size: 13px;
 }
 
-// Fullscreen dimmed surface behind a modal popup, and the click target that
-// dismisses it. Shared because every popup window needs the same thing: eww has
-// no key handling, so clicking out is the only dismissal a widget can offer.
+// Fullscreen surface behind every popup, and the click target that dismisses
+// it. Shared because eww has no key handling, so clicking out is the only
+// dismissal a widget can offer, and that needs something to click on.
+//
+// The dim is deliberately faint. At 0.45 it read as a modal that blocks the
+// desktop; the point here is only to mark that a popup has focus, not to hide
+// what is behind it. rofi dimmed nothing at all, so this sits between the two.
 .backdrop {
-  background-color: rgba(30, 30, 30, 0.45);
-}
-
-// Same job, no dimming. A GtkEventBox keeps its input window even with nothing
-// painted, so clicks still land and dismiss. Use this where the widget should
-// float over the desktop the way a normal window would, rather than reading as
-// a modal that blocks everything behind it.
-.backdrop-clear {
-  background-color: transparent;
+  background-color: rgba(30, 30, 30, 0.12);
 }
 
 // Tooltips. GTK draws these in their own windows, but the same style provider
