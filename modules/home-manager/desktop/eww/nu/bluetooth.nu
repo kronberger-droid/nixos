@@ -40,15 +40,18 @@ def battery [mac: string]: nothing -> any {
 }
 
 def main [] {
+  # `print`, not a bare pipeline: nushell only surfaces the *last* expression
+  # of a block, so a value built before an early `return` is discarded. Two of
+  # these three branches showed nothing at all until this was explicit.
   if (not (powered?)) {
-    {text: "󰂲 off", tooltip: "Bluetooth off", class: "off"} | to json --raw
+    print ({text: "󰂲 off", tooltip: "Bluetooth off", class: "off"} | to json --raw)
     return
   }
 
   let devs = (connected)
 
   if ($devs | is-empty) {
-    {text: "󰂯 on", tooltip: "Bluetooth on, nothing connected", class: "on"} | to json --raw
+    print ({text: "󰂯 on", tooltip: "Bluetooth on, nothing connected", class: "on"} | to json --raw)
     return
   }
 
@@ -65,7 +68,7 @@ def main [] {
     # waybar's tooltip enumerates every connected device with its address.
     tooltip: ($devs | each {|x| $"($x.alias)\t($x.mac)" } | str join "\n")
     class: "connected"
-  } | to json --raw
+  } | to json --raw | print
 }
 
 # waybar's on-click-right toggles power through D-Bus, for the reason above.
