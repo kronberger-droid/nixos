@@ -25,10 +25,10 @@
 
     # Block adult/ad domains via the StevenBlack hosts list (rewrites /etc/hosts).
     # Consulted by libc before DNS, so it applies regardless of upstream resolver.
-    # stevenblack = {
-    #   enable = true;
-    #   block = ["porn"];
-    # };
+    stevenblack = {
+      enable = true;
+      block = ["porn"];
+    };
   };
 
   # NetworkManager handles all networking; disable systemd-networkd to avoid
