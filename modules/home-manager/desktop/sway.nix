@@ -183,7 +183,9 @@ in {
 
       focus.mouseWarping = "container";
 
-      menu = "${pkgs.rofi}/bin/rofi -show drun";
+      # eww's launcher replaces `rofi -show drun`; rofi stays installed as the
+      # fallback and for rofi-rbw.
+      menu = "${config.programs.eww.package}/bin/eww open --toggle launcher";
 
       defaultWorkspace = "workspace ${ws1}";
 
@@ -197,7 +199,7 @@ in {
         # reload sway
         "${modifier}+Shift+c" = "exec swaymsg reload";
         # open powermenu
-        "${modifier}+Shift+e" = "exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
+        "${modifier}+Shift+e" = "exec ${config.programs.eww.package}/bin/eww open --toggle powermenu";
         # open local send app
         "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
         # open rbw-rofi for password selection
@@ -224,8 +226,8 @@ in {
           else "exec ${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)";
         "${modifier}+Return" = "exec '${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)'";
 
-        # Toggle waybar
-        "${modifier}+Shift+b" = "exec ${config.xdg.configHome}/waybar/toggle-waybar.sh";
+        # Toggle the bar
+        "${modifier}+Shift+b" = "exec ${config.programs.eww.package}/bin/eww open --toggle bar";
 
         # Brightness control
         "XF86MonBrightnessDown" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%-";
@@ -236,10 +238,10 @@ in {
         "XF86AudioLowerVolume" = "exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-";
         "XF86AudioMute" = "exec ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
 
-        # Music control using waybar-mpris
-        "XF86AudioNext" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send next";
-        "XF86AudioPrev" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send prev";
-        "XF86AudioPlay" = "exec ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
+        # Music control using playerctl, which also backs the bar's mpris module
+        "XF86AudioNext" = "exec ${pkgs.playerctl}/bin/playerctl next";
+        "XF86AudioPrev" = "exec ${pkgs.playerctl}/bin/playerctl previous";
+        "XF86AudioPlay" = "exec ${pkgs.playerctl}/bin/playerctl play-pause";
 
         # Workspace switching
         "${modifier}+1" = "workspace ${ws1}";

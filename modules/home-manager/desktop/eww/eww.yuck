@@ -1,0 +1,12 @@
+;; Top level is nothing but includes. One daemon serves every window, so each
+;; widget gets its own file and its own defwindow, and they are all loaded here.
+;;
+;; Mirrors how the nix side will install it: sources under widgets/ and styles/,
+;; helper scripts generated into scripts/.
+
+(include "widgets/powermenu.yuck")
+(include "widgets/workspaces.yuck")
+(include "widgets/modules.yuck")
+(include "widgets/clusters.yuck")
+(include "widgets/bar.yuck")
+(include "widgets/launcher.yuck")

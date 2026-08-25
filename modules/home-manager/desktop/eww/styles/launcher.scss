@@ -1,0 +1,90 @@
+// Ported from rofi/launcher/style-2.rasi. The palette indirection there is
+// worth unpicking: `element selected.normal` sets background to
+// var(normal-foreground) and text to var(normal-background), i.e. the selected
+// row inverts to light-on-dark rather than taking an accent colour. That is
+// why the launcher's highlight looks nothing like the powermenu's.
+
+// window { width: 800px; border-radius: 8px } + mainbox { padding: 40px }
+
+// Every rule below is nested inside the widget's root class, deliberately.
+// One eww daemon means one global CSS namespace across every widget, and
+// `.search`, `.top` and `.rows` all exist in more than one of them. Scoping
+// under the root is what stops the launcher's 720px `.rows` from resizing the
+// power menu, which is exactly what happened before this.
+
+.launcher {
+  background-color: $panel-bg;
+  // Flat, like the rasi: `border: 0px solid`.
+  border-radius: $launcher-radius;
+  padding: $launcher-padding;
+  color: $base05;
+  min-width: 800px;
+
+
+  .prompt {
+    color: $base05;
+  }
+
+  .search {
+    background-color: transparent;
+    color: $base05;
+    caret-color: $base05;
+  }
+
+  .placeholder {
+    color: $base03;
+  }
+
+  // element { padding: 8px; border-radius: 4px; spacing: 8px }
+  // Fixed width, so the list is the same size whatever the filter leaves. 800px
+  // panel minus 40px padding on each side.
+  .rows {
+    min-width: 720px;
+  }
+
+  .app {
+    @include menu-row(4px, 8px);
+  }
+
+  // rofi's `element selected.normal` inverts to light-on-dark (background gets
+  // var(normal-foreground)). Deliberately not doing that: base0F, the same brown
+  // accent the powermenu and the bar's clock use, so the three widgets read as
+  // one system.
+  .top {
+    @include menu-row-selected;
+
+    .app-name { color: $base00; }
+    .app-comment { color: $base01; }
+  }
+
+  // Keyboard focus, reachable with Tab from the search box and then the arrow
+  // keys between rows. Distinct from .top, which marks what Enter-in-the-entry
+  // would launch; once focus is in the list, Enter activates the focused row.
+  .app:focus {
+    background-color: $base02;
+    color: $base05;
+  }
+
+  .app-name {
+    color: $base05;
+  }
+
+  // rofi renders the Comment in italics beside the name.
+  .app-comment {
+    color: $base03;
+    font-style: italic;
+  }
+
+  // scrollbar { handle-width: 5px; border-radius: 8px }
+  .list {
+    scrollbar {
+      background-color: transparent;
+    }
+
+    slider {
+      background-color: $alt-bg;
+      border-radius: 8px;
+      min-width: 5px;
+    }
+  }
+}

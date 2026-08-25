@@ -45,7 +45,9 @@
   # Wrap a spawn command list to pin the window to the current workspace
   wsSpawn = cmd: ["${spawnOnWs}"] ++ cmd;
 
-  scratchpadToggle = "${config.xdg.configHome}/waybar/scratchpad-toggle.sh";
+  # Was waybar/scratchpad-toggle.sh, which never existed: waybar installs its
+  # helpers without an extension, so this bind has been dead. Now the eww copy.
+  scratchpadToggle = "${config.xdg.configHome}/eww/scripts/scratchpad";
 in {
   home.packages = with pkgs; [
     fuzzel
@@ -176,7 +178,9 @@ in {
     binds = {
       # Applications
       "${modifier}+Return".action.spawn = termSpawn {cwdArg = true;};
-      "${modifier}+D".action.spawn = ["${pkgs.rofi}/bin/rofi" "-show" "drun"];
+      # eww's launcher replaces `rofi -show drun`. rofi stays installed:
+      # rofi-rbw below still uses it, and it is the fallback if eww misbehaves.
+      "${modifier}+D".action.spawn = ["${config.programs.eww.package}/bin/eww" "open" "--toggle" "launcher"];
       "${modifier}+Shift+S".action.spawn = wsSpawn ["${pkgs.helium}/bin/helium"];
       "${modifier}+Shift+Return".action.spawn = termSpawn {
         floating = true;
@@ -190,11 +194,11 @@ in {
       "${modifier}+Shift+N".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${pkgs.nemo-with-extensions}/bin/nemo $(${cwd})"];
 
       # Scratchpad
-      "${modifier}+Minus".action.spawn = ["${scratchpadToggle}"];
+      "${modifier}+Minus".action.spawn = ["${scratchpadToggle}" "toggle"];
 
       # Session
       "${modifier}+Shift+Q".action.close-window = [];
-      "${modifier}+Shift+E".action.spawn = ["${config.xdg.configHome}/rofi/powermenu/powermenu.sh"];
+      "${modifier}+Shift+E".action.spawn = ["${config.programs.eww.package}/bin/eww" "open" "--toggle" "powermenu"];
       "${modifier}+Shift+P".action.spawn = ["${pkgs.bitwarden-desktop}/bin/bitwarden"];
       "${modifier}+Shift+W".action.spawn = ["${pkgs.rofi-rbw-wayland}/bin/rofi-rbw"];
       "${modifier}+Shift+B".action.spawn = ["qutebrowser"];
@@ -262,7 +266,8 @@ in {
 
       # Column sizing
       "${modifier}+R".action.switch-preset-column-width = [];
-      "${modifier}+Shift+R".action.spawn = ["${config.xdg.configHome}/waybar/screenrec-toggle.sh"];
+      # Same story as the scratchpad bind above: the .sh path never existed.
+      "${modifier}+Shift+R".action.spawn = ["${config.xdg.configHome}/eww/scripts/screenrec" "toggle"];
       "${modifier}+Shift+V".action.switch-preset-window-height = [];
       "${modifier}+Ctrl+R".action.reset-window-height = [];
       "${modifier}+F".action.maximize-column = [];
@@ -399,15 +404,15 @@ in {
       # Media
       "XF86AudioNext" = {
         allow-when-locked = true;
-        action.spawn = ["${pkgs.waybar-mpris}/bin/waybar-mpris" "--send" "next"];
+        action.spawn = ["${pkgs.playerctl}/bin/playerctl" "next"];
       };
       "XF86AudioPrev" = {
         allow-when-locked = true;
-        action.spawn = ["${pkgs.waybar-mpris}/bin/waybar-mpris" "--send" "prev"];
+        action.spawn = ["${pkgs.playerctl}/bin/playerctl" "previous"];
       };
       "XF86AudioPlay" = {
         allow-when-locked = true;
-        action.spawn = ["${pkgs.waybar-mpris}/bin/waybar-mpris" "--send" "toggle"];
+        action.spawn = ["${pkgs.playerctl}/bin/playerctl" "play-pause"];
       };
     };
 

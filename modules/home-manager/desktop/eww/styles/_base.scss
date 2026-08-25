@@ -1,0 +1,24 @@
+// Shared reset. GTK ships widget defaults that fight any styling you attempt,
+// so `all: unset` on * is the conventional first move in every eww config.
+// Everything below this line is opt-in.
+
+* {
+  all: unset;
+  font-family: "JetBrains Mono Nerd Font";
+  font-size: 13px;
+}
+
+// Fullscreen dimmed surface behind a modal popup, and the click target that
+// dismisses it. Shared because every popup window needs the same thing: eww has
+// no key handling, so clicking out is the only dismissal a widget can offer.
+.backdrop {
+  background-color: rgba(30, 30, 30, 0.45);
+}
+
+// Same job, no dimming. A GtkEventBox keeps its input window even with nothing
+// painted, so clicks still land and dismiss. Use this where the widget should
+// float over the desktop the way a normal window would, rather than reading as
+// a modal that blocks everything behind it.
+.backdrop-clear {
+  background-color: transparent;
+}

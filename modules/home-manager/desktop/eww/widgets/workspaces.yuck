@@ -1,0 +1,29 @@
+;; ─────────────────────────────────────────────────────────────────
+;; Workspaces — the piece waybar gave us for free (niri/workspaces,
+;; sway/workspaces) and eww has no equivalent for.
+;;
+;; deflisten holds a long-running process open and takes its latest
+;; line as the value, so there is no polling: scripts/workspaces sits
+;; on niri's event stream and prints when something changes.
+;;
+;; Relative path, deliberately. eww resolves defpoll/deflisten command
+;; paths against the config dir, which is the way around the fact that
+;; ${EWW_CONFIG_DIR} is not in scope at top level. Note it does NOT
+;; apply to :onclick, which runs through sh with the daemon's cwd, so
+;; those still need the magic var.
+;; ─────────────────────────────────────────────────────────────────
+
+(deflisten workspaces :initial "[]" "scripts/workspaces")
+
+;; monitor "" means every output, which is what the standalone spike
+;; window below wants. A real bar passes its own output name so each
+;; screen shows only its own workspaces.
+(defwidget workspaces [monitor]
+  (box :class "workspaces" :space-evenly false :spacing 0 :halign "start" :valign "center"
+    (for ws in {jq(workspaces, '[.[] | select("${monitor}" == "" or .output == "${monitor}")]')}
+      (eventbox :cursor "pointer"
+        (button :class {ws.urgent
+                        ? "ws urgent"
+                        : (ws.focused ? "ws focused" : (ws.active ? "ws active" : "ws"))}
+                :onclick "${EWW_CONFIG_DIR}/scripts/workspaces focus ${ws.idx}"
+          (label :text {ws.name}))))))

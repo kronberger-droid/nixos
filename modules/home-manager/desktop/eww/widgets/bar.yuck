@@ -1,0 +1,77 @@
+;; ─────────────────────────────────────────────────────────────────
+;; The bar. Geometry and styling ported from waybar.nix (height 30,
+;; layer top, position top, spacing 10) and waybar/style.css.
+;;
+;; waybar's window is transparent and each module carries its own
+;; background, which is why there is no bar-wide fill here either.
+;; ─────────────────────────────────────────────────────────────────
+
+;; waybar: clock { interval = 60; format = "{:%e %b %Y %H:%M}" }.
+;; %e space-pads the day, same as waybar, so the width does not jump on
+;; the 1st of a month.
+(defpoll clock :interval "60s" :initial "" `date +'%e %b %Y %H:%M'`)
+
+;; :spacing 0, not 10. The pills carry `margin: 0 5px` from waybar's CSS, so
+;; two adjacent ones already sit 10px apart, which is what waybar measures.
+;; Adding box spacing on top made every gap 20px.
+(defwidget bar-left []
+  (box :halign "start" :valign "center" :space-evenly false :spacing 0
+    ;; waybar's custom/menu runs `rofi -show drun`; this opens our launcher.
+    (eventbox :cursor "pointer"
+      (button :class "menu" :onclick "${EWW_CMD} open --toggle launcher"
+        (label :text "")))
+    (workspaces :monitor "")
+    (scratchpad)))
+
+(defwidget bar-right []
+  (box :halign "end" :valign "center" :space-evenly false :spacing 0
+    ;; waybar's modules-right order, complete.
+    (toggles-cluster)
+    (sep)
+    (bluetooth)
+    (pulseaudio)
+    (mpris)
+    (sep)
+    (network)
+    (vpn)
+    (sep)
+    (cpu)
+    (memory)
+    (temperature)
+    (sep)
+    (tray-cluster)
+    ;; waybar: on-click = dropkittenCmd tui.calendar
+    (eventbox :cursor "pointer"
+      (button :class "clock" :onclick "${EWW_CONFIG_DIR}/scripts/tui calendar"
+        (label :text clock)))
+    ;; waybar's custom/power runs the rofi script; this opens the eww
+    ;; powermenu instead, which is the first place the two widgets meet.
+    (eventbox :cursor "pointer"
+      (button :class "power" :onclick "${EWW_CMD} open --toggle powermenu"
+        (label :text "")))))
+
+(defwindow bar
+  :monitor 0
+  :namespace "eww-bar"
+  ;; "fg" == waybar's layer = "top". Below the powermenu's overlay, which
+  ;; is what lets the menu cover the bar when it opens.
+  :stacking "fg"
+  :exclusive true
+  :focusable "none"
+  :geometry (geometry :width "100%" :height "30px" :anchor "top center")
+  ;; A bar-wide hover-lost that clears every cluster's peek state.
+  ;;
+  ;; The clusters set their own hover flags on enter and clear them on leave,
+  ;; but GTK does not reliably deliver leave-notify when the pointer exits fast:
+  ;; the drawer is collapsing and resizing under the pointer at the same time,
+  ;; and the crossing event can be missed entirely. The flag then stays true and
+  ;; the drawer sticks part-open.
+  ;;
+  ;; Leaving the bar is a much larger target and a much less racy event, so this
+  ;; is the backstop. Both flags are cleared in one `eww update`, which takes
+  ;; several assignments at once.
+  (eventbox :onhoverlost "${EWW_CMD} update tray_hover=false toggles_hover=false"
+    (centerbox :class "bar"
+      (bar-left)
+      (box)
+      (bar-right))))

@@ -3,7 +3,7 @@
     ./compositor.nix
     ./niri.nix
     ./sway.nix
-    ./waybar.nix
+    ./eww.nix
     ./rofi.nix
     ./shikane.nix
     ./session-services.nix

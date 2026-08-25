@@ -1,0 +1,13 @@
+// Top level is nothing but imports, one per widget plus the shared base.
+// SCSS @import shares scope, so anything defined in _colors is visible to every
+// widget stylesheet that follows.
+
+@import "styles/colors";
+@import "styles/metrics";
+@import "styles/base";
+
+@import "styles/powermenu";
+@import "styles/workspaces";
+@import "styles/bar";
+@import "styles/launcher";
+@import "styles/dropdown";
