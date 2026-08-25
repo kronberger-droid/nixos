@@ -97,6 +97,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nixpkgs-stable.follows = "nixpkgs";
       inputs.niri-unstable.follows = "niri-src";
+      # Nothing here uses niri-stable, but the overlay defines it regardless,
+      # and niri-flake resolves cargo git dependencies with
+      # `allowBuiltinFetchGit`, i.e. at evaluation time. Two source trees meant
+      # two Cargo.locks and thus smithay fetched twice on every eval. Pointing
+      # stable at the same tree collapses that to one.
+      inputs.niri-stable.follows = "niri-src";
     };
     # Self-hosted NixOS module for the oo7 secret-service stack (daemon +
     # ssh-agent + PAM + portal). nixpkgs packages oo7/oo7-portal/oo7-server
