@@ -5,7 +5,7 @@
 // The mixins matter more than the variables: waybar groups #mode, #custom-menu,
 // #custom-power, #clock and #scratchpad under one comment ("Accent widgets —
 // brown background with white text") and styles them identically. `bar-pill`
-// is that group. Same for the rows shared by the power menu and the launcher.
+// is that group.
 
 // ── Bar ───────────────────────────────────────────────────────────
 $bar-height: 30px;      // waybar.nix: height = 30
@@ -36,13 +36,14 @@ $ws-pill-width: 32px;   // content box; + 2 * 10px padding = the 52px measured
 }
 
 // ── Popups ────────────────────────────────────────────────────────
-$popup-radius: 12px;    // powermenu: rofi window { border-radius: 12px }
-$launcher-radius: 8px;  // launcher: rofi window { border-radius: 8px }
-$popup-padding: 20px;   // powermenu mainbox
-$launcher-padding: 40px;
+// Only the VPN dropdown is left: the launcher and the power menu went back to
+// rofi, which handles the environment an application expects and the arrow-key
+// navigation eww has no events for.
+$popup-radius: 8px;
 
-// A selectable row in a popup list. The two menus differ only in their
-// radius and padding, which rofi's own two rasi files also differ on.
+// A selectable row in a popup list. Parameterised because there used to be two
+// callers with different trim; kept that way since it costs nothing and the
+// next dropdown will want its own.
 @mixin menu-row($radius, $pad) {
   background-color: transparent;
   border-radius: $radius;
@@ -52,11 +53,3 @@ $launcher-padding: 40px;
   &:hover { background-color: $base02; }
 }
 
-// The highlighted row: base0F fill with dark text, the same accent the bar
-// pills use, so the three widgets read as one system.
-@mixin menu-row-selected {
-  background-color: $base0F;
-  color: $base00;
-
-  &:hover { background-color: $base0F; }
-}

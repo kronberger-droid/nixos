@@ -4,9 +4,7 @@
 ;; Mirrors how the nix side will install it: sources under widgets/ and styles/,
 ;; helper scripts generated into scripts/.
 
-(include "widgets/powermenu.yuck")
 (include "widgets/workspaces.yuck")
 (include "widgets/modules.yuck")
 (include "widgets/clusters.yuck")
 (include "widgets/bar.yuck")
-(include "widgets/launcher.yuck")

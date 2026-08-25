@@ -16,9 +16,11 @@
 ;; Adding box spacing on top made every gap 20px.
 (defwidget bar-left []
   (box :halign "start" :valign "center" :space-evenly false :spacing 0
-    ;; waybar's custom/menu runs `rofi -show drun`; this opens our launcher.
+    ;; rofi, as waybar's custom/menu did. The eww launcher this briefly
+    ;; pointed at is gone: rofi's drun already handles the environment an
+    ;; application expects, which the eww one did not (steam would not start).
     (eventbox :cursor "pointer"
-      (button :class "menu" :onclick "${EWW_CMD} open --toggle launcher"
+      (button :class "menu" :onclick "${EWW_CONFIG_DIR}/scripts/menu launcher"
         (label :text "")))
     (workspaces :monitor "")
     (scratchpad)))
@@ -44,10 +46,9 @@
     (eventbox :cursor "pointer"
       (button :class "clock" :onclick "${EWW_CONFIG_DIR}/scripts/tui calendar"
         (label :text clock)))
-    ;; waybar's custom/power runs the rofi script; this opens the eww
-    ;; powermenu instead, which is the first place the two widgets meet.
+    ;; waybar's custom/power ran the rofi script, and so does this again.
     (eventbox :cursor "pointer"
-      (button :class "power" :onclick "${EWW_CMD} open --toggle powermenu"
+      (button :class "power" :onclick "${EWW_CONFIG_DIR}/scripts/menu power"
         (label :text "")))))
 
 (defwindow bar

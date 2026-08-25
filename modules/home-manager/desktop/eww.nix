@@ -33,8 +33,7 @@
   };
 
   scripts = {
-    power = {inherit eww; inherit (pkgs) systemd wireplumber; swaylock = pkgs.swaylock-effects;};
-    apps = {inherit eww utilLinux;};
+    menu = {inherit (pkgs) rofi;};
     workspaces = {};
     network = {inherit (pkgs) iproute2;};
     vpn = {inherit eww; inherit (pkgs) systemd libnotify tailscale;};
@@ -53,10 +52,10 @@
     tui = {inherit utilLinux; dropkitten = dropkittenPkg;};
   };
 
-  widgets = ["bar" "modules" "clusters" "workspaces" "powermenu" "launcher"];
+  widgets = ["bar" "modules" "clusters" "workspaces"];
 
   # _colors.scss is generated below, so it is not in this list.
-  styles = ["_base" "_metrics" "bar" "workspaces" "powermenu" "launcher" "dropdown"];
+  styles = ["_base" "_metrics" "bar" "workspaces" "dropdown"];
 
   toAttrs = f: names: builtins.listToAttrs (map f names);
 
