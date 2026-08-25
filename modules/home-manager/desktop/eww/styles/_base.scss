@@ -28,17 +28,21 @@
 // background too. Without this they render as bare text over whatever is
 // behind them, which is unreadable over anything busy.
 //
-// Styled like the VPN dropdown rather than like the translucent panels: a
-// tooltip is small and transient, and at 90% the desktop stayed legible
-// through it.
+// The background goes on the label, not on the tooltip window. GTK paints the
+// toplevel behind the rounded box, so a background here leaves an opaque
+// square peeking out at each corner. Transparent window, rounded label.
+//
+// Small radius and tight padding on purpose: a tooltip should read as a note
+// attached to the pointer rather than as another panel.
 tooltip,
 tooltip.background {
-  background-color: $base00;
-  border: 1px solid $base02;
-  border-radius: $launcher-radius;
+  background-color: transparent;
+  border: none;
 }
 
 tooltip label {
+  background-color: $base00;
+  border-radius: 6px;
   color: $base05;
-  padding: 6px 8px;
+  padding: 4px 8px;
 }
