@@ -46,3 +46,12 @@ tooltip label {
   color: $base05;
   padding: 4px 8px;
 }
+
+// The toplevel window node. `* { all: unset }` above does not reach it, so GTK
+// paints the theme's own window background behind everything eww draws. On the
+// bar and the dimmed power menu that is invisible; on the launcher, whose
+// backdrop is deliberately transparent, it blanked the whole screen.
+window,
+window.background {
+  background-color: transparent;
+}
