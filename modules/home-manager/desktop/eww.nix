@@ -38,8 +38,8 @@
     workspaces = {};
     network = {inherit (pkgs) iproute2;};
     vpn = {inherit eww; inherit (pkgs) systemd libnotify tailscale;};
-    audio = {inherit (pkgs) wireplumber;};
-    bluetooth = {inherit (pkgs) systemd bluez;};
+    audio = {inherit eww; inherit (pkgs) wireplumber;};
+    bluetooth = {inherit eww; inherit (pkgs) systemd bluez;};
     mpris = {inherit (pkgs) playerctl;};
     dnd = {inherit eww; inherit (pkgs) mako libnotify;};
     idle = {inherit eww; inherit (pkgs) systemd;};

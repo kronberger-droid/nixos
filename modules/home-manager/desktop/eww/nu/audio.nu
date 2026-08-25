@@ -55,7 +55,7 @@ def sink-icon [v: int]: nothing -> string {
   }
 }
 
-def main [] {
+def state-json []: nothing -> string {
   let sink = (vol-of $SINK)
   let src = (vol-of $SOURCE)
   let src_icon = if $src.muted { "" } else { "" }
@@ -75,8 +75,15 @@ def main [] {
   } | to json --raw
 }
 
+def main [] {
+  print (state-json)
+}
+
 # waybar's on-click opens wiremix; scroll is not ported because eww has no
 # scroll event on a widget.
 def "main toggle-mute" [] {
   ^@wireplumber@/bin/wpctl set-mute $SINK toggle | complete | ignore
+  # Push rather than wait for the 2s poll, as the other toggles do.
+  let dir = ($env.FILE_PWD | path dirname)
+  ^@eww@/bin/eww -c $dir update $"audio_state=(state-json)" | complete | ignore
 }

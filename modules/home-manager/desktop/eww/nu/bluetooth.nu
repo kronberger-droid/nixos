@@ -39,28 +39,35 @@ def battery [mac: string]: nothing -> any {
   if $m == null { null } else { $m.pct | into int }
 }
 
-def main [] {
-  # `print`, not a bare pipeline: nushell only surfaces the *last* expression
-  # of a block, so a value built before an early `return` is discarded. Two of
-  # these three branches showed nothing at all until this was explicit.
+# waybar refreshed on a signal; eww has none, so the new state is pushed
+# straight into the poll variable. Without this the 5s interval makes a
+# right-click look like it did nothing, which is what it looked like.
+#
+# BlueZ settles the Powered property a moment after bluetoothctl returns, so
+# this waits for the value to actually change rather than reading it back
+# immediately and pushing the old one.
+def refresh [] {
+  let dir = ($env.FILE_PWD | path dirname)
+  ^@eww@/bin/eww -c $dir update $"bt_state=(status-json)" | complete | ignore
+}
+
+def status-json []: nothing -> string {
   if (not (powered?)) {
-    print ({text: "󰂲 off", tooltip: "Bluetooth off", class: "off"} | to json --raw)
-    return
+    return ({text: "\u{f00b2} off", tooltip: "Bluetooth off", class: "off"} | to json --raw)
   }
 
   let devs = (connected)
 
   if ($devs | is-empty) {
-    print ({text: "󰂯 on", tooltip: "Bluetooth on, nothing connected", class: "on"} | to json --raw)
-    return
+    return ({text: "\u{f00af} on", tooltip: "Bluetooth on, nothing connected", class: "on"} | to json --raw)
   }
 
   let d = ($devs | get 0)
   let batt = (battery $d.mac)
   let text = if $batt == null {
-    $"󰂱 ($d.alias)"
+    $"\u{f00b1} ($d.alias)"
   } else {
-    $"󰂱 ($d.alias) ($batt)%"
+    $"\u{f00b1} ($d.alias) ($batt)%"
   }
 
   {
@@ -68,14 +75,24 @@ def main [] {
     # waybar's tooltip enumerates every connected device with its address.
     tooltip: ($devs | each {|x| $"($x.alias)\t($x.mac)" } | str join "\n")
     class: "connected"
-  } | to json --raw | print
+  } | to json --raw
 }
 
-# waybar's on-click-right toggles power through D-Bus, for the reason above.
+def main [] {
+  print (status-json)
+}
+
 def "main toggle" [] {
-  if (powered?) {
+  let was = (powered?)
+  if $was {
     ^@bluez@/bin/bluetoothctl power off | complete | ignore
   } else {
     ^@bluez@/bin/bluetoothctl power on | complete | ignore
   }
+
+  for _ in 1..20 {
+    if (powered?) != $was { break }
+    sleep 50ms
+  }
+  refresh
 }
