@@ -42,10 +42,13 @@ def ipaddr [iface: string]: nothing -> string {
 const ICONS = ["󰤯" "󰤟" "󰤢" "󰤥" "󰤨"]
 
 def main [] {
+  # `print`, not a bare pipeline: nushell only surfaces the *last* expression
+  # of a block, so a value built before an early `return` is discarded. Two of
+  # these three branches showed nothing at all until this was explicit.
   let iface = (default-iface)
 
   if $iface == null {
-    {text: "󰖪", tooltip: "Disconnected", class: "disconnected"} | to json --raw
+    print ({text: "󰖪", tooltip: "Disconnected", class: "disconnected"} | to json --raw)
     return
   }
 
@@ -54,11 +57,11 @@ def main [] {
 
   if $q == null {
     # Ethernet: waybar shows the interface name next to the glyph.
-    {text: $"($iface) ", tooltip: $"($iface): ($ip)", class: "ethernet"} | to json --raw
+    print ({text: $"($iface) ", tooltip: $"($iface): ($ip)", class: "ethernet"} | to json --raw)
   } else {
     # waybar maps signal onto its icon list by proportion; five icons means
     # one per 20 points, clamped so 100 does not fall off the end.
     let idx = ([(($q * 5) // 100), 4] | math min)
-    {text: ($ICONS | get $idx), tooltip: $"($iface): ($ip) \(($q)%\)", class: "wifi"} | to json --raw
+    print ({text: ($ICONS | get $idx), tooltip: $"($iface): ($ip) \(($q)%\)", class: "wifi"} | to json --raw)
   }
 }

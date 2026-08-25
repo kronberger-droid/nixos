@@ -59,6 +59,19 @@
   styles = ["_base" "_metrics" "bar" "workspaces" "powermenu" "launcher" "dropdown"];
 
   toAttrs = f: names: builtins.listToAttrs (map f names);
+
+  # systemd calls ExecStartPost directly, with no shell, so `sleep 1 && eww
+  # open bar` was passed to sleep as arguments and failed the unit. A script
+  # keeps the retry readable and avoids guessing how long the socket takes:
+  # the daemon counts as active the moment the process starts, but its IPC
+  # socket appears a little later.
+  openBar = pkgs.writeShellScript "eww-open-bar" ''
+    for _ in $(seq 1 25); do
+      ${eww}/bin/eww open bar && exit 0
+      sleep 0.2
+    done
+    exit 1
+  '';
 in {
   programs.eww = {
     enable = true;
@@ -132,10 +145,18 @@ in {
       Description = "eww daemon";
       PartOf = ["graphical-session.target"];
       After = ["graphical-session.target"];
+      # As home-manager's own waybar unit does: without a compositor there is
+      # nothing to draw on, and the unit would restart-loop until it hit the
+      # start limit.
+      ConditionEnvironment = "WAYLAND_DISPLAY";
     };
     Service = {
       ExecStart = "${eww}/bin/eww daemon --no-daemonize";
-      ExecStartPost = "${pkgs.coreutils}/bin/sleep 1 && ${eww}/bin/eww open bar";
+      ExecStartPost = openBar;
+      # The scratchpad and ncspot popups spawn a terminal that inherits this
+      # directory, so zellij opens in $HOME rather than wherever the daemon
+      # happened to be started from.
+      WorkingDirectory = config.home.homeDirectory;
       Restart = "on-failure";
     };
     Install.WantedBy = ["graphical-session.target"];
