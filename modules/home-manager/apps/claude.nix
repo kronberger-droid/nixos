@@ -114,11 +114,83 @@
   outwardFacing =
     [
       "Bash(git push:*)"
-      "Bash(gh:*)"
       "Bash(deploy:*)"
       "Bash(ssh:*)"
       "Bash(nix copy:*)"
       "Bash(cachix:*)"
+    ]
+    # `gh`, by subcommand rather than wholesale. A blanket `Bash(gh:*)` also
+    # caught `gh pr view`, `gh issue list` and every `gh api` GET, which is the
+    # half worth having unprompted -- looking something up on GitHub is reading,
+    # not publishing. Only the verbs that write are named here.
+    #
+    # `gh api` resists the same treatment: the method arrives as `-X POST` after
+    # the endpoint, past where a prefix rule can see it, and gating the whole
+    # subcommand would take the reads down with it. A write spelled that way is
+    # left to auto mode's soft_deny below, which reads the command rather than
+    # its first few words.
+    ++ map (sub: "Bash(gh ${sub}:*)") [
+      "pr create"
+      "pr merge"
+      "pr close"
+      "pr reopen"
+      "pr edit"
+      "pr comment"
+      "pr review"
+      "pr ready"
+      "pr lock"
+      "pr unlock"
+      "issue create"
+      "issue close"
+      "issue reopen"
+      "issue edit"
+      "issue comment"
+      "issue delete"
+      "issue transfer"
+      "issue lock"
+      "issue unlock"
+      "issue pin"
+      "issue unpin"
+      "repo create"
+      "repo delete"
+      "repo edit"
+      "repo fork"
+      "repo rename"
+      "repo archive"
+      "repo unarchive"
+      "repo sync"
+      "repo deploy-key"
+      "release create"
+      "release edit"
+      "release delete"
+      "release upload"
+      "gist create"
+      "gist edit"
+      "gist delete"
+      "gist rename"
+      "workflow run"
+      "workflow enable"
+      "workflow disable"
+      "run rerun"
+      "run cancel"
+      "run delete"
+      "secret set"
+      "secret delete"
+      "variable set"
+      "variable delete"
+      "ssh-key add"
+      "ssh-key delete"
+      "gpg-key add"
+      "gpg-key delete"
+      "label create"
+      "label edit"
+      "label delete"
+      "label clone"
+      "cache delete"
+      "auth login"
+      "auth logout"
+      "auth refresh"
+      "auth token"
     ]
     # The GitHub MCP server's write half, tool by tool: it has no wildcard
     # form, and naming the whole server would drag every search_/get_/list_
