@@ -49,7 +49,15 @@
     };
     scratchpad = terminalVars // {inherit (pkgs) zellij;};
     ncspot = terminalVars // {inherit (pkgs) zellij;};
-    tui = {inherit utilLinux; dropkitten = dropkittenPkg;};
+    tui =
+      terminalVars
+      // {
+        inherit utilLinux;
+        dropkitten = dropkittenPkg;
+        # dropkitten -t wants the emulator's name, not its path.
+        terminalEmulator = config.terminal.emulator;
+        inherit (pkgs) bash btop bluetuith calcurse networkmanager wiremix;
+      };
   };
 
   widgets = ["bar" "modules" "clusters" "workspaces"];
