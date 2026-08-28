@@ -9,6 +9,13 @@
 # See scratchpad.nu: same shape, different spawn branch. The zellij session is
 # started with `-n ncspot` when it does not exist, and attached when it does.
 
+# Binaries by store path; see eww.nix for why these are consts and not
+# spelled inline at the call sites.
+const TERMINAL        = "@terminalBin@"
+const TERM_APPID_FLAG = "@terminalAppIdFlag@"
+const TERM_EXEC_FLAG  = "@terminalExecFlag@"
+const ZELLIJ          = "@zellij@/bin/zellij"
+
 def niri-windows [] {
   let r = (^niri msg -j windows | complete)
   if $r.exit_code == 0 { $r.stdout | from json } else { [] }
@@ -50,17 +57,17 @@ def main [] {
   } else {
     # Drop a resurrectable-but-dead session of the same name so we don't attach
     # to a ghost where ncspot is no longer running.
-    let dead = (^@zellij@/bin/zellij list-sessions -n | complete | get stdout | lines)
+    let dead = (^$ZELLIJ list-sessions -n | complete | get stdout | lines)
     if ($dead | any {|l| ($l | str starts-with $"($session) ") and ($l | str contains "EXITED")}) {
-      ^@zellij@/bin/zellij delete-session $session --force | complete | ignore
+      ^$ZELLIJ delete-session $session --force | complete | ignore
     }
 
     # `-s` lists live session names only, so this is an exact match.
-    let live = (^@zellij@/bin/zellij list-sessions -s -n | complete | get stdout | lines)
+    let live = (^$ZELLIJ list-sessions -s -n | complete | get stdout | lines)
     if ($live | any {|l| $l == $session}) {
-      ^@terminalBin@ @terminalAppIdFlag@ $app_id @terminalExecFlag@ @zellij@/bin/zellij attach $session | complete | ignore
+      ^$TERMINAL $TERM_APPID_FLAG $app_id $TERM_EXEC_FLAG $ZELLIJ attach $session | complete | ignore
     } else {
-      ^@terminalBin@ @terminalAppIdFlag@ $app_id @terminalExecFlag@ @zellij@/bin/zellij -s $session -n ncspot | complete | ignore
+      ^$TERMINAL $TERM_APPID_FLAG $app_id $TERM_EXEC_FLAG $ZELLIJ -s $session -n ncspot | complete | ignore
     }
     await-state $app_id "open"
   }

@@ -10,6 +10,11 @@
 # expose through wpctl. The node name does though: a bluetooth sink is
 # bluez_output.*, which is what "headphones" means in practice on this machine.
 
+# Binaries by store path; see eww.nix for why these are consts and not
+# spelled inline at the call sites.
+const EWW   = "@eww@/bin/eww"
+const WPCTL = "@wireplumber@/bin/wpctl"
+
 # wpctl's own identifiers happen to look like replaceVars placeholders, and
 # replaceVars fails the build on any placeholder it was not given a value for.
 # Built by concatenation so the literal pattern never appears here.
@@ -17,7 +22,7 @@ const SINK = ("@" + "DEFAULT_AUDIO_SINK" + "@")
 const SOURCE = ("@" + "DEFAULT_AUDIO_SOURCE" + "@")
 
 def vol-of [target: string]: nothing -> record {
-  let out = (^@wireplumber@/bin/wpctl get-volume $target | complete)
+  let out = (^$WPCTL get-volume $target | complete)
   if $out.exit_code != 0 { return {vol: 0, muted: true} }
   let t = ($out.stdout | str trim)
   {
@@ -28,7 +33,7 @@ def vol-of [target: string]: nothing -> record {
 }
 
 def sink-name []: nothing -> string {
-  let out = (^@wireplumber@/bin/wpctl inspect $SINK | complete)
+  let out = (^$WPCTL inspect $SINK | complete)
   if $out.exit_code != 0 { return "" }
   ($out.stdout
    | lines
@@ -82,10 +87,10 @@ def main [] {
 # waybar's on-click opens wiremix; its scroll-to-change-volume is `main
 # scroll` below.
 def "main toggle-mute" [] {
-  ^@wireplumber@/bin/wpctl set-mute $SINK toggle | complete | ignore
+  ^$WPCTL set-mute $SINK toggle | complete | ignore
   # Push rather than wait for the 2s poll, as the other toggles do.
   let dir = ($env.FILE_PWD | path dirname)
-  ^@eww@/bin/eww -c $dir update $"audio_state=(state-json)" | complete | ignore
+  ^$EWW -c $dir update $"audio_state=(state-json)" | complete | ignore
 }
 
 # The bar's scroll handler, waybar's scroll-to-change-volume. `dir` is what
@@ -101,14 +106,14 @@ def "main scroll" [dir: string] {
   # Unmute in both directions: scrolling a muted sink and hearing nothing is
   # the papercut this avoids. Before the volume change, so the push at the
   # bottom reads a sink that is already unmuted.
-  ^@wireplumber@/bin/wpctl set-mute $SINK 0 | complete | ignore
+  ^$WPCTL set-mute $SINK 0 | complete | ignore
 
   # wpctl's relative form is VOL%[-/+]. -l takes a fraction, 1.0 being 100%,
   # and caps the result rather than the step, so it only bites on the way up.
-  ^@wireplumber@/bin/wpctl set-volume -l 1.0 $SINK $step | complete | ignore
+  ^$WPCTL set-volume -l 1.0 $SINK $step | complete | ignore
 
   # Push rather than wait for the 2s poll, as toggle-mute does. `cfg`, not
   # `dir`: that name is the scroll direction here.
   let cfg = ($env.FILE_PWD | path dirname)
-  ^@eww@/bin/eww -c $cfg update $"audio_state=(state-json)" | complete | ignore
+  ^$EWW -c $cfg update $"audio_state=(state-json)" | complete | ignore
 }

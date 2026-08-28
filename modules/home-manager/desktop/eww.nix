@@ -12,6 +12,17 @@
   # substitution, and replaceVars fails the build both on an unfilled @var@ and
   # on an unused attr, so the table below cannot drift from the scripts.
   #
+  # Each script binds its binaries to consts up top (`const WPCTL =
+  # "@wireplumber@/bin/wpctl"`) rather than spelling `^@wireplumber@/bin/wpctl`
+  # at the call site. That is what keeps the first claim above true: a bare
+  # @var@ is not parseable nushell, so tree-sitter reads the whole line as an
+  # error and then mis-highlights the rest of it, picking the next bare word as
+  # the command. Inside a string the marker is just characters, the call sites
+  # read as ordinary external commands, and substitution is unaffected either
+  # way. Measured with tree-sitter over ./eww/nu: 96 parse errors before, 11
+  # after. The 11 are all vpn.nu's `where on`, a row-condition shorthand no
+  # released tree-sitter-nu parses yet. Valid nushell, so it stays.
+  #
   # Installed names carry no extension and consumers go through `scriptPath`,
   # matching waybar's convention.
   script = name: vars:

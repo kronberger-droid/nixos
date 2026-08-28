@@ -16,6 +16,15 @@
 # btop needs at least 80x24 and dropkitten's fractional sizing came up short,
 # so niri's btop_monitor window rule sizes it instead.
 
+# Binaries by store path; see eww.nix for why these are consts and not
+# spelled inline at the call sites.
+const BTOP            = "@btop@/bin/btop"
+const DROPKITTEN      = "@dropkitten@/bin/dropkitten"
+const SETSID          = "@utilLinux@/bin/setsid"
+const TERMINAL        = "@terminalBin@"
+const TERM_APPID_FLAG = "@terminalAppIdFlag@"
+const TERM_EXEC_FLAG  = "@terminalExecFlag@"
+
 const NMTUI_COLORS = "root=white,black:window=white,black:border=blue,black:listbox=white,black:actlistbox=black,blue:label=white,black:title=brightblue,black:button=white,black:actbutton=black,blue:compactbutton=white,black:checkbox=white,black:actcheckbox=black,blue:entry=white,black:textbox=white,black"
 
 def drop [...cmd: string] {
@@ -27,7 +36,7 @@ def drop [...cmd: string] {
   # Built as one list rather than spread across lines: nushell ends an external
   # command at the newline, so a continuation line parses as a new expression.
   let args = (["-t" "@terminalEmulator@" "-W" "0.35" "-H" "0.45"] ++ $offset ++ ["--"] ++ $cmd)
-  ^@utilLinux@/bin/setsid --fork @dropkitten@/bin/dropkitten ...$args | complete | ignore
+  ^$SETSID --fork $DROPKITTEN ...$args | complete | ignore
 }
 
 def main [what: string] {
@@ -43,7 +52,7 @@ def main [what: string] {
       # app-id, not title: btop's title arrives via OSC after the window maps,
       # too late for the rule, which is why niri.nix's Mod+Shift+T does the
       # same.
-      ^@utilLinux@/bin/setsid --fork @terminalBin@ @terminalAppIdFlag@ btop_monitor @terminalExecFlag@ @btop@/bin/btop | complete | ignore
+      ^$SETSID --fork $TERMINAL $TERM_APPID_FLAG btop_monitor $TERM_EXEC_FLAG $BTOP | complete | ignore
     }
     _ => { error make {msg: $"unknown tui: ($what)"} }
   }

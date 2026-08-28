@@ -12,6 +12,13 @@
 # niri is called bare rather than by store path, as the originals do: this only
 # ever runs inside the niri session.
 
+# Binaries by store path; see eww.nix for why these are consts and not
+# spelled inline at the call sites.
+const TERMINAL        = "@terminalBin@"
+const TERM_APPID_FLAG = "@terminalAppIdFlag@"
+const TERM_EXEC_FLAG  = "@terminalExecFlag@"
+const ZELLIJ          = "@zellij@/bin/zellij"
+
 def niri-windows []: nothing -> list {
   let r = (^niri msg -j windows | complete)
   if $r.exit_code == 0 { $r.stdout | from json } else { [] }
@@ -74,14 +81,14 @@ def "main toggle" [] {
   } else {
     # Drop a resurrectable-but-dead session so `attach --create` makes a fresh
     # one instead of restoring an empty shell where yazi used to be.
-    let sessions = (^@zellij@/bin/zellij list-sessions -n | complete | get stdout | lines)
+    let sessions = (^$ZELLIJ list-sessions -n | complete | get stdout | lines)
     if ($sessions | any {|l| ($l | str starts-with $"($session) ") and ($l | str contains "EXITED")}) {
-      ^@zellij@/bin/zellij delete-session $session --force | complete | ignore
+      ^$ZELLIJ delete-session $session --force | complete | ignore
     }
 
     # Foreground, as in bash: blocks until the terminal exits, so await-state
     # only runs afterwards.
-    ^@terminalBin@ @terminalAppIdFlag@ $app_id @terminalExecFlag@ @zellij@/bin/zellij attach $session --create | complete | ignore
+    ^$TERMINAL $TERM_APPID_FLAG $app_id $TERM_EXEC_FLAG $ZELLIJ attach $session --create | complete | ignore
     await-state $app_id "open"
   }
 
