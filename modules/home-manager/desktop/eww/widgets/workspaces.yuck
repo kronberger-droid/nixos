@@ -15,9 +15,9 @@
 
 (deflisten workspaces :initial "[]" "scripts/workspaces")
 
-;; monitor "" means every output, which is what the standalone spike
-;; window below wants. A real bar passes its own output name so each
-;; screen shows only its own workspaces.
+;; The bar passes its own output name, so each screen shows only its own
+;; workspaces. "" still means every output; nothing in the config uses it
+;; now, but it keeps this widget usable on its own for a quick spike.
 (defwidget workspaces [monitor]
   (box :class "workspaces" :space-evenly false :spacing 0 :halign "start" :valign "center"
     (for ws in {jq(workspaces, '[.[] | select("${monitor}" == "" or .output == "${monitor}")]')}

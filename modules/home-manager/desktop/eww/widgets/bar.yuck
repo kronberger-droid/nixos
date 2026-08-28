@@ -14,7 +14,7 @@
 ;; :spacing 0, not 10. The pills carry `margin: 0 5px` from waybar's CSS, so
 ;; two adjacent ones already sit 10px apart, which is what waybar measures.
 ;; Adding box spacing on top made every gap 20px.
-(defwidget bar-left []
+(defwidget bar-left [mon]
   (box :halign "start" :valign "center" :space-evenly false :spacing 0
     ;; rofi, as waybar's custom/menu did. The eww launcher this briefly
     ;; pointed at is gone: rofi's drun already handles the environment an
@@ -22,7 +22,7 @@
     (eventbox :cursor "pointer"
       (button :class "menu" :onclick "${EWW_CONFIG_DIR}/scripts/menu launcher"
         (label :text "")))
-    (workspaces :monitor "")
+    (workspaces :monitor mon)
     (scratchpad)))
 
 (defwidget bar-right []
@@ -51,8 +51,13 @@
       (button :class "power" :onclick "${EWW_CONFIG_DIR}/scripts/menu power"
         (label :text "")))))
 
-(defwindow bar
-  :monitor 0
+;; One instance per output, opened by scripts/bars as monitors come and go.
+;; `mon` is the connector name (HDMI-A-1, DP-2), which does double duty: eww
+;; resolves :monitor by name, and bar-left hands the same string to the
+;; workspaces widget so each bar draws only its own screen's pills. A name
+;; rather than an index deliberately, since indices shift on hotplug.
+(defwindow bar [mon]
+  :monitor mon
   :namespace "eww-bar"
   ;; "fg" == waybar's layer = "top". Below the powermenu's overlay, which
   ;; is what lets the menu cover the bar when it opens.
@@ -73,6 +78,6 @@
   ;; several assignments at once.
   (eventbox :onhoverlost "${EWW_CMD} update tray_hover=false toggles_hover=false"
     (centerbox :class "bar"
-      (bar-left)
+      (bar-left :mon mon)
       (box)
       (bar-right))))
