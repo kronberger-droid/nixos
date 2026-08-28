@@ -103,12 +103,10 @@
   color: $base05;
 }
 
-// Dim leading zeroes. The number keeps a constant three-digit width, which is
-// what removed the need for the per-module min-widths that used to live here:
-// padding the string is a stricter guarantee than reserving space for it.
-.bar .pad {
-  color: $base03;
-}
+// The per-module min-widths that used to live here are gone: padnum pads
+// every number out to three characters, which is a stricter guarantee than
+// reserving space for it. The padding is spaces, so there is nothing left to
+// style either.
 
 // #custom-scratchpad. Unlike the other modules this one is always filled: the
 // background carries the open/closed state rather than saying "accent widget",
