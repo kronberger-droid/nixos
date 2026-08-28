@@ -27,7 +27,11 @@
 
 (defwidget bar-right []
   (box :halign "end" :valign "center" :space-evenly false :spacing 0
-    ;; waybar's modules-right order, complete.
+    ;; waybar's modules-right order, with one deliberate change: battery and
+    ;; backlight sit in their own separator group rather than trailing cpu.
+    ;; waybar swapped them in for memory and temperature on notebooks, so the
+    ;; two sets never met; here every module shows on every host, and the
+    ;; group keeps the power readouts from reading as more cpu metrics.
     (toggles-cluster)
     (sep)
     (bluetooth)
@@ -37,6 +41,12 @@
     (network)
     (vpn)
     (sep)
+    (battery)
+    (backlight)
+    ;; The group's trailing separator, hidden with the group: on a desktop
+    ;; both modules are absent and the two separators would collapse into an
+    ;; empty "| |".
+    (sep :visible {batt_state.present || bl_state.present})
     (cpu)
     (memory)
     (temperature)
