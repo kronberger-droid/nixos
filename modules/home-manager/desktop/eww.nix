@@ -45,6 +45,7 @@
 
   scripts = {
     menu = {inherit (pkgs) rofi;};
+    bars = {inherit eww;};
     workspaces = {};
     network = {inherit (pkgs) iproute2;};
     vpn = {inherit eww; inherit (pkgs) systemd libnotify tailscale;};
@@ -77,19 +78,6 @@
   styles = ["_base" "_metrics" "bar" "workspaces" "dropdown"];
 
   toAttrs = f: names: builtins.listToAttrs (map f names);
-
-  # systemd calls ExecStartPost directly, with no shell, so `sleep 1 && eww
-  # open bar` was passed to sleep as arguments and failed the unit. A script
-  # keeps the retry readable and avoids guessing how long the socket takes:
-  # the daemon counts as active the moment the process starts, but its IPC
-  # socket appears a little later.
-  openBar = pkgs.writeShellScript "eww-open-bar" ''
-    for _ in $(seq 1 25); do
-      ${eww}/bin/eww open bar && exit 0
-      sleep 0.2
-    done
-    exit 1
-  '';
 in {
   programs.eww = {
     enable = true;
@@ -156,8 +144,8 @@ in {
   ];
 
   # eww is a daemon: one server per config dir, and windows are opened against
-  # it. The bar is opened here; the popups are opened on demand by keybinds and
-  # by the bar's own buttons.
+  # it. The bars are opened by eww-bars.service below; the popups are opened on
+  # demand by keybinds and by the bar's own buttons.
   systemd.user.services.eww = {
     Unit = {
       Description = "eww daemon";
@@ -170,11 +158,32 @@ in {
     };
     Service = {
       ExecStart = "${eww}/bin/eww daemon --no-daemonize";
-      ExecStartPost = openBar;
       # The scratchpad and ncspot popups spawn a terminal that inherits this
       # directory, so zellij opens in $HOME rather than wherever the daemon
       # happened to be started from.
       WorkingDirectory = config.home.homeDirectory;
+      Restart = "on-failure";
+    };
+    Install.WantedBy = ["graphical-session.target"];
+  };
+
+  # A separate unit rather than the ExecStartPost this replaces: opening the
+  # bars is no longer a one-shot. It has to keep watching, because a monitor
+  # plugged in after login needs its own bar and niri has no reload to hang
+  # that off.
+  systemd.user.services.eww-bars = {
+    Unit = {
+      Description = "eww bars, one per output";
+      PartOf = ["graphical-session.target"];
+      # BindsTo, not just After: the ids this reconciles against live in the
+      # daemon, so a restarted daemon must restart this too or it will think
+      # bars are open that are not.
+      BindsTo = ["eww.service"];
+      After = ["eww.service"];
+      ConditionEnvironment = "WAYLAND_DISPLAY";
+    };
+    Service = {
+      ExecStart = scriptPath "bars";
       Restart = "on-failure";
     };
     Install.WantedBy = ["graphical-session.target"];
