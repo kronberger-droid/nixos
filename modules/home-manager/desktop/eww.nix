@@ -30,6 +30,20 @@
 
   scriptPath = name: "${config.xdg.configHome}/eww/scripts/${name}";
 
+  # Every static config file goes through here rather than being referenced as
+  # a bare ./eww/... path. A path inside a flake evaluates to a path inside the
+  # flake's *source* store dir, so its string changes whenever anything in this
+  # repo does; builtins.path copies the one file out, giving it a hash that
+  # tracks only its own content. Invisible to xdg.configFile either way, but it
+  # is what keeps eww.service's X-Restart-Triggers below honest, since those
+  # trigger on the paths changing and would otherwise fire on every rebuild.
+  # The scripts need no equivalent: replaceVars already builds each one into a
+  # derivation of its own.
+  file = p: builtins.path {
+    path = p;
+    name = baseNameOf p;
+  };
+
   eww = config.programs.eww.package;
 
   # setsid, for the scripts' detach helpers. Nushell has no `&`.
@@ -92,8 +106,8 @@ in {
 
   xdg.configFile =
     {
-      "eww/eww.yuck".source = ./eww/eww.yuck;
-      "eww/eww.scss".source = ./eww/eww.scss;
+      "eww/eww.yuck".source = file ./eww/eww.yuck;
+      "eww/eww.scss".source = file ./eww/eww.scss;
 
       # The shared palette, the direct equivalent of rofi/shared/colors.rasi.
       # Generated so a scheme change repaints eww along with mako and waybar.
@@ -127,11 +141,11 @@ in {
     }
     // toAttrs (n: {
       name = "eww/widgets/${n}.yuck";
-      value.source = ./eww/widgets + "/${n}.yuck";
+      value.source = file (./eww/widgets + "/${n}.yuck");
     }) widgets
     // toAttrs (n: {
       name = "eww/styles/${n}.scss";
-      value.source = ./eww/styles + "/${n}.scss";
+      value.source = file (./eww/styles + "/${n}.scss");
     }) styles
     // lib.mapAttrs' (n: vars:
       lib.nameValuePair "eww/scripts/${n}" {
@@ -158,6 +172,19 @@ in {
       # nothing to draw on, and the unit would restart-loop until it hit the
       # start limit.
       ConditionEnvironment = "WAYLAND_DISPLAY";
+      # Without this a config-only rebuild reaches disk and nothing acts on
+      # it, so the daemon keeps serving the previous config until it is
+      # restarted by hand. Neither half of the usual pair fires: eww watches
+      # the store paths its config files resolve to and a switch swaps the
+      # symlinks above them, and home-manager restarts only units whose own
+      # definition changed, which this one's never does. Listing the paths
+      # makes a config change a unit change, which is the one signal both
+      # sides do act on. Derived from xdg.configFile rather than written out,
+      # so a widget or script added above joins it without being remembered.
+      X-Restart-Triggers =
+        map (f: toString f.source)
+        (lib.attrValues
+          (lib.filterAttrs (n: _: lib.hasPrefix "eww/" n) config.xdg.configFile));
     };
     Service = {
       ExecStart = "${eww}/bin/eww daemon --no-daemonize";
