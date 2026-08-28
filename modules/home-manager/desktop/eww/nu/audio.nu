@@ -79,11 +79,36 @@ def main [] {
   print (state-json)
 }
 
-# waybar's on-click opens wiremix; scroll is not ported because eww has no
-# scroll event on a widget.
+# waybar's on-click opens wiremix; its scroll-to-change-volume is `main
+# scroll` below.
 def "main toggle-mute" [] {
   ^@wireplumber@/bin/wpctl set-mute $SINK toggle | complete | ignore
   # Push rather than wait for the 2s poll, as the other toggles do.
   let dir = ($env.FILE_PWD | path dirname)
   ^@eww@/bin/eww -c $dir update $"audio_state=(state-json)" | complete | ignore
+}
+
+# The bar's scroll handler, waybar's scroll-to-change-volume. `dir` is what
+# eww substituted into {}: "up" or "down", nothing else.
+def "main scroll" [dir: string] {
+  # eww only ever sends those two. Anything else is not ours to interpret,
+  # and a bar handler has no stderr anyone would read, so bail silently.
+  let step = match $dir {
+    "up" => "1%+"
+    "down" => "1%-"
+    _ => { return }
+  }
+  # Unmute in both directions: scrolling a muted sink and hearing nothing is
+  # the papercut this avoids. Before the volume change, so the push at the
+  # bottom reads a sink that is already unmuted.
+  ^@wireplumber@/bin/wpctl set-mute $SINK 0 | complete | ignore
+
+  # wpctl's relative form is VOL%[-/+]. -l takes a fraction, 1.0 being 100%,
+  # and caps the result rather than the step, so it only bites on the way up.
+  ^@wireplumber@/bin/wpctl set-volume -l 1.0 $SINK $step | complete | ignore
+
+  # Push rather than wait for the 2s poll, as toggle-mute does. `cfg`, not
+  # `dir`: that name is the scroll direction here.
+  let cfg = ($env.FILE_PWD | path dirname)
+  ^@eww@/bin/eww -c $cfg update $"audio_state=(state-json)" | complete | ignore
 }

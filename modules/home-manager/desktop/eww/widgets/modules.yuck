@@ -146,9 +146,10 @@
         (vpn-menu-panel)))))
 
 ;; ── pulseaudio ───────────────────────────────────────────────────
-;; waybar: on-click = wiremix in a dropdown terminal. Its scroll-to-change
-;; -volume is not ported: eww has no scroll event on a widget, so the
-;; volume keys stay the way to change it.
+;; waybar: on-click = wiremix in a dropdown terminal, scroll to change the
+;; volume. Both are ported. An earlier note here claimed eww has no scroll
+;; event; it does, on eventbox, verified against this build by the absence
+;; of an "Unknown attribute" warning that a made-up attribute does draw.
 
 (defpoll audio_state :interval "2s"
   :initial '{"vol": 0, "muted": false, "suffix": "", "tooltip": "", "class": ""}'
@@ -156,6 +157,7 @@
 
 (defwidget pulseaudio []
   (eventbox :cursor "pointer"
+            :onscroll "${EWW_CONFIG_DIR}/scripts/audio scroll {}"
     (button :class "mod" :tooltip {audio_state.tooltip}
             :onclick "${EWW_CONFIG_DIR}/scripts/tui audio"
             :onrightclick "${EWW_CONFIG_DIR}/scripts/audio toggle-mute"
