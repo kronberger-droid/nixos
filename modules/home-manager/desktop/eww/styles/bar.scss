@@ -73,9 +73,16 @@
   color: $base03;
 }
 
-// temperature { critical-threshold = 80 }
+// temperature { critical-threshold = 80 }, and battery { states.critical = 15 }
 .bar .critical {
   color: $base08;
+}
+
+// battery { states.warning = 30 }. waybar styled this state through
+// #battery.warning; the class is generic here since nothing else needs a
+// second severity yet.
+.bar .warning {
+  color: $base0A;
 }
 
 // #custom-tray-handle / #custom-toggles-handle: dim until hovered, so the

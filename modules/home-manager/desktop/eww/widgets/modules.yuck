@@ -31,8 +31,11 @@
     (label :text value)))
 
 ;; custom/separator: format = "|"
-(defwidget sep []
-  (label :class "sep" :text "|"))
+;;
+;; ?visible, as padnum takes: the battery group hides whole on a desktop, and
+;; a separator left behind would draw the bar's only empty "| |".
+(defwidget sep [?visible]
+  (label :class "sep" :text "|" :visible {visible ?: true}))
 
 ;; cpu: format = "{usage}% "
 (defwidget cpu []
@@ -57,6 +60,39 @@
        :class {(EWW_TEMPS.CORETEMP_PACKAGE_ID_0 ?: "0") + 0 >= 80 ? "mod critical" : "mod"}
     (padnum :value {(EWW_TEMPS.CORETEMP_PACKAGE_ID_0 ?: "0") + 0})
     (label :text "°C ")))
+
+;; ── battery ──────────────────────────────────────────────────────
+;; waybar: interval = 30. Both this and backlight below were dropped in the
+;; port along with the isNotebook conditional that used to gate them; they
+;; now hide on `present` instead, which the script decides at runtime.
+
+(defpoll batt_state :interval "30s"
+  :initial '{"present": false, "pct": 0, "suffix": "", "tooltip": "", "class": ""}'
+  "scripts/battery")
+
+(defwidget battery []
+  (box :class "mod ${batt_state.class}" :space-evenly false :spacing 0
+       :visible {batt_state.present} :tooltip {batt_state.tooltip}
+    (padnum :value {batt_state.pct})
+    (label :text {batt_state.suffix})))
+
+;; ── backlight ────────────────────────────────────────────────────
+;; waybar had no interval here, since it watched udev. A poll is the cheaper
+;; thing to write and the scroll handler pushes its own result, so the only
+;; case the interval covers is the brightness keys, which is what makes 5s
+;; rather than something slower the right number.
+
+(defpoll bl_state :interval "5s"
+  :initial '{"present": false, "pct": 0, "suffix": "", "tooltip": "", "class": ""}'
+  "scripts/backlight")
+
+(defwidget backlight []
+  (eventbox :cursor "pointer" :visible {bl_state.present}
+            :onscroll "${EWW_CONFIG_DIR}/scripts/backlight scroll {}"
+    (box :class "mod" :space-evenly false :spacing 0
+         :tooltip {bl_state.tooltip}
+      (padnum :value {bl_state.pct})
+      (label :text {bl_state.suffix}))))
 
 ;; tray: spacing = 10, icon-size = 14
 (defwidget tray []

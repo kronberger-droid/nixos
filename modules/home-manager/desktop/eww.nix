@@ -47,6 +47,9 @@
     menu = {inherit (pkgs) rofi;};
     bars = {inherit eww;};
     workspaces = {};
+    # No vars beyond nushell itself: it reads /sys/class/power_supply.
+    battery = {};
+    backlight = {inherit eww; inherit (pkgs) brightnessctl;};
     network = {inherit (pkgs) iproute2;};
     vpn = {inherit eww; inherit (pkgs) systemd libnotify tailscale;};
     audio = {inherit eww; inherit (pkgs) wireplumber;};
