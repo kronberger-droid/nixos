@@ -8,8 +8,13 @@
 # mechanism. Note that wayland-pipewire-idle-inhibit.service still runs, so
 # audio playback keeps inhibiting idle independently of this toggle.
 
+# Binaries by store path; see eww.nix for why these are consts and not
+# spelled inline at the call sites.
+const EWW       = "@eww@/bin/eww"
+const SYSTEMCTL = "@systemd@/bin/systemctl"
+
 def inhibited? []: nothing -> bool {
-  (^@systemd@/bin/systemctl --user is-active swayidle.service | complete).exit_code != 0
+  (^$SYSTEMCTL --user is-active swayidle.service | complete).exit_code != 0
 }
 
 def status-json []: nothing -> string {
@@ -22,16 +27,16 @@ def status-json []: nothing -> string {
 
 def refresh [] {
   let dir = ($env.FILE_PWD | path dirname)
-  ^@eww@/bin/eww -c $dir update $"idle_state=(status-json)" | complete | ignore
+  ^$EWW -c $dir update $"idle_state=(status-json)" | complete | ignore
 }
 
 def main [] { print (status-json) }
 
 def "main toggle" [] {
   if (inhibited?) {
-    ^@systemd@/bin/systemctl --user start swayidle.service | complete | ignore
+    ^$SYSTEMCTL --user start swayidle.service | complete | ignore
   } else {
-    ^@systemd@/bin/systemctl --user stop swayidle.service | complete | ignore
+    ^$SYSTEMCTL --user stop swayidle.service | complete | ignore
   }
   refresh
 }

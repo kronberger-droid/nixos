@@ -11,8 +11,12 @@
 # tailscale0 up simultaneously, and only the routing table says which one the
 # traffic is on.
 
+# Binaries by store path; see eww.nix for why these are consts and not
+# spelled inline at the call sites.
+const IP = "@iproute2@/bin/ip"
+
 def default-iface []: nothing -> any {
-  let route = (^@iproute2@/bin/ip route show default | complete)
+  let route = (^$IP route show default | complete)
   if $route.exit_code != 0 { return null }
   let line = ($route.stdout | lines | get 0?)
   if $line == null { return null }
@@ -34,7 +38,7 @@ def wifi-quality [iface: string]: nothing -> any {
 }
 
 def ipaddr [iface: string]: nothing -> string {
-  let out = (^@iproute2@/bin/ip -4 -brief addr show dev $iface | complete)
+  let out = (^$IP -4 -brief addr show dev $iface | complete)
   if $out.exit_code != 0 { return "" }
   ($out.stdout | split row --regex '\s+' | get 2? | default "" | split row "/" | get 0? | default "")
 }

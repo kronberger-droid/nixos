@@ -8,6 +8,17 @@
 # are the obvious next candidates for an eww dropdown; left alone for now to
 # keep this port a port.
 
+# Binaries by store path; see eww.nix for why these are consts and not
+# spelled inline at the call sites.
+const EWW          = "@eww@/bin/eww"
+const NOTIFY_SEND  = "@libnotify@/bin/notify-send"
+const PGREP        = "@procps@/bin/pgrep"
+const PKILL        = "@procps@/bin/pkill"
+const ROFI         = "@rofi@/bin/rofi"
+const SETSID       = "@utilLinux@/bin/setsid"
+const SLURP        = "@slurp@/bin/slurp"
+const WL_SCREENREC = "@wlScreenrec@/bin/wl-screenrec"
+
 def status-json []: nothing -> string {
   if (recording?) {
     {text: "REC", class: "recording"} | to json --raw
@@ -21,35 +32,35 @@ def main [] { print (status-json) }
 
 
 def recording? [] {
-  (^@procps@/bin/pgrep -x wl-screenrec | complete).exit_code == 0
+  (^$PGREP -x wl-screenrec | complete).exit_code == 0
 }
 
 def notify [body: string] {
-  ^@libnotify@/bin/notify-send "Screen Recording" $body | complete | ignore
+  ^$NOTIFY_SEND "Screen Recording" $body | complete | ignore
 }
 
 def refresh [] {
   let dir = ($env.FILE_PWD | path dirname)
-  ^@eww@/bin/eww -c $dir update $"screenrec_state=(status-json)" | complete | ignore
+  ^$EWW -c $dir update $"screenrec_state=(status-json)" | complete | ignore
 }
 
 # Same shape as the `detach` in utilities.nu. Nushell has no `&`, and its
 # `job spawn` runs in a thread of *this* process, so a recording started that
 # way would die when this script exits.
 def detach [...cmd: string] {
-  ^@utilLinux@/bin/setsid -f ...$cmd out> /dev/null err> /dev/null
+  ^$SETSID -f ...$cmd out> /dev/null err> /dev/null
 }
 
 def "main toggle" [] {
   if (recording?) {
-    ^@procps@/bin/pkill wl-screenrec | complete | ignore
+    ^$PKILL wl-screenrec | complete | ignore
     notify "Recording stopped"
     refresh
     return
   }
 
   let mode = ("area\noutput"
-    | ^@rofi@/bin/rofi -dmenu -p "Record" -theme-str 'listview {lines: 2;}'
+    | ^$ROFI -dmenu -p "Record" -theme-str 'listview {lines: 2;}'
     | complete
     | get stdout
     | str trim)
@@ -57,7 +68,7 @@ def "main toggle" [] {
   # Each arm returns the wl-screenrec selection flags, or null to abort.
   let selection = match $mode {
     "area" => {
-      let geometry = (^@slurp@/bin/slurp | complete | get stdout | str trim)
+      let geometry = (^$SLURP | complete | get stdout | str trim)
       if ($geometry | is-empty) { null } else { ["-g" $geometry] }
     }
     "output" => {
@@ -70,7 +81,7 @@ def "main toggle" [] {
           | from json
           | columns
           | str join "\n"
-          | ^@rofi@/bin/rofi -dmenu -p "Output" -theme-str 'listview {lines: 3;}'
+          | ^$ROFI -dmenu -p "Output" -theme-str 'listview {lines: 3;}'
           | complete
           | get stdout
           | str trim)
@@ -88,7 +99,7 @@ def "main toggle" [] {
 
   # Spread as one list: a literal `-f` in the argument list would be parsed as a
   # flag to `detach` and fail at parse time. Spread values are not reinterpreted.
-  let record_args = [@wlScreenrec@/bin/wl-screenrec ...$selection "-f" $filename]
+  let record_args = [$WL_SCREENREC ...$selection "-f" $filename]
   detach ...$record_args
 
   notify $"Recording started: ($filename | path basename)"

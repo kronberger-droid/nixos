@@ -13,12 +13,19 @@
 # filtering cannot misalign a label from its tooltip. The leading space in
 # `text` is load-bearing for the bar's spacing.
 
+# Binaries by store path; see eww.nix for why these are consts and not
+# spelled inline at the call sites.
+const EWW         = "@eww@/bin/eww"
+const NOTIFY_SEND = "@libnotify@/bin/notify-send"
+const SYSTEMCTL   = "@systemd@/bin/systemctl"
+const TAILSCALE   = "@tailscale@/bin/tailscale"
+
 def active? [unit: string] {
-  (^@systemd@/bin/systemctl is-active $unit | complete).exit_code == 0
+  (^$SYSTEMCTL is-active $unit | complete).exit_code == 0
 }
 
 def notify [body: string, icon: string] {
-  ^@libnotify@/bin/notify-send "VPN" $body -i $icon | complete | ignore
+  ^$NOTIFY_SEND "VPN" $body -i $icon | complete | ignore
 }
 
 def systemctl-user [verb: string, unit: string] {
@@ -26,7 +33,7 @@ def systemctl-user [verb: string, unit: string] {
 }
 
 def tailscale-on? []: nothing -> bool {
-  (^@tailscale@/bin/tailscale status | complete).exit_code == 0
+  (^$TAILSCALE status | complete).exit_code == 0
 }
 
 # Tailscale has no systemd unit and no connect delay, so it carries an empty
@@ -43,13 +50,13 @@ def entries []: nothing -> list {
 # is pushed straight into the poll variable rather than waiting up to 15s.
 def refresh [] {
   let dir = ($env.FILE_PWD | path dirname)
-  ^@eww@/bin/eww -c $dir update $"vpn_state=(status-json)" | complete | ignore
-  ^@eww@/bin/eww -c $dir update $"vpn_list=(entries | to json --raw)" | complete | ignore
+  ^$EWW -c $dir update $"vpn_state=(status-json)" | complete | ignore
+  ^$EWW -c $dir update $"vpn_list=(entries | to json --raw)" | complete | ignore
 }
 
 def close-menu [] {
   let dir = ($env.FILE_PWD | path dirname)
-  ^@eww@/bin/eww -c $dir close vpn-menu | complete | ignore
+  ^$EWW -c $dir close vpn-menu | complete | ignore
 }
 
 def status-json []: nothing -> string {
@@ -99,10 +106,10 @@ def "main toggle" [name: string] {
 
   if $e.unit == "" {
     if $e.on {
-      ^@tailscale@/bin/tailscale down | complete | ignore
+      ^$TAILSCALE down | complete | ignore
       notify "Tailscale disconnected" "network-vpn-disconnected"
     } else {
-      ^@tailscale@/bin/tailscale up | complete | ignore
+      ^$TAILSCALE up | complete | ignore
       notify "Tailscale connected" "network-vpn"
     }
   } else {
@@ -119,7 +126,7 @@ def "main disconnect-all" [] {
   for e in (entries | where on) {
     $any = true
     if $e.unit == "" {
-      ^@tailscale@/bin/tailscale down | complete | ignore
+      ^$TAILSCALE down | complete | ignore
     } else {
       systemctl-user "stop" $e.unit
     }

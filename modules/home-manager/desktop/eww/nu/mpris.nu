@@ -12,6 +12,10 @@
 # `--follow` blocks and waits even when no player exists, so this stays alive
 # and starts emitting when one appears; exactly what deflisten wants.
 
+# Binaries by store path; see eww.nix for why these are consts and not
+# spelled inline at the call sites.
+const PLAYERCTL = "@playerctl@/bin/playerctl"
+
 def render [line: string]: nothing -> string {
   let parts = ($line | split row "|")
   let status = ($parts | get 0? | default "" | str trim)
@@ -37,7 +41,7 @@ def render [line: string]: nothing -> string {
 }
 
 def main [] {
-  ^@playerctl@/bin/playerctl -f '{{status}}|{{playerName}}' metadata --follow
+  ^$PLAYERCTL -f '{{status}}|{{playerName}}' metadata --follow
   | lines
   | each {|line| print (render $line) }
   | ignore
@@ -45,12 +49,12 @@ def main [] {
 
 # waybar: on-click = --send toggle.
 def "main toggle" [] {
-  ^@playerctl@/bin/playerctl play-pause | complete | ignore
+  ^$PLAYERCTL play-pause | complete | ignore
 }
 
 # waybar: on-click-right = --send player-next, which cycles between *players*.
 # playerctl has no direct equivalent, and skipping the track is the more useful
 # binding on a right-click, so this deviates deliberately.
 def "main next" [] {
-  ^@playerctl@/bin/playerctl next | complete | ignore
+  ^$PLAYERCTL next | complete | ignore
 }

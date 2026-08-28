@@ -11,14 +11,20 @@
 # and the toggle only ever powered on. `bluetoothctl` is still fine for reading
 # the device list and battery level, which have not moved.
 
+# Binaries by store path; see eww.nix for why these are consts and not
+# spelled inline at the call sites.
+const BLUETOOTHCTL = "@bluez@/bin/bluetoothctl"
+const BUSCTL       = "@systemd@/bin/busctl"
+const EWW          = "@eww@/bin/eww"
+
 def powered? []: nothing -> bool {
-  let out = (^@systemd@/bin/busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Powered | complete)
+  let out = (^$BUSCTL --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Powered | complete)
   ($out.stdout | str trim) == "b true"
 }
 
 # "Device CC:98:8B:3D:E3:99 WH-1000XM3" -> {mac, alias}
 def connected []: nothing -> list {
-  let out = (^@bluez@/bin/bluetoothctl devices Connected | complete)
+  let out = (^$BLUETOOTHCTL devices Connected | complete)
   if $out.exit_code != 0 { return [] }
   $out.stdout
   | lines
@@ -31,7 +37,7 @@ def connected []: nothing -> list {
 
 # "Battery Percentage: 0x46 (70)" -> 70
 def battery [mac: string]: nothing -> any {
-  let out = (^@bluez@/bin/bluetoothctl info $mac | complete)
+  let out = (^$BLUETOOTHCTL info $mac | complete)
   if $out.exit_code != 0 { return null }
   let line = ($out.stdout | lines | where {|l| $l | str contains "Battery Percentage" } | get 0?)
   if $line == null { return null }
@@ -48,7 +54,7 @@ def battery [mac: string]: nothing -> any {
 # immediately and pushing the old one.
 def refresh [] {
   let dir = ($env.FILE_PWD | path dirname)
-  ^@eww@/bin/eww -c $dir update $"bt_state=(status-json)" | complete | ignore
+  ^$EWW -c $dir update $"bt_state=(status-json)" | complete | ignore
 }
 
 def status-json []: nothing -> string {
@@ -85,9 +91,9 @@ def main [] {
 def "main toggle" [] {
   let was = (powered?)
   if $was {
-    ^@bluez@/bin/bluetoothctl power off | complete | ignore
+    ^$BLUETOOTHCTL power off | complete | ignore
   } else {
-    ^@bluez@/bin/bluetoothctl power on | complete | ignore
+    ^$BLUETOOTHCTL power on | complete | ignore
   }
 
   for _ in 1..20 {

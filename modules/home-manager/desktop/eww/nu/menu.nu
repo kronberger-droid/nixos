@@ -12,8 +12,12 @@
 # copied verbatim and never see replaceVars, so a store path cannot be
 # interpolated into one.
 
+# Binaries by store path; see eww.nix for why these are consts and not
+# spelled inline at the call sites.
+const ROFI = "@rofi@/bin/rofi"
+
 def "main launcher" [] {
-  ^@rofi@/bin/rofi -show drun | complete | ignore
+  ^$ROFI -show drun | complete | ignore
 }
 
 def "main power" [] {
