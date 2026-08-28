@@ -172,6 +172,14 @@ in {
       # nothing to draw on, and the unit would restart-loop until it hit the
       # start limit.
       ConditionEnvironment = "WAYLAND_DISPLAY";
+      # eww-bars binds to this unit, which covers the stop side but not the
+      # start side, and a switch is the case where that matters: home-manager
+      # stops a changed service and starts it again as two jobs rather than
+      # restarting it, so the restart BindsTo would have propagated never
+      # happens and the bars stay down until started by hand. Upholds is the
+      # start side spelled out, and holds for every route into a restart
+      # rather than just this one.
+      Upholds = ["eww-bars.service"];
       # Without this a config-only rebuild reaches disk and nothing acts on
       # it, so the daemon keeps serving the previous config until it is
       # restarted by hand. Neither half of the usual pair fires: eww watches
