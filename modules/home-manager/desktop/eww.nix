@@ -179,7 +179,16 @@ in {
       # daemon, so a restarted daemon must restart this too or it will think
       # bars are open that are not.
       BindsTo = ["eww.service"];
-      After = ["eww.service"];
+      # graphical-session.target belongs in here even though eww.service
+      # already orders after it. A target implicitly orders itself after
+      # everything it wants, so WantedBy alone gives
+      # graphical-session.target -> after eww-bars -> after eww -> after
+      # graphical-session.target, and systemd breaks that cycle by dropping
+      # whichever job it likes, usually this one. Naming the target
+      # explicitly replaces the implicit reverse ordering and the cycle goes
+      # away. Every other unit here (swayidle, shikane, wlsunset) is shaped
+      # the same way for the same reason.
+      After = ["graphical-session.target" "eww.service"];
       ConditionEnvironment = "WAYLAND_DISPLAY";
     };
     Service = {
