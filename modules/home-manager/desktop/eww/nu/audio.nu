@@ -66,7 +66,7 @@ def state-json []: nothing -> string {
   let src_icon = if $src.muted { "" } else { "" }
 
   # vol and the glyph tail are separate fields: the widget pads the number
-  # with dim leading zeroes, which it cannot do to a pre-formatted string.
+  # with dim dashes, which it cannot do to a pre-formatted string.
   {
     vol: $sink.vol
     muted: $sink.muted

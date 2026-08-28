@@ -20,15 +20,19 @@
 ;; ─────────────────────────────────────────────────────────────────
 
 ;; ── padded numbers ───────────────────────────────────────────────
-;; Leading zeroes in a dim colour, so 7% and 100% occupy the same width
-;; and the digits stay column-aligned. This also makes the reserved
-;; min-widths in bar.scss redundant for these modules: the string is now
-;; always three digits wide, so there is nothing left to reserve.
+;; Spaces, so 7% and 100% occupy the same width and the digits stay
+;; column-aligned. This also makes the reserved min-widths in bar.scss
+;; redundant for these modules: the string is now always three characters
+;; wide, so there is nothing left to reserve.
+;;
+;; The bar is set in JetBrains Mono, where a space is exactly as wide as a
+;; digit, which is what lets the padding be nothing at all. Visible fillers
+;; were tried first and both misread: a leading zero joins the number
+;; ("007%") and a leading dash reads as a minus sign ("-46%").
 
 (defwidget padnum [value ?visible]
-  (box :space-evenly false :spacing 0 :visible {visible ?: true}
-    (label :class "pad" :text {value < 10 ? "00" : (value < 100 ? "0" : "")})
-    (label :text value)))
+  (label :visible {visible ?: true}
+         :text {(value < 10 ? "  " : (value < 100 ? " " : "")) + value}))
 
 ;; custom/separator: format = "|"
 ;;

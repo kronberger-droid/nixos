@@ -77,7 +77,7 @@ def state-json []: nothing -> string {
   let first = ($cs | first)
 
   # pct and the glyph tail stay separate fields: the widget pads the number
-  # with dim leading zeroes, which it cannot do to a pre-formatted string.
+  # with dim dashes, which it cannot do to a pre-formatted string.
   {
     present: true
     pct: $pct
