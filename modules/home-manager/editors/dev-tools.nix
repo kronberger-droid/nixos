@@ -8,6 +8,38 @@
   rustToolchain = pkgs.rust-bin.stable.latest.default.override {
     extensions = ["rust-analyzer" "rust-src"];
   };
+
+  # A second toolchain under `n-` prefixed names, for projects whose CI runs on
+  # nightly (atuin's formatter is what prompted it). Stable keeps every
+  # unprefixed name, so nightly is something you opt into per command rather
+  # than something sitting on PATH.
+  #
+  # selectLatestNightlyWith rather than `nightly.latest`: nightly builds ship
+  # per-day and a component can be missing on any given one, which would fail
+  # the build here for a reason that has nothing to do with this config. This
+  # walks back to the newest date that actually carries the profile asked for.
+  rustNightly = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default);
+
+  # Wrappers rather than renamed symlinks. cargo carries no compiler: it
+  # resolves rustc, rustfmt and rustdoc off PATH when it runs, and stable comes
+  # first there, so a bare `n-cargo` would drive the nightly cargo against the
+  # stable compiler and quietly mix the two. Prefixing PATH with nightly's own
+  # bin dir is the job rustup's shims do, and it keeps whatever a wrapped
+  # binary shells out to inside its own toolchain.
+  #
+  # Worth remembering the next time target/ is audited (see cargo-sweep below):
+  # this is a whole second compiler, orphaning object sets on nightly's release
+  # cadence rather than stable's. `cargo sweep --installed -r` collects both.
+  rustNightlyShims =
+    pkgs.runCommand "rust-nightly-shims" {
+      nativeBuildInputs = [pkgs.makeWrapper];
+    } ''
+      mkdir -p $out/bin
+      for bin in ${rustNightly}/bin/*; do
+        makeWrapper "$bin" "$out/bin/n-$(basename "$bin")" \
+          --prefix PATH : ${rustNightly}/bin
+      done
+    '';
 in {
   # Cargo's own defaults (profiles, aliases, linker) live in cargo.nix, which
   # hosts/droid/home.nix imports too — the phone has a toolchain but no
@@ -17,6 +49,8 @@ in {
   # rustfmt uses its default max_width (100); per-project rustfmt.toml still wins.
   home.packages = with pkgs; [
     rustToolchain
+    # n-cargo, n-rustc, n-rustfmt, n-clippy-driver, …
+    rustNightlyShims
     tokei
     cargo-generate
     # One process per test instead of one thread per test in a shared binary:
