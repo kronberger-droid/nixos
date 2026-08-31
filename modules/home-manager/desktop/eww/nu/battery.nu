@@ -29,15 +29,30 @@ def attr [dir: string, name: string]: nothing -> any {
   if ($f | path exists) { open --raw $f | into string | str trim } else { null }
 }
 
-# The directory also holds the AC adapter and, on this machine, a USB-C source
-# psy, hence the filter on `type`.
+# Three filters, because three different things in this directory are not the
+# battery we want.
+#
+# `type` drops the AC adapter and, on this machine, a USB-C source psy.
+#
+# `scope` drops a battery that powers a peripheral rather than the machine. A
+# Logitech receiver registers its mouse as a `type = Battery` psy with
+# `scope = Device`, which is what put a red 0% on a desktop bar. Real system
+# batteries mostly omit the file rather than write "System", so a missing
+# scope has to count as a system one.
+#
+# `capacity` drops a battery that reports no percentage. A psy is free to
+# publish only the coarse `capacity_level` (Full/Good/Low/Critical), as that
+# same mouse does, and the reading has to be absent rather than defaulted: 0
+# is a plausible enough number to render as a real one.
 def cells []: nothing -> list<record> {
   if not ($SYSFS | path exists) { return [] }
   ls $SYSFS
   | get name
   | where {|p| (attr $p "type") == "Battery" }
+  | where {|p| (attr $p "scope" | default "System") == "System" }
+  | where {|p| (attr $p "capacity") != null }
   | each {|p| {
-      pct: (attr $p "capacity" | default "0" | into int)
+      pct: (attr $p "capacity" | into int)
       status: (attr $p "status" | default "Unknown")
       # µAh/µA here, µWh/µW on firmware that reports watt-hours. now/rate is
       # hours in either unit system, so one path covers both.
