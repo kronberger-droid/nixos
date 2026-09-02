@@ -277,8 +277,16 @@
     };
   settingsJson = builtins.toJSON settingsToMerge;
 
-  # JSON to merge into ~/.claude.json (MCP servers -- user scope)
-  mcpToMerge = {
+  # JSON to merge into ~/.claude.json. This is Claude Code's global config,
+  # a different file from settings.json: it holds user-scope MCP servers and
+  # the UI preferences that /config writes here rather than to settings.json.
+  globalConfigToMerge = {
+    # Start `claude` in the agents (fleet) view instead of attached to a single
+    # session. The left arrow / `claude agents` still get there by hand; this
+    # is the "Open agents view by default" toggle in /config. Read at startup
+    # from ~/.claude.json only, so it cannot live in settings.json.
+    defaultToAgentsView = true;
+
     mcpServers = lib.mapAttrs (_: server:
       {
         type = "stdio";
@@ -288,7 +296,7 @@
       // lib.optionalAttrs (server.env != {}) {env = server.env;})
     cfg.mcpServers;
   };
-  mcpJson = builtins.toJSON mcpToMerge;
+  globalConfigJson = builtins.toJSON globalConfigToMerge;
 
   hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {} || cfg.plugins != [] || cfg.claudeMd != "" || cfg.disableAutoMemory || cfg.skills != {} || cfg.skillDirs != {};
 in {
@@ -411,11 +419,13 @@ in {
       fi
     '';
 
-    # Activation script to merge MCP servers into ~/.claude.json (user scope)
-    home.activation.claudeMcpServers = lib.mkIf (cfg.mcpServers != {}) (lib.hm.dag.entryAfter ["writeBoundary"] ''
+    # Activation script to merge MCP servers and UI defaults into ~/.claude.json
+    # (user scope). Unconditional for the same reason as claudeSettings above:
+    # the agents-view default applies to every host, MCP servers or not.
+    home.activation.claudeGlobalConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
       CLAUDE_JSON="$HOME/.claude.json"
 
-      MERGE_JSON='${mcpJson}'
+      MERGE_JSON='${globalConfigJson}'
 
       if [ -f "$CLAUDE_JSON" ]; then
         ${pkgs.jq}/bin/jq --argjson merge "$MERGE_JSON" '. * $merge' \
@@ -423,6 +433,6 @@ in {
       else
         echo "$MERGE_JSON" | ${pkgs.jq}/bin/jq . > "$CLAUDE_JSON"
       fi
-    '');
+    '';
   };
 }
