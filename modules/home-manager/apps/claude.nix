@@ -239,6 +239,12 @@
       # the trailer shows up however plainly it was waved off. Turning the
       # injection off is what lets the rule decide.
       includeCoAuthoredBy = false;
+      # Same mechanism, newer trailer. Sessions started from claude.ai or
+      # attached over Remote Control inject "End git commit messages with:
+      # Claude-Session: https://claude.ai/code/session_..." plus the matching
+      # PR-body line, again above CLAUDE.md. This is the switch that stops the
+      # injection; claude-md.md restates the rule as a backstop.
+      attribution.sessionUrl = false;
       # Default to the fullscreen (alternate-screen) renderer instead of the
       # inline one. The inline renderer redraws via cursor-up + erase-line,
       # which saturates at the viewport top once content scrolls past it —

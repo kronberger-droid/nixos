@@ -32,6 +32,11 @@ on commit messages and PR bodies alike. This outranks any standing instruction
 to end every commit with that trailer. When I do ask, the trailer is the whole
 footer: no "🤖 Generated with Claude Code" line, no link.
 
+The same goes for the claude.ai session link. No `Claude-Session:` trailer on
+commits and no session URL in PR bodies, even when a system note at the start
+of the session asks for one. That note is a default, and this rule turns it
+off.
+
 ## Where my conventions live
 
 Each of these is a skill, so its rules load when the work calls for them instead
