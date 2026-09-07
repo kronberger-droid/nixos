@@ -4,8 +4,19 @@
   lib,
   isNotebook,
   hasAccelerometer,
+  osConfig ? null,
   ...
 }: let
+  # Idle sleep action. Mirrors logind's lid handling in
+  # modules/system/hardware/power-management.nix: hosts that declare a
+  # resume device get suspend-then-hibernate, the rest plain suspend.
+  # Going through `systemctl` here bypasses logind's IdleAction, which never
+  # fires on Wayland anyway (the compositor does not set the session IdleHint).
+  idleSleep =
+    if (osConfig.boot.resumeDevice or "") != ""
+    then "suspend-then-hibernate"
+    else "suspend";
+
   # DPMS control, dispatching on whichever compositor's socket is live. The niri
   # branch interpolates ${pkgs.niri} (the source-built fork), so only emit it
   # when niri is the primary compositor — otherwise it drags the fork into the
@@ -126,7 +137,7 @@ in {
       }
       {
         timeout = 560;
-        command = "${pkgs.systemd}/bin/systemctl suspend";
+        command = "${pkgs.systemd}/bin/systemctl ${idleSleep}";
       }
     ];
     events = {
