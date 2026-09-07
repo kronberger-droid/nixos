@@ -132,11 +132,6 @@
     }
   ];
 
-  systemd.sleep.settings.Sleep = {
-    SuspendState = "mem";
-    HibernateDelaySec = "90m";
-  };
-
   # Docker — for testing Nextcloud instances
   # Socket-activated: daemon only starts when docker commands are run
   virtualisation.docker = {

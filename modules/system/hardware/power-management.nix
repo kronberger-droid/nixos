@@ -1,8 +1,15 @@
 {
+  config,
   pkgs,
   isNotebook ? false,
   ...
-}: {
+}: let
+  # A host can only be hibernated safely when it tells the kernel where to
+  # find the image on the next boot. Without boot.resumeDevice a hibernate
+  # would "work" and then boot fresh, losing the session, so those hosts keep
+  # plain suspend.
+  canHibernate = config.boot.resumeDevice != "";
+in {
   # Power management configuration optimized for laptops
   powerManagement = {
     enable = true;
@@ -93,9 +100,15 @@
       if isNotebook
       then {
         SuspendState = "mem";
-        HibernateDelaySec = "90m";
-        HybridSleepState = "disk";
-        HybridSleepMode = "suspend";
+        # No HibernateDelaySec on purpose. Without a fixed delay,
+        # suspend-then-hibernate arms an ACPI low-battery alarm (or, failing
+        # that, wakes hourly via RTC to sample the discharge rate) and only
+        # hibernates when the battery is about to hit 5%. Measured on P14E
+        # (2026-09-06): s2idle drains ~1.1%/h, hibernate ~0.1%/h, so the old
+        # 90m cutoff paid a 44s image write for every lunch break to save
+        # under 2% of battery.
+        # HybridSleepState/HybridSleepMode were removed in systemd 261 and
+        # only produced warnings on every sleep transition.
       }
       else {};
   };
@@ -105,7 +118,14 @@
     if isNotebook
     then {
       settings.Login = {
-        HandleLidSwitch = "suspend";
+        # On battery, closing the lid should not be able to drain the
+        # machine to death: suspend first, hibernate when the battery gets
+        # low (see sleep.settings above). On external power there is nothing
+        # to protect against, so plain suspend keeps resume instant.
+        HandleLidSwitch =
+          if canHibernate
+          then "suspend-then-hibernate"
+          else "suspend";
         HandleLidSwitchDocked = "ignore";
         HandleLidSwitchExternalPower = "suspend";
         HandlePowerKey = "suspend";
