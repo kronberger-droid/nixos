@@ -13,6 +13,9 @@
     # Electron, and it builds with bun rather than the CVE-flagged pnpm.
     equibop
 
+    # AI
+    gemini-cli
+
     # Documents
     (pkgs.obsidian.overrideAttrs (oldAttrs: {
       postInstall =
@@ -24,6 +27,7 @@
     }))
     onlyoffice-desktopeditors
     zotero
+
     # Media
     drawio
     inkscape
@@ -35,10 +39,6 @@
     vlc
     obs-studio
     ipe
-    # 2.70 (GTK2) kept as the fallback — it goes through XWayland and renders
-    # at half size on scaled outputs. `gwyddion3` is the GTK3/Wayland-native
-    # build and is the one to reach for; see modules/shared/gwyddion3.nix.
-    gwyddion
     (pkgs.callPackage ../../shared/gwyddion3.nix {})
 
     # PDF
