@@ -39,10 +39,11 @@
   # trigger on the paths changing and would otherwise fire on every rebuild.
   # The scripts need no equivalent: replaceVars already builds each one into a
   # derivation of its own.
-  file = p: builtins.path {
-    path = p;
-    name = baseNameOf p;
-  };
+  file = p:
+    builtins.path {
+      path = p;
+      name = baseNameOf p;
+    };
 
   eww = config.programs.eww.package;
 
@@ -58,19 +59,40 @@
   };
 
   scripts = {
-    menu = {inherit utilLinux; inherit (pkgs) rofi;};
+    menu = {
+      inherit utilLinux;
+      inherit (pkgs) rofi;
+    };
     bars = {inherit eww;};
     workspaces = {};
     # No vars beyond nushell itself: it reads /sys/class/power_supply.
     battery = {};
-    backlight = {inherit eww; inherit (pkgs) brightnessctl;};
+    backlight = {
+      inherit eww;
+      inherit (pkgs) brightnessctl;
+    };
     network = {inherit (pkgs) iproute2;};
-    vpn = {inherit eww; inherit (pkgs) systemd libnotify tailscale;};
-    audio = {inherit eww; inherit (pkgs) wireplumber;};
-    bluetooth = {inherit eww; inherit (pkgs) systemd bluez;};
+    vpn = {
+      inherit eww;
+      inherit (pkgs) systemd libnotify tailscale;
+    };
+    audio = {
+      inherit eww;
+      inherit (pkgs) wireplumber;
+    };
+    bluetooth = {
+      inherit eww;
+      inherit (pkgs) systemd bluez;
+    };
     mpris = {inherit (pkgs) playerctl;};
-    dnd = {inherit eww; inherit (pkgs) mako libnotify;};
-    idle = {inherit eww; inherit (pkgs) systemd;};
+    dnd = {
+      inherit eww;
+      inherit (pkgs) mako libnotify;
+    };
+    idle = {
+      inherit eww;
+      inherit (pkgs) systemd;
+    };
     screenrec = {
       inherit eww utilLinux;
       inherit (pkgs) libnotify procps rofi slurp;
@@ -142,11 +164,13 @@ in {
     // toAttrs (n: {
       name = "eww/widgets/${n}.yuck";
       value.source = file (./eww/widgets + "/${n}.yuck");
-    }) widgets
+    })
+    widgets
     // toAttrs (n: {
       name = "eww/styles/${n}.scss";
       value.source = file (./eww/styles + "/${n}.scss");
-    }) styles
+    })
+    styles
     // lib.mapAttrs' (n: vars:
       lib.nameValuePair "eww/scripts/${n}" {
         executable = true;
