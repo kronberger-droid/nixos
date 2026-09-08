@@ -92,7 +92,7 @@
   widgets = ["bar" "modules" "clusters" "workspaces"];
 
   # _colors.scss is generated below, so it is not in this list.
-  styles = ["_base" "_metrics" "bar" "workspaces" "dropdown"];
+  styles = ["_base" "_metrics" "bar" "workspaces" "dropdown" "tray-menu"];
 
   toAttrs = f: names: builtins.listToAttrs (map f names);
 in {
