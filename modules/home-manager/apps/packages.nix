@@ -14,7 +14,7 @@
     equibop
 
     # AI
-    gemini-cli
+    antigravity-cli
 
     # Documents
     (pkgs.obsidian.overrideAttrs (oldAttrs: {
