@@ -1,0 +1,101 @@
+// The menus a tray icon opens on click.
+//
+// Not eww widgets: the systray is a StatusNotifier host, and an item's menu
+// arrives over DBus as a menu layout that dbusmenu turns into a real GtkMenu in
+// a popup window of its own. eww never names those widgets, so nothing here can
+// be given a class; the selectors are GTK's own CSS nodes.
+//
+// They need styling at all for the reason _base.scss gives for tooltips, one
+// step further out. eww installs its stylesheet on the whole GdkScreen, so the
+// `* { all: unset }` reset reaches every surface the process creates, including
+// menus it did not build. Stripped of its background the menu draws its entries
+// straight onto whatever is behind it, which is a wallpaper or a text editor.
+//
+// The fill goes on `menu`, not on its window, the same split the tooltip uses:
+// _base.scss makes `window.background` transparent for the launcher's sake, and
+// GTK paints the toplevel as a square behind the rounded box either way.
+
+menu,
+menu.background {
+  background-color: $base00;
+  border: 1px solid $base02;
+  border-radius: $popup-radius;
+  padding: 4px 0;
+}
+
+// No radius on the row: a rounded highlight inside a rounded box needs the two
+// radii to agree at the corners, and full-bleed rows are what a menu looks like
+// everywhere else on the desktop. `menu-row` from _metrics.scss is for the
+// dropdowns eww draws itself, which are inset from their panel.
+menu menuitem {
+  color: $base05;
+  padding: 4px 12px;
+  min-height: 22px;
+}
+
+// GTK marks the keyboard-or-pointer selected row with :hover, so arrow keys and
+// the mouse light up the same thing. There is no separate :selected here.
+menu menuitem:hover {
+  background-color: $base02;
+  color: $base05;
+}
+
+menu menuitem:disabled {
+  color: $base03;
+}
+
+// Toggle and radio items, which tray menus lean on for the show/hide entry.
+// GTK draws the mark from -gtk-icon-source, a property `all: unset` clears, so
+// without this the box is not merely unstyled but blank in both states.
+menu menuitem check,
+menu menuitem radio {
+  min-width: 14px;
+  min-height: 14px;
+  margin-right: 6px;
+  color: $base03;
+}
+
+menu menuitem check:checked {
+  -gtk-icon-source: -gtk-icontheme("object-select-symbolic");
+  color: $base0B;
+}
+
+menu menuitem radio:checked {
+  -gtk-icon-source: -gtk-icontheme("radio-checked-symbolic");
+  color: $base0B;
+}
+
+// The submenu indicator, and the scroll arrows GTK grows when a menu is taller
+// than the screen. Same story as the check marks: the icon is CSS, so it comes
+// back or it does not come back at all.
+menu menuitem arrow {
+  min-width: 14px;
+  min-height: 14px;
+  -gtk-icon-source: -gtk-icontheme("pan-end-symbolic");
+  color: $base04;
+}
+
+menu arrow.top {
+  -gtk-icon-source: -gtk-icontheme("pan-up-symbolic");
+  color: $base04;
+  min-height: 14px;
+}
+
+menu arrow.bottom {
+  -gtk-icon-source: -gtk-icontheme("pan-down-symbolic");
+  color: $base04;
+  min-height: 14px;
+}
+
+// An item's own icon, where the item ships one.
+menu menuitem image {
+  margin-right: 6px;
+}
+
+// A group separator. min-height rather than a border: the reset leaves the
+// node with no size at all, so a border alone draws nothing.
+menu separator {
+  background-color: $base02;
+  min-height: 1px;
+  margin: 4px 0;
+}
