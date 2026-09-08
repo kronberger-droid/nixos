@@ -51,12 +51,7 @@
     };
 
     # Smaller journal limit than the common 1G default — laptop SSD.
-    journald.extraConfig = ''
-      Storage=persistent
-      Compress=yes
-      SystemMaxUse=500M
-      RuntimeMaxUse=100M
-    '';
+    journald.settings.Journal.SystemMaxUse = "500M";
 
     udev.extraRules = ''
       ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.uutils-coreutils-noprefix}/bin/chgrp video /sys/class/leds/%k/brightness"
