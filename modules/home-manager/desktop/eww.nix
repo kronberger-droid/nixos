@@ -58,7 +58,7 @@
   };
 
   scripts = {
-    menu = {inherit (pkgs) rofi;};
+    menu = {inherit utilLinux; inherit (pkgs) rofi;};
     bars = {inherit eww;};
     workspaces = {};
     # No vars beyond nushell itself: it reads /sys/class/power_supply.
