@@ -72,7 +72,7 @@
 
   # System optimization services
   # Journal retention is enforced continuously by journald via SystemMaxUse
-  # (set per-host in journald.extraConfig), so no extra vacuum timer is needed.
+  # (set per-host in journald.settings.Journal), so no extra vacuum timer is needed.
   systemd = {
     # Faster shutdown
     settings.Manager = {
