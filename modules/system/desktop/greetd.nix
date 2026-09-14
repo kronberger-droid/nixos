@@ -54,14 +54,17 @@ in {
           "--cmd ${sessionWrapper}"
           "--remember"
           "--remember-user-session"
-          "--sessions ${quietSessions}/share/wayland-sessions:${pkgs.sway}/share/wayland-sessions"
+          # Only the primary compositor's session. Sway used to be listed as a
+          # fallback on every host, but its home-manager config is now gated
+          # on compositor.primary, so on a niri host that entry would have
+          # started a stock sway with no terminal bound: not a fallback.
+          "--sessions ${quietSessions}/share/wayland-sessions"
         ];
       };
     };
   };
 
   environment.etc."greetd/environments".text = ''
-    niri-session
-    sway
+    ${sessionBin}
   '';
 }

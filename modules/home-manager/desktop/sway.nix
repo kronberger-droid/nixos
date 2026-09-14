@@ -22,288 +22,294 @@
   backgroundImage = ./sway/deathpaper.jpg;
 
   defaultBrowser = "${pkgs.firefox}/bin/firefox";
-in {
-  # swaylock and swayidle come from sway/swaylock.nix and session-services.nix
-  # respectively. swaycwd and sway-scratch used to be here too, but the cwd
-  # helper is terminals/terminal.nix's cwd.sh and the scratchpad goes through
-  # eww/scripts/scratchpad, so neither was referenced anywhere.
-  home.packages = with pkgs; [
-    swayimg
-    autotiling
-    sway-contrib.grimshot
-    sway-contrib.inactive-windows-transparency
-  ];
+in
+  # Gated on the primary compositor: sway is configured only where it is
+  # the session. Its keybindings had drifted from niri's while it was
+  # enabled everywhere as a never-used fallback. greetd lists only the
+  # primary session as well (modules/system/desktop/greetd.nix).
+  lib.mkIf (config.compositor.primary == "sway") {
+    # swaylock and swayidle come from sway/swaylock.nix and
+    # session-services.nix; swayimg (the image viewer, also yazi's and the
+    # xdg default) lives in session-services.nix so niri hosts keep it.
+    # swaycwd and sway-scratch used to be here too, but the cwd helper is
+    # terminals/terminal.nix's cwd.sh and the scratchpad goes through
+    # eww/scripts/scratchpad, so neither was referenced anywhere.
+    home.packages = with pkgs; [
+      autotiling
+      sway-contrib.grimshot
+      sway-contrib.inactive-windows-transparency
+    ];
 
-  wayland.windowManager.sway = {
-    enable = true;
-    systemd.enable = true;
-    wrapperFeatures.gtk = true;
-    extraConfig =
-      ''
-        # Limit default floating window size
-        floating_maximum_size ${
-          if isNotebook
-          then "1000 x 650"
-          else "1200 x 800"
-        }
-
-        mouse_warping container
-
-        # Window rules with sizing
-        for_window [app_id="nemo"] floating enable, sticky enable, resize set 1200 800
-        for_window [app_id="floating_shell"] floating enable, border pixel 1, sticky enable, resize set 50ppt 60ppt
-        for_window [app_id="localsend_app"] floating enable, sticky enable, resize set 1200 800
-        for_window [app_id="Bitwarden"] floating enable, sticky enable, resize set 1200 800
-        for_window [app_id="org.speedcrunch"] floating enable, sticky enable, resize set 800 600
-        for_window [instance="gpartedbin"] floating enable
-        for_window [title="Authentication Required"] floating enable
-
-        # File dialogs with sizing
-        for_window [title="(?:Open|Save) (?:File|Folder|As)"] floating enable, resize set 60 ppt 55 ppt
-        for_window [title="(?:open|save) (?:file|folder|as)"] floating enable, resize set 60 ppt 55 ppt
-
-        # Generic dialog types
-        for_window [window_role="bubble"] floating enable
-        for_window [window_role="task_dialog"] floating enable
-        for_window [window_role="Preferences"] floating enable
-        for_window [window_type="dialog"] floating enable
-        for_window [window_type="menu"] floating enable
-      ''
-      + (
-        if isNotebook
-        then ''
-          # Touchpad gestures for notebooks
-          bindgesture swipe:3:right workspace next
-          bindgesture swipe:3:left workspace prev
-
-          # Lid switch handling - disable/enable internal display
-          # logind handles suspend based on docking state
-          # Note: lid:on means lid is closed, lid:off means lid is open
-          bindswitch --reload --locked lid:on output eDP-1 disable
-          bindswitch --reload --locked lid:off output eDP-1 enable
+    wayland.windowManager.sway = {
+      enable = true;
+      systemd.enable = true;
+      wrapperFeatures.gtk = true;
+      extraConfig =
         ''
-        else ""
-      );
-    config = rec {
-      modifier = modKey;
-      terminal = config.terminal.bin;
-      output =
-        {
-          "*" = {
-            bg = "${backgroundImage} fill";
-          };
-        }
-        // (
-          if host == "spectre"
-          then {
-            "eDP-1" = {
-              scale = "1.25";
+          # Limit default floating window size
+          floating_maximum_size ${
+            if isNotebook
+            then "1000 x 650"
+            else "1200 x 800"
+          }
+
+          mouse_warping container
+
+          # Window rules with sizing
+          for_window [app_id="nemo"] floating enable, sticky enable, resize set 1200 800
+          for_window [app_id="floating_shell"] floating enable, border pixel 1, sticky enable, resize set 50ppt 60ppt
+          for_window [app_id="localsend_app"] floating enable, sticky enable, resize set 1200 800
+          for_window [app_id="Bitwarden"] floating enable, sticky enable, resize set 1200 800
+          for_window [app_id="org.speedcrunch"] floating enable, sticky enable, resize set 800 600
+          for_window [instance="gpartedbin"] floating enable
+          for_window [title="Authentication Required"] floating enable
+
+          # File dialogs with sizing
+          for_window [title="(?:Open|Save) (?:File|Folder|As)"] floating enable, resize set 60 ppt 55 ppt
+          for_window [title="(?:open|save) (?:file|folder|as)"] floating enable, resize set 60 ppt 55 ppt
+
+          # Generic dialog types
+          for_window [window_role="bubble"] floating enable
+          for_window [window_role="task_dialog"] floating enable
+          for_window [window_role="Preferences"] floating enable
+          for_window [window_type="dialog"] floating enable
+          for_window [window_type="menu"] floating enable
+        ''
+        + (
+          if isNotebook
+          then ''
+            # Touchpad gestures for notebooks
+            bindgesture swipe:3:right workspace next
+            bindgesture swipe:3:left workspace prev
+
+            # Lid switch handling - disable/enable internal display
+            # logind handles suspend based on docking state
+            # Note: lid:on means lid is closed, lid:off means lid is open
+            bindswitch --reload --locked lid:on output eDP-1 disable
+            bindswitch --reload --locked lid:off output eDP-1 enable
+          ''
+          else ""
+        );
+      config = rec {
+        modifier = modKey;
+        terminal = config.terminal.bin;
+        output =
+          {
+            "*" = {
+              bg = "${backgroundImage} fill";
             };
           }
-          else {}
-        );
-      window = {
-        titlebar = false;
-        border = 1;
-      };
-      floating = {
-        border = 0;
-        criteria = [
-          {app_id = "nemo";}
-          {app_id = "floating_shell";}
-          {app_id = "pavucontrol";}
-          {app_id = "nm-connection-editor";}
-          {app_id = "blueman-manager";}
-          {app_id = "imv";}
-          {app_id = "mpv";}
-          {title = "^Open File$";}
-          {title = "^Save File$";}
-          {title = "^Open Folder$";}
-          {title = "^File Upload";}
-          {title = "^Picture-in-Picture$";}
-          {window_role = "pop-up";}
-          {window_role = "dialog";}
-          {window_type = "dialog";}
+          // (
+            if host == "spectre"
+            then {
+              "eDP-1" = {
+                scale = "1.25";
+              };
+            }
+            else {}
+          );
+        window = {
+          titlebar = false;
+          border = 1;
+        };
+        floating = {
+          border = 0;
+          criteria = [
+            {app_id = "nemo";}
+            {app_id = "floating_shell";}
+            {app_id = "pavucontrol";}
+            {app_id = "nm-connection-editor";}
+            {app_id = "blueman-manager";}
+            {app_id = "imv";}
+            {app_id = "mpv";}
+            {title = "^Open File$";}
+            {title = "^Save File$";}
+            {title = "^Open Folder$";}
+            {title = "^File Upload";}
+            {title = "^Picture-in-Picture$";}
+            {window_role = "pop-up";}
+            {window_role = "dialog";}
+            {window_type = "dialog";}
+          ];
+        };
+        startup = [
+          {
+            command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.95 --focused 1.0";
+            always = false;
+          }
+          {
+            command = "${pkgs.autotiling}/bin/autotiling";
+            always = false;
+          }
         ];
-      };
-      startup = [
-        {
-          command = "${pkgs.sway-contrib.inactive-windows-transparency}/bin/inactive-windows-transparency.py --opacity 0.95 --focused 1.0";
-          always = false;
-        }
-        {
-          command = "${pkgs.autotiling}/bin/autotiling";
-          always = false;
-        }
-      ];
-      # Base16 colors with custom brown accent for focused windows
-      colors = {
-        background = "#${config.scheme.base00}";
-
-        # Focused window border: custom brown accent, text: base05
-        focused = {
-          border = "#${config.scheme.base0F}"; # Brown accent - matches background
-          background = "#${config.scheme.base00}"; # Brown accent
-          text = "#${config.scheme.base05}";
-          indicator = "#${config.scheme.base0F}";
-          childBorder = "#${config.scheme.base0F}"; # Brown accent
-        };
-        # Unfocused window border in group: border matches background
-        focusedInactive = {
-          border = "#${config.scheme.base00}";
+        # Base16 colors with custom brown accent for focused windows
+        colors = {
           background = "#${config.scheme.base00}";
-          text = "#${config.scheme.base05}";
-          indicator = "#${config.scheme.base00}";
-          childBorder = "#${config.scheme.base00}";
-        };
-        # Unfocused window border: border matches background
-        unfocused = {
-          border = "#${config.scheme.base00}";
-          background = "#${config.scheme.base00}";
-          text = "#${config.scheme.base05}";
-          indicator = "#${config.scheme.base00}";
-          childBorder = "#${config.scheme.base00}";
-        };
-        # Urgent window border: base08, text: base05
-        urgent = {
-          border = "#${config.scheme.base08}";
-          background = "#${config.scheme.base08}";
-          text = "#${config.scheme.base00}";
-          indicator = "#${config.scheme.base08}";
-          childBorder = "#${config.scheme.base08}";
-        };
-        placeholder = {
-          border = "#${config.scheme.base00}";
-          background = "#${config.scheme.base00}";
-          text = "#${config.scheme.base05}";
-          indicator = "#${config.scheme.base00}";
-          childBorder = "#${config.scheme.base00}";
-        };
-      };
 
-      focus.mouseWarping = "container";
-
-      menu = "${pkgs.rofi}/bin/rofi -show drun";
-
-      defaultWorkspace = "workspace ${ws1}";
-
-      keybindings = lib.mkOptionDefault {
-        # browser
-        "${modifier}+Shift+s" = "exec ${defaultBrowser}";
-        # dismiss notifications
-        "${modifier}+Shift+d" = "exec ${pkgs.mako}/bin/makoctl dismiss -a";
-        # take a screenshot
-        "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
-        # reload sway
-        "${modifier}+Shift+c" = "exec swaymsg reload";
-        # open powermenu
-        "${modifier}+Shift+e" = "exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
-        # open local send app
-        "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
-        # open rbw-rofi for password selection
-        "${modifier}+Shift+w" = "exec ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw";
-        # open bitwarden GUI
-        "${modifier}+Shift+p" = "exec ${pkgs.bitwarden-desktop}/bin/bitwarden";
-        # open floating btop shell
-        "${modifier}+Shift+t" =
-          if config.terminal.floatingAppId != null
-          then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"
-          else "exec ${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop";
-        # zooming and highlighting for screen share
-        "${modifier}+Shift+y" = "exec ${pkgs.woomer}/bin/woomer";
-        # open file managers
-        "${modifier}+Shift+x" =
-          if config.terminal.floatingAppId != null
-          then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.terminal.cwdScript})"
-          else "exec ${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.terminal.cwdScript})";
-        "${modifier}+Shift+n" = "exec ${pkgs.nemo-with-extensions}/bin/nemo $(${config.terminal.cwdScript})";
-        # open terminals
-        "${modifier}+Shift+Return" =
-          if config.terminal.floatingAppId != null
-          then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.workingDirFlag} $(${config.terminal.cwdScript})"
-          else "exec ${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.terminal.cwdScript})";
-        "${modifier}+Return" = "exec '${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.terminal.cwdScript})'";
-
-        # Toggle the bar
-        "${modifier}+Shift+b" = "exec ${config.programs.eww.package}/bin/eww open --toggle bar";
-
-        # Brightness control
-        "XF86MonBrightnessDown" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%-";
-        "XF86MonBrightnessUp" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set +10%";
-
-        # Volume control using wpctl (WirePlumber)
-        "XF86AudioRaiseVolume" = "exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%+";
-        "XF86AudioLowerVolume" = "exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-";
-        "XF86AudioMute" = "exec ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
-
-        # Music control using playerctl, which also backs the bar's mpris module
-        "XF86AudioNext" = "exec ${pkgs.playerctl}/bin/playerctl next";
-        "XF86AudioPrev" = "exec ${pkgs.playerctl}/bin/playerctl previous";
-        "XF86AudioPlay" = "exec ${pkgs.playerctl}/bin/playerctl play-pause";
-
-        # Workspace switching
-        "${modifier}+1" = "workspace ${ws1}";
-        "${modifier}+2" = "workspace ${ws2}";
-        "${modifier}+3" = "workspace ${ws3}";
-        "${modifier}+4" = "workspace ${ws4}";
-        "${modifier}+5" = "workspace ${ws5}";
-        "${modifier}+6" = "workspace ${ws6}";
-        "${modifier}+7" = "workspace ${ws7}";
-        "${modifier}+8" = "workspace ${ws8}";
-        "${modifier}+9" = "workspace ${ws9}";
-        "${modifier}+0" = "workspace ${ws10}";
-
-        # Move container to workspace
-        "${modifier}+Shift+1" = "move container to workspace ${ws1}; workspace ${ws1}";
-        "${modifier}+Shift+2" = "move container to workspace ${ws2}; workspace ${ws2}";
-        "${modifier}+Shift+3" = "move container to workspace ${ws3}; workspace ${ws3}";
-        "${modifier}+Shift+4" = "move container to workspace ${ws4}; workspace ${ws4}";
-        "${modifier}+Shift+5" = "move container to workspace ${ws5}; workspace ${ws5}";
-        "${modifier}+Shift+6" = "move container to workspace ${ws6}; workspace ${ws6}";
-        "${modifier}+Shift+7" = "move container to workspace ${ws7}; workspace ${ws7}";
-        "${modifier}+Shift+8" = "move container to workspace ${ws8}; workspace ${ws8}";
-        "${modifier}+Shift+9" = "move container to workspace ${ws9}; workspace ${ws9}";
-        "${modifier}+Shift+0" = "move container to workspace ${ws10}; workspace ${ws10}";
-
-        # Workspace Cycling
-        "Mod1+l" = "workspace next";
-        "Mod1+Right" = "workspace next";
-        "Mod1+h" = "workspace prev";
-        "Mod1+Left" = "workspace prev";
-
-        "Mod1+Shift+h" = "move workspace output left";
-        "Mod1+Shift+l" = "move workspace output right";
-        "Mod1+Shift+k" = "move workspace output up";
-        "Mod1+Shift+j" = "move workspace output down";
-      };
-      gaps = {
-        inner = 4;
-        outer = 2;
-        smartGaps = true;
-        smartBorders = "no_gaps";
-      };
-      input =
-        {
-          "*" = {
-            xkb_options = "compose:menu";
-            xkb_layout = "us";
+          # Focused window border: custom brown accent, text: base05
+          focused = {
+            border = "#${config.scheme.base0F}"; # Brown accent - matches background
+            background = "#${config.scheme.base00}"; # Brown accent
+            text = "#${config.scheme.base05}";
+            indicator = "#${config.scheme.base0F}";
+            childBorder = "#${config.scheme.base0F}"; # Brown accent
           };
-        }
-        // (
-          if host == "spectre"
-          then {
-            "1739:52912:SYNA32BF:00_06CB:CEB0_Touchpad" = {
-              natural_scroll = "enabled";
-              tap = "enabled";
-              pointer_accel = "0.3";
-            };
-            "1267:11821:ELAN2513:00_04F3:2E2D_Stylus" = {
-              map_to_output = "eDP-1";
+          # Unfocused window border in group: border matches background
+          focusedInactive = {
+            border = "#${config.scheme.base00}";
+            background = "#${config.scheme.base00}";
+            text = "#${config.scheme.base05}";
+            indicator = "#${config.scheme.base00}";
+            childBorder = "#${config.scheme.base00}";
+          };
+          # Unfocused window border: border matches background
+          unfocused = {
+            border = "#${config.scheme.base00}";
+            background = "#${config.scheme.base00}";
+            text = "#${config.scheme.base05}";
+            indicator = "#${config.scheme.base00}";
+            childBorder = "#${config.scheme.base00}";
+          };
+          # Urgent window border: base08, text: base05
+          urgent = {
+            border = "#${config.scheme.base08}";
+            background = "#${config.scheme.base08}";
+            text = "#${config.scheme.base00}";
+            indicator = "#${config.scheme.base08}";
+            childBorder = "#${config.scheme.base08}";
+          };
+          placeholder = {
+            border = "#${config.scheme.base00}";
+            background = "#${config.scheme.base00}";
+            text = "#${config.scheme.base05}";
+            indicator = "#${config.scheme.base00}";
+            childBorder = "#${config.scheme.base00}";
+          };
+        };
+
+        focus.mouseWarping = "container";
+
+        menu = "${pkgs.rofi}/bin/rofi -show drun";
+
+        defaultWorkspace = "workspace ${ws1}";
+
+        keybindings = lib.mkOptionDefault {
+          # browser
+          "${modifier}+Shift+s" = "exec ${defaultBrowser}";
+          # dismiss notifications
+          "${modifier}+Shift+d" = "exec ${pkgs.mako}/bin/makoctl dismiss -a";
+          # take a screenshot
+          "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
+          # reload sway
+          "${modifier}+Shift+c" = "exec swaymsg reload";
+          # open powermenu
+          "${modifier}+Shift+e" = "exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
+          # open local send app
+          "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
+          # open rbw-rofi for password selection
+          "${modifier}+Shift+w" = "exec ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw";
+          # open bitwarden GUI
+          "${modifier}+Shift+p" = "exec ${pkgs.bitwarden-desktop}/bin/bitwarden";
+          # open floating btop shell
+          "${modifier}+Shift+t" =
+            if config.terminal.floatingAppId != null
+            then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"
+            else "exec ${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.btop}/bin/btop";
+          # zooming and highlighting for screen share
+          "${modifier}+Shift+y" = "exec ${pkgs.woomer}/bin/woomer";
+          # open file managers
+          "${modifier}+Shift+x" =
+            if config.terminal.floatingAppId != null
+            then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.terminal.cwdScript})"
+            else "exec ${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.terminal.cwdScript})";
+          "${modifier}+Shift+n" = "exec ${pkgs.nemo-with-extensions}/bin/nemo $(${config.terminal.cwdScript})";
+          # open terminals
+          "${modifier}+Shift+Return" =
+            if config.terminal.floatingAppId != null
+            then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.workingDirFlag} $(${config.terminal.cwdScript})"
+            else "exec ${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.terminal.cwdScript})";
+          "${modifier}+Return" = "exec '${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.terminal.cwdScript})'";
+
+          # Toggle the bar
+          "${modifier}+Shift+b" = "exec ${config.programs.eww.package}/bin/eww open --toggle bar";
+
+          # Brightness control
+          "XF86MonBrightnessDown" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set 10%-";
+          "XF86MonBrightnessUp" = "exec ${pkgs.brightnessctl}/bin/brightnessctl set +10%";
+
+          # Volume control using wpctl (WirePlumber)
+          "XF86AudioRaiseVolume" = "exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%+";
+          "XF86AudioLowerVolume" = "exec ${pkgs.wireplumber}/bin/wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-";
+          "XF86AudioMute" = "exec ${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+
+          # Music control using playerctl, which also backs the bar's mpris module
+          "XF86AudioNext" = "exec ${pkgs.playerctl}/bin/playerctl next";
+          "XF86AudioPrev" = "exec ${pkgs.playerctl}/bin/playerctl previous";
+          "XF86AudioPlay" = "exec ${pkgs.playerctl}/bin/playerctl play-pause";
+
+          # Workspace switching
+          "${modifier}+1" = "workspace ${ws1}";
+          "${modifier}+2" = "workspace ${ws2}";
+          "${modifier}+3" = "workspace ${ws3}";
+          "${modifier}+4" = "workspace ${ws4}";
+          "${modifier}+5" = "workspace ${ws5}";
+          "${modifier}+6" = "workspace ${ws6}";
+          "${modifier}+7" = "workspace ${ws7}";
+          "${modifier}+8" = "workspace ${ws8}";
+          "${modifier}+9" = "workspace ${ws9}";
+          "${modifier}+0" = "workspace ${ws10}";
+
+          # Move container to workspace
+          "${modifier}+Shift+1" = "move container to workspace ${ws1}; workspace ${ws1}";
+          "${modifier}+Shift+2" = "move container to workspace ${ws2}; workspace ${ws2}";
+          "${modifier}+Shift+3" = "move container to workspace ${ws3}; workspace ${ws3}";
+          "${modifier}+Shift+4" = "move container to workspace ${ws4}; workspace ${ws4}";
+          "${modifier}+Shift+5" = "move container to workspace ${ws5}; workspace ${ws5}";
+          "${modifier}+Shift+6" = "move container to workspace ${ws6}; workspace ${ws6}";
+          "${modifier}+Shift+7" = "move container to workspace ${ws7}; workspace ${ws7}";
+          "${modifier}+Shift+8" = "move container to workspace ${ws8}; workspace ${ws8}";
+          "${modifier}+Shift+9" = "move container to workspace ${ws9}; workspace ${ws9}";
+          "${modifier}+Shift+0" = "move container to workspace ${ws10}; workspace ${ws10}";
+
+          # Workspace Cycling
+          "Mod1+l" = "workspace next";
+          "Mod1+Right" = "workspace next";
+          "Mod1+h" = "workspace prev";
+          "Mod1+Left" = "workspace prev";
+
+          "Mod1+Shift+h" = "move workspace output left";
+          "Mod1+Shift+l" = "move workspace output right";
+          "Mod1+Shift+k" = "move workspace output up";
+          "Mod1+Shift+j" = "move workspace output down";
+        };
+        gaps = {
+          inner = 4;
+          outer = 2;
+          smartGaps = true;
+          smartBorders = "no_gaps";
+        };
+        input =
+          {
+            "*" = {
+              xkb_options = "compose:menu";
+              xkb_layout = "us";
             };
           }
-          else {}
-        );
-      bars = [];
+          // (
+            if host == "spectre"
+            then {
+              "1739:52912:SYNA32BF:00_06CB:CEB0_Touchpad" = {
+                natural_scroll = "enabled";
+                tap = "enabled";
+                pointer_accel = "0.3";
+              };
+              "1267:11821:ELAN2513:00_04F3:2E2D_Stylus" = {
+                map_to_output = "eDP-1";
+              };
+            }
+            else {}
+          );
+        bars = [];
+      };
     };
-  };
-}
+  }

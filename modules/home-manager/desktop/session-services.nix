@@ -92,6 +92,11 @@ in {
 
     # Screen recording
     wl-screenrec
+
+    # Image viewer: xdg.nix's image/* default and yazi's opener. Compositor
+    # agnostic despite the name, so it lives here rather than in sway.nix,
+    # which is gated on compositor.primary.
+    swayimg
   ];
 
   # ── Mako ────────────────────────────────────────────────────────

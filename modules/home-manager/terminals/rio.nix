@@ -1,4 +1,11 @@
-{config, ...}: {
+{
+  config,
+  lib,
+  ...
+}:
+# Only the selected emulator is installed and configured; terminal.emulator
+# (terminals/terminal.nix) is the single switch.
+lib.mkIf (config.terminal.emulator == "rio") {
   programs.rio = {
     enable = true;
     settings = {
