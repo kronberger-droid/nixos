@@ -61,6 +61,11 @@
     systemd-boot-defaults.enable = false;
     loader.systemd-boot.enable = lib.mkForce false;
     loader.efi.canTouchEfiVariables = false;
+    # systemd-boot-defaults is off here, so boot-systemd.nix's editor = false
+    # never applies; lanzaboote copies this value into loader.conf regardless.
+    # With TPM auto-unlock, an editable cmdline (init=/bin/sh) is root on the
+    # decrypted disk, which is the one thing Secure Boot exists to stop.
+    loader.systemd-boot.editor = false;
     lanzaboote = {
       enable = true;
       pkiBundle = "/var/lib/sbctl";
