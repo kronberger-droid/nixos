@@ -107,6 +107,16 @@ interfaces {
     ethernet eth0 {
         address dhcp
         description Internet
+        dhcpv6-pd {
+            pd 0 {
+                interface switch0 {
+                    host-address ::1
+                    prefix-id :1
+                }
+                prefix-length /56
+            }
+            rapid-commit enable
+        }
         duplex auto
         firewall {
             in {
@@ -148,6 +158,24 @@ interfaces {
     switch switch0 {
         address 192.168.2.1/24
         description Local
+        ipv6 {
+            dup-addr-detect-transmits 1
+            router-advert {
+                cur-hop-limit 64
+                link-mtu 0
+                managed-flag false
+                max-interval 600
+                other-config-flag false
+                prefix ::/64 {
+                    autonomous-flag true
+                    on-link-flag true
+                    valid-lifetime 2592000
+                }
+                reachable-time 0
+                retrans-timer 0
+                send-advert true
+            }
+        }
         mtu 1500
         switch-port {
             interface eth1 {
@@ -172,8 +200,20 @@ service {
                 default-router 192.168.2.1
                 dns-server 192.168.2.54
                 lease 86400
-                start 192.168.2.38 {
+                start 192.168.2.60 {
                     stop 192.168.2.243
+                }
+                static-mapping ap {
+                    ip-address 192.168.2.38
+                    mac-address 94:a6:7e:b1:ce:99
+                }
+                static-mapping homeserver {
+                    ip-address 192.168.2.54
+                    mac-address 48:21:0b:55:c4:ea
+                }
+                static-mapping printer {
+                    ip-address 192.168.2.39
+                    mac-address b4:3a:45:a9:fe:58
                 }
             }
         }
@@ -219,10 +259,22 @@ system {
     }
     host-name EdgeRouter-X-5-Port
     login {
+        user admin {
+            authentication {
+                encrypted-password <redacted>
+                plaintext-password <redacted>
+            }
+            level admin
+        }
         user kronberger {
             authentication {
                 encrypted-password <redacted>
+                plaintext-password <redacted>
                 public-keys claude-code@intelNuc {
+                    key <redacted>
+                    type ssh-ed25519
+                }
+                public-keys kronberger@P14E {
                     key <redacted>
                     type ssh-ed25519
                 }
