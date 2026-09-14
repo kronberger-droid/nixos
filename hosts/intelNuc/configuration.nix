@@ -47,7 +47,12 @@
         renice = -10;
         inhibit_screensaver = 1;
         desiredgov = "performance";
-        defaultgov = "schedutil";
+        # intel_pstate runs in active mode here (the default; only the
+        # laptops pass intel_pstate=active explicitly), which offers just
+        # `performance` and `powersave`. `schedutil` does not exist in that
+        # mode, so the restore step silently failed and the box stayed
+        # pinned to `performance` after the first game.
+        defaultgov = "powersave";
       };
       gpu = {
         apply_gpu_optimisations = "accept-responsibility";

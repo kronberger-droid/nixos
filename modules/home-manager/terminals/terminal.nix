@@ -122,9 +122,12 @@ in {
     # Used to be kitty/cwd.sh inside terminals/kitty.nix, so niri and sway
     # both depended on the kitty module even on rio hosts.
     xdg.configFile."wm/cwd.sh" = let
-      # The niri branch interpolates ${pkgs.niri} (the source-built fork).
-      # Only emit it when niri is the primary compositor, so sway-only hosts
-      # do not pull the fork into their closure just for this helper.
+      # The niri branch interpolates ${pkgs.niri} (the source-built fork) and
+      # is only emitted when niri is the primary compositor. Note the sway
+      # branch below always references ${pkgs.sway} for swaymsg, as do
+      # rofi.nix and session-services.nix, so sway itself is in every
+      # closure; the gate here only keeps a sway-primary host from also
+      # building the niri fork for a script branch it never takes.
       niriPrimary = config.compositor.primary == "niri";
     in {
       executable = true;

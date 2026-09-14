@@ -324,8 +324,7 @@
       };
 
       # Intel NUC P14E Laptop Element — modular "Compute Element" chassis.
-      # Not yet installed; hardware-configuration.nix is a placeholder until
-      # nixos-generate-config runs on the real disk.
+      # Installed; shares the secureboot-laptop profile with spectre.
       P14E = mkHost {
         hostname = "P14E";
         system = x86System;

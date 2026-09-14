@@ -3,10 +3,10 @@
 # user modules so the two cannot drift: a skill added here shows up wherever
 # `claude` runs, rather than only on whichever machine it was written on.
 #
-# Deliberately NOT listed in apps/default.nix. That file is imported wholesale
-# by the desktop user, but also by the media user, which is meant to have no
-# claude/ai at all (see users/media.nix). Both real users pull this in by an
-# explicit path import instead.
+# Deliberately NOT listed in apps/default.nix. The homeserver user imports
+# modules one by one and must not pull the whole apps tree (browsers, mail,
+# music) onto a headless box, so both users reach this file by an explicit
+# path import instead.
 #
 # Host-specific additions layer on top of this in the user module. The desktop
 # adds the inpdf MCP server there, because `pkgs.inpdf` comes from the overlay
