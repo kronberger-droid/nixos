@@ -2,7 +2,6 @@
   pkgs,
   lib,
   config,
-  username,
   ...
 }: {
   imports = [
@@ -110,29 +109,15 @@
     HibernateDelaySec = "90m";
   };
 
-  # Docker — for testing Nextcloud instances
-  # Socket-activated: daemon only starts when docker commands are run
-  virtualisation.docker = {
-    enable = true;
-    enableOnBoot = false;
-    autoPrune = {
-      enable = true;
-      dates = "weekly";
-    };
-  };
-
   # Limit build parallelism to keep the system responsive
   nix.settings = {
     cores = 8; # Leave 4 threads free for desktop responsiveness
     max-jobs = 2; # Max parallel derivation builds
   };
 
-  users.users.${username}.extraGroups = ["docker"];
-
   environment.systemPackages = with pkgs; [
     brightnessctl
     dmidecode
-    docker-compose
     sbctl
   ];
 
