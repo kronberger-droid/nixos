@@ -21,18 +21,23 @@ in {
   "sftp-password.age".publicKeys = [intelNuc spectre P14E];
   "aerc-gmx-password.age".publicKeys = [intelNuc spectre P14E];
   "aerc-uptudate-password.age".publicKeys = [intelNuc spectre P14E];
-  "miniflux-credentials.age".publicKeys = [homeserver];
-  "cache-private-key.age".publicKeys = [homeserver];
+  # Escrow: the three workstation host keys can decrypt the server-only
+  # secrets too, so a dead homeserver disk does not take the cache signing
+  # key or the tunnel credentials with it, and any of them can re-key. After
+  # editing this list the .age files must be re-encrypted (`agenix -r`)
+  # where a current recipient's private key lives.
+  "miniflux-credentials.age".publicKeys = [homeserver intelNuc spectre P14E];
+  "cache-private-key.age".publicKeys = [homeserver intelNuc spectre P14E];
   # bcrypt htpasswd line — only the server needs it.
-  "radicale-htpasswd.age".publicKeys = [homeserver];
+  "radicale-htpasswd.age".publicKeys = [homeserver intelNuc spectre P14E];
   # plaintext CardDAV password — the user machines (vdirsyncer) need it.
   "radicale-password.age".publicKeys = [intelNuc spectre P14E];
   # Cloudflare Tunnel credentials JSON, written by `cloudflared tunnel create`.
   # Contains the tunnel secret — anyone holding it can serve traffic on the
   # tunnel's hostnames. Only the server runs cloudflared.
-  "cloudflared-website.age".publicKeys = [homeserver];
+  "cloudflared-website.age".publicKeys = [homeserver intelNuc spectre P14E];
   # ZOTERO_DAV_USER / ZOTERO_DAV_PASSWORD for the WebDAV server backing Zotero
   # file sync. Only the server reads it — the Zotero clients hold the same
   # password in their own settings store, not from here.
-  "webdav-zotero.age".publicKeys = [homeserver];
+  "webdav-zotero.age".publicKeys = [homeserver intelNuc spectre P14E];
 }
