@@ -483,6 +483,8 @@
 
     nixosConfigurations.recovery = nixpkgs.lib.nixosSystem {
       system = x86System;
+      # The ISO embeds `inputs.self` (tracked files only) as /nixos-config.
+      specialArgs = {inherit inputs;};
       modules = [
         ./hosts/recovery/configuration.nix
         lixModule
