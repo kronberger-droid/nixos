@@ -11,7 +11,7 @@
 
   healthcheck = pkgs.writeShellApplication {
     name = "dns-healthcheck";
-    runtimeInputs = with pkgs; [dnsutils curl systemd];
+    runtimeInputs = with pkgs; [dnsutils curl systemd findutils];
     text = ''
       # Probe over loopback rather than the LAN address on purpose. This unit
       # answers exactly one question, "is the resolver itself alive", and a
@@ -34,7 +34,19 @@
         exit 1
       fi
 
+      # Backoff. A persistently broken AdGuard (bad state file, corrupt filter
+      # cache) used to get restarted every five minutes forever, each restart
+      # re-copying the config, re-downloading filter lists and dropping
+      # whatever cache was still answering. One restart per hour, then hands
+      # off: a failure that survives a restart needs a human anyway.
+      marker="$STATE_DIRECTORY/last-restart"
+      if [ -e "$marker" ] && [ -n "$(find "$marker" -mmin -60)" ]; then
+        echo "AdGuard was already restarted within the last hour and is still failing, so this needs a human. Not restarting again." >&2
+        exit 1
+      fi
+
       echo "DoH upstream is reachable, so AdGuard itself is at fault. Restarting it." >&2
+      touch "$marker"
       systemctl restart adguardhome.service
 
       # AdGuard rebuilds its filter lists on start and refuses queries until it
@@ -85,6 +97,8 @@ in {
     serviceConfig = {
       Type = "oneshot";
       ExecStart = "${healthcheck}/bin/dns-healthcheck";
+      # Holds the last-restart marker the backoff in the script checks.
+      StateDirectory = "dns-healthcheck";
     };
   };
 

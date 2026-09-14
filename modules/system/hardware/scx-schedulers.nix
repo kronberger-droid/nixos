@@ -1,4 +1,4 @@
-{...}: {
+{pkgs, ...}: {
   # SCX (sched-ext) userspace scheduler for improved desktop responsiveness.
   # Requires kernel 6.12+ with sched_ext (currently on 6.18).
   #
@@ -10,6 +10,10 @@
   # startup on /sys/kernel/sched_ext existing.
   services.scx = {
     enable = true;
+    # The module defaults to scx.full, the entire sched-ext suite, for the
+    # one scheduler below. rustscheds carries scx_bpfland and is a fraction
+    # of the closure.
+    package = pkgs.scx.rustscheds;
     # scx_bpfland targets the same interactive workloads scx_lavd did, but
     # with a much smaller design: no autopilot, topology or power-mode
     # machinery, and all policy in BPF with Rust only handling CLI and stats.

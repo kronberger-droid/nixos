@@ -396,9 +396,24 @@
 
     # Remote deployment (deploy-rs)
     deploy.nodes.homeserver = {
+      # MagicDNS name, so a deploy works from any tailnet peer without
+      # remembering the IP. The trade-off is that a deploy which disturbs
+      # tailscale on the target loses the magic-rollback confirmation
+      # channel and rolls back for the wrong reason; the harmonia switch in
+      # hosts/homeserver notes one such case. Switch to 100.92.46.97 if that
+      # ever bites again.
       hostname = "homeserver";
       sshUser = "kronberger";
       user = "root";
+      # Spelled out rather than left at deploy-rs's defaults so the rollback
+      # behaviour is reviewable here: magic rollback needs the confirmation
+      # to arrive within confirmTimeout after activation, and a raised
+      # timeout gives sshd and the firewall time to settle after a switch
+      # that changes both.
+      magicRollback = true;
+      autoRollback = true;
+      confirmTimeout = 60;
+      activationTimeout = 240;
       profiles.system.path =
         inputs.deploy-rs.lib.${x86System}.activate.nixos
         self.nixosConfigurations.homeserver;
