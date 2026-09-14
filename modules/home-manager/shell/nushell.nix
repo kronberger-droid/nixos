@@ -377,7 +377,7 @@ in {
           template?: string                                  # template name for init (e.g. rust-cli, rust-gui)
           --update (-u)                                      # update flake inputs first
           --dir (-d): string = "${dirs.nixosConfig}"           # flake directory
-          --remote (-r)                                      # build on homeserver instead of locally
+          --remote (-r)                                      # build on homeserver, then pull via its cache
       ] {
           if $action == "init" {
               let templates_dir = ("${dirs.templates}" | path expand)
@@ -428,18 +428,43 @@ in {
               return
           }
 
+          # Push-build-pull: ship the staged tree plus every locked input to
+          # the homeserver's store, realise this host's toplevel there, then
+          # let the local nh run below find it all in nix-serve (port 5001,
+          # see modules/system/core/nix-caches.nix) and only download +
+          # activate. Evaluation happens on both ends, but nothing in the
+          # config depends on self.rev, so both produce the same drv paths
+          # and the substituter lookup hits. No sudo and no root ssh key:
+          # everything runs as this user, who is a trusted-user on both ends.
           if $remote {
               if $action not-in ["switch" "boot" "test" "build"] {
                   print $"(ansi red)Remote build only supports: switch, boot, test, build(ansi reset)"
                   return
               }
-              print $"(ansi cyan)Building on homeserver...(ansi reset)"
-              try {
-                      sudo nixos-rebuild $action --flake $flake_dir --build-host kronberger@192.168.2.54
+              let host = (sys host | get hostname)
+              # gcroot on the homeserver so a later GC doesn't evict the
+              # generation before another machine (or a reinstall) pulls it.
+              let out_link = $"/home/kronberger/.local/state/nix-builds/($host)"
+              let archived = (try {
+                  print $"(ansi cyan)Copying flake source and inputs to homeserver...(ansi reset)"
+                  nix flake archive --to ssh-ng://homeserver --json $flake_dir | from json
+              } catch {
+                  print $"\n(ansi yellow)Copying to homeserver failed.(ansi reset)"
+                  null
+              })
+              if $archived == null { return }
+              let src = ($archived | get path)
+              print $"(ansi cyan)Building ($host) on homeserver...(ansi reset)"
+              let built = (try {
+                  # -t: a tty on the far side keeps nix's progress bar and colors.
+                  ssh -t homeserver $"mkdir -p ($out_link | path dirname) && nix build --print-build-logs --out-link ($out_link) 'path:($src)#nixosConfigurations.($host).config.system.build.toplevel'"
+                  true
               } catch {
                   print $"\n(ansi yellow)Remote build interrupted or failed.(ansi reset)"
-              }
-              return
+                  false
+              })
+              if not $built { return }
+              print $"(ansi cyan)Pulling from homeserver cache and running ($action) locally...(ansi reset)"
           }
 
           let nh_action = if $action == "dry" { "build" } else { $action }
