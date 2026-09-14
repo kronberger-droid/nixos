@@ -12,13 +12,10 @@
     ../../modules/system/hardware/droidcam.nix
   ];
 
-  # NOTE: this host was prepared ahead of the actual hardware arriving, and
-  # much below is still a starting point copied from spectre. In particular:
-  #   - nix.settings.cores below assumes a 4-core/8-thread CPU (the common
-  #     case across the Celeron 6305..i7-1185G7 Compute Element range) —
-  #     check `nproc` after install and adjust.
-  #   - hosts/P14E/hardware-configuration.nix is a placeholder; replace it
-  #     with the real `nixos-generate-config` output.
+  # Started as a copy of spectre before the hardware arrived; the hardware
+  # config, LUKS layout and SSH key are real now. Still open from that
+  # phase: nix.settings.cores below assumes a 4-core/8-thread CPU, check
+  # `nproc` and adjust.
   # Resolved since: the webcam is not IPU6. It is a USB UVC module
   # (Foxlink 05c8:03e9) on uvcvideo, so this host imports uvc-camera.nix
   # rather than spectre's ipu6-camera.nix.
