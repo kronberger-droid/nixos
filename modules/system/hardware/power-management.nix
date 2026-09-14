@@ -129,7 +129,13 @@ in {
         HandleLidSwitchDocked = "ignore";
         HandleLidSwitchExternalPower = "suspend";
         HandlePowerKey = "suspend";
-        IdleAction = "suspend-then-hibernate";
+        # Same guard as the lid switch. Without a resume device (spectre)
+        # "suspend-then-hibernate" still hibernates after the delay and the
+        # next power-on is a cold boot with the session gone.
+        IdleAction =
+          if canHibernate
+          then "suspend-then-hibernate"
+          else "suspend";
         IdleActionSec = "30m";
       };
     }
