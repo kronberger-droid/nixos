@@ -200,7 +200,7 @@
       username ? "kronberger",
       extraModules ? [],
       # The home-manager user module. Defaults to the full workstation user;
-      # lean hosts (e.g. mediaBox) pass a trimmed one.
+      # a leaner host can pass a trimmed one.
       userModule ? ./modules/home-manager/users/kronberger.nix,
     }:
       nixpkgs.lib.nixosSystem {
@@ -380,22 +380,6 @@
           {environment.systemPackages = [agenix.packages.${x86System}.default];}
           lixModule
         ];
-      };
-
-      # x86 notebook media box — a "focused spectre": full niri desktop
-      # (waybar, rofi, mako, nemo, keyd, theming) via the shared mkHost stack,
-      # but with a lean media user (no dev toolchains, no personal apps) and a
-      # lean system config (no common.nix, so no agenix/workstation services).
-      mediaBox = mkHost {
-        hostname = "mediaBox";
-        system = x86System;
-        isNotebook = true;
-        # sway (prebuilt from cache) instead of the niri fork, which would add
-        # a second from-source Rust build on top of the nushell overlay this
-        # box now shares with every other host.
-        primaryCompositor = "sway";
-        username = "media";
-        userModule = ./modules/home-manager/users/media.nix;
       };
     };
 

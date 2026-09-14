@@ -5,7 +5,7 @@
   ...
 }: let
   # The niri branch interpolates ${pkgs.niri} (the source-built fork). Only emit
-  # it when niri is the primary compositor, so sway-only hosts (mediaBox) don't
+  # it when niri is the primary compositor, so sway-only hosts do not
   # pull the fork into their closure just for this helper.
   niriPrimary = config.compositor.primary == "niri";
 in {

@@ -20,7 +20,7 @@
   # DPMS control, dispatching on whichever compositor's socket is live. The niri
   # branch interpolates ${pkgs.niri} (the source-built fork), so only emit it
   # when niri is the primary compositor — otherwise it drags the fork into the
-  # closure of sway-only hosts (mediaBox) for a code path that never runs there.
+  # closure of sway-only hosts for a code path that never runs there.
   niriPrimary = config.compositor.primary == "niri";
   dpms = name: niriAction: swayState:
     pkgs.writeShellScript name ''
