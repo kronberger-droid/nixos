@@ -72,81 +72,91 @@
       list_show_user_status=1
     '';
 
-    "color.conf" = ''
-      # Default colors - matching kitty's background/foreground
-      default_color_bg=0x202020
-      default_color_fg=0xd0d0d0
+    # Colours come from config.scheme like every other themed app; this used
+    # to be a frozen copy of an older palette (0x202020/0xd0d0d0/0x7dd5cf)
+    # that no longer matched base00/base05/base0C. Seed-once semantics still
+    # apply: an existing color.conf keeps its values until deleted.
+    "color.conf" = let
+      s = config.scheme;
+      bg = "0x${s.base00}";
+      bar = "0x${s.base01}";
+      fg = "0x${s.base05}";
+      dim = "0x${s.base03}";
+    in ''
+      # Default colors
+      default_color_bg=${bg}
+      default_color_fg=${fg}
 
       # Dialog (contact selection)
       dialog_attr=
       dialog_attr_selected=reverse
-      dialog_color_bg=0x202020
-      dialog_color_fg=0xd0d0d0
+      dialog_color_bg=${bg}
+      dialog_color_fg=${fg}
 
       # Entry (input field)
       entry_attr=
-      entry_color_bg=0x202020
-      entry_color_fg=0xd0d0d0
+      entry_color_bg=${bg}
+      entry_color_fg=${fg}
 
       # Help bar
       help_attr=reverse
-      help_color_bg=0x151515
-      help_color_fg=0xd0d0d0
+      help_color_bg=${bar}
+      help_color_fg=${fg}
 
       # History - received messages
       history_name_attr=bold
       history_name_attr_selected=reverse
-      history_name_recv_color_bg=0x202020
-      history_name_recv_color_fg=0x6c99ba
-      history_name_recv_group_color_bg=0x202020
+      history_name_recv_color_bg=${bg}
+      history_name_recv_color_fg=0x${s.base0D}
+      history_name_recv_group_color_bg=${bg}
       history_name_recv_group_color_fg=usercolor
 
       # History - sent messages
-      history_name_sent_color_bg=0x202020
-      history_name_sent_color_fg=0x7e8d50
+      history_name_sent_color_bg=${bg}
+      history_name_sent_color_fg=0x${s.base0B}
 
       # History - message text received
       history_text_attr=
       history_text_attr_selected=reverse
-      history_text_recv_color_bg=0x202020
-      history_text_recv_color_fg=0xd0d0d0
-      history_text_recv_group_color_bg=0x202020
-      history_text_recv_group_color_fg=0xd0d0d0
+      history_text_recv_color_bg=${bg}
+      history_text_recv_color_fg=${fg}
+      history_text_recv_group_color_bg=${bg}
+      history_text_recv_group_color_fg=${fg}
 
       # History - message text sent
-      history_text_sent_color_bg=0x202020
-      history_text_sent_color_fg=0xd0d0d0
+      history_text_sent_color_bg=${bg}
+      history_text_sent_color_fg=${fg}
 
       # History - attachments and special elements
-      history_text_attachment_color_bg=0x202020
-      history_text_attachment_color_fg=0x7dd5cf
-      history_text_quoted_color_bg=0x202020
-      history_text_quoted_color_fg=0x505050
-      history_text_reaction_color_bg=0x202020
-      history_text_reaction_color_fg=0xe5b566
+      history_text_attachment_color_bg=${bg}
+      history_text_attachment_color_fg=0x${s.base0C}
+      history_text_quoted_color_bg=${bg}
+      history_text_quoted_color_fg=${dim}
+      history_text_reaction_color_bg=${bg}
+      history_text_reaction_color_fg=0x${s.base0A}
 
       # Chat list
       list_attr=
       list_attr_selected=reverse
-      list_color_bg=0x202020
-      list_color_fg=0xd0d0d0
-      list_color_unread_bg=0x202020
-      list_color_unread_fg=0xac4142
+      list_color_bg=${bg}
+      list_color_fg=${fg}
+      list_color_unread_bg=${bg}
+      list_color_unread_fg=0x${s.base08}
 
       # Chat list border
       listborder_attr=
-      listborder_color_bg=0x202020
-      listborder_color_fg=0x505050
+      listborder_color_bg=${bg}
+      listborder_color_fg=${dim}
 
       # Status bar
       status_attr=reverse
-      status_color_bg=0x151515
-      status_color_fg=0xd0d0d0
+      status_color_bg=${bar}
+      status_color_fg=${fg}
 
       # Top bar
       top_attr=reverse
-      top_color_bg=0x151515
-      top_color_fg=0xd0d0d0
+      top_color_bg=${bar}
+      top_color_fg=${fg}
     '';
   };
 
