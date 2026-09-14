@@ -8,7 +8,7 @@
 }: let
   modifier = "Mod";
   terminal = config.terminal.bin;
-  cwd = "${config.xdg.configHome}/kitty/cwd.sh";
+  cwd = config.terminal.cwdScript;
 
   # Build a terminal spawn command, optionally with floating app-id and an exec command
   termSpawn = {

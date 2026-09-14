@@ -23,15 +23,15 @@
 
   defaultBrowser = "${pkgs.firefox}/bin/firefox";
 in {
+  # swaylock and swayidle come from sway/swaylock.nix and session-services.nix
+  # respectively. swaycwd and sway-scratch used to be here too, but the cwd
+  # helper is terminals/terminal.nix's cwd.sh and the scratchpad goes through
+  # eww/scripts/scratchpad, so neither was referenced anywhere.
   home.packages = with pkgs; [
-    swaylock
-    swayidle
     swayimg
     autotiling
     sway-contrib.grimshot
     sway-contrib.inactive-windows-transparency
-    swaycwd
-    sway-scratch
   ];
 
   wayland.windowManager.sway = {
@@ -214,15 +214,15 @@ in {
         # open file managers
         "${modifier}+Shift+x" =
           if config.terminal.floatingAppId != null
-          then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)"
-          else "exec ${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.xdg.configHome}/kitty/cwd.sh)";
-        "${modifier}+Shift+n" = "exec ${pkgs.nemo-with-extensions}/bin/nemo $(${config.xdg.configHome}/kitty/cwd.sh)";
+          then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.terminal.cwdScript})"
+          else "exec ${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.yazi}/bin/yazi $(${config.terminal.cwdScript})";
+        "${modifier}+Shift+n" = "exec ${pkgs.nemo-with-extensions}/bin/nemo $(${config.terminal.cwdScript})";
         # open terminals
         "${modifier}+Shift+Return" =
           if config.terminal.floatingAppId != null
-          then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)"
-          else "exec ${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)";
-        "${modifier}+Return" = "exec '${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.xdg.configHome}/kitty/cwd.sh)'";
+          then "exec ${config.terminal.bin} ${config.terminal.appIdFlag} ${config.terminal.floatingAppId} ${config.terminal.workingDirFlag} $(${config.terminal.cwdScript})"
+          else "exec ${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.terminal.cwdScript})";
+        "${modifier}+Return" = "exec '${config.terminal.bin} ${config.terminal.workingDirFlag} $(${config.terminal.cwdScript})'";
 
         # Toggle the bar
         "${modifier}+Shift+b" = "exec ${config.programs.eww.package}/bin/eww open --toggle bar";

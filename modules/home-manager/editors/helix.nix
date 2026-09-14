@@ -113,10 +113,6 @@
     exec rustfmt --edition "''${edition:-2021}" --emit stdout
   '';
 in {
-  imports = [
-    ./helix/dprint.nix
-  ];
-
   options.helix = {
     liveConfigPath = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
@@ -190,9 +186,6 @@ in {
           harper
         ]
         ++ lib.optionals full [
-          # PDF Viewer
-          zathura
-
           # CSV
           prettier
 
@@ -461,11 +454,6 @@ in {
                   };
                 };
               };
-            };
-
-            rumdl = {
-              command = "${pkgs.rumdl}/bin/rumdl";
-              args = ["server" "--stdio"];
             };
           }
           // lib.optionalAttrs glancer {

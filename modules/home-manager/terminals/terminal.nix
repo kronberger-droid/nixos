@@ -94,15 +94,71 @@ in {
       readOnly = true;
       description = "Use -e cd workaround instead of --working-dir flag";
     };
+
+    cwdScript = lib.mkOption {
+      type = lib.types.str;
+      readOnly = true;
+      description = ''
+        Path of a script that prints the working directory of the focused
+        window (or $HOME). The compositor keybindings for "open a terminal /
+        file manager here" call it. Terminal-agnostic, which is why it lives
+        in this module and not with any one emulator.
+      '';
+    };
   };
 
-  config.terminal = {
-    bin = lib.mkDefault selectedConfig.bin;
-    execFlag = lib.mkDefault selectedConfig.execFlag;
-    workingDirFlag = lib.mkDefault selectedConfig.workingDirFlag;
-    appIdFlag = lib.mkDefault selectedConfig.appIdFlag;
-    hasKittens = lib.mkDefault selectedConfig.hasKittens;
-    floatingAppId = lib.mkDefault selectedConfig.floatingAppId;
-    cwdViaExec = lib.mkDefault selectedConfig.cwdViaExec;
+  config = {
+    terminal = {
+      bin = lib.mkDefault selectedConfig.bin;
+      execFlag = lib.mkDefault selectedConfig.execFlag;
+      workingDirFlag = lib.mkDefault selectedConfig.workingDirFlag;
+      appIdFlag = lib.mkDefault selectedConfig.appIdFlag;
+      hasKittens = lib.mkDefault selectedConfig.hasKittens;
+      floatingAppId = lib.mkDefault selectedConfig.floatingAppId;
+      cwdViaExec = lib.mkDefault selectedConfig.cwdViaExec;
+      cwdScript = "${config.xdg.configHome}/wm/cwd.sh";
+    };
+
+    # Used to be kitty/cwd.sh inside terminals/kitty.nix, so niri and sway
+    # both depended on the kitty module even on rio hosts.
+    xdg.configFile."wm/cwd.sh" = let
+      # The niri branch interpolates ${pkgs.niri} (the source-built fork).
+      # Only emit it when niri is the primary compositor, so sway-only hosts
+      # do not pull the fork into their closure just for this helper.
+      niriPrimary = config.compositor.primary == "niri";
+    in {
+      executable = true;
+      text = ''
+        #!${pkgs.bash}/bin/bash
+        # Print working directory of the focused window, or $HOME.
+        # Only uses cwd for terminals and file managers, not browsers/other apps.
+        # Supports both sway and niri.
+
+        ${lib.optionalString niriPrimary ''
+          if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
+              focused=$(${pkgs.niri}/bin/niri msg -j focused-window)
+              app_id=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.app_id // empty')
+              pid=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.pid')
+          el''}if [ -n "$SWAYSOCK" ] && [ -S "$SWAYSOCK" ]; then
+            focused=$(${pkgs.sway}/bin/swaymsg -t get_tree | ${pkgs.jq}/bin/jq -r \
+                  '.. | select(.type?) | select(.type=="con") | select(.focused==true)')
+            app_id=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.app_id // empty')
+            pid=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.pid')
+        else
+            echo "$HOME"
+            exit 0
+        fi
+
+        relevant_apps="kitty|rio|foot|alacritty|wezterm|ghostty|nemo|nautilus|thunar|yazi|ranger|helix|nvim|vim|emacs|code|zed"
+
+        if [[ "$app_id" =~ ^($relevant_apps) ]]; then
+            ppid=$(${pkgs.procps}/bin/pgrep --newest --parent "$pid")
+            cwd=$(${pkgs.uutils-coreutils-noprefix}/bin/readlink "/proc/''${ppid}/cwd" 2>/dev/null || true)
+            echo "''${cwd:-$HOME}"
+        else
+            echo "$HOME"
+        fi
+      '';
+    };
   };
 }

@@ -32,6 +32,15 @@ _: {
         "image/webp" = "swayimg.desktop";
         "image/svg+xml" = "swayimg.desktop";
         "image/tiff" = "swayimg.desktop";
+        # Folders (from mako notifications, nchat's link opener, yazi) and
+        # video had no default, so xdg-open fell through to whatever the
+        # desktop-file scan order produced.
+        "inode/directory" = "nemo.desktop";
+        "video/mp4" = "vlc.desktop";
+        "video/x-matroska" = "vlc.desktop";
+        "video/webm" = "vlc.desktop";
+        "video/quicktime" = "vlc.desktop";
+        "video/x-msvideo" = "vlc.desktop";
       };
     };
   };
