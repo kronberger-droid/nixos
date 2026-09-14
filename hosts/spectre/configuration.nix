@@ -1,12 +1,8 @@
-{
-  pkgs,
-  lib,
-  config,
-  ...
-}: {
+_: {
   imports = [
     ./hardware-configuration.nix
     ../common.nix
+    ../../modules/profiles/secureboot-laptop.nix
     ../../modules/system/hardware/firmware/vbt.nix
     ../../modules/system/hardware/ipu6-camera.nix
     ../../modules/system/hardware/scx-schedulers.nix
@@ -14,98 +10,17 @@
     ../../modules/system/hardware/droidcam.nix
   ];
 
-  programs.steam = {
-    enable = true;
-    gamescopeSession.enable = true;
-    extraPackages = [pkgs.sdl3];
-    package = pkgs.steam.override {
-      extraArgs = "-system-composer";
-    };
-  };
+  # HP Spectre specifics on top of the shared laptop profile. No resume
+  # device here: the swapfile exists but hibernation was never wired up on
+  # this host, so power-management.nix's canHibernate stays false and lid /
+  # idle actions fall back to plain suspend.
+  services.udev.extraRules = ''
+    # Prevent Realtek SD card reader from runtime suspending
+    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10ec", ATTR{device}=="0x525a", ATTR{power/control}="on"
+  '';
 
-  services = {
-    # SSH on this host is only reachable over tailscale0 (see security.nix
-    # firewall rules), so fail2ban has no public-facing port to protect and
-    # would just continuously tail the journal for nothing.
-    fail2ban.enable = false;
-
-    printing = {
-      enable = true;
-      drivers = [pkgs.gutenprint];
-    };
-
-    # Spectre uses smaller journal limit than the common 1G default
-    journald.settings.Journal.SystemMaxUse = "500M";
-
-    udev.extraRules = ''
-      ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.uutils-coreutils-noprefix}/bin/chgrp video /sys/class/leds/%k/brightness"
-      ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.uutils-coreutils-noprefix}/bin/chmod g+w /sys/class/leds/%k/brightness"
-
-      # Allow access to IIO devices for screen rotation (group-restricted)
-      SUBSYSTEM=="iio", KERNEL=="iio:device*", MODE="0660", GROUP="video"
-
-      # Prevent Realtek SD card reader from runtime suspending
-      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10ec", ATTR{device}=="0x525a", ATTR{power/control}="on"
-    '';
-  };
-
-  hardware = {
-    enableRedistributableFirmware = true;
-    keyboard.qmk.enable = true;
-    graphics.extraPackages = [pkgs.intel-media-driver];
-  };
-
-  boot = {
-    binfmt.emulatedSystems = ["aarch64-linux"];
-    # Lanzaboote replaces systemd-boot for Secure Boot
-    systemd-boot-defaults.enable = false;
-    loader.systemd-boot.enable = lib.mkForce false;
-    loader.efi.canTouchEfiVariables = false;
-    # systemd-boot-defaults is off here, so boot-systemd.nix's editor = false
-    # never applies; lanzaboote copies this value into loader.conf regardless.
-    # With TPM auto-unlock, an editable cmdline (init=/bin/sh) is root on the
-    # decrypted disk, which is the one thing Secure Boot exists to stop.
-    loader.systemd-boot.editor = false;
-    lanzaboote = {
-      enable = true;
-      pkiBundle = "/var/lib/sbctl";
-      configurationLimit = 20;
-    };
-    kernel.sysctl = {
-      # 176 = enable sync (16) + enable remount-ro (32) + enable reboot (128)
-      # Allows safe emergency reboot (REISUB) without exposing full sysrq
-      "kernel.sysrq" = 176;
-    };
-    kernelParams = [
-      "nvme_core.default_ps_max_latency_us=0"
-      "pcie_aspm=off"
-      "snd_intel_dspcfg.dsp_driver=1"
-      "intel_iommu=on"
-      "console=tty1"
-    ];
-    kernelModules = [
-      "hp_wmi"
-    ];
-    blacklistedKernelModules = [
-      "iTCO_wdt"
-      "watchdog"
-    ];
-    initrd.luks.devices."nixos-root".crypttabExtraOpts = ["tpm2-device=auto"];
-    initrd.systemd.tpm2.enable = true;
-  };
-
-  # TPM2 support for Secure Boot + LUKS auto-unlock
-  security.tpm2 = {
-    enable = true;
-    pkcs11.enable = false;
-    tctiEnvironment.enable = true;
-  };
-
-  swapDevices = [
-    {
-      device = "/swapfile";
-      size = 16 * 1024;
-    }
+  boot.kernelModules = [
+    "hp_wmi"
   ];
 
   # Limit build parallelism to keep the system responsive
@@ -113,12 +28,6 @@
     cores = 8; # Leave 4 threads free for desktop responsiveness
     max-jobs = 2; # Max parallel derivation builds
   };
-
-  environment.systemPackages = with pkgs; [
-    brightnessctl
-    dmidecode
-    sbctl
-  ];
 
   system.stateVersion = "24.11";
 }

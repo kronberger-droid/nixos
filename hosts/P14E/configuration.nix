@@ -1,94 +1,30 @@
-{
-  pkgs,
-  lib,
-  ...
-}: {
+_: {
   imports = [
     ./hardware-configuration.nix
     ../common.nix
+    ../../modules/profiles/secureboot-laptop.nix
     ../../modules/system/hardware/uvc-camera.nix
     ../../modules/system/hardware/scx-schedulers.nix
     ../../modules/profiles/vpn-workstation.nix
     ../../modules/system/hardware/droidcam.nix
   ];
 
-  # Started as a copy of spectre before the hardware arrived; the hardware
-  # config, LUKS layout and SSH key are real now. Still open from that
-  # phase: nix.settings.cores below assumes a 4-core/8-thread CPU, check
-  # `nproc` and adjust.
-  # Resolved since: the webcam is not IPU6. It is a USB UVC module
-  # (Foxlink 05c8:03e9) on uvcvideo, so this host imports uvc-camera.nix
-  # rather than spectre's ipu6-camera.nix.
-  # Deliberately NOT carried over from spectre:
-  #   - modules/system/hardware/firmware/vbt.nix — that ships a firmware
-  #     blob hand-patched for spectre's exact VBT dump; using it on
-  #     different hardware would feed the i915 driver wrong panel data.
-  #   - the "hp_wmi" kernel module and the Realtek SD-reader udev rule —
-  #     both are HP Spectre-specific hardware.
-
-  programs.steam = {
-    enable = true;
-    gamescopeSession.enable = true;
-    extraPackages = [pkgs.sdl3];
-    package = pkgs.steam.override {
-      extraArgs = "-system-composer";
-    };
-  };
-
-  services = {
-    # SSH on this host is only reachable over tailscale0 (see security.nix
-    # firewall rules), so fail2ban has no public-facing port to protect and
-    # would just continuously tail the journal for nothing.
-    fail2ban.enable = false;
-
-    printing = {
-      enable = true;
-      drivers = [pkgs.gutenprint];
-    };
-
-    # Smaller journal limit than the common 1G default — laptop SSD.
-    journald.settings.Journal.SystemMaxUse = "500M";
-
-    udev.extraRules = ''
-      ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.uutils-coreutils-noprefix}/bin/chgrp video /sys/class/leds/%k/brightness"
-      ACTION=="add", SUBSYSTEM=="leds", RUN+="${pkgs.uutils-coreutils-noprefix}/bin/chmod g+w /sys/class/leds/%k/brightness"
-
-      # Allow access to IIO devices for screen rotation (group-restricted)
-      SUBSYSTEM=="iio", KERNEL=="iio:device*", MODE="0660", GROUP="video"
-    '';
-  };
-
-  hardware = {
-    enableRedistributableFirmware = true;
-    keyboard.qmk.enable = true;
-    graphics.extraPackages = [pkgs.intel-media-driver];
-  };
+  # ThinkPad P14E specifics on top of the shared laptop profile. Started as
+  # a copy of spectre before the hardware arrived; the hardware config, LUKS
+  # layout and SSH key are real now. Still open from that phase:
+  # nix.settings.cores below assumes a 4-core/8-thread CPU, check `nproc`
+  # and adjust.
+  # The webcam is not IPU6. It is a USB UVC module (Foxlink 05c8:03e9) on
+  # uvcvideo, hence uvc-camera.nix rather than spectre's ipu6-camera.nix.
+  # Deliberately NOT carried over from spectre: vbt.nix (a firmware blob
+  # hand-patched for spectre's exact VBT dump; wrong panel data on other
+  # hardware), the hp_wmi module and the Realtek SD-reader udev rule.
 
   boot = {
-    binfmt.emulatedSystems = ["aarch64-linux"];
-    # Lanzaboote replaces systemd-boot for Secure Boot
-    systemd-boot-defaults.enable = false;
-    loader.systemd-boot.enable = lib.mkForce false;
-    loader.efi.canTouchEfiVariables = false;
     # HiDPI panel renders the boot menu at native res, making the generation
     # list tiny. "0" forces the lowest UEFI text mode (80x25) for larger text.
     # Lanzaboote reads this value into loader.conf even with systemd-boot off.
     loader.systemd-boot.consoleMode = "0";
-    # Same route as consoleMode: systemd-boot-defaults is off, so the shared
-    # editor = false never applies, and lanzaboote copies this into
-    # loader.conf. With TPM auto-unlock an editable cmdline is root on the
-    # decrypted disk.
-    loader.systemd-boot.editor = false;
-    lanzaboote = {
-      enable = true;
-      pkiBundle = "/var/lib/sbctl";
-      configurationLimit = 20;
-    };
-    kernel.sysctl = {
-      # 176 = enable sync (16) + enable remount-ro (32) + enable reboot (128)
-      # Allows safe emergency reboot (REISUB) without exposing full sysrq
-      "kernel.sysrq" = 176;
-    };
     # Hibernation resume target. The swapfile lives on the LUKS-backed root
     # fs, so resume happens from the unlocked mapper device plus the file's
     # first physical block (from `filefrag -v /swapfile`). If the swapfile is
@@ -97,11 +33,6 @@
     # Electron/Chromium apps do, which disables it kernel-wide while they run.
     resumeDevice = "/dev/mapper/nixos-root";
     kernelParams = [
-      "nvme_core.default_ps_max_latency_us=0"
-      "pcie_aspm=off"
-      "snd_intel_dspcfg.dsp_driver=1"
-      "intel_iommu=on"
-      "console=tty1"
       "resume_offset=68904960"
       # Disable memfd_secret kernel-wide. Any process holding secret memory
       # (Electron/Chromium apps like Bitwarden do) makes the kernel refuse
@@ -110,27 +41,7 @@
       # at rest, so the trade-off is negligible here.
       "secretmem.enable=0"
     ];
-    blacklistedKernelModules = [
-      "iTCO_wdt"
-      "watchdog"
-    ];
-    initrd.luks.devices."nixos-root".crypttabExtraOpts = ["tpm2-device=auto"];
-    initrd.systemd.tpm2.enable = true;
   };
-
-  # TPM2 support for Secure Boot + LUKS auto-unlock
-  security.tpm2 = {
-    enable = true;
-    pkcs11.enable = false;
-    tctiEnvironment.enable = true;
-  };
-
-  swapDevices = [
-    {
-      device = "/swapfile";
-      size = 16 * 1024;
-    }
-  ];
 
   # Limit build parallelism to keep the system responsive.
   # Assumes a 4-core/8-thread CPU (the common case for this Compute Element
@@ -139,12 +50,6 @@
     cores = 4;
     max-jobs = 2; # Max parallel derivation builds
   };
-
-  environment.systemPackages = with pkgs; [
-    brightnessctl
-    dmidecode
-    sbctl
-  ];
 
   system.stateVersion = "24.11";
 }
