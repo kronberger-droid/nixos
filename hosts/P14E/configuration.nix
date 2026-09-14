@@ -77,6 +77,11 @@
     # list tiny. "0" forces the lowest UEFI text mode (80x25) for larger text.
     # Lanzaboote reads this value into loader.conf even with systemd-boot off.
     loader.systemd-boot.consoleMode = "0";
+    # Same route as consoleMode: systemd-boot-defaults is off, so the shared
+    # editor = false never applies, and lanzaboote copies this into
+    # loader.conf. With TPM auto-unlock an editable cmdline is root on the
+    # decrypted disk.
+    loader.systemd-boot.editor = false;
     lanzaboote = {
       enable = true;
       pkiBundle = "/var/lib/sbctl";

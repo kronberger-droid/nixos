@@ -59,8 +59,15 @@
     owner = "root";
   };
 
-  # Bootloader
-  boot.loader.systemd-boot.enable = true;
+  # Bootloader. Set directly rather than via boot-systemd.nix, so the two
+  # defaults that module would give us are spelled out here: no boot-time
+  # cmdline editor (init=/bin/sh at the menu is root), and a generation cap
+  # so the ESP does not fill up between weekly GCs.
+  boot.loader.systemd-boot = {
+    enable = true;
+    editor = false;
+    configurationLimit = 20;
+  };
   boot.loader.efi.canTouchEfiVariables = true;
 
   # aarch64 emulation so this host can act as remote builder for the phone's
