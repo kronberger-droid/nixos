@@ -103,22 +103,57 @@
   };
 
   # Users
+  #
+  # ${username} has NOPASSWD sudo (below) because deploy-rs logs in as this
+  # account and escalates to activate the profile. So the set of keys that
+  # can reach it is the set of keys that are root here: the workstation keys
+  # only. Anything that just needs a Nix store on the far side (remote
+  # builds, `flake --remote`, the phone's builder) goes through `nix-remote`,
+  # which is a trusted Nix user and nothing more.
   users.users.${username} = {
     createHome = true;
     isNormalUser = true;
     extraGroups = ["wheel"];
     shell = pkgs.nushell;
+    openssh.authorizedKeys.keys = builtins.attrValues (import ../../modules/shared/ssh-keys.nix);
+  };
+
+  # Builder account: `nix flake archive --to ssh-ng://nix-remote@homeserver`
+  # and `nix build` under this user, plus the dormant buildMachines entry and
+  # the phone's `builders`. Uploading unsigned paths needs trusted-user;
+  # nothing here needs wheel, sudo, or a login shell beyond running nix.
+  # Normal user rather than system user so it gets a home for nix's own
+  # caches and for the gcroots `flake --remote` leaves under ~/.local/state.
+  users.users.nix-remote = {
+    isNormalUser = true;
+    createHome = true;
+    shell = pkgs.bash;
     openssh.authorizedKeys.keys =
       builtins.attrValues (import ../../modules/shared/ssh-keys.nix)
       ++ [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBhJDPNrVbt//EeQVXT4stPOH+gFCjrYKHrrAvqbUKBE root@spectre" # nix remote builder
+        # spectre's root key, for the buildMachines entry (nix-daemon runs
+        # the builder connection as root).
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBhJDPNrVbt//EeQVXT4stPOH+gFCjrYKHrrAvqbUKBE root@spectre"
+        # Nothing Phone (Termux). Only ever needs the store, so it is not in
+        # the shared key set any more; key was generated on the homeserver,
+        # hence the comment.
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGNMj1J9Y7Qc6oVzZQsAizZUJIP/F4bNn4hZmc4pCGeA kronberger@homeserver"
       ];
   };
+  # nix-settings.nix restricts allowed-users to root + ${username}, so the
+  # builder account has to be let in explicitly before trusted-users means
+  # anything.
+  nix.settings.allowed-users = ["nix-remote"];
+  nix.settings.trusted-users = ["nix-remote"];
 
+  # Container deployments. `docker` alone is still root-equivalent through
+  # the socket; moving these workloads to rootless podman is the real fix
+  # and is tracked in the vault's config review. wheel was on top of that
+  # and served nothing.
   users.users.wiesinger = {
     isNormalUser = true;
     createHome = true;
-    extraGroups = ["wheel" "docker"];
+    extraGroups = ["docker"];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDkdsU9B7+sb5ISQy9RjykK0u04VdYTFYhnSHozpBqYl dietpi"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDZDyijah9B71tRnhZtLxLFuxJ9raP3RdwMSYihxECfA dietpi"
@@ -179,7 +214,7 @@
       LoginGraceTime = 30;
 
       # Only allow specific users
-      AllowUsers = [username "wiesinger"];
+      AllowUsers = [username "nix-remote" "wiesinger"];
     };
 
     # Strong ciphers and key exchange

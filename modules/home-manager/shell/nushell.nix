@@ -434,20 +434,25 @@ in {
           # see modules/system/core/nix-caches.nix) and only download +
           # activate. Evaluation happens on both ends, but nothing in the
           # config depends on self.rev, so both produce the same drv paths
-          # and the substituter lookup hits. No sudo and no root ssh key:
-          # everything runs as this user, who is a trusted-user on both ends.
+          # and the substituter lookup hits. No sudo and no root ssh key: the
+          # far side is the homeserver's `nix-remote` account (a trusted Nix
+          # user and nothing else, see hosts/homeserver), reached with this
+          # user's own key.
           if $remote {
               if $action not-in ["switch" "boot" "test" "build"] {
                   print $"(ansi red)Remote build only supports: switch, boot, test, build(ansi reset)"
                   return
               }
               let host = (sys host | get hostname)
+              let builder = "nix-remote@homeserver"
               # gcroot on the homeserver so a later GC doesn't evict the
               # generation before another machine (or a reinstall) pulls it.
-              let out_link = $"/home/kronberger/.local/state/nix-builds/($host)"
+              # `~` is expanded by the remote shell, so this lands in
+              # nix-remote's own home; nu leaves it literal.
+              let out_link = $"~/.local/state/nix-builds/($host)"
               let archived = (try {
                   print $"(ansi cyan)Copying flake source and inputs to homeserver...(ansi reset)"
-                  nix flake archive --to ssh-ng://homeserver --json $flake_dir | from json
+                  nix flake archive --to $"ssh-ng://($builder)" --json $flake_dir | from json
               } catch {
                   print $"\n(ansi yellow)Copying to homeserver failed.(ansi reset)"
                   null
@@ -457,7 +462,7 @@ in {
               print $"(ansi cyan)Building ($host) on homeserver...(ansi reset)"
               let built = (try {
                   # -t: a tty on the far side keeps nix's progress bar and colors.
-                  ssh -t homeserver $"mkdir -p ($out_link | path dirname) && nix build --print-build-logs --out-link ($out_link) 'path:($src)#nixosConfigurations.($host).config.system.build.toplevel'"
+                  ssh -t $builder $"mkdir -p ~/.local/state/nix-builds && nix build --print-build-logs --out-link ($out_link) 'path:($src)#nixosConfigurations.($host).config.system.build.toplevel'"
                   true
               } catch {
                   print $"\n(ansi yellow)Remote build interrupted or failed.(ansi reset)"

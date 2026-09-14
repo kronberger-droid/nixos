@@ -68,16 +68,17 @@
     # Never build on-device: proot on this phone denies the pseudoterminal
     # Nix allocates for every local builder ("getting pseudoterminal
     # attributes: Permission denied"), so ALL builds are pushed to the
-    # homeserver (aarch64 via binfmt emulation; kronberger is a trusted-user
-    # there via modules/system/core/nix-settings.nix). max-jobs = 0 forces
-    # remote building even though the builder's system matches ours.
-    # Requires ~/.ssh/id_ed25519 (authorized on the homeserver) and its host
-    # key in known_hosts. Both routes to the homeserver are listed — tailscale
-    # (100.92.46.97, works from anywhere while the Tailscale app is connected)
-    # first, home LAN (192.168.2.54) as fallback; nix skips an unreachable
-    # builder and tries the next. Trade-off: switching needs the homeserver
-    # reachable — acceptable, since local builds cannot work at all.
-    builders = ssh://kronberger@100.92.46.97 aarch64-linux ; ssh://kronberger@192.168.2.54 aarch64-linux
+    # homeserver (aarch64 via binfmt emulation) as the `nix-remote` account,
+    # a trusted Nix user with no sudo (see hosts/homeserver). max-jobs = 0
+    # forces remote building even though the builder's system matches ours.
+    # Requires ~/.ssh/id_ed25519 (authorized for nix-remote on the homeserver)
+    # and its host key in known_hosts. Both routes to the homeserver are
+    # listed — tailscale (100.92.46.97, works from anywhere while the
+    # Tailscale app is connected) first, home LAN (192.168.2.54) as fallback;
+    # nix skips an unreachable builder and tries the next. Trade-off:
+    # switching needs the homeserver reachable — acceptable, since local
+    # builds cannot work at all.
+    builders = ssh://nix-remote@100.92.46.97 aarch64-linux ; ssh://nix-remote@192.168.2.54 aarch64-linux
     builders-use-substitutes = true
     max-jobs = 0
   '';
