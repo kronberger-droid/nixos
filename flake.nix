@@ -240,7 +240,7 @@
                 # builds it unless `helix.rustLsp` selects it. Also applied to
                 # droid, the only other config that imports the helix module.
                 (import ./modules/shared/rust-glancer-overlay.nix inputs)
-                (_: prev: {
+                (_: _: {
                   deploy-rs = inputs.deploy-rs.packages.${system}.default;
                   claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
                   # rio from upstream main, tests skipped — same policy as the
