@@ -246,21 +246,39 @@ in {
           { has_direnv: $has_direnv, has_flake: $has_flake, dev_shell: $dev_shell }
       }
 
+      # Open the terminal in a directory and run a command there. Honours
+      # terminal.cwdViaExec the same way desktop/niri.nix's termSpawn does:
+      # rio's --working-dir is broken, so on rio the cd happens inside a
+      # bash -c wrapper instead of via the flag.
+      ${
+        if config.terminal.cwdViaExec
+        then ''
+          def termIn [cwd: string, cmd: string] {
+              $"${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.bash}/bin/bash -c \"cd '($cwd)' && exec ($cmd)\""
+          }
+        ''
+        else ''
+          def termIn [cwd: string, cmd: string] {
+              $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} ($cmd)"
+          }
+        ''
+      }
+
       # Build a terminal command string with optional dev shell wrapping
       def termCmd [cwd: string, dev_env: record, exec_args: string] {
           if $dev_env.has_direnv or not $dev_env.has_flake {
-              $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} ($exec_args)"
+              termIn $cwd $exec_args
           } else {
-              $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} nix develop ($dev_env.dev_shell) -c ($exec_args)"
+              termIn $cwd $"nix develop ($dev_env.dev_shell) -c ($exec_args)"
           }
       }
 
       # Build a claude terminal command string
       def claudeCmd [cwd: string, dev_env: record] {
           if $dev_env.has_direnv or not $dev_env.has_flake {
-              $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} sh -c 'exec claude'"
+              termIn $cwd "sh -c 'exec claude'"
           } else {
-              $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} nix develop ($dev_env.dev_shell) -c sh -c 'exec claude'"
+              termIn $cwd $"nix develop ($dev_env.dev_shell) -c sh -c 'exec claude'"
           }
       }
 

@@ -276,8 +276,10 @@
   # the next run, deletes the previously recorded paths before merging. That
   # is what lets a key removed from Nix disappear from the live file; a plain
   # `. * $merge` can only ever add or overwrite.
+  # An empty attrset is a leaf too: recursing into it would yield no paths,
+  # so a key set to `{}` could never be removed again.
   leafPaths = prefix: v:
-    if builtins.isAttrs v
+    if builtins.isAttrs v && v != {}
     then lib.concatLists (lib.mapAttrsToList (k: x: leafPaths (prefix ++ [k]) x) v)
     else [prefix];
   settingsPathsFile =
@@ -417,27 +419,35 @@ in {
     # Two passes over the live file: first delete every path the previous
     # activation recorded as Nix-managed (so keys dropped from Nix leave the
     # file too), then deep-merge the current document. The record of what
-    # was written sits next to the file, not in the store, since it has to
-    # describe the previous generation, not this one.
+    # was written lives under ~/.claude (both records do; the global one's
+    # target is ~/.claude.json), not in the store, since it has to describe
+    # the previous generation, not this one.
+    #
+    # Under `home-manager switch --dry-run` DRY_RUN_CMD is `echo`, so every
+    # step that touches $HOME goes through it; the jq passes write only to a
+    # .tmp file that the guarded mv then would or would not move.
     home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
       SETTINGS_FILE="$HOME/.claude/settings.json"
       MANAGED="$HOME/.claude/.nix-managed-settings-paths.json"
-      mkdir -p "$HOME/.claude"
+      $DRY_RUN_CMD mkdir -p "$HOME/.claude"
 
       if [ -f "$SETTINGS_FILE" ]; then
         if [ -f "$MANAGED" ]; then
           ${pkgs.jq}/bin/jq --slurpfile prev "$MANAGED" 'delpaths($prev[0])' \
-            "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+            "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && $DRY_RUN_CMD mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
         fi
         ${pkgs.jq}/bin/jq --slurpfile merge ${settingsFile} '. * $merge[0]' \
-          "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+          "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && $DRY_RUN_CMD mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+        [ -n "$DRY_RUN_CMD" ] && rm -f "$SETTINGS_FILE.tmp"
+      elif [ -n "$DRY_RUN_CMD" ]; then
+        echo "would create $SETTINGS_FILE from ${settingsFile}"
       else
         ${pkgs.jq}/bin/jq . ${settingsFile} > "$SETTINGS_FILE"
       fi
       # install, not cp: cp from the store creates the record with the
       # store's 0444 mode, and the next activation cannot write into it.
       # install unlinks and recreates it writable.
-      ${pkgs.coreutils}/bin/install -m 0644 ${settingsPathsFile} "$MANAGED"
+      $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0644 ${settingsPathsFile} "$MANAGED"
     '';
 
     # Activation script to merge MCP servers and UI defaults into ~/.claude.json
@@ -446,19 +456,22 @@ in {
     home.activation.claudeGlobalConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
       CLAUDE_JSON="$HOME/.claude.json"
       MANAGED="$HOME/.claude/.nix-managed-global-config-paths.json"
-      mkdir -p "$HOME/.claude"
+      $DRY_RUN_CMD mkdir -p "$HOME/.claude"
 
       if [ -f "$CLAUDE_JSON" ]; then
         if [ -f "$MANAGED" ]; then
           ${pkgs.jq}/bin/jq --slurpfile prev "$MANAGED" 'delpaths($prev[0])' \
-            "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
+            "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" && $DRY_RUN_CMD mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
         fi
         ${pkgs.jq}/bin/jq --slurpfile merge ${globalConfigFile} '. * $merge[0]' \
-          "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
+          "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" && $DRY_RUN_CMD mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
+        [ -n "$DRY_RUN_CMD" ] && rm -f "$CLAUDE_JSON.tmp"
+      elif [ -n "$DRY_RUN_CMD" ]; then
+        echo "would create $CLAUDE_JSON from ${globalConfigFile}"
       else
         ${pkgs.jq}/bin/jq . ${globalConfigFile} > "$CLAUDE_JSON"
       fi
-      ${pkgs.coreutils}/bin/install -m 0644 ${globalConfigPathsFile} "$MANAGED"
+      $DRY_RUN_CMD ${pkgs.coreutils}/bin/install -m 0644 ${globalConfigPathsFile} "$MANAGED"
     '';
   };
 }

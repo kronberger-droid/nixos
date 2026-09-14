@@ -34,14 +34,9 @@
     "aerc-uptudate-password"
   ];
 in {
-  # Enable SSH for agenix
-  services.openssh = {
-    enable = true;
-    settings = {
-      PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
-    };
-  };
+  # sshd itself (which agenix relies on for the host key) is configured in
+  # hardening.nix; this module used to restate three of its settings at the
+  # same priority, which only evaluated because the values happened to match.
 
   age.secrets =
     lib.genAttrs rootSecrets (mkSecret "root")

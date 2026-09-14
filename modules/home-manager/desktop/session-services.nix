@@ -97,6 +97,10 @@ in {
     # agnostic despite the name, so it lives here rather than in sway.nix,
     # which is gated on compositor.primary.
     swayimg
+    # `magick` backs the nushell color-picker helper (grim | magick). It used
+    # to ride along in terminals/kitty.nix, which is gated on the emulator
+    # now, so it lives with the other screen tools.
+    imagemagick
   ];
 
   # ── Mako ────────────────────────────────────────────────────────

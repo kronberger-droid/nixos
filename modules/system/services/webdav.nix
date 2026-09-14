@@ -77,6 +77,26 @@ in {
     "Z ${dataDir} - webdav webdav -"
   ];
 
+  # The upstream module sets only User/Group/ExecStart/Restart, which made
+  # this the one network daemon on the box with no sandbox: a file server
+  # reachable from every tailnet peer that could see the whole filesystem
+  # as `webdav`. It needs to write exactly one tree.
+  systemd.services.webdav.serviceConfig = {
+    ProtectSystem = "strict";
+    ReadWritePaths = [dataDir];
+    ProtectHome = true;
+    PrivateTmp = true;
+    PrivateDevices = true;
+    NoNewPrivileges = true;
+    CapabilityBoundingSet = "";
+    RestrictAddressFamilies = ["AF_INET" "AF_INET6"];
+    ProtectKernelTunables = true;
+    ProtectKernelModules = true;
+    ProtectControlGroups = true;
+    RestrictNamespaces = true;
+    LockPersonality = true;
+  };
+
   # Tailnet only. Scoping to the interface rather than adding to the global
   # allowedTCPPorts keeps this off the LAN entirely — every Zotero client that
   # needs it is on the tailnet anyway, and the traffic is already WireGuard

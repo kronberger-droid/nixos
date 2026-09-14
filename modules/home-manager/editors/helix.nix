@@ -178,9 +178,10 @@ in {
           tinymist
         ]
         ++ [
-          # Markdown
+          # Markdown (rumdl is the formatter; markdown-oxide used to be
+          # installed here too but the markdown entry below lists only
+          # harper as a server, so it never ran)
           rumdl
-          markdown-oxide
 
           # Spellcheck
           harper

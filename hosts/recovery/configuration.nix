@@ -10,6 +10,10 @@
     # Same keyd remaps as the workstations. Was a verbatim copy of that
     # module here, which is how the two would have drifted.
     ../../modules/system/desktop/keyd.nix
+    # Substituters and keys, so `nixos-install --flake /nixos-config#<host>`
+    # from the live system pulls niri, rio and nushell from the caches
+    # instead of building them on a USB stick.
+    ../../modules/system/core/nix-caches.nix
   ];
 
   # ISO image settings
@@ -33,8 +37,10 @@
 
   # SSH into the live system with the usual workstation keys, so a rescue
   # can be driven from another machine instead of the console. The installer
-  # image ships openssh as a package but never enables the service. The
-  # `nixos` live user has passwordless sudo; root login stays off.
+  # profile already enables sshd, with PermitRootLogin "yes" as a mkDefault;
+  # what this block changes is turning that root login off, disabling
+  # passwords, and putting the keys on the `nixos` live user, which has
+  # passwordless sudo. LAN only: the ISO runs no tailscale.
   services.openssh = {
     enable = true;
     settings = {
@@ -164,6 +170,13 @@
     # Editor & shell
     helix
     nushell
+
+    # Secure Boot + TPM: both laptops are lanzaboote with TPM-unlocked LUKS
+    # (modules/profiles/secureboot-laptop.nix), so a broken enrollment or a
+    # failed TPM unlock is exactly the rescue this image exists for.
+    sbctl
+    tpm2-tools
+    tpm2-tss
 
     # Disk management (GUI)
     gparted

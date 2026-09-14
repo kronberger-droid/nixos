@@ -4,8 +4,16 @@
 # without a systemd user session (nix-on-droid/Android) don't set it — that
 # error aborts env.nu at every startup, so the nushell login shell never comes
 # up. Guard with the optional `?` cell-path so those hosts just skip it.
+#
+# Also guard on the socket actually being there. This file is shared with
+# the homeserver, which runs no keyring: pointing SSH_AUTH_SOCK at a socket
+# that never exists there clobbered `ssh -A` forwarding from the laptops on
+# every login.
 if ($env.XDG_RUNTIME_DIR? | is-not-empty) {
-    $env.SSH_AUTH_SOCK = $"($env.XDG_RUNTIME_DIR)/oo7-ssh-agent.sock"
+    let sock = $"($env.XDG_RUNTIME_DIR)/oo7-ssh-agent.sock"
+    if ($sock | path exists) {
+        $env.SSH_AUTH_SOCK = $sock
+    }
 }
 
 # Force TTY passphrase prompts; suppress OpenSSH's bundled GUI askpass fallback

@@ -71,6 +71,12 @@
   };
   boot.loader.efi.canTouchEfiVariables = true;
 
+  # The generated hardware config ties Intel microcode updates to this flag
+  # (`updateMicrocode = mkDefault enableRedistributableFirmware`), and only
+  # the laptop profile set it, so the always-on box ran stock BIOS
+  # microcode with none of the errata or side-channel fixes.
+  hardware.enableRedistributableFirmware = true;
+
   # aarch64 emulation so this host can act as remote builder for the phone's
   # nix-on-droid config (proot on the phone cannot allocate build ptys, so the
   # droid config points its `builders` here and never builds locally).
@@ -100,12 +106,17 @@
       # ICMP is the only liveness check the network has for the one host
       # everything depends on.
       allowPing = true;
-      # LAN-wide: only SSH and DNS. Everything else on this box speaks plain
-      # HTTP (Radicale is Basic auth, immich and miniflux are password
-      # logins, harmonia serves the store) and is only meant to be reached
-      # over the tailnet, so it is opened on tailscale0 alone, the same way
-      # modules/system/services/webdav.nix scopes port 8081. Tailscale's
-      # subnet route still lets tailnet peers reach the LAN, not the reverse.
+      # LAN-wide: SSH, DNS, and syncthing (22000/21027, appended by
+      # modules/system/services/syncthing.nix). Everything else on this box
+      # speaks plain HTTP (Radicale is Basic auth, immich and miniflux are
+      # password logins, harmonia serves the store) and is only meant to be
+      # reached over the tailnet, so it is opened on tailscale0 alone, the
+      # same way modules/system/services/webdav.nix scopes port 8081.
+      # Tailscale's subnet route still lets tailnet peers reach the LAN, not
+      # the reverse. Two things this list does not govern: docker's own
+      # DOCKER chains sit ahead of nixos-fw, so any container port published
+      # with -p is LAN-reachable regardless; and `flake --remote` depends on
+      # the tailnet end to end (ssh via MagicDNS, the cache on 5001).
       allowedTCPPorts = [22 53];
       allowedUDPPorts = [53];
       interfaces."tailscale0".allowedTCPPorts = [
@@ -127,11 +138,20 @@
   # Users
   #
   # ${username} has NOPASSWD sudo (below) because deploy-rs logs in as this
-  # account and escalates to activate the profile. So the set of keys that
-  # can reach it is the set of keys that are root here: the workstation keys
-  # only. Anything that just needs a Nix store on the far side (remote
-  # builds, `flake --remote`, the phone's builder) goes through `nix-remote`,
-  # which is a trusted Nix user and nothing more.
+  # account and escalates to activate the profile, so only the workstation
+  # keys reach it. Anything that just needs a Nix store on the far side
+  # (remote builds, `flake --remote`, the phone's builder) goes through
+  # `nix-remote` instead.
+  #
+  # Be clear about what that buys: `nix-remote` is a trusted Nix user, and a
+  # trusted user can hand the daemon settings like post-build-hook, which is
+  # root by a slower route. The split keeps the phone and the builder key
+  # away from an account with an interactive shell and sudo, and it keeps
+  # the two purposes reviewable, but every key on `nix-remote` is still a
+  # key you would give root on this box. Unsigned uploads (what
+  # `nix flake archive --to ssh-ng://` and remote builds do) need trusted;
+  # the alternative is signing paths on every client, which is a bigger
+  # change than this config has wanted so far.
   users.users.${username} = {
     createHome = true;
     isNormalUser = true;
@@ -162,10 +182,8 @@
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGNMj1J9Y7Qc6oVzZQsAizZUJIP/F4bNn4hZmc4pCGeA kronberger@homeserver"
       ];
   };
-  # nix-settings.nix restricts allowed-users to root + ${username}, so the
-  # builder account has to be let in explicitly before trusted-users means
-  # anything.
-  nix.settings.allowed-users = ["nix-remote"];
+  # Trusted users are always allowed to connect to the daemon, whatever
+  # allowed-users says, so this one line is the whole grant.
   nix.settings.trusted-users = ["nix-remote"];
 
   # Container deployments. `docker` alone is still root-equivalent through
@@ -324,20 +342,24 @@
         bootstrap_dns = ["1.1.1.1" "9.9.9.9"];
       };
       filtering.rewrites = [
-        # Local DNS — add your services here
+        # Local names for the services on this box. They answer with the
+        # tailnet address, not the LAN one: the ports behind them (3080,
+        # 8070, 2283) are opened on tailscale0 only, so a LAN answer would
+        # resolve and then hang on a dropped SYN. A client without Tailscale
+        # cannot reach these services either way.
         {
           domain = "adguard.home.lan";
-          answer = "192.168.2.54";
+          answer = "100.92.46.97";
           enabled = true;
         }
         {
           domain = "rss.home.lan";
-          answer = "192.168.2.54";
+          answer = "100.92.46.97";
           enabled = true;
         }
         {
           domain = "photos.home.lan";
-          answer = "192.168.2.54";
+          answer = "100.92.46.97";
           enabled = true;
         }
       ];
@@ -392,8 +414,10 @@
     machine-learning.enable = true;
   };
 
-  # Power saving
-  powerManagement.powertop.enable = true;
+  # No powertop here. The option runs `powertop --auto-tune` at boot, which
+  # turns on USB autosuspend, SATA/PCIe link power management and NIC
+  # runtime PM: the wrong trade for a 24/7 box serving DNS and the cache,
+  # and the same reason power-management.nix disables it on the laptops.
 
   # locale.nix (imported above) turns the full documentation set on for the
   # workstations. Headless box: man pages stay for `man` over ssh, the doc

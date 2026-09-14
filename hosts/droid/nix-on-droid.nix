@@ -106,7 +106,7 @@
 
     # Bright colors
     color8 = "#${s.base03}"; # bright black
-    color9 = "#${s.base09}"; # bright red (orange in base16)
+    color9 = "#${s.base09}"; # bright red (base09; this scheme keeps it red, not orange)
     color10 = "#${s.base0B}"; # bright green
     color11 = "#${s.base0A}"; # bright yellow
     color12 = "#${s.base0D}"; # bright blue

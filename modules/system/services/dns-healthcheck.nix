@@ -99,6 +99,15 @@ in {
       ExecStart = "${healthcheck}/bin/dns-healthcheck";
       # Holds the last-restart marker the backoff in the script checks.
       StateDirectory = "dns-healthcheck";
+      # A root oneshot that runs dig, curl and one `systemctl restart` needs
+      # none of root's reach. ProtectSystem is left off on purpose: the
+      # restart goes through systemd's private socket under /run, and a
+      # read-only /run is a cheap way to make that fail obscurely.
+      NoNewPrivileges = true;
+      PrivateTmp = true;
+      ProtectHome = true;
+      CapabilityBoundingSet = "";
+      RestrictAddressFamilies = ["AF_INET" "AF_INET6" "AF_UNIX"];
     };
   };
 
