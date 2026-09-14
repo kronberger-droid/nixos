@@ -18,7 +18,10 @@ _: {
       enable = true;
       defaultApplications = {
         "application/pdf" = "org.pwmt.zathura.desktop";
-        "x-scheme-handler/mailto" = "thunderbird.desktop";
+        # aerion rather than aerc: both are in use, but aerc's desktop entry
+        # is `Terminal=true`, so handing it a mailto: link means spawning a
+        # terminal for it.
+        "x-scheme-handler/mailto" = "io.github.hkdb.Aerion.desktop";
         "x-scheme-handler/http" = "helium.desktop";
         "x-scheme-handler/https" = "helium.desktop";
         "text/html" = "helium.desktop";
