@@ -4,7 +4,6 @@
     helium
 
     # Messaging
-    thunderbird
     aerion
     zapzap
     signal-desktop
