@@ -31,10 +31,6 @@
     ];
   };
 
-  environment.systemPackages = with pkgs; [
-    docker-compose
-  ];
-
   programs.steam = {
     enable = true;
     extraPackages = [pkgs.sdl3];
@@ -110,17 +106,6 @@
     ];
   };
 
-  # Docker — for testing Nextcloud instances
-  # Socket-activated: daemon only starts when docker commands are run
-  virtualisation.docker = {
-    enable = true;
-    enableOnBoot = false;
-    autoPrune = {
-      enable = true;
-      dates = "weekly";
-    };
-  };
-
   # Limit build parallelism to keep the system responsive
   nix.settings = {
     cores = 12; # Leave 4 threads free for desktop responsiveness
@@ -131,7 +116,7 @@
   # bluetooth keyboard reconnects on its own (default is false for laptops).
   hardware.bluetooth.powerOnBoot = true;
 
-  users.users.${username}.extraGroups = ["docker" "gamemode"];
+  users.users.${username}.extraGroups = ["gamemode"];
 
   system.stateVersion = "24.11";
 }

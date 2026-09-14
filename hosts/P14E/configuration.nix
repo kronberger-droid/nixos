@@ -1,7 +1,6 @@
 {
   pkgs,
   lib,
-  username,
   ...
 }: {
   imports = [
@@ -132,17 +131,6 @@
     }
   ];
 
-  # Docker — for testing Nextcloud instances
-  # Socket-activated: daemon only starts when docker commands are run
-  virtualisation.docker = {
-    enable = true;
-    enableOnBoot = false;
-    autoPrune = {
-      enable = true;
-      dates = "weekly";
-    };
-  };
-
   # Limit build parallelism to keep the system responsive.
   # Assumes a 4-core/8-thread CPU (the common case for this Compute Element
   # range) — check `nproc` once installed and adjust.
@@ -151,12 +139,9 @@
     max-jobs = 2; # Max parallel derivation builds
   };
 
-  users.users.${username}.extraGroups = ["docker"];
-
   environment.systemPackages = with pkgs; [
     brightnessctl
     dmidecode
-    docker-compose
     sbctl
   ];
 
