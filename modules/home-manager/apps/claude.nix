@@ -245,19 +245,11 @@
       # PR-body line, again above CLAUDE.md. This is the switch that stops the
       # injection; claude-md.md restates the rule as a backstop.
       attribution.sessionUrl = false;
-      # Default to the fullscreen (alternate-screen) renderer instead of the
-      # inline one. The inline renderer redraws via cursor-up + erase-line,
-      # which saturates at the viewport top once content scrolls past it —
-      # leaving ghosted, overlapping output and the cursor drifting out of the
-      # input box (upstream issue #51828). Fullscreen draws to a reserved
-      # screen and repaints regions directly, avoiding that path entirely.
-      # Tradeoff: the conversation isn't left in terminal scrollback on exit
-      # (reopen `claude`, or scroll/PageUp inside it, to see history).
-      # Per the docs this is the CLAUDE_CODE_NO_FLICKER env var, not a settings
-      # key; `/tui fullscreen` does the same for a single session.
-      # env = {
-      #   CLAUDE_CODE_NO_FLICKER = "1";
-      # };
+      # Not set here: the fullscreen renderer (CLAUDE_CODE_NO_FLICKER=1, or
+      # `/tui fullscreen` per session) that works around the inline
+      # renderer's ghosting once output scrolls past the viewport (upstream
+      # issue #51828). It costs the conversation in terminal scrollback on
+      # exit, so it stays a per-session choice rather than a default.
     }
     // lib.optionalAttrs cfg.statusline.enable {
       statusLine = {
@@ -277,6 +269,20 @@
     };
   settingsJson = builtins.toJSON settingsToMerge;
   settingsFile = pkgs.writeText "claude-settings-merge.json" settingsJson;
+
+  # Every path this module writes, down to the first non-object value (so a
+  # list counts as one path, matching jq's `*`, which replaces lists whole).
+  # The activation script records this set next to the target file and, on
+  # the next run, deletes the previously recorded paths before merging. That
+  # is what lets a key removed from Nix disappear from the live file; a plain
+  # `. * $merge` can only ever add or overwrite.
+  leafPaths = prefix: v:
+    if builtins.isAttrs v
+    then lib.concatLists (lib.mapAttrsToList (k: x: leafPaths (prefix ++ [k]) x) v)
+    else [prefix];
+  settingsPathsFile =
+    pkgs.writeText "claude-settings-managed-paths.json"
+    (builtins.toJSON (leafPaths [] settingsToMerge));
 
   # JSON to merge into ~/.claude.json. This is Claude Code's global config,
   # a different file from settings.json: it holds user-scope MCP servers and
@@ -299,6 +305,9 @@
   };
   globalConfigJson = builtins.toJSON globalConfigToMerge;
   globalConfigFile = pkgs.writeText "claude-global-config-merge.json" globalConfigJson;
+  globalConfigPathsFile =
+    pkgs.writeText "claude-global-config-managed-paths.json"
+    (builtins.toJSON (leafPaths [] globalConfigToMerge));
 
   hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {} || cfg.plugins != [] || cfg.claudeMd != "" || cfg.disableAutoMemory || cfg.skills != {} || cfg.skillDirs != {};
 in {
@@ -404,16 +413,28 @@ in {
     # blob pasted into a single-quoted shell string: one apostrophe in any
     # value (the autoMode soft_deny prose is a free-text English sentence)
     # would have ended the quote and broken activation.
+    #
+    # Two passes over the live file: first delete every path the previous
+    # activation recorded as Nix-managed (so keys dropped from Nix leave the
+    # file too), then deep-merge the current document. The record of what
+    # was written sits next to the file, not in the store, since it has to
+    # describe the previous generation, not this one.
     home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
       SETTINGS_FILE="$HOME/.claude/settings.json"
+      MANAGED="$HOME/.claude/.nix-managed-settings-paths.json"
       mkdir -p "$HOME/.claude"
 
       if [ -f "$SETTINGS_FILE" ]; then
+        if [ -f "$MANAGED" ]; then
+          ${pkgs.jq}/bin/jq --slurpfile prev "$MANAGED" 'delpaths($prev[0])' \
+            "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+        fi
         ${pkgs.jq}/bin/jq --slurpfile merge ${settingsFile} '. * $merge[0]' \
           "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
       else
         ${pkgs.jq}/bin/jq . ${settingsFile} > "$SETTINGS_FILE"
       fi
+      cp ${settingsPathsFile} "$MANAGED"
     '';
 
     # Activation script to merge MCP servers and UI defaults into ~/.claude.json
@@ -421,13 +442,20 @@ in {
     # the agents-view default applies to every host, MCP servers or not.
     home.activation.claudeGlobalConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
       CLAUDE_JSON="$HOME/.claude.json"
+      MANAGED="$HOME/.claude/.nix-managed-global-config-paths.json"
+      mkdir -p "$HOME/.claude"
 
       if [ -f "$CLAUDE_JSON" ]; then
+        if [ -f "$MANAGED" ]; then
+          ${pkgs.jq}/bin/jq --slurpfile prev "$MANAGED" 'delpaths($prev[0])' \
+            "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
+        fi
         ${pkgs.jq}/bin/jq --slurpfile merge ${globalConfigFile} '. * $merge[0]' \
           "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
       else
         ${pkgs.jq}/bin/jq . ${globalConfigFile} > "$CLAUDE_JSON"
       fi
+      cp ${globalConfigPathsFile} "$MANAGED"
     '';
   };
 }

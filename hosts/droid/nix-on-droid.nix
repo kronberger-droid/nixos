@@ -83,31 +83,36 @@
     max-jobs = 0
   '';
 
-  # Terminal colors (based on the Kitty config)
-  terminal.colors = {
-    background = "#202020";
-    foreground = "#d0d0d0";
-    cursor = "#d0d0d0";
+  # Terminal colors from the shared base16 scheme, with the same slot policy
+  # as theming/ansi.nix (which is a home-manager module and cannot be read
+  # from here, so the mapping is restated; keep the two in step). This used
+  # to be a hand-typed palette that had drifted from the scheme.
+  terminal.colors = let
+    s = (import ../../modules/home-manager/theming/base16-scheme.nix {}).scheme;
+  in {
+    background = "#${s.base00}";
+    foreground = "#${s.base05}";
+    cursor = "#${s.base05}";
 
     # Normal colors
-    color0 = "#151515"; # black
-    color1 = "#ac4142"; # red
-    color2 = "#7e8d50"; # green
-    color3 = "#e5b566"; # yellow
-    color4 = "#6c99ba"; # blue
-    color5 = "#9e4e85"; # magenta
-    color6 = "#7dd5cf"; # cyan
-    color7 = "#d0d0d0"; # white
+    color0 = "#${s.base00}"; # black
+    color1 = "#${s.base08}"; # red
+    color2 = "#${s.base0B}"; # green
+    color3 = "#${s.base0A}"; # yellow
+    color4 = "#${s.base0D}"; # blue
+    color5 = "#${s.base0E}"; # magenta
+    color6 = "#${s.base0C}"; # cyan
+    color7 = "#${s.base05}"; # white
 
     # Bright colors
-    color8 = "#505050"; # bright black
-    color9 = "#ac4142"; # bright red
-    color10 = "#7e8d50"; # bright green
-    color11 = "#e5b566"; # bright yellow
-    color12 = "#6c99ba"; # bright blue
-    color13 = "#9e4e85"; # bright magenta
-    color14 = "#7dd5cf"; # bright cyan
-    color15 = "#f5f5f5"; # bright white
+    color8 = "#${s.base03}"; # bright black
+    color9 = "#${s.base09}"; # bright red (orange in base16)
+    color10 = "#${s.base0B}"; # bright green
+    color11 = "#${s.base0A}"; # bright yellow
+    color12 = "#${s.base0D}"; # bright blue
+    color13 = "#${s.base0E}"; # bright magenta
+    color14 = "#${s.base0C}"; # bright cyan
+    color15 = "#${s.base07}"; # bright white
   };
 
   # Configure home-manager

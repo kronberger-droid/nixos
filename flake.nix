@@ -59,8 +59,9 @@
       # reproduced on every pinned version and in multiple terminals — it's
       # upstream issue #51828 (Ink main-screen renderer overflowing the
       # viewport), not a version regression. So no reason to forgo features.
-      # The fix lives in claude.nix: the fullscreen renderer, enabled via the
-      # CLAUDE_CODE_NO_FLICKER env var (equivalently the `/tui fullscreen` cmd).
+      # The workaround is the fullscreen renderer (`/tui fullscreen`, or
+      # CLAUDE_CODE_NO_FLICKER=1), used per session; claude.nix says why it
+      # is not the default.
       url = "github:sadjow/claude-code-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -109,14 +110,15 @@
       # stable at the same tree collapses that to one.
       inputs.niri-stable.follows = "niri-src";
     };
-    # Self-hosted NixOS module for the oo7 secret-service stack (daemon +
-    # ssh-agent + PAM + portal). nixpkgs packages oo7/oo7-portal/oo7-server
-    # but has no `services.oo7.*` module yet — this flake fills that gap.
+    # Self-hosted NixOS module for the parts of the oo7 secret-service stack
+    # nixpkgs' own `services.oo7` (enable only: daemon, D-Bus, cap wrapper,
+    # pam_oo7, portal file) still lacks: the SSH agent, the default Login
+    # collection, the gcr unlock prompt, and the PAM socket-wait race fix.
+    # modules/system/desktop/keyring.nix documents the split.
     #
-    # Retire when upstream lands a module. Watch for it via:
+    # Retire when nixpkgs grows an SSH agent for oo7. Watch:
     #   - https://github.com/linux-credentials/oo7/releases
-    #   - https://github.com/NixOS/nixpkgs/commits/master/pkgs/by-name/oo/oo7
-    #   - https://github.com/NixOS/nixpkgs/pulls?q=oo7+in%3Atitle
+    #   - https://github.com/NixOS/nixpkgs/commits/master/nixos/modules/services/desktops/oo7.nix
     oo7-nixos = {
       url = "github:kronberger-droid/oo7-nixos";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -257,32 +259,15 @@
                   rio =
                     inputs.rio-upstream.packages.${system}.default.overrideAttrs
                     (_: {doCheck = false;});
-                  # bitwarden-desktop's checkPhase runs the desktop_native cargo
-                  # tests, and a currently-failing test there breaks the build.
-                  # Upstream nixpkgs already carries per-test checkFlags skips
-                  # but hasn't caught this one yet. Drop the whole phase until
-                  # it does; the Electron app itself is unaffected.
-                  #
-                  # 2026.7.0 also picks its clipboard backend off
-                  # XDG_CURRENT_DESKTOP and takes the RemoteDesktop portal
-                  # whenever it spots GNOME, which our niri session appends for
-                  # Chromium's keyring. That portal call then always fails:
-                  # desktop_core marks the process PR_SET_DUMPABLE(0) for
-                  # anti-memory-dump hardening, so xdg-desktop-portal cannot
-                  # read /proc/$pid/root to identify the caller and refuses it
-                  # (flatpak/xdg-desktop-portal#785). Hide the GNOME token from
-                  # this one app to get the working X11 backend back. Drop the
-                  # wrapper at 2026.8.0, which makes X11 the default and the
-                  # portal a fallback (bitwarden/clients#22062).
-                  bitwarden-desktop = prev.bitwarden-desktop.overrideAttrs (old: {
-                    doCheck = false;
-                    nativeBuildInputs = (old.nativeBuildInputs or []) ++ [prev.makeWrapper];
-                    postFixup =
-                      (old.postFixup or "")
-                      + ''
-                        wrapProgram $out/bin/bitwarden --set XDG_CURRENT_DESKTOP niri
-                      '';
-                  });
+                  # bitwarden-desktop is stock again. Until 2026.8.0 it carried
+                  # a doCheck = false (a failing desktop_native cargo test) and
+                  # a wrapper hiding the GNOME token in XDG_CURRENT_DESKTOP so
+                  # it would not pick the RemoteDesktop clipboard portal, which
+                  # always failed under PR_SET_DUMPABLE(0). 2026.8.0 made X11
+                  # the default backend (bitwarden/clients#22062) and the
+                  # locked nixpkgs builds it clean, so the cached binary is
+                  # back. If the clipboard regresses, that wrapper is
+                  # `wrapProgram $out/bin/bitwarden --set XDG_CURRENT_DESKTOP niri`.
                   # freecad-wayland is uncached on current unstable, so pull it
                   # from nixpkgs-freecad (the last rev where it is prebuilt).
                   # Fresh nixpkgs import needs its own allowUnfree — it does
