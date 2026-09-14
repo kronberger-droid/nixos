@@ -395,6 +395,14 @@
   # Power saving
   powerManagement.powertop.enable = true;
 
+  # locale.nix (imported above) turns the full documentation set on for the
+  # workstations. Headless box: man pages stay for `man` over ssh, the doc
+  # and info trees do not earn their closure.
+  documentation = {
+    doc.enable = false;
+    info.enable = false;
+  };
+
   # sudo-rs hardening
   security.sudo-rs = {
     enable = true;

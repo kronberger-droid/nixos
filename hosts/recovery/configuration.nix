@@ -7,6 +7,9 @@
 }: {
   imports = [
     (modulesPath + "/installer/cd-dvd/installation-cd-graphical-base.nix")
+    # Same keyd remaps as the workstations. Was a verbatim copy of that
+    # module here, which is how the two would have drifted.
+    ../../modules/system/desktop/keyd.nix
   ];
 
   # ISO image settings
@@ -145,77 +148,6 @@
     # Auto-start terminal
     exec foot
   '';
-
-  # Keyd — same as main config
-  services.keyd = {
-    enable = true;
-    keyboards = {
-      apple = {
-        ids = ["05ac:020c"];
-        settings = {
-          main = {
-            leftalt = "leftalt";
-            leftmeta = "leftmeta";
-            rightshift = "layer(backspace_layer)";
-            rightalt = "layer(meta_layer)";
-            capslock = "overload(control, esc)";
-          };
-          "backspace_layer" = {
-            space = "backspace";
-          };
-          "control:C" = {
-            h = "left";
-            k = "up";
-            j = "down";
-            l = "right";
-          };
-          "meta_layer" = {
-            "o" = "macro(compose o \")";
-            "u" = "macro(compose u \")";
-            "a" = "macro(compose a \")";
-            "s" = "macro(compose s s)";
-          };
-          "shift+meta_layer" = {
-            "o" = "macro(compose O \")";
-            "u" = "macro(compose U \")";
-            "a" = "macro(compose A \")";
-          };
-        };
-      };
-      default = {
-        ids = ["*"];
-        settings = {
-          main = {
-            leftalt = "leftmeta";
-            leftmeta = "leftalt";
-            rightshift = "layer(backspace_layer)";
-            rightalt = "layer(meta_layer)";
-            capslock = "overload(control, esc)";
-          };
-          "backspace_layer" = {
-            space = "backspace";
-          };
-          "control:C" = {
-            h = "left";
-            k = "up";
-            j = "down";
-            l = "right";
-          };
-          "meta_layer" = {
-            "o" = "macro(compose o \")";
-            "u" = "macro(compose u \")";
-            "a" = "macro(compose a \")";
-            "s" = "macro(compose s s)";
-          };
-          "shift+meta_layer" = {
-            "o" = "macro(compose O \")";
-            "u" = "macro(compose U \")";
-            "a" = "macro(compose A \")";
-          };
-        };
-      };
-    };
-  };
 
   # Shell — nushell + helix as default
   programs.bash.interactiveShellInit = ''

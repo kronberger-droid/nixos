@@ -1,4 +1,4 @@
-_: {
+{lib, ...}: {
   time.timeZone = "Europe/Vienna";
 
   i18n = {
@@ -16,10 +16,12 @@ _: {
     };
   };
 
+  # These are the NixOS defaults, stated for visibility. mkDefault so a
+  # headless host (homeserver) can drop the doc and info trees.
   documentation = {
     enable = true;
-    doc.enable = true;
+    doc.enable = lib.mkDefault true;
     man.enable = true;
-    info.enable = true;
+    info.enable = lib.mkDefault true;
   };
 }
