@@ -236,30 +236,27 @@
     extraSetFlags = ["--advertise-routes=192.168.2.0/24"];
   };
 
-  # Binary cache — serves /nix/store to other machines on the network
-  services.nix-serve = {
+  # Binary cache — serves /nix/store to other machines on the network. Same
+  # port and signing key as the nix-serve it replaced, so the substituter and
+  # trusted-public-keys in modules/system/core/nix-caches.nix are unchanged.
+  #
+  # The upstream module runs under DynamicUser, which is what bit nix-serve
+  # here (its getpwuid() raced nsncd at boot and tripped deploy-rs's
+  # rollback). Harmonia dodges that on two counts: the signing key comes in
+  # via LoadCredential, read as root before privileges drop, and the unit is
+  # socket-activated, so activation only starts the listener and the service
+  # itself forks on the first request, long after nsncd is answering.
+  services.harmonia.cache = {
     enable = true;
-    package = pkgs.nix-serve-ng;
-    port = 5001;
-    secretKeyFile = "/run/secrets/cache-private-key";
-    # Priority > cache.nixos.org (40), so it's queried as a fallback rather
-    # than first. Avoids stalling evals when the LAN cache serves a narinfo
-    # but 404s the matching .nar.
-    extraParams = "--priority 50";
+    signKeyPaths = ["/run/secrets/cache-private-key"];
+    settings = {
+      bind = "[::]:5001";
+      # Priority > cache.nixos.org (40), so it's queried as a fallback rather
+      # than first. Avoids stalling evals when the LAN cache serves a narinfo
+      # but 404s the matching .nar.
+      priority = 50;
+    };
   };
-
-  # nix-serve's module hardcodes DynamicUser, whose ephemeral UID resolves only through
-  # nscd -> nss-systemd. nscd here is nsncd (Type=simple, no readiness notification), so
-  # "started" just means "process forked" — nix-serve's getpwuid() can still race ahead of
-  # nsncd actually being able to answer, aborting the unit (self-heals via Restart=always,
-  # but the first failure trips deploy-rs's rollback). Give it a static system user instead
-  # so resolution goes through the plain `files` NSS module and there's nothing left to race.
-  users.users.nix-serve = {
-    isSystemUser = true;
-    group = "nix-serve";
-  };
-  users.groups.nix-serve = {};
-  systemd.services.nix-serve.serviceConfig.DynamicUser = lib.mkForce false;
 
   # DNS + ad blocking — accessible on LAN (:53) and web UI (:3080)
   services.adguardhome = {

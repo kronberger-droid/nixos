@@ -114,8 +114,9 @@ in {
   #
   # The upstream module runs this under DynamicUser with systemd LoadCredential.
   # LoadCredential reads the file as root before dropping privileges, so the
-  # root-owned 0400 agenix secret is readable without the static-user workaround
-  # nix-serve needed (see the comment above users.users.nix-serve).
+  # root-owned 0400 agenix secret is readable without a static-user workaround
+  # (the same pattern harmonia relies on, see services.harmonia in
+  # hosts/homeserver/configuration.nix).
   services.cloudflared = {
     enable = true;
     tunnels.${tunnelId} = {
