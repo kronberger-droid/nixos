@@ -49,15 +49,16 @@ in {
     // {
       # Nix authenticates GitHub flake fetches by !include-ing this file into
       # nix.conf (see core/nix-settings.nix). Flake evaluation runs as whoever
-      # invokes nix — the user (`nix flake update`) or root (`nixos-rebuild`) —
-      # so it's group-readable by `users` rather than the usual 0400.
+      # invokes nix — the user (`nix flake update`) or root (`nixos-rebuild`).
+      # Owned by the user at 0400: root reads it regardless of mode, so one
+      # file serves both, and no other account in the `users` group (the
+      # homeserver's nix-remote, for one) gets the PAT along the way.
       # Contents: a single nix.conf line `access-tokens = github.com=<token>`.
       nix-github-token = {
         file = "${inputs.self}/secrets/nix-github-token.age";
         path = "/run/secrets/nix-github-token";
-        mode = "0440";
-        owner = "root";
-        group = "users";
+        mode = "0400";
+        owner = username;
       };
     };
 }

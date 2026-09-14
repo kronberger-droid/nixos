@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  inputs,
   modulesPath,
   ...
 }: {
@@ -14,14 +15,33 @@
   };
   isoImage = {
     volumeID = lib.mkForce "NIXOS_RECOVERY";
-    # Include the flake for reinstallation
+    # Include the flake for reinstallation. `inputs.self` is the flake's own
+    # source as nix fetched it: tracked files only. `../..` was the raw
+    # directory, which baked whatever sat in the working tree at build time
+    # (untracked scratch, `result` links, .claude/worktrees) into an image
+    # meant to be handed around.
     contents = [
       {
-        source = ../..;
+        source = inputs.self;
         target = "/nixos-config";
       }
     ];
   };
+
+  # SSH into the live system with the usual workstation keys, so a rescue
+  # can be driven from another machine instead of the console. The installer
+  # image ships openssh as a package but never enables the service. The
+  # `nixos` live user has passwordless sudo; root login stays off.
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+      PermitRootLogin = "no";
+    };
+  };
+  users.users.nixos.openssh.authorizedKeys.keys =
+    builtins.attrValues (import ../../modules/shared/ssh-keys.nix);
 
   # Use sway as the graphical environment
   programs.sway = {

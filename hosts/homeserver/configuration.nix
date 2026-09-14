@@ -11,6 +11,7 @@
     ../../modules/system/core/activation.nix
     ../../modules/system/core/locale.nix
     ../../modules/system/core/esp-permissions.nix
+    ../../modules/system/security/hardening.nix
     ../../modules/system/services/syncthing.nix
     ../../modules/system/services/website.nix
     ../../modules/system/services/webdav.nix
@@ -211,62 +212,20 @@
     autoPrune = {
       enable = true;
       dates = "weekly";
+      # Bare `docker system prune -f` removes every stopped container and
+      # dangling image on the spot, so anything that happened to be stopped
+      # when the timer fired was gone. Only prune what has been unused for
+      # a week.
+      flags = ["--filter" "until=168h"];
     };
   };
 
   # Services
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "no";
-      PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
-      PubkeyAuthentication = true;
-      X11Forwarding = false;
-
-      # Connection limits
-      MaxAuthTries = 3;
-      MaxSessions = 10;
-      MaxStartups = "10:30:60";
-
-      # Timeout settings
-      ClientAliveInterval = 300;
-      ClientAliveCountMax = 2;
-      LoginGraceTime = 30;
-
-      # Only allow specific users
-      AllowUsers = [username "nix-remote" "wiesinger"];
-    };
-
-    # Strong ciphers and key exchange
-    extraConfig = ''
-      HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-256,rsa-sha2-512
-      PubkeyAcceptedKeyTypes ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-256,rsa-sha2-512
-      KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
-      Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
-      MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128-etm@openssh.com
-    '';
-  };
-
-  services.fail2ban = {
-    enable = true;
-    maxretry = 3;
-    bantime = "1h";
-    bantime-increment = {
-      enable = true;
-      maxtime = "168h"; # 1 week
-      factor = "4";
-    };
-    jails.ssh.settings = {
-      enabled = true;
-      port = "ssh";
-      filter = "sshd";
-      backend = "systemd";
-      maxretry = 3;
-      findtime = "10m";
-      bantime = "1h";
-    };
-  };
+  # sshd policy, fail2ban, sysctls, auditd and sudo defaults all come from
+  # modules/system/security/hardening.nix (imported above). Only the
+  # host-specific additions live here: the extra accounts sshd may admit.
+  # ${username} is already in the list from the shared module.
+  services.openssh.settings.AllowUsers = ["nix-remote" "wiesinger"];
 
   # Subnet router for the LAN. Advertising 192.168.2.0/24 lets every tailnet
   # device reach hardware that will never run Tailscale itself: the EdgeRouter
@@ -402,6 +361,13 @@
       storage.filesystem_folder = "/var/lib/radicale/collections";
     };
   };
+  # The radicale module sets no Restart=, unlike every other service on this
+  # box, so one crash took contacts and calendar sync offline until someone
+  # noticed DAVx5 failing on the phone.
+  systemd.services.radicale.serviceConfig = {
+    Restart = "on-failure";
+    RestartSec = 5;
+  };
 
   # RSS reader — backed by PostgreSQL (auto-provisioned by the module)
   services.miniflux = {
@@ -432,6 +398,9 @@
   # sudo-rs hardening
   security.sudo-rs = {
     enable = true;
+    # deploy-rs logs in as ${username} and escalates through this rule to
+    # activate the profile; magic rollback confirms through the same path.
+    # The Defaults (timeouts, use_pty) come from hardening.nix.
     extraRules = [
       {
         users = [username];
@@ -443,50 +412,6 @@
         ];
       }
     ];
-    extraConfig = ''
-      Defaults timestamp_timeout=5
-      Defaults passwd_timeout=1
-      Defaults use_pty
-    '';
-  };
-
-  # Kernel security hardening
-  boot.kernel.sysctl = {
-    # Network security
-    "net.ipv4.conf.all.send_redirects" = 0;
-    "net.ipv4.conf.default.send_redirects" = 0;
-    "net.ipv4.conf.all.accept_redirects" = 0;
-    "net.ipv4.conf.default.accept_redirects" = 0;
-    "net.ipv4.conf.all.secure_redirects" = 0;
-    "net.ipv4.conf.default.secure_redirects" = 0;
-    "net.ipv6.conf.all.accept_redirects" = 0;
-    "net.ipv6.conf.default.accept_redirects" = 0;
-    "net.ipv4.conf.all.accept_source_route" = 0;
-    "net.ipv4.conf.default.accept_source_route" = 0;
-    "net.ipv6.conf.all.accept_source_route" = 0;
-    "net.ipv6.conf.default.accept_source_route" = 0;
-
-    # IP spoofing protection
-    "net.ipv4.conf.all.rp_filter" = 1;
-    "net.ipv4.conf.default.rp_filter" = 1;
-
-    # Ignore broadcast ping
-    "net.ipv4.icmp_echo_ignore_broadcasts" = 1;
-
-    # TCP SYN flood protection
-    "net.ipv4.tcp_syncookies" = 1;
-    "net.ipv4.tcp_max_syn_backlog" = 2048;
-    "net.ipv4.tcp_synack_retries" = 2;
-    "net.ipv4.tcp_syn_retries" = 5;
-
-    # Kernel security
-    "kernel.dmesg_restrict" = 1;
-    "kernel.kptr_restrict" = 2;
-    "kernel.yama.ptrace_scope" = 1;
-    "kernel.kexec_load_disabled" = 1;
-
-    # Disable core dumps
-    "fs.suid_dumpable" = 0;
   };
 
   # Override: don't list self as a remote builder
@@ -495,6 +420,44 @@
   # Limit build parallelism to avoid OOM
   nix.settings.max-jobs = 4;
   nix.settings.cores = 4;
+
+  # Ops baseline the workstations get from hardware/performance.nix and
+  # core/systemd-tweaks.nix via common.nix, which this host does not import.
+  # The always-on box with the only copy of the photo library and the DNS
+  # resolver had none of it.
+  services.fstrim.enable = true;
+  # SMART self-monitoring on the single NVMe. Default notifications go to the
+  # journal and wall; there is no MTA here, so nothing more to wire up yet.
+  services.smartd.enable = true;
+  # 15 GB shared by Postgres, immich's ML worker, docker and remote builds.
+  # earlyoom picks the largest process before the kernel OOM killer takes
+  # Postgres. No notifications: there is no desktop session to show them.
+  services.earlyoom = {
+    enable = true;
+    freeMemThreshold = 5;
+    freeSwapThreshold = 5;
+  };
+  systemd.oomd.enable = false;
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 25;
+    priority = 10;
+  };
+  # immich's ML worker loads models on demand and has no ceiling by default.
+  # Cap it well below RAM so a model load under build pressure gets the
+  # worker restarted (Restart=on-failure from the module) rather than the
+  # database killed.
+  systemd.services.immich-machine-learning.serviceConfig.MemoryMax = "6G";
+  # The firewall logs every dropped packet on the LAN-facing box, so without
+  # a cap the journal grows to journald's default 10 % of /var on the same
+  # disk as the photos.
+  services.journald.settings.Journal = {
+    Storage = "persistent";
+    Compress = "yes";
+    SystemMaxUse = "1G";
+    RuntimeMaxUse = "100M";
+  };
 
   # nix-settings.nix keeps outputs and derivations alive fleet-wide for the
   # dev shells. Here that would pin every build-time input of every client

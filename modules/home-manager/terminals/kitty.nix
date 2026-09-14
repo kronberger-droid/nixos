@@ -75,9 +75,15 @@ in {
       italic_font = ''family="JetBrainsMonoNL Nerd Font" style="Medium Italic"'';
       bold_italic_font = ''family="JetBrainsMonoNL Nerd Font" style="Bold Italic"'';
 
-      # for dropdown menu
+      # for dropdown menu. Per-user runtime dir (mode 0700) rather than a
+      # fixed path in world-writable /tmp: socket-only still means anyone who
+      # can reach the socket can run commands in the terminal, and a
+      # predictable /tmp name can be pre-created by another user. kitty
+      # expands both the env var and {kitty_pid} itself; the backslash keeps
+      # Nix from interpolating the former. Children find the socket through
+      # KITTY_LISTEN_ON, so nothing needs the fixed name.
       allow_remote_control = "socket-only";
-      listen_on = "unix:/tmp/kitty-rc.sock";
+      listen_on = "unix:\${XDG_RUNTIME_DIR}/kitty-rc-{kitty_pid}";
 
       # Theme - using base16 scheme
       background_opacity = "1.0";
