@@ -33,10 +33,12 @@ in {
         args = ["mcp"];
       };
 
-      # Set default terminal emulator
+      # The one terminal that gets installed and configured (terminals/*.nix
+      # are gated on this).
       terminal.emulator = "rio";
 
-      # Set primary compositor (both are always available via greetd)
+      # The one compositor that gets configured and offered by greetd. The
+      # value comes from mkHost so the NixOS and home sides agree.
       compositor.primary = primaryCompositor;
 
       programs.ssh = {

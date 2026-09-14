@@ -3,7 +3,10 @@
   config,
   lib,
   ...
-}: {
+}:
+# Only the selected emulator is installed and configured; terminal.emulator
+# (terminals/terminal.nix) is the single switch.
+lib.mkIf (config.terminal.emulator == "kitty") {
   home.packages = with pkgs; [
     imagemagick
   ];
