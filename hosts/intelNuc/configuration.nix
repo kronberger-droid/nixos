@@ -57,35 +57,11 @@
         park_cores = "no";
         pin_policy = "prefer-high-performance";
       };
-      custom = {
-        start = "${pkgs.writeShellScript "gamemode-start" ''
-          # Set Intel GPU to maximum performance
-          echo performance | sudo tee /sys/class/drm/card*/gt/gt*/rps_max_freq_mhz 2>/dev/null || true
-
-          # Disable CPU power saving
-          echo 0 | sudo tee /sys/devices/system/cpu/cpufreq/boost 2>/dev/null || true
-
-          # Set I/O scheduler to performance for SSDs
-          for disk in /sys/block/sd*/queue/scheduler; do
-            echo mq-deadline | sudo tee "$disk" 2>/dev/null || true
-          done
-          for disk in /sys/block/nvme*/queue/scheduler; do
-            echo none | sudo tee "$disk" 2>/dev/null || true
-          done
-        ''}";
-        end = "${pkgs.writeShellScript "gamemode-end" ''
-          # Reset Intel GPU to auto
-          echo auto | sudo tee /sys/class/drm/card*/gt/gt*/rps_max_freq_mhz 2>/dev/null || true
-
-          # Re-enable CPU power saving
-          echo 1 | sudo tee /sys/devices/system/cpu/cpufreq/boost 2>/dev/null || true
-
-          # Reset I/O scheduler to default
-          for disk in /sys/block/sd*/queue/scheduler; do
-            echo bfq | sudo tee "$disk" 2>/dev/null || true
-          done
-        ''}";
-      };
+      # No custom start/end scripts. The previous pair wrote 0 to
+      # cpufreq/boost on game start (that disables turbo), a string into
+      # rps_max_freq_mhz (an integer in MHz), and swapped the I/O scheduler to
+      # a different one on exit than on entry, all through sudo from a session
+      # daemon with no tty. desiredgov = performance above is the whole intent.
     };
   };
 

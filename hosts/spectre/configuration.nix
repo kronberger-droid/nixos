@@ -90,7 +90,6 @@
       "iTCO_wdt"
       "watchdog"
     ];
-    crashDump.enable = true;
     initrd.luks.devices."nixos-root".crypttabExtraOpts = ["tpm2-device=auto"];
     initrd.systemd.tpm2.enable = true;
   };
