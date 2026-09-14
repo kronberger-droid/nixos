@@ -3,6 +3,19 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # freecad-wayland is not cached on current nixos-unstable (its boost and
+    # ifcopenshell inputs moved and hydra has not caught up), so pulling it
+    # from the tracked nixpkgs means building freecad and ifcopenshell
+    # locally. Pin it to the last nixpkgs rev where it comes prebuilt, while
+    # the rest of the system tracks unstable. The overlay below pulls only
+    # `freecad-wayland` out of this input.
+    #
+    # Removal test, done against the *locked* nixpkgs store path (from
+    # `nix flake archive --dry-run --json`, not any nixpkgs-looking path in
+    # the store; that mistake dropped this pin once already):
+    #   nix build --dry-run 'path:<that path>#freecad-wayland'
+    # must report nothing to build. Then delete the input and the overlay.
+    nixpkgs-freecad.url = "github:NixOS/nixpkgs/d407951447dcd00442e97087bf374aad70c04cea";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -270,6 +283,16 @@
                         wrapProgram $out/bin/bitwarden --set XDG_CURRENT_DESKTOP niri
                       '';
                   });
+                  # freecad-wayland is uncached on current unstable, so pull it
+                  # from nixpkgs-freecad (the last rev where it is prebuilt).
+                  # Fresh nixpkgs import needs its own allowUnfree — it does
+                  # not inherit this system's nixpkgs.config. See input above.
+                  freecad-wayland =
+                    (import inputs.nixpkgs-freecad {
+                      inherit system;
+                      config.allowUnfree = true;
+                    })
+                    .freecad-wayland;
                 })
               ];
             }
