@@ -3,13 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # Temporary: pull rio 0.4.3 from our open nixpkgs PR until it merges.
-    # PR: https://github.com/NixOS/nixpkgs/pull/518401
-    # Currently unused — overlay swapped to rio-upstream (Rio's own flake at
-    # main). Kept here so a one-line overlay flip restores the 0.4.3 PR build
-    # if nightly turns out unstable. Remove once we're committed to either path
-    # AND 0.4.3 has landed in nixos-unstable.
-    nixpkgs-rio.url = "github:kronberger-droid/nixpkgs/rio-0.4.3";
     # freecad-wayland regressed on current nixos-unstable and won't build.
     # Pin it to the last nixpkgs rev we published to origin/main (d407951),
     # where it still built, while the rest of the system tracks unstable.

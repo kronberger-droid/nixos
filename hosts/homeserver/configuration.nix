@@ -496,6 +496,14 @@
   nix.settings.max-jobs = 4;
   nix.settings.cores = 4;
 
+  # nix-settings.nix keeps outputs and derivations alive fleet-wide for the
+  # dev shells. Here that would pin every build-time input of every client
+  # generation that `flake --remote` roots under nix-remote's state dir
+  # (compilers, sources, cargo vendor trees) on the same disk as the photo
+  # library. Keep the .drv closures (cheap, useful for `nix log`), drop the
+  # outputs.
+  nix.settings.keep-outputs = lib.mkForce false;
+
   # Disable sleep — it's a server
   systemd.sleep.settings.Sleep = {
     AllowSuspend = "no";

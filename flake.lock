@@ -501,22 +501,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-rio": {
-      "locked": {
-        "lastModified": 1778333397,
-        "narHash": "sha256-p4XyBM0qmskceGzSULW/ankFvGA3SYLXGfDWfpMU4Vs=",
-        "owner": "kronberger-droid",
-        "repo": "nixpkgs",
-        "rev": "34e85d8cc273f240fc284faa46c1b69a53237c8c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "kronberger-droid",
-        "ref": "rio-0.4.3",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1787360063,
@@ -688,7 +672,6 @@
         "nix-pia-vpn": "nix-pia-vpn",
         "nixpkgs": "nixpkgs",
         "nixpkgs-freecad": "nixpkgs-freecad",
-        "nixpkgs-rio": "nixpkgs-rio",
         "nushell-src": "nushell-src",
         "oo7-nixos": "oo7-nixos",
         "rio-upstream": "rio-upstream",
