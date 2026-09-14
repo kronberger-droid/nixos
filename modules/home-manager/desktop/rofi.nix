@@ -6,7 +6,7 @@
 }: let
   # Gate the niri logout path: interpolating ${pkgs.niri} pulls the source-built
   # niri fork into the closure, so only emit it when niri is the primary
-  # compositor (keeps it out of sway-only hosts like mediaBox).
+  # compositor (keeps it out of sway-only hosts).
   niriPrimary = config.compositor.primary == "niri";
 in {
   programs.rofi = {
