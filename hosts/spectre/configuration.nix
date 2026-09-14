@@ -108,11 +108,6 @@
     }
   ];
 
-  systemd.sleep.settings.Sleep = {
-    SuspendState = "mem";
-    HibernateDelaySec = "90m";
-  };
-
   # Limit build parallelism to keep the system responsive
   nix.settings = {
     cores = 8; # Leave 4 threads free for desktop responsiveness

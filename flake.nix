@@ -3,12 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # freecad-wayland regressed on current nixos-unstable and won't build.
-    # Pin it to the last nixpkgs rev we published to origin/main (d407951),
-    # where it still built, while the rest of the system tracks unstable.
-    # The overlay below pulls only `freecad-wayland` out of this input.
-    # Drop it once unstable's freecad builds again, then bump/remove here.
-    nixpkgs-freecad.url = "github:NixOS/nixpkgs/d407951447dcd00442e97087bf374aad70c04cea";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -40,6 +34,11 @@
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
+      # agenix pins its own home-manager and nix-darwin for its HM/darwin
+      # modules; neither is used here, so they were two stale trees
+      # (2025-04) fetched and hashed on every `nix flake update`.
+      inputs.home-manager.follows = "home-manager";
+      inputs.darwin.follows = "";
     };
     claude-code = {
       # Tracks latest. We briefly pinned to 2.1.168 chasing a TUI render glitch
@@ -271,16 +270,6 @@
                         wrapProgram $out/bin/bitwarden --set XDG_CURRENT_DESKTOP niri
                       '';
                   });
-                  # freecad-wayland is broken on current unstable, so pull it
-                  # from nixpkgs-freecad (origin/main's last-good rev) instead.
-                  # Fresh nixpkgs import needs its own allowUnfree — it does
-                  # not inherit this system's nixpkgs.config. See input above.
-                  freecad-wayland =
-                    (import inputs.nixpkgs-freecad {
-                      inherit system;
-                      config.allowUnfree = true;
-                    })
-                    .freecad-wayland;
                 })
               ];
             }

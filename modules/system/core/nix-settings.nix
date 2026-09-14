@@ -8,9 +8,16 @@
   nix = {
     settings = {
       experimental-features = ["nix-command" "flakes"];
-      auto-optimise-store = true;
-      max-free = 1073741824; # 1GB
-      min-free = 134217728; # 128MB
+      # Deduplication is the nightly nix.optimise job below. The inline
+      # variant hashed and hard-linked on every store add, on top of the same
+      # nightly pass, for no extra space.
+      auto-optimise-store = false;
+      # Mid-build GC thresholds. 128 MB / 1 GB meant the daemon only started
+      # collecting once the disk was effectively full (most builds ENOSPC
+      # before that) and then stopped after a token gigabyte, far short of
+      # what a Rust or browser build needs to finish.
+      min-free = 5368709120; # 5 GB
+      max-free = 32212254720; # 30 GB
 
       # Build optimization (hosts can override these)
       max-jobs = lib.mkDefault "auto";
