@@ -430,7 +430,7 @@ in {
 
           # Push-build-pull: ship the staged tree plus every locked input to
           # the homeserver's store, realise this host's toplevel there, then
-          # let the local nh run below find it all in nix-serve (port 5001,
+          # let the local nh run below find it all in harmonia (port 5001,
           # see modules/system/core/nix-caches.nix) and only download +
           # activate. Evaluation happens on both ends, but nothing in the
           # config depends on self.rev, so both produce the same drv paths
