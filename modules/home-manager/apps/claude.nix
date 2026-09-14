@@ -434,7 +434,10 @@ in {
       else
         ${pkgs.jq}/bin/jq . ${settingsFile} > "$SETTINGS_FILE"
       fi
-      cp ${settingsPathsFile} "$MANAGED"
+      # install, not cp: cp from the store creates the record with the
+      # store's 0444 mode, and the next activation cannot write into it.
+      # install unlinks and recreates it writable.
+      ${pkgs.coreutils}/bin/install -m 0644 ${settingsPathsFile} "$MANAGED"
     '';
 
     # Activation script to merge MCP servers and UI defaults into ~/.claude.json
@@ -455,7 +458,7 @@ in {
       else
         ${pkgs.jq}/bin/jq . ${globalConfigFile} > "$CLAUDE_JSON"
       fi
-      cp ${globalConfigPathsFile} "$MANAGED"
+      ${pkgs.coreutils}/bin/install -m 0644 ${globalConfigPathsFile} "$MANAGED"
     '';
   };
 }
