@@ -52,7 +52,9 @@
         sshUser = username;
         sshKey = "/root/.ssh/nix-builder";
         system = "x86_64-linux";
-        maxJobs = 12;
+        # Matches the homeserver's own max-jobs cap (hosts/homeserver): 15 GB
+        # of RAM and a dozen parallel Rust builds is a swap storm.
+        maxJobs = 4;
         speedFactor = 1;
         supportedFeatures = ["nixos-test" "benchmark" "big-parallel" "kvm"];
       }
