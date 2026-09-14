@@ -49,7 +49,8 @@
     buildMachines = [
       {
         hostName = "homeserver";
-        sshUser = username;
+        # The builder account on the homeserver: trusted Nix user, no sudo.
+        sshUser = "nix-remote";
         sshKey = "/root/.ssh/nix-builder";
         system = "x86_64-linux";
         # Matches the homeserver's own max-jobs cap (hosts/homeserver): 15 GB
