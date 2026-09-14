@@ -27,10 +27,19 @@
   # cf. https://github.com/atx/wtype/issues/31. For those, use the built-in
   # copy shortcut (Alt+c = password, Alt+u = username) and paste with Ctrl+V;
   # clear-after wipes the password from the clipboard 30s after a copy.
+  #
+  # typing-start-delay is whole seconds, not the milliseconds rofi-rbw 1.7.0's
+  # changelog claims: the parser was switched to int, but the wtype typer
+  # still hands the value straight to sleep(). A fractional value makes
+  # argparse bail with exit 2 before any window appears, which is how the
+  # keybinding went silently dead; 400 would sleep for almost seven minutes.
+  # 1 is the smallest value that keeps the "wait for focus to return from
+  # rofi" behaviour. Revisit when upstream divides by 1000 like it already
+  # does for action-sequence-delay.
   xdg.configFile."rofi-rbw.rc".text = ''
     typer = wtype
     clear-after = 30
-    typing-start-delay = 0.4
+    typing-start-delay = 1
     typing-key-delay = 12
     use-notify-send = true
   '';
