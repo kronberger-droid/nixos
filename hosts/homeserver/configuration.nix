@@ -87,18 +87,39 @@
       }
     ];
     defaultGateway = "192.168.2.1";
-    nameservers = ["8.8.8.8" "1.1.1.1"];
+    # This host runs the LAN's resolver, so it resolves through itself.
+    # 8.8.8.8 on UDP/53 was never reachable here: the ISP blocks outbound
+    # UDP/53 to every destination (see hosts/edgerouter/README.md), which is
+    # why AdGuard's upstreams are IP-literal DoH. With Google listed first
+    # every local lookup depended on Tailscale's DNS proxy answering.
+    nameservers = ["127.0.0.1"];
 
     firewall = {
       enable = true;
-      allowPing = false;
-      allowedTCPPorts = [22 53 3080 5001 8070 2283 5232];
+      # ICMP is the only liveness check the network has for the one host
+      # everything depends on.
+      allowPing = true;
+      # LAN-wide: only SSH and DNS. Everything else on this box speaks plain
+      # HTTP (Radicale is Basic auth, immich and miniflux are password
+      # logins, harmonia serves the store) and is only meant to be reached
+      # over the tailnet, so it is opened on tailscale0 alone, the same way
+      # modules/system/services/webdav.nix scopes port 8081. Tailscale's
+      # subnet route still lets tailnet peers reach the LAN, not the reverse.
+      allowedTCPPorts = [22 53];
       allowedUDPPorts = [53];
+      interfaces."tailscale0".allowedTCPPorts = [
+        3080 # AdGuard admin UI
+        5001 # harmonia binary cache
+        8070 # miniflux
+        2283 # immich
+        5232 # radicale
+      ];
 
-      # Log dropped packets (limited to prevent log spam)
-      extraCommands = ''
-        iptables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7
-      '';
+      # Rate-limited log of dropped packets. This is the module default and
+      # is spelled out because the hand-rolled iptables LOG line it replaces
+      # did the same job on top of it, without a matching stop command, so it
+      # stacked a duplicate on every firewall reload.
+      logRefusedConnections = true;
     };
   };
 
@@ -300,12 +321,26 @@
     };
   };
 
-  # DNS + ad blocking — accessible on LAN (:53) and web UI (:3080)
+  # DNS + ad blocking — :53 on the LAN, web UI (:3080) on the tailnet only.
   services.adguardhome = {
     enable = true;
     mutableSettings = false;
     port = 3080;
     settings = {
+      # mutableSettings = false means the module copies this YAML over the
+      # state file on every start, so an admin user set through the UI was
+      # wiped on the next restart (including the ones dns-healthcheck
+      # triggers) and the UI, which can rewrite DNS for the whole LAN, ran
+      # with no login at all. The bcrypt hash lives here in plain sight on
+      # purpose: settings are evaluated at build time, so an agenix file
+      # cannot feed it, and a hash for a tailnet-only LAN admin page is an
+      # acceptable thing to commit. The password itself is in Bitwarden.
+      users = [
+        {
+          name = "kronberger";
+          password = "$2y$10$E49TmMek9cObE1k2Y191a.nDMDOGO41g0u1fR/r/f0bT8dNrdDWPW";
+        }
+      ];
       dns = {
         bind_hosts = ["0.0.0.0"];
         port = 53;
