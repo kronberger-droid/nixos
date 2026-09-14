@@ -8,13 +8,23 @@
 }: let
   hasTerminal = options ? terminal;
 
+  # The vault lives in `vault.path` (apps/obsidian.nix), declared only for
+  # users that import the apps tree; the server and droid users fall back to
+  # the same default. Written with `~` because the nu helpers `path expand`
+  # it and starship matches its substitutions against the contracted path.
+  vaultPath =
+    if options ? vault
+    then config.vault.path
+    else "${config.home.homeDirectory}/Documents/notes/general-vault";
+  vaultTilde = lib.replaceStrings [config.home.homeDirectory] ["~"] vaultPath;
+
   # Centralised personal directory paths — change here, updates everywhere
   dirs = {
     nixosConfig = "~/.config/nixos";
     templates = "~/.config/nixos/templates";
     projects = "~/Projects";
     emulation = "~/Emulation";
-    vault = "~/Documents/notes/general-vault";
+    vault = vaultTilde;
   };
 in {
   home.packages = with pkgs; [
@@ -72,25 +82,6 @@ in {
         )
 
         echo [[type value]; [RGB ($tokens | get 1 | str replace -ra "[()]" "")] [HEX ($tokens | get 2)] ]
-    }
-
-    # SSH connection shortcuts
-    def connect [host: string] {
-        let connections = {
-            datalab: "martin.kronberger@cluster.datalab.tuwien.ac.at",
-            asc4: "sumo_mk@vsc4.vsc.ac.at",
-            asc5: "sumo_mk@vsc5.vsc.ac.at"
-        }
-
-        if ($host in $connections) {
-            let target = ($connections | get $host)
-            print $"Connecting to ($host) \(($target)\)..."
-            ^ssh $target
-        } else {
-            print $"Error: Unknown host '($host)'"
-            print "Available hosts:"
-            $connections | columns | each { |h| print $"  - ($h)" }
-        }
     }
 
     # Watch every .typ file in a folder, optionally writing PDFs to a separate output dir.
@@ -720,7 +711,7 @@ in {
         # Starship shows a real repo's name. Matches against the ~-contracted
         # path, so the key must start with ~, not /home/...
         directory.substitutions = {
-          "~/Documents/notes/general-vault" = "vault";
+          "${dirs.vault}" = "vault";
         };
         git_status = {
           ahead = "↑";

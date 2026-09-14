@@ -9,13 +9,14 @@
     then 1.25
     else 1.0;
 in {
-  home.packages = with pkgs; [
-    swaylock
-  ];
-
+  # swaylock-effects, and every caller (swayidle timeouts, before-sleep, the
+  # rofi powermenu) reads the binary from config.programs.swaylock.package.
+  # Before this the settings below were written for pkgs.swaylock while all
+  # three callers launched pkgs.swaylock-effects directly, so two lockers sat
+  # in the closure and the theming targeted the one nothing ran.
   programs.swaylock = {
     enable = true;
-    package = pkgs.swaylock;
+    package = pkgs.swaylock-effects;
     settings = {
       image = "${./deathpaper.jpg}";
       font-size = builtins.ceil (24 * scale);

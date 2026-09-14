@@ -276,6 +276,7 @@
       autoMemoryEnabled = false;
     };
   settingsJson = builtins.toJSON settingsToMerge;
+  settingsFile = pkgs.writeText "claude-settings-merge.json" settingsJson;
 
   # JSON to merge into ~/.claude.json. This is Claude Code's global config,
   # a different file from settings.json: it holds user-scope MCP servers and
@@ -297,6 +298,7 @@
     cfg.mcpServers;
   };
   globalConfigJson = builtins.toJSON globalConfigToMerge;
+  globalConfigFile = pkgs.writeText "claude-global-config-merge.json" globalConfigJson;
 
   hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {} || cfg.plugins != [] || cfg.claudeMd != "" || cfg.disableAutoMemory || cfg.skills != {} || cfg.skillDirs != {};
 in {
@@ -389,14 +391,6 @@ in {
             }
         )
         cfg.skillDirs)
-
-      # Install the statusline script (only when statusline is enabled)
-      (lib.mkIf cfg.statusline.enable {
-        ".config/claude/statusline.sh" = {
-          source = statuslineScript;
-          executable = true;
-        };
-      })
     ];
 
     # Activation script to merge settings (statusline + plugins) into ~/.claude/settings.json
@@ -405,17 +399,20 @@ in {
     # key, which meant a host with the statusline off and no plugins silently
     # got none of the permission or attribution settings either. Those go in
     # for every host, so there is nothing left to guard on.
+    #
+    # The merge document is a store file read via --slurpfile, not a JSON
+    # blob pasted into a single-quoted shell string: one apostrophe in any
+    # value (the autoMode soft_deny prose is a free-text English sentence)
+    # would have ended the quote and broken activation.
     home.activation.claudeSettings = lib.hm.dag.entryAfter ["writeBoundary"] ''
       SETTINGS_FILE="$HOME/.claude/settings.json"
       mkdir -p "$HOME/.claude"
 
-      MERGE_JSON='${settingsJson}'
-
       if [ -f "$SETTINGS_FILE" ]; then
-        ${pkgs.jq}/bin/jq --argjson merge "$MERGE_JSON" '. * $merge' \
+        ${pkgs.jq}/bin/jq --slurpfile merge ${settingsFile} '. * $merge[0]' \
           "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
       else
-        echo "$MERGE_JSON" | ${pkgs.jq}/bin/jq . > "$SETTINGS_FILE"
+        ${pkgs.jq}/bin/jq . ${settingsFile} > "$SETTINGS_FILE"
       fi
     '';
 
@@ -425,13 +422,11 @@ in {
     home.activation.claudeGlobalConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
       CLAUDE_JSON="$HOME/.claude.json"
 
-      MERGE_JSON='${globalConfigJson}'
-
       if [ -f "$CLAUDE_JSON" ]; then
-        ${pkgs.jq}/bin/jq --argjson merge "$MERGE_JSON" '. * $merge' \
+        ${pkgs.jq}/bin/jq --slurpfile merge ${globalConfigFile} '. * $merge[0]' \
           "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
       else
-        echo "$MERGE_JSON" | ${pkgs.jq}/bin/jq . > "$CLAUDE_JSON"
+        ${pkgs.jq}/bin/jq . ${globalConfigFile} > "$CLAUDE_JSON"
       fi
     '';
   };

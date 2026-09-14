@@ -6,10 +6,10 @@
 # behaviour in the engine. What remains are genuine nushell bindings; they
 # target helix modes (and vi, so they survive a switch back to edit_mode 'vi').
 #
-# NOTE: keep mode lists written EXACTLY as
-# `[helix_insert helix_normal vi_insert vi_normal]` — nushell.nix rewrites
-# that literal to `[vi_insert vi_normal]` for stock-nushell hosts, where the
-# fork-only helix_* modes are a startup error.
+# Every host runs the upstream-main nushell from the shared overlay, so the
+# helix_* modes exist everywhere this file is loaded. There is no rewrite for
+# stock-nushell hosts (an older comment here claimed one; nushell.nix copies
+# this file verbatim).
 
 export def get_keybindings [] {
     [

@@ -128,7 +128,7 @@ in {
       }
       {
         timeout = 400;
-        command = "${pkgs.swaylock-effects}/bin/swaylock -f";
+        command = "${config.programs.swaylock.package}/bin/swaylock -f";
       }
       {
         timeout = 460;
@@ -141,7 +141,7 @@ in {
       }
     ];
     events = {
-      "before-sleep" = "${pkgs.swaylock-effects}/bin/swaylock -f";
+      "before-sleep" = "${config.programs.swaylock.package}/bin/swaylock -f";
       "after-resume" = "${dpmsOn}";
     };
   };
@@ -195,6 +195,31 @@ in {
 
     Service = {
       ExecStart = "${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4";
+      Restart = "on-failure";
+      RestartSec = 5;
+    };
+
+    Install = {
+      WantedBy = ["graphical-session.target"];
+    };
+  };
+
+  # ── Clipboard persistence ──────────────────────────────────────
+  # Wayland clipboards belong to the source window: close the terminal you
+  # copied from and the selection is gone. That bites with rio's
+  # copy-on-select and with rofi-rbw's clear-after flow (a password copied
+  # in a window you then close). wl-clip-persist re-owns the regular
+  # clipboard only; the primary selection is left alone so select-to-copy
+  # keeps its usual semantics.
+  systemd.user.services.wl-clip-persist = {
+    Unit = {
+      Description = "Keep the Wayland clipboard after the source window closes";
+      After = ["graphical-session.target"];
+      PartOf = ["graphical-session.target"];
+    };
+
+    Service = {
+      ExecStart = "${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard regular";
       Restart = "on-failure";
       RestartSec = 5;
     };

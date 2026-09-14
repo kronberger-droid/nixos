@@ -115,7 +115,7 @@ in {
         		run_cmd --reboot
                 ;;
             $lock)
-        		${pkgs.swaylock-effects}/bin/swaylock
+        		${config.programs.swaylock.package}/bin/swaylock
                 ;;
             $suspend)
         		run_cmd --suspend
