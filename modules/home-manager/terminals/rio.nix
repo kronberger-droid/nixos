@@ -9,6 +9,17 @@ lib.mkIf (config.terminal.emulator == "rio") {
   programs.rio = {
     enable = true;
     settings = {
+      # On Linux rio defaults to spawning the shell with its own fork/exec
+      # path, and that path takes no working directory at all: `--working-dir`
+      # only reaches the pty through the std::process::Command path, which
+      # rio picks on its own for `-e` commands (hence `rio -w /tmp -e sh -c
+      # pwd` printing /tmp while a bare `rio -w /tmp` still opened in $HOME).
+      # Turning the fork path off routes the bare shell through the same
+      # spawn, so Mod+Return opens in the focused window's cwd again. Both
+      # paths take the same shell program and args; login handling is
+      # macOS-only in either.
+      use-fork = false;
+
       # Font configuration
       # Rio's `size` is in pixels, not points; 16px ≈ 11pt at ~96 DPI.
       fonts = {

@@ -16,10 +16,11 @@
       hasKittens = false;
       floatingAppId = "floating_shell";
       # --working-dir was broken on the April 2026 fork build, hence the
-      # cwdViaExec machinery. Re-tested 2026-09-15 on the upstream-main
-      # build: `rio --working-dir /tmp -e sh -c pwd` prints /tmp, so the
-      # flag is used directly again. Flip this back if a bump regresses it;
-      # niri.nix and nushell.nix both still honour it.
+      # cwdViaExec machinery. It was never broken for `-e` commands, only
+      # for the bare shell, since rio's default fork path ignores the
+      # directory; rio.nix sets `use-fork = false` so the flag now works for
+      # both. Flip this back if a bump regresses it; niri.nix and nushell.nix
+      # both still honour it.
       cwdViaExec = false;
     };
 
