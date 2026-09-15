@@ -1,0 +1,132 @@
+From f9624af1b6214831f0aa9f33d3817e64aae25010 Mon Sep 17 00:00:00 2001
+From: Dan Stillman <dstillman@zotero.org>
+Date: Tue, 8 Sep 2026 13:05:34 -0400
+Subject: [PATCH] Start HiddenBrowser loads from the parent process
+
+Firefox ESR 140.15 rejects loads from a content process for URLs that
+process couldn't load on its own, including blob: URLs created by chrome
+code. Full-text indexing loads HTML attachments through such a URL, so
+indexing crashed Zotero with "Illegal load attempt of blob: URL from
+web". Loads started by the parent are exempt, so start the load there
+and use the child actor only to disable content retargeting.
+
+https://forums.zotero.org/discussion/133661/
+
+(cherry picked from commit e03920890a10ffde62bba55aea34f84d193f9345)
+---
+ chrome/content/zotero/HiddenBrowser.mjs       | 16 ++++++----
+ .../content/zotero/actors/PageDataChild.mjs   | 30 ++++---------------
+ test/tests/fulltextTest.js                    | 10 +++++++
+ 3 files changed, 26 insertions(+), 30 deletions(-)
+
+diff --git a/chrome/content/zotero/HiddenBrowser.mjs b/chrome/content/zotero/HiddenBrowser.mjs
+index 7ba5e93b2de..f048e7307b3 100644
+--- a/chrome/content/zotero/HiddenBrowser.mjs
++++ b/chrome/content/zotero/HiddenBrowser.mjs
+@@ -155,9 +155,7 @@ export class HiddenBrowser {
+ 		Zotero.debug(`Loading ${uri} in hidden browser`);
+ 		// Next bit adapted from Mozilla's HeadlessShell.jsm
+ 		try {
+-			// Figure out whether the browser should be remote. We actually
+-			// perform the load in PageDataChild, but remoteness changes
+-			// need to happen here.
++			// Figure out whether the browser should be remote
+ 			let oa = E10SUtils.predictOriginAttributes({ browser: this });
+ 			let remoteType = E10SUtils.getRemoteTypeForURI(
+ 				uri,
+@@ -221,12 +219,18 @@ export class HiddenBrowser {
+ 				);
+ 			});
+ 
+-			let loadURISuccess = await this.browsingContext.currentWindowGlobal.getActor("PageData")
+-				.sendQuery("loadURI", { uri });
+-			if (!loadURISuccess) {
++			let prepared = await this.browsingContext.currentWindowGlobal.getActor("PageData")
++				.sendQuery("prepareLoad");
++			if (!prepared) {
+ 				Zotero.logError(new Error("Load failed"));
+ 				return false;
+ 			}
++			// Start the load from the parent process. A load started by the content process
++			// is restricted to URLs that process could load itself, which excludes blob: URLs
++			// created by chrome code.
++			this._browser.loadURI(Services.io.newURI(uri), {
++				triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()
++			});
+ 			await loadCompletePromise;
+ 		}
+ 		catch (e) {
+diff --git a/chrome/content/zotero/actors/PageDataChild.mjs b/chrome/content/zotero/actors/PageDataChild.mjs
+index 87093301c1c..4b1d8f27b4f 100644
+--- a/chrome/content/zotero/actors/PageDataChild.mjs
++++ b/chrome/content/zotero/actors/PageDataChild.mjs
+@@ -2,10 +2,10 @@ import { documentIsReady } from "chrome://zotero/content/actors/actorUtils.mjs";
+ 
+ export class PageDataChild extends JSWindowActorChild {
+ 	async receiveMessage(message) {
+-		// Special case for loadURI: don't wait for document to be ready,
++		// Special case for prepareLoad: don't wait for document to be ready,
+ 		// since we haven't loaded anything yet
+-		if (message.name === "loadURI") {
+-			return this.loadURI(message.data.uri);
++		if (message.name === "prepareLoad") {
++			return this.prepareLoad();
+ 		}
+ 		
+ 		let document = this.document;
+@@ -50,31 +50,13 @@ export class PageDataChild extends JSWindowActorChild {
+ 		}
+ 	}
+ 	
+-	loadURI(uri) {
++	prepareLoad() {
+ 		// https://searchfox.org/mozilla-central/rev/e69f323af80c357d287fb6314745e75c62eab92a/toolkit/actors/BackgroundThumbnailsChild.sys.mjs#44-85
+-		let docShell = this.docShell.QueryInterface(Ci.nsIWebNavigation);
+ 		// Don't allow downloads/external apps
+-		docShell.allowContentRetargeting = false;
++		this.docShell.allowContentRetargeting = false;
+ 
+ 		// Get the document to force a content viewer to be created, otherwise
+ 		// the first load can fail.
+-		if (!this.document) {
+-			return false;
+-		}
+-		
+-		let loadURIOptions = {
+-			triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
+-		};
+-		
+-		try {
+-			docShell.loadURI(
+-				Services.io.newURI(uri),
+-				loadURIOptions
+-			);
+-			return true;
+-		}
+-		catch (e) {
+-			return false;
+-		}
++		return !!this.document;
+ 	}
+ }
+diff --git a/test/tests/fulltextTest.js b/test/tests/fulltextTest.js
+index 417b84e42d6..c46e8918b74 100644
+--- a/test/tests/fulltextTest.js
++++ b/test/tests/fulltextTest.js
+@@ -496,6 +496,16 @@ describe("Zotero.FullText", function () {
+ 				);
+ 			})
+ 			
++			it("should index an HTML file", async function () {
++				var item = await importFileAttachment('test.html');
++				assert.equal(
++					((await Zotero.Fulltext.getIndexedState(item))),
++					Zotero.Fulltext.INDEX_STATE_INDEXED
++				);
++				var content = await Zotero.File.getContentsAsync(Zotero.Fulltext.getItemCacheFile(item).path);
++				assert.include(content, 'This is a test.');
++			})
++			
+ 			it("should skip indexing of a PDF if fulltext.textMaxLength is 0", async function () {
+ 				Zotero.Prefs.set('fulltext.textMaxLength', 0);
+ 				var item = await importFileAttachment('test.pdf');
