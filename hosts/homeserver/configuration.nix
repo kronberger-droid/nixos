@@ -12,6 +12,7 @@
     ../../modules/system/core/locale.nix
     ../../modules/system/core/esp-permissions.nix
     ../../modules/system/security/hardening.nix
+    ../../modules/system/security/agent-sandbox.nix
     ../../modules/system/services/syncthing.nix
     ../../modules/system/services/website.nix
     ../../modules/system/services/webdav.nix
