@@ -614,6 +614,10 @@ in {
           source ~/.config/nushell/development.nu
         '')
         + builtins.readFile ./nushell/extra_config.nu
+        # After the base record, which it writes into. Replaces the carapace
+        # module's own nushell integration; see programs.carapace below.
+        + "\n"
+        + builtins.readFile ./nushell/carapace.nu
         # Layer the edit mode on after the base record. Requires the
         # upstream-main nushell from the shared overlay; nixpkgs' release
         # doesn't know `helix` yet and hard-errors at startup on it.
@@ -679,7 +683,11 @@ in {
 
   programs.carapace = {
     enable = true;
-    enableNushellIntegration = true;
+    # The snippet this would source (`carapace _carapace nushell`) still
+    # declares the legacy `{|spans| ...}` completer, deprecated on nushell
+    # main. ./nushell/carapace.nu wires carapace up on the named inputs
+    # instead; see the comment there.
+    enableNushellIntegration = false;
   };
 
   programs.starship = {
