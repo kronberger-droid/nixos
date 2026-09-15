@@ -108,11 +108,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786556076,
-        "narHash": "sha256-RmyUq6ugZcDS5BDmqLHGrOguTIkrRpG98ubgaNZgLkk=",
+        "lastModified": 1789511724,
+        "narHash": "sha256-KFRPOlkiK0F9DLDd/CBmnzkPuWg+62F9efqDK/gtMgw=",
         "owner": "kronberger-droid",
         "repo": "dropkitten",
-        "rev": "3c9bbbcf5aeae8b10c9d2570995a5aa5fc41be76",
+        "rev": "afbdb7cc0b0ea76455358a74e36901547d900e87",
         "type": "github"
       },
       "original": {
