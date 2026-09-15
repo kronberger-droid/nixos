@@ -15,7 +15,12 @@
       appIdFlag = "--app-id";
       hasKittens = false;
       floatingAppId = "floating_shell";
-      cwdViaExec = true; # --working-dir is broken; use -e cd workaround
+      # --working-dir was broken on the April 2026 fork build, hence the
+      # cwdViaExec machinery. Re-tested 2026-09-15 on the upstream-main
+      # build: `rio --working-dir /tmp -e sh -c pwd` prints /tmp, so the
+      # flag is used directly again. Flip this back if a bump regresses it;
+      # niri.nix and nushell.nix both still honour it.
+      cwdViaExec = false;
     };
 
     kitty = {
