@@ -14,7 +14,7 @@
         systemd-boot = {
           enable = true;
           editor = false;
-          configurationLimit = 20;
+          configurationLimit = lib.mkDefault 20;
         };
         timeout = 1;
       };
