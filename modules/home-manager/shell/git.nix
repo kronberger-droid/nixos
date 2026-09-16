@@ -196,6 +196,13 @@ in {
         init.defaultBranch = "main";
         pull.rebase = true;
         push.autoSetupRemote = true;
+        # The Claude Code sandbox account (system/security/agent-sandbox.nix)
+        # keeps its checkouts under /home/claude/src, and this user fetches
+        # from them as a local remote. git refuses to touch a repository owned
+        # by another uid ("dubious ownership") unless it is listed here; the
+        # trailing /* covers every checkout under that directory. Harmless on
+        # the sandbox side, which imports this file too and owns them anyway.
+        safe.directory = ["/home/claude/src/*"];
       };
     };
   };

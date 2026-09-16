@@ -49,6 +49,13 @@ in
             path = config.vault.path;
             devices = builtins.attrNames otherDevices ++ builtins.attrNames mobileDevices;
             ignorePatterns = ignores.generalVault;
+            # The Claude Code sandbox account writes to this folder through a
+            # default ACL (system/security/agent-sandbox.nix). Every synced
+            # change would otherwise end in a chmod to the remote's mode bits,
+            # and chmod on a file with an ACL rewrites the mask, so a note
+            # edited on the phone came back read-only to the sandbox. Mode
+            # bits carry nothing worth syncing for markdown anyway.
+            ignorePerms = true;
             versioning = {
               type = "staggered";
               params = {

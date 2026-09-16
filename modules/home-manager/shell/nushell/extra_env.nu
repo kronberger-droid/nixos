@@ -25,17 +25,30 @@ $env.NAVI_FINDER = "skim"
 # Add ~/.local/bin to PATH
 $env.PATH = ($env.PATH | prepend ($env.HOME | path join ".local" "bin"))
 
-# Load GitHub tokens from agenix secrets. Two separate tokens on purpose, so the
-# scope sets stay independent.
-if ("/run/secrets/github-token" | path exists) {
-    # Claude Code GitHub plugin.
-    $env.GITHUB_PERSONAL_ACCESS_TOKEN = (open /run/secrets/github-token | str trim)
+# Load GitHub tokens from agenix secrets, into $var if this account may read
+# $file. The read itself is the test: `path exists` says yes for every account,
+# since /run/agenix is world-traversable and only the owner can open what is
+# inside, and this file is shared with the sandbox user (agent-sandbox.nix),
+# whose shell would otherwise die on the primary user's 0400 files at startup.
+def --env load-secret [file: string, var: string] {
+    let value = try { open $file | str trim } catch { null }
+    if $value != null {
+        load-env { $var: $value }
+    }
 }
 
-# `gh` resolves GH_TOKEN ahead of ~/.config/gh/hosts.yml, so setting it here also
+# Two separate tokens for the primary user on purpose, so the scope sets stay
+# independent.
+#
+# GITHUB_PERSONAL_ACCESS_TOKEN feeds the Claude Code GitHub plugin. `gh`
+# resolves GH_TOKEN ahead of ~/.config/gh/hosts.yml, so setting it here also
 # means `gh auth login` is never needed — which matters, since that flow would
 # try to write ~/.config/gh/config.yml, a read-only home-manager store symlink.
 # Note this covers every `gh` invocation, not only gh-dash.
-if ("/run/secrets/gh-dash-token" | path exists) {
-    $env.GH_TOKEN = (open /run/secrets/gh-dash-token | str trim)
-}
+load-secret /run/secrets/github-token GITHUB_PERSONAL_ACCESS_TOKEN
+load-secret /run/secrets/gh-dash-token GH_TOKEN
+
+# The sandbox account holds one fine-grained token for both jobs; only it can
+# read this file, so on the primary user's side both lines are no-ops.
+load-secret /run/secrets/claude-github-token GITHUB_PERSONAL_ACCESS_TOKEN
+load-secret /run/secrets/claude-github-token GH_TOKEN
