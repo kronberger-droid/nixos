@@ -79,6 +79,14 @@ $env.config.completions.external.completer = {|token, place, buffer|
 		CARAPACE_SHELL_FUNCTIONS: (help commands | where category == "" | get name | each { split row " " | first } | uniq | str join "\n")
 		CARAPACE_SHELL_VARIABLES: (scope variables | get name | uniq | str join "\n")
 	} {
-		carapace $words.0 nushell ...$words | from json
+		# Carapace answers a position it has no spec for with `[]`, and nushell
+		# reads a list, empty or not, as the authoritative set of completions for
+		# the slot: `dispatch_external_arg` in nu-cli/src/completions/completer.rs
+		# adds its file fallback only where the completer left the slot open, and
+		# since nushell#18791 that means returning `null`. Map the empty answer
+		# back to `null` so paths still complete where carapace knows nothing, as
+		# after the `--` in `cargo run --bin foo -- summary <file>`.
+		let result = carapace $words.0 nushell ...$words | from json
+		if ($result | is-empty) { null } else { $result }
 	}
 }
