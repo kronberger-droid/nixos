@@ -102,6 +102,13 @@ in {
 
       environment.systemPackages = [launcher];
 
+      # The launcher forwards TERM, so the sandbox shell sees `xterm-rio`,
+      # and rio's terminfo lives in the primary user's home-manager profile
+      # where this account cannot read it. Every terminfo nixpkgs knows,
+      # system-wide, is a few hundred kilobytes and stops mattering which
+      # emulator the session was started from.
+      environment.enableAllTerminfo = true;
+
       # machined checks host-shell with the target user in the action
       # details (src/machine/machine-dbus.c), so the grant can name both
       # ends: this user, opening a shell as the sandbox account, nobody
