@@ -15,6 +15,11 @@
     binfmt.emulatedSystems = ["aarch64-linux"];
     systemd-boot-defaults.enable = true;
     loader.efi.canTouchEfiVariables = true;
+    # 512M ESP. With the systemd initrd at ~45M plus a ~14M kernel, every
+    # distinct kernel/initrd pair costs ~60M, and the installer copies the new
+    # pair in before it prunes old entries. The shared limit of 20 filled the
+    # partition and made switch fail with ENOSPC; 8 leaves room for the copy.
+    loader.systemd-boot.configurationLimit = 8;
     # Hibernation resume target. Raw swap partition (see hardware-configuration.nix),
     # unencrypted, so the UUID alone is enough — no resume_offset (that's only for
     # swapfiles) and no LUKS mapper indirection. Needed because zram is also active
