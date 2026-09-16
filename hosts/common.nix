@@ -14,4 +14,9 @@ _: {
   # so intelNuc booted with stock BIOS microcode. Fleet-wide now; the
   # homeserver, which skips common.nix, sets it in its own file.
   hardware.enableRedistributableFirmware = true;
+
+  # The `claude` account for sandboxed Claude Code sessions, on every
+  # workstation. The homeserver imports agent-sandbox.nix for its packages
+  # but leaves this off: nothing there runs the agent under a second uid.
+  security.agentSandbox.enable = true;
 }
