@@ -117,15 +117,28 @@ in {
         });
       '';
 
-      # The directories the bind mount and the agent's checkouts land in.
-      # An activation script rather than tmpfiles: tmpfiles runs after
-      # local-fs.target, by which time the mount unit has already created
-      # its mountpoint chain as root, and a root-owned ~/Documents in the
-      # sandbox home is not what anybody wants.
-      system.activationScripts.claudeSandboxHome = lib.stringAfter ["users"] ''
-        ${pkgs.coreutils}/bin/install -d -o ${user} -g ${user} -m 0755 \
-          ${home}/Documents ${home}/Documents/notes ${home}/src
-      '';
+      # The directories the bind mount and the agent's checkouts land in,
+      # the same way userborn makes the home itself. Not an activation
+      # script: under userborn (core/activation.nix) accounts are created by
+      # userborn.service, after every activation script has run, so a
+      # script here sees no `claude` user. Sequence at boot: the mount unit
+      # mkdirs its mountpoint chain as root, then systemd-tmpfiles-setup
+      # (after local-fs.target) hits these rules, and `d` adjusts owner and
+      # mode on a directory that already exists. Net effect is the same as
+      # creating them first.
+      systemd.tmpfiles.settings."10-claude-sandbox" = let
+        owned = {
+          d = {
+            mode = "0755";
+            inherit user;
+            group = user;
+          };
+        };
+      in {
+        "${home}/Documents" = owned;
+        "${home}/Documents/notes" = owned;
+        "${home}/src" = owned;
+      };
 
       # A bind mount resolves permissions on the vault's own inodes, never on
       # /home/<primary> above it, so the 700 there stays intact while the
