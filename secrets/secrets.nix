@@ -15,6 +15,12 @@ in {
   # `repository.branchProtectionRules`, which fine-grained PATs can't reach on
   # repos you don't administer (dlvhdr/gh-dash#562).
   "gh-dash-token.age".publicKeys = [intelNuc spectre P14E];
+  # Fine-grained PAT for the Claude Code sandbox account
+  # (modules/system/security/agent-sandbox.nix). Contents: the bare token,
+  # one line. Scope it on GitHub to the repositories the agent may push to,
+  # contents read/write and nothing else; it is the only GitHub credential
+  # that account holds, so widening it widens the sandbox.
+  "claude-github-token.age".publicKeys = [intelNuc spectre P14E];
   "tunet-credentials.age".publicKeys = [intelNuc spectre P14E];
   "tuwien-vpn-totp.age".publicKeys = [intelNuc spectre P14E];
   "spotify-password.age".publicKeys = [intelNuc spectre P14E];

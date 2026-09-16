@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   username,
   lib,
@@ -55,5 +56,15 @@ in {
         mode = "0400";
         owner = username;
       };
-    };
+    }
+    # The Claude Code sandbox account's GitHub credential: a fine-grained
+    # token on the primary user's account, scoped on GitHub to the repos the
+    # agent may push to. Read as GH_TOKEN and GITHUB_PERSONAL_ACCESS_TOKEN by
+    # extra_env.nu, only ever readable by that account. Gated on the .age
+    # file existing so the module can land before the token is minted:
+    # agenix decrypts at activation, and a missing file there fails the
+    # switch instead of the eval.
+    // lib.optionalAttrs
+    (config.security.agentSandbox.enable && builtins.pathExists "${inputs.self}/secrets/claude-github-token.age")
+    {claude-github-token = mkSecret "claude" "claude-github-token";};
 }
