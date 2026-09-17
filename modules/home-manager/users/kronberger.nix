@@ -26,13 +26,6 @@ in {
         ../apps/claude-settings.nix
       ];
 
-      # Desktop-only: inpdf comes from the overlay in system/core/packages.nix,
-      # which the homeserver does not import, so it cannot live in the shared file.
-      claude.mcpServers.inpdf = {
-        command = "${pkgs.inpdf}/bin/inpdf";
-        args = ["mcp"];
-      };
-
       # The one terminal that gets installed and configured (terminals/*.nix
       # are gated on this).
       terminal.emulator = "rio";
