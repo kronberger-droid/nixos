@@ -7,8 +7,6 @@
 # What this deliberately leaves out:
 #   - programs.ssh: no cluster aliases and no addKeysToAgent. The account's
 #     one key sits unencrypted in ~/.ssh and ssh finds it on its own.
-#   - the inpdf MCP server: pkgs.inpdf is a desktop overlay, and this file
-#     has to evaluate wherever agent-sandbox.nix is imported.
 #   - helix and neovim: the agent edits through its own tools.
 {
   config,
@@ -43,6 +41,11 @@
     # fine-grained token that extra_env.nu puts in GH_TOKEN, and gh's git
     # credential helper (on by default) hands that to git for https pushes.
     programs.gh.settings.git_protocol = lib.mkForce "https";
+
+    # Everything else about Claude Code comes from claude-settings.nix, same
+    # as the primary user. Only this account's CLAUDE.md gets an extra
+    # section, on how to work from inside the sandbox.
+    claude.claudeMd = lib.mkAfter (builtins.readFile ../apps/claude-md-sandbox.md);
 
     programs.home-manager.enable = true;
   };
