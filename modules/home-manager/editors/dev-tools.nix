@@ -71,6 +71,20 @@ in {
     #   cargo sweep --installed -r     # drop artifacts from toolchains you no longer have
     #   cargo sweep --time 30 -r       # drop anything not touched in 30 days
     cargo-sweep
+
+    # What build scripts reach for. rustc links through `cc` even where
+    # rust-lld does the linking, so without a C compiler nothing links at all;
+    # the rest covers `-sys` crates building their bundled C (cc, cmake,
+    # openssl-src's perl, pkg-config probing). Listed here rather than left to
+    # helix's `gcc`, which the sandbox account does not import. Crates that
+    # link a system library still need that library's dev output, which is a
+    # `nix develop` / `nix-shell -p` job, not a PATH one.
+    gcc
+    gnumake
+    cmake
+    perl
+    pkg-config
+
     serpl
 
     (python3.withPackages (ps:
