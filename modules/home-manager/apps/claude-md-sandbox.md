@@ -22,6 +22,13 @@ design working. Work from what this account holds.
 - **nix** builds work, but this account is not a trusted user: a flake's
   `nixConfig` substituters are ignored and uncached paths build locally. There
   is no sudo, so work on the nixos config ends at an eval check.
+- **Rust** builds with the stable toolchain and a C toolchain (`cc`, `make`,
+  `cmake`, `perl`, `pkg-config`) already on PATH. When a crate links a system
+  library (`openssl-sys`, `libgit2-sys`, ...), use the project's
+  `nix develop` if it has one, else wrap the command:
+  `nix-shell -p pkg-config openssl --run 'cargo build'`. `nix-shell` runs the
+  setup hooks that point `pkg-config` and the linker at the library, which
+  `nix shell` skips.
 - **This file** is generated too. Here the nixos config is `~/src/nixos`
   (`kronberger-droid/nixos`), and this section's source is
   `modules/home-manager/apps/claude-md-sandbox.md`, appended in
