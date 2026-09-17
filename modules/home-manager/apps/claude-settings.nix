@@ -1,18 +1,19 @@
-# Claude Code configuration shared by every host that runs it — the desktops
-# (kronberger.nix) and the homeserver (kronberger-server.nix). Split out of the
-# user modules so the two cannot drift: a skill added here shows up wherever
-# `claude` runs, rather than only on whichever machine it was written on.
+# Claude Code configuration shared by every account that runs it: the desktops
+# (kronberger.nix), the homeserver (kronberger-server.nix) and the sandbox
+# account (users/claude.nix). Split out of the user modules so they cannot
+# drift: a skill added here shows up wherever `claude` runs, rather than only
+# on whichever machine or account it was written on.
 #
 # Deliberately NOT listed in apps/default.nix. The homeserver user imports
 # modules one by one and must not pull the whole apps tree (browsers, mail,
 # music) onto a headless box, so both users reach this file by an explicit
 # path import instead.
 #
-# Host-specific additions layer on top of this in the user module. The desktop
-# adds the inpdf MCP server there, because `pkgs.inpdf` comes from the overlay
-# in system/core/packages.nix, which the homeserver does not import.
+# Account-specific additions layer on top of this in the user module. The
+# sandbox appends its own CLAUDE.md section there.
 {
   lib,
+  pkgs,
   inputs,
   ...
 }: let
@@ -38,6 +39,15 @@ in {
     "explanatory-output-style@claude-plugins-official"
   ];
   claude.claudeMd = builtins.readFile ./claude-md.md;
+
+  # inpdf comes from the overlay in system/core/packages.nix, which the
+  # homeserver does not import. Keyed on the package rather than the host so
+  # every account on a desktop gets it, the Claude Code sandbox included
+  # (useGlobalPkgs makes this the system's pkgs on both).
+  claude.mcpServers.inpdf = lib.mkIf (pkgs ? inpdf) {
+    command = "${pkgs.inpdf}/bin/inpdf";
+    args = ["mcp"];
+  };
 
   claude.skills.rust-to-cpp.content = builtins.readFile ./skills/rust-to-cpp.md;
   claude.skills.vault.content = builtins.readFile ./skills/vault.md;
