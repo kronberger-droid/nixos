@@ -35,6 +35,7 @@ in {
   # The helix_* keybinding modes need a nushell that knows them; every host
   # gets the upstream-main build via the shared overlay, so this goes in as-is.
   xdg.configFile."nushell/keybindings.nu".source = ./nushell/keybindings.nu;
+  xdg.configFile."nushell/cl.nu".source = ./nushell/cl.nu;
 
   # Generated so it can use centralised path variables
   xdg.configFile."nushell/utilities.nu".text = ''

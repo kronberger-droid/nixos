@@ -1,6 +1,7 @@
 # Import modular configuration files
 source ~/.config/nushell/utilities.nu
 source ~/.config/nushell/keybindings.nu
+source ~/.config/nushell/cl.nu
 
 $env.config = {
 	show_banner: false
