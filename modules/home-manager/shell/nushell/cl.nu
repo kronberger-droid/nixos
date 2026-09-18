@@ -36,33 +36,32 @@ def cl-remotes [dir: path]: nothing -> list<string> {
     | uniq
 }
 
-# Open Claude Code in the sandbox's checkout of this repo, else here.
-# Extra arguments go to `claude` unchanged, e.g. `cl --resume`.
-def --wrapped cl [...args: string] {
+# Sandbox checkouts of the repo the current directory is in. Empty outside a
+# repo, on a host without the sandbox, and from inside the sandbox itself.
+# development.nu's `dev` asks this too, to decide where its Claude pane goes.
+def cl-matches []: nothing -> list<string> {
     let here = (^git rev-parse --show-toplevel | complete)
     let mine = if $here.exit_code == 0 { cl-remotes ($here.stdout | str trim) } else { [] }
-
-    # Nothing to match on, no sandbox on this host, or already inside it.
     let sandboxed = (which claude-sandbox | is-not-empty) and ((whoami) != "claude")
-    if ($mine | is-empty) or (not $sandboxed) {
-        ^claude ...$args
-        return
-    }
+    if ($mine | is-empty) or (not $sandboxed) { return [] }
+
     # Group membership is read at login, so a session older than the rebuild
     # that added it cannot list the sandbox yet.
     if not (try { ls $CL_SANDBOX_SRC | ignore; true } catch { false }) {
         print $"(ansi yellow)cl:(ansi reset) cannot read ($CL_SANDBOX_SRC), log in again to pick up the `claude` group. Starting here."
-        ^claude ...$args
-        return
+        return []
     }
 
-    let matches = (
-        ls $CL_SANDBOX_SRC
-        | where type == dir
-        | get name
-        | where {|dir| cl-remotes $dir | any {|r| $r in $mine } }
-    )
+    ls $CL_SANDBOX_SRC
+    | where type == dir
+    | get name
+    | where {|dir| cl-remotes $dir | any {|r| $r in $mine } }
+}
 
+# Open Claude Code in the sandbox's checkout of this repo, else here.
+# Extra arguments go to `claude` unchanged, e.g. `cl --resume`.
+def --wrapped cl [...args: string] {
+    let matches = cl-matches
     let target = match ($matches | length) {
         0 => null
         1 => ($matches | first)

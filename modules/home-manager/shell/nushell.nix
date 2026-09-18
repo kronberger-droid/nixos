@@ -274,9 +274,14 @@ in {
           }
       }
 
-      # Build a claude terminal command string
+      # Build a claude terminal command string. With a sandbox checkout of
+      # this repo (cl.nu), the pane runs `cl`, which crosses over and picks
+      # between several matches itself; no local dev shell around it, since
+      # the sandbox builds its own. Otherwise claude runs here.
       def claudeCmd [cwd: string, dev_env: record] {
-          if $dev_env.has_direnv or not $dev_env.has_flake {
+          if (cl-matches | is-not-empty) {
+              termIn $cwd "nu -l -c cl"
+          } else if $dev_env.has_direnv or not $dev_env.has_flake {
               termIn $cwd "sh -c 'exec claude'"
           } else {
               termIn $cwd $"nix develop ($dev_env.dev_shell) -c sh -c 'exec claude'"
@@ -611,7 +616,13 @@ in {
 
     extraConfig = lib.mkMerge [
       (
-        (lib.optionalString hasTerminal ''
+        # cl.nu first: development.nu calls `cl-matches`, and nushell binds
+        # command names at parse time, so a def sourced later would be taken
+        # for an external command.
+        ''
+          source ~/.config/nushell/cl.nu
+        ''
+        + (lib.optionalString hasTerminal ''
           source ~/.config/nushell/development.nu
         '')
         + builtins.readFile ./nushell/extra_config.nu
