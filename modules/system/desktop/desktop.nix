@@ -52,6 +52,24 @@ in {
   # in the PAM environment, which greetd's niri-session inherits.
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
+  # xwayland-satellite 0.8.2 focuses override-redirect popups, so Steam's
+  # dropdowns and context menus close ~35ms after opening. Upstream fixed it in
+  # #494 but has not cut a release. The version gate drops the patch by itself
+  # once nixpkgs moves past 0.8.2; if nixpkgs backports it into 0.8.2 instead
+  # (NixOS/nixpkgs#564273), the patch fails to apply and this should go.
+  nixpkgs.overlays = [
+    (final: prev: {
+      xwayland-satellite = prev.xwayland-satellite.overrideAttrs (old: {
+        patches =
+          (old.patches or [])
+          ++ lib.optional (lib.versionOlder old.version "0.8.3") (final.fetchpatch {
+            url = "https://github.com/Supreeeme/xwayland-satellite/commit/add2795134593faafce60e404a0a75df68e9ee0c.patch";
+            hash = "sha256-/1zJYAIHC+xiVytHH5HDt83lZKLBGQQdAoS/y2ObTLc=";
+          });
+      });
+    })
+  ];
+
   virtualisation.spiceUSBRedirection.enable = true;
 
   programs = {
