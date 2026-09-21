@@ -4,6 +4,7 @@ _: {
     ../common.nix
     ../../modules/profiles/secureboot-laptop.nix
     ../../modules/system/hardware/uvc-camera.nix
+    ../../modules/system/hardware/tpbridge-touchpad.nix
     ../../modules/system/hardware/scx-schedulers.nix
     ../../modules/profiles/vpn-workstation.nix
     ../../modules/system/hardware/droidcam.nix
