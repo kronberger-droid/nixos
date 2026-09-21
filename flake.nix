@@ -127,6 +127,13 @@
       url = "github:nix-community/lanzaboote";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Declarative partitioning. Hosts that import modules/system/boot/disk-layout.nix
+    # get their disk described in the flake, so an install is `disko` plus
+    # `nixos-install` with no UUIDs to copy back afterwards.
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     deploy-rs = {
       url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
