@@ -227,7 +227,25 @@
                 # pull a toolchain from rust-overlay instead of nixpkgs' rustc,
                 # which lags Rust stable. See modules/home-manager/editors/dev-tools.nix.
                 inputs.rust-overlay.overlays.default
-                (final: _prev: {
+                (final: prev: {
+                  # libinput 1.31.3 keeps a stale palm flag on a touchpad slot
+                  # when the tool type changes while its fd is closed, e.g. a
+                  # palm lifting while the lid switch has the touchpad
+                  # suspended. Every touch in that slot is then dropped as a
+                  # palm, so every gesture needs one finger more (#1319).
+                  # Fixed in 1.31.901/1.32.0; the version gate drops the patch
+                  # once nixpkgs gets there. Scoped to niri because a global
+                  # override would rebuild qtbase and everything above it.
+                  niri-unstable = prev.niri-unstable.override {
+                    libinput = prev.libinput.overrideAttrs (old: {
+                      patches =
+                        (old.patches or [])
+                        ++ final.lib.optional (final.lib.versionOlder old.version "1.31.901") (final.fetchpatch {
+                          url = "https://gitlab.freedesktop.org/libinput/libinput/-/commit/d0e6d43a78ee81f077dbd0dda98827440a3b5fc2.patch";
+                          hash = "sha256-fAmBVqHNoOmIUAKbGw5QBW3VGfuP4vrs3+gK++evWpw=";
+                        });
+                    });
+                  };
                   # Make pkgs.niri resolve to the same fork build — collapses
                   # the closure so scripts using `pkgs.niri/bin/niri msg` don't
                   # pull in a parallel nixpkgs niri build.
