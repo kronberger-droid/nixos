@@ -8,9 +8,9 @@
   nix = {
     settings = {
       experimental-features = ["nix-command" "flakes"];
-      # Deduplication is the nightly nix.optimise job below. The inline
+      # Deduplication is the scheduled nix.optimise job below. The inline
       # variant hashed and hard-linked on every store add, on top of the same
-      # nightly pass, for no extra space.
+      # scheduled pass, for no extra space.
       auto-optimise-store = false;
       # Mid-build GC thresholds. 128 MB / 1 GB meant the daemon only started
       # collecting once the disk was effectively full (most builds ENOSPC
@@ -69,14 +69,16 @@
     ];
     # Use remote builders only when explicitly requested via --builders
     distributedBuilds = false;
+    # The dates are the always-on schedule the homeserver runs. Workstations
+    # replace them in maintenance-schedule.nix.
     gc = {
       automatic = true;
-      dates = "weekly";
+      dates = lib.mkDefault "weekly";
       options = "--delete-older-than 30d";
     };
     optimise = {
       automatic = true;
-      dates = ["03:45"];
+      dates = lib.mkDefault ["03:45"];
     };
   };
 

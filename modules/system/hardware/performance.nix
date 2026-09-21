@@ -15,11 +15,8 @@
     priority = 10;
   };
 
-  # SSD optimizations
-  services.fstrim = {
-    enable = true;
-    interval = "weekly";
-  };
+  # SSD optimizations. The schedule is in core/maintenance-schedule.nix.
+  services.fstrim.enable = true;
 
   # Kernel parameters for better performance
   boot.kernel.sysctl = {
