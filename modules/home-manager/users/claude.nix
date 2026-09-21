@@ -27,7 +27,7 @@
     home = {
       username = "claude";
       homeDirectory = "/home/claude";
-      stateVersion = "25.05";
+      stateVersion = "26.11";
       # ai.nix's set minus ollama and sox: claude itself, plus node for the
       # npx-launched MCP servers the enabled plugins bring along.
       packages = with pkgs; [

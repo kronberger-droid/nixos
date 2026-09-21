@@ -29,5 +29,5 @@ _: {
     max-jobs = 2; # Max parallel derivation builds
   };
 
-  system.stateVersion = "24.11";
+  system.stateVersion = "26.11";
 }

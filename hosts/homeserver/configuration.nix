@@ -392,6 +392,12 @@
     RestartSec = 5;
   };
 
+  # Pinned, not left to system.stateVersion. The module picks the major from
+  # stateVersion (17 at 25.11, 18 at 26.11) and the data dir is per major, so
+  # bumping stateVersion alone would start miniflux and immich on an empty
+  # /var/lib/postgresql/18. A major upgrade is dump, bump this, restore.
+  services.postgresql.package = pkgs.postgresql_17;
+
   # RSS reader — backed by PostgreSQL (auto-provisioned by the module)
   services.miniflux = {
     enable = true;
@@ -508,5 +514,5 @@
     AllowSuspendThenHibernate = "no";
   };
 
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.11";
 }
