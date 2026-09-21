@@ -25,13 +25,7 @@
         '';
     }))
     onlyoffice-desktopeditors
-    # nixpkgs builds Zotero 10.0.1 against firefox-esr 140.15, which rejects
-    # the blob: load the full-text indexer uses for HTML attachments and
-    # aborts the whole app. Upstream fixed it in 10.0.2 (f9624af1b); drop
-    # this override once nixpkgs ships 10.0.2 or later.
-    (pkgs.zotero.overrideAttrs (oldAttrs: {
-      patches = (oldAttrs.patches or []) ++ [./zotero-hiddenbrowser-blob.patch];
-    }))
+    zotero
 
     # Media
     drawio
