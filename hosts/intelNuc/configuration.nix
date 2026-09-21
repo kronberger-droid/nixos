@@ -9,29 +9,29 @@
     ../../modules/system/hardware/scx-schedulers.nix
     ../../modules/profiles/vpn-workstation.nix
     ../../modules/system/hardware/droidcam.nix
+    ../../modules/system/boot/disk-layout.nix
   ];
+
+  # Filesystems, swap, the LUKS entry and boot.resumeDevice all come out of
+  # this; see the module for the layout and the install commands.
+  disk-layout = {
+    device = "/dev/disk/by-id/nvme-CT1000P3PSSD8_24344A99EF58";
+    # 16G of RAM. The image is compressed and rarely full-size, but a
+    # hibernate that fails only when memory is full is the worst kind.
+    swapSize = "20G";
+  };
 
   boot = {
     binfmt.emulatedSystems = ["aarch64-linux"];
     systemd-boot-defaults.enable = true;
     loader.efi.canTouchEfiVariables = true;
-    # 512M ESP. With the systemd initrd at ~45M plus a ~14M kernel, every
-    # distinct kernel/initrd pair costs ~60M, and the installer copies the new
-    # pair in before it prunes old entries. The shared limit of 20 filled the
-    # partition and made switch fail with ENOSPC; 8 leaves room for the copy.
-    loader.systemd-boot.configurationLimit = 8;
-    # Hibernation resume target. Raw swap partition (see hardware-configuration.nix),
-    # unencrypted, so the UUID alone is enough — no resume_offset (that's only for
-    # swapfiles) and no LUKS mapper indirection. Needed because zram is also active
-    # as swap, so the resume device can't be auto-detected and must be named.
-    resumeDevice = "/dev/disk/by-uuid/85499372-4284-4605-96da-1df3600b9f74";
     kernelParams = [
       "console=tty1"
       # Disable memfd_secret kernel-wide. Any process holding secret memory
       # (Electron apps like Bitwarden do) makes the kernel refuse hibernation,
       # since secretmem pages must never hit disk but a hibernate image writes
-      # all of RAM. Swap here is unencrypted, so this trades a niche hardening
-      # feature for working hibernation while Bitwarden is open.
+      # all of RAM. LUKS-encrypted swap already protects the image at rest,
+      # so the trade-off is negligible here.
       "secretmem.enable=0"
     ];
   };

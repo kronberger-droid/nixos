@@ -178,6 +178,12 @@
     tpm2-tools
     tpm2-tss
 
+    # Partitions a disk from the flake on this stick:
+    #   disko --mode destroy,format,mount --flake /nixos-config#<host>
+    # Taken from the flake input rather than nixpkgs, so the CLI and the
+    # module schema in /nixos-config are always the same disko.
+    inputs.disko.packages.${pkgs.stdenv.hostPlatform.system}.disko
+
     # Disk management (GUI)
     gparted
 
