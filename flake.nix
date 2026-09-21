@@ -343,9 +343,6 @@
         # The only convertible in the fleet, thus the only host with an
         # accelerometer to drive screen rotation.
         hasAccelerometer = true;
-        extraModules = [
-          inputs.lanzaboote.nixosModules.lanzaboote
-        ];
       };
 
       # Intel NUC P14E Laptop Element — modular "Compute Element" chassis.
@@ -354,9 +351,6 @@
         hostname = "P14E";
         system = x86System;
         isNotebook = true;
-        extraModules = [
-          inputs.lanzaboote.nixosModules.lanzaboote
-        ];
       };
 
       # Servers

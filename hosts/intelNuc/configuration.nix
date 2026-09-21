@@ -10,6 +10,7 @@
     ../../modules/profiles/vpn-workstation.nix
     ../../modules/system/hardware/droidcam.nix
     ../../modules/system/boot/disk-layout.nix
+    ../../modules/system/boot/secureboot-tpm.nix
   ];
 
   # Filesystems, swap, the LUKS entry and boot.resumeDevice all come out of
@@ -23,8 +24,12 @@
 
   boot = {
     binfmt.emulatedSystems = ["aarch64-linux"];
-    systemd-boot-defaults.enable = true;
-    loader.efi.canTouchEfiVariables = true;
+    # nixos-install runs on a disk with no Secure Boot keys yet, and lanzaboote
+    # refuses to install unsigned by default. This lets that first install
+    # through and creates the keys on first boot; the next rebuild signs.
+    # Only here, not in secureboot-tpm.nix: the laptops have their keys, and
+    # there it would only loosen allowUnsigned on an enrolled machine.
+    lanzaboote.autoGenerateKeys.enable = true;
     kernelParams = [
       "console=tty1"
       # Disable memfd_secret kernel-wide. Any process holding secret memory
