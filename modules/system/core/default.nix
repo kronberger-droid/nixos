@@ -1,6 +1,7 @@
 {...}: {
   imports = [
     ./nix-settings.nix
+    ./maintenance-schedule.nix
     ./activation.nix
     ./locale.nix
     ./users.nix
