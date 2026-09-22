@@ -4,32 +4,82 @@ Disk layout is declarative (`modules/system/boot/disk-layout.nix`), so there is
 no manual partitioning and no UUIDs to copy back. This config only boots on a
 disk that disko has formatted: do not rebuild the old install from it.
 
-## Before wiping
-- [ ] Push or bundle local-only git branches; copy what is not in git or
-      Syncthing (Steam library and saves, `~/Public`, gitignored datasets)
-- [ ] Save the machine identity, to an encrypted disk on another host:
-      `/etc/ssh/ssh_host_*`, `/var/lib/tailscale/`, `~/.ssh/`,
-      `~/.local/state/syncthing/{cert,key}.pem`
+Shells: the old intelNuc and P14E run nu as the login shell, so commands there
+are nu and anything after `ssh P14E` is parsed by nu (no `>` redirects). The
+live stick is a stock installer, its commands are sh.
 
-## Partition & install (from the recovery stick)
-- [ ] Boot the stick, connect network
+## Before wiping (on the old intelNuc, nu)
+
+- [ ] Push or bundle local-only git branches, or just take all of Projects:
+      `rsync -aH --exclude target --exclude node_modules ~/Projects $"($dst)/"`
+- [ ] Bulk data to the external disk (`$dst` = its mount point):
+      ```nu
+      rsync -aH --info=progress2 --exclude steamapps/shadercache --exclude logs ~/.local/share/Steam $"($dst)/"
+      rsync -aH ~/.local/share/Terraria ~/.local/share/irrationalgames ~/.local/share/PrismLauncher ~/.config/unity3d ~/Public $"($dst)/"
+      ```
+      Native Linux games save in `~/.local/share` and `~/.config`, Proton
+      games inside `steamapps/compatdata/<appid>/pfx`, which the first line
+      covers. `appmanifest_*.acf` must come along or Steam re-downloads.
+- [ ] Machine identity, to P14E rather than the external disk, since the
+      host key decrypts every agenix secret. Tar locally, then `scp`; a
+      remote `cat > file` would run in nu and fail:
+      ```nu
+      let tmp = (mktemp -d)
+      sudo tar -C / -czf $"($tmp)/intelNuc-identity.tgz" etc/ssh var/lib/tailscale
+      tar -C ~ -czf $"($tmp)/intelNuc-user-identity.tgz" .ssh .local/state/syncthing/cert.pem .local/state/syncthing/key.pem
+      scp $"($tmp)/intelNuc-identity.tgz" $"($tmp)/intelNuc-user-identity.tgz" P14E:
+      ssh P14E "ls intelNuc-*.tgz; tar -tzf intelNuc-user-identity.tgz | lines"
+      ```
+      What each file pins: the host key is intelNuc's recipient in
+      `secrets/secrets.nix`; `~/.ssh/id_ed25519` is in `modules/shared/ssh-keys.nix`
+      and on GitHub; the Syncthing cert is the device ID and
+      `/var/lib/tailscale` the tailnet IP, both in
+      `modules/shared/syncthing-devices.nix`. Transferring them means the
+      config does not change at all. There are no Secure Boot keys to save,
+      they are generated on the new install.
+- [ ] Merge the disko branch, then build and flash the stick from it, so
+      `/nixos-config` on the stick carries this layout:
+      ```nu
+      nix build .#recovery -o result-recovery
+      udisksctl unmount -b /dev/sdX1
+      sudo dd if=(glob result-recovery/iso/*.iso | first) of=/dev/sdX bs=4M status=progress oflag=sync
+      ```
+      From that merge on, do not `nixos-rebuild` the old install.
+
+## Partition & install (on the live stick, sh)
+
+- [ ] Boot the stick, connect network, note the IP from `ip a`
 - [ ] `sudo disko --mode destroy,format,mount --flake /nixos-config#intelNuc`
       and set the LUKS passphrase when asked
-- [ ] Restore the SSH host keys to `/mnt/etc/ssh/` (`ssh_host_ed25519_key`
-      mode 600, root:root) **before** installing. agenix decrypts with this
+- [ ] Bring the identity back. The stick has no key P14E would accept, so
+      push from P14E; the stick's sshd accepts the workstation keys:
+      ```nu
+      # on P14E
+      scp intelNuc-identity.tgz intelNuc-user-identity.tgz root@<live-ip>:
+      ```
+      ```sh
+      # on the stick
+      tar -C /mnt -xzf ~/intelNuc-identity.tgz etc/ssh var/lib/tailscale
+      ls -l /mnt/etc/ssh/ssh_host_ed25519_key     # 600 root:root
+      ```
+      This has to happen **before** installing: agenix decrypts with this
       key and the login password is an agenix secret, so without it the first
       boot has no usable account. sshd only generates keys that are missing.
-- [ ] Restore `/mnt/var/lib/tailscale/` to keep the tailnet IP that
-      `modules/shared/syncthing-devices.nix` hardcodes
 - [ ] `sudo nixos-install --flake /nixos-config#intelNuc`
+- [ ] Keep the user tarball for after first boot:
+      `cp ~/intelNuc-user-identity.tgz /mnt/root/`
 
 ## First boot
-- [ ] Restore `~/.ssh/` and the Syncthing `cert.pem`/`key.pem` before
-      Syncthing first starts, or it mints a new device ID
+
+- [ ] Before Syncthing first runs, or it mints a new device ID:
+      `sudo tar -C ~ -xzf /root/intelNuc-user-identity.tgz` then
+      `sudo chown -R kronberger:users ~/.ssh ~/.local/state/syncthing`
 - [ ] `systemctl hibernate` once, to confirm resume from `/dev/pool/swap`
-- [ ] Restore the Steam library with Steam closed, then start it
+- [ ] Restore the Steam library and saves from the external disk with Steam
+      closed, same paths as backed up, then start it
 
 ## Secure Boot + TPM2 (lanzaboote)
+
 The install goes through unsigned and the first boot asks for the passphrase;
 `generate-sb-keys.service` creates the keys in `/var/lib/sbctl` on that boot.
 The order below matters: the TPM seals against PCR 7, the Secure Boot state.
@@ -48,5 +98,6 @@ The order below matters: the TPM seals against PCR 7, the Secure Boot state.
       after firmware updates change PCR 7.
 
 ## If the host key was lost
+
 - [ ] Put the new `/etc/ssh/ssh_host_ed25519_key.pub` into `secrets/secrets.nix`
       and run `agenix -r` on spectre or P14E, which hold escrow for every secret
