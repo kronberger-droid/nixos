@@ -45,7 +45,56 @@
       name = baseNameOf p;
     };
 
-  eww = config.programs.eww.package;
+  # The daemon, unwrapped. eww.service is the only thing that may run this.
+  ewwDaemon = pkgs.eww;
+
+  # Every *client* call goes through this wrapper. programs.eww.package is set
+  # to it below, so it is also the `eww` on PATH, the one the scripts
+  # substitute as @eww@, and the one sway.nix's bar keybind resolves.
+  #
+  # Without --no-daemonize an eww subcommand that cannot reach the server does
+  # not fail: it forks itself into a second server, keeping the client's argv,
+  # and that server opens its own copy of every window. Two bars, only one of
+  # which `eww active-windows` reports, because whichever server bound the
+  # socket path last is the only one that answers. Hit at login, where
+  # eww-bars.service landed in the gap before the daemon's IPC socket came up,
+  # but any script here and any keybind can hit it just as well: the daemon is
+  # unreachable for a moment during every restart too.
+  #
+  # Wrapped rather than spelled out at the 14 call sites, because a wrapper is
+  # the one form of it a script added later cannot forget. Harmless on the one
+  # subcommand that is supposed to become a server: `daemon` passes the same
+  # flag explicitly already.
+  eww = pkgs.symlinkJoin {
+    name = "eww-client-${ewwDaemon.version}";
+    paths = [ewwDaemon];
+    nativeBuildInputs = [pkgs.makeWrapper];
+    postBuild = ''
+      wrapProgram $out/bin/eww --add-flags --no-daemonize
+    '';
+    # symlinkJoin drops meta, and lib.getExe on this is a plausible thing for
+    # a later call site to do. home-manager's own eww module does it.
+    meta.mainProgram = "eww";
+  };
+
+  # Readiness gate for eww.service below. Type=simple counts the unit started
+  # the moment the process forks, but eww binds its IPC socket about half a
+  # second later, and that gap is what eww-bars.service used to land in.
+  # Holding the start job open until the daemon answers is what makes `After=`
+  # on it mean "reachable" rather than "spawned", for eww-bars and for whatever
+  # is ordered after it later.
+  #
+  # `ping` is the right probe: it is the subcommand that needs a server and
+  # never becomes one, so the gate cannot create the thing it is waiting for.
+  # Through the wrapper anyway, for the same reason the wrapper exists.
+  waitForDaemon = pkgs.writeShellScript "eww-wait-ready" ''
+    for _ in $(seq 50); do
+      ${eww}/bin/eww ping >/dev/null 2>&1 && exit 0
+      sleep 0.2
+    done
+    echo "eww daemon did not answer inside 10s" >&2
+    exit 1
+  '';
 
   # setsid, for the scripts' detach helpers. Nushell has no `&`.
   utilLinux = pkgs.util-linux;
@@ -120,7 +169,9 @@
 in {
   programs.eww = {
     enable = true;
-    package = pkgs.eww;
+    # The wrapped client rather than pkgs.eww: this is what lands on PATH and
+    # in every consumer that reads programs.eww.package. See the binding above.
+    package = eww;
     # No configDir / yuckConfig / scssConfig here: the config is assembled from
     # the xdg.configFile entries below, because scripts/ and _colors.scss are
     # generated and a whole-directory symlink cannot mix generated files in.
@@ -219,7 +270,10 @@ in {
           (lib.filterAttrs (n: _: lib.hasPrefix "eww/" n) config.xdg.configFile));
     };
     Service = {
-      ExecStart = "${eww}/bin/eww daemon --no-daemonize";
+      ExecStart = "${ewwDaemon}/bin/eww daemon --no-daemonize";
+      # Not a side effect of starting: this is the unit's readiness signal,
+      # and eww-bars.service's `After=` is what waits on it.
+      ExecStartPost = "${waitForDaemon}";
       # The scratchpad and ncspot popups spawn a terminal that inherits this
       # directory, so zellij opens in $HOME rather than wherever the daemon
       # happened to be started from.
@@ -250,6 +304,10 @@ in {
       # explicitly replaces the implicit reverse ordering and the cycle goes
       # away. Every other unit here (swayidle, shikane, wlsunset) is shaped
       # the same way for the same reason.
+      #
+      # With eww.service's ExecStartPost gate, this ordering now carries
+      # readiness: the daemon answers `eww ping` before this unit starts, so
+      # the script needs no wait of its own.
       After = ["graphical-session.target" "eww.service"];
       ConditionEnvironment = "WAYLAND_DISPLAY";
     };
