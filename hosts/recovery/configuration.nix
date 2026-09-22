@@ -40,7 +40,8 @@
   # profile already enables sshd, with PermitRootLogin "yes" as a mkDefault;
   # what this block changes is turning that root login off, disabling
   # passwords, and putting the keys on the `nixos` live user, which has
-  # passwordless sudo. LAN only: the ISO runs no tailscale.
+  # passwordless sudo. Reachable over the tailnet too once `tailscale up` has
+  # run (below); keys only either way.
   services.openssh = {
     enable = true;
     settings = {
@@ -246,6 +247,16 @@
   # Enable networking for downloads during install
   # (wireless.enable is already set by the base installer module)
   networking.networkmanager.enable = true;
+
+  # The homeserver cache (nix-caches.nix) is a tailnet address, and it holds
+  # the overlay builds the public caches miss. Without it an install compiles
+  # rio and friends on the target, which is what OOM-killed and tmpfs-filled
+  # the intelNuc install. In-memory state makes the node ephemeral: each boot
+  # of the stick logs in afresh and drops off the tailnet once it goes away.
+  services.tailscale = {
+    enable = true;
+    extraDaemonFlags = ["--state=mem:"];
+  };
 
   # Hardware support — broad driver coverage for recovery
   hardware.enableAllFirmware = true;
