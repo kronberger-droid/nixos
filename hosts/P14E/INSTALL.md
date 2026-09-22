@@ -1,13 +1,22 @@
 # P14E install checklist
 
 ## Partition & install
-- [ ] Boot NixOS installer, connect network
-- [ ] Partition: EFI/vfat boot + LUKS2 root (ext4 inside), matching spectre's layout
+
+The numbered steps are `hosts/recovery/INSTALL.md`; P14E's own parts are
+here.
+
+- [ ] Steps 1 and 2: boot the recovery stick, network, `tailscale up`
+- [ ] Step 3: partition EFI/vfat boot + LUKS2 root (ext4 inside), matching
+      spectre's layout, mounted under `/mnt`
 - [ ] `nixos-generate-config --root /mnt`, then replace
       `hosts/P14E/hardware-configuration.nix` with the generated file
       (keep the LUKS `boot.initrd.luks.devices."nixos-root"` line — name must
       stay `nixos-root` to match `configuration.nix`)
-- [ ] `nixos-install --root /mnt --flake .#P14E`
+- [ ] Steps 4 and 5: the 16G `/mnt/swapfile`, build dir bind mounts
+- [ ] Step 6: restore the host key into `/mnt/etc/ssh` if keeping P14E's
+      identity (see intelNuc's checklist for the tarball)
+- [ ] Step 7: `sudo nixos-install --flake /nixos-config#P14E --max-jobs 1 --cores 8 --no-root-passwd`
+- [ ] Step 8: drop the scratch space
 
 ## First boot
 - [ ] Check real thread count: `nproc` — fix `nix.settings.cores` in
