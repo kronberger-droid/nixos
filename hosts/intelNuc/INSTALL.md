@@ -65,7 +65,15 @@ live stick is a stock installer, its commands are sh.
       This has to happen **before** installing: agenix decrypts with this
       key and the login password is an agenix secret, so without it the first
       boot has no usable account. sshd only generates keys that are missing.
-- [ ] `sudo nixos-install --flake /nixos-config#intelNuc`
+- [ ] Turn on swap. disko creates the LV but does not activate it, and the
+      Rust builds OOM-kill the install on 16G without it:
+      ```sh
+      sudo swapon /dev/pool/swap     # "read swap header failed": mkswap it first
+      swapon --show                  # ~20G
+      ```
+- [ ] `sudo nixos-install --flake /nixos-config#intelNuc --max-jobs 1 --cores 8`
+      The host's `max-jobs`/`cores` only apply once it runs; the installer
+      defaults to every thread for every job.
 - [ ] Keep the user tarball for after first boot:
       `cp ~/intelNuc-user-identity.tgz /mnt/root/`
 
