@@ -49,6 +49,17 @@ in {
     args = ["mcp"];
   };
 
+  # Same overlay, same guard. Talks to the running Zotero desktop over its
+  # local API (Settings -> Advanced -> "Allow other applications on this
+  # computer to communicate with Zotero"), so nothing here holds a web API
+  # key and the server is only useful while Zotero is open. Reads work as
+  # is; writes on Zotero 10+ need a one-off `zotero-mcp authorize-local`.
+  claude.mcpServers.zotero = lib.mkIf (pkgs ? zotero-mcp) {
+    command = "${pkgs.zotero-mcp}/bin/zotero-mcp";
+    args = ["serve"];
+    env.ZOTERO_LOCAL = "true";
+  };
+
   claude.skills.rust-to-cpp.content = builtins.readFile ./skills/rust-to-cpp.md;
   claude.skills.vault.content = builtins.readFile ./skills/vault.md;
   claude.skills.typst.content = builtins.readFile ./skills/typst.md;

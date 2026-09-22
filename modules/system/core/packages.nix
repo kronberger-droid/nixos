@@ -19,6 +19,10 @@
         };
         cargoHash = "sha256-q7DR0+u1p0Dkp6LhFvNHXuiZoC7am8XH+HC+suLgBY4=";
       };
+
+      # Zotero MCP server for Claude Code; see the file for why it is
+      # packaged here rather than pulled from nixpkgs.
+      zotero-mcp = prev.callPackage ./zotero-mcp.nix {};
     })
   ];
 
