@@ -38,7 +38,7 @@
   dest = "${home}/.local/share/steam-container-libs/x86_64/libxkbcommon.so.0";
 in {
   home.activation.steamContainerLibs = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    src=$(ls -d "${runtimes}"/SteamLinuxRuntime_sniper/sniper_platform_*/files/lib/x86_64-linux-gnu/libxkbcommon.so.0.0.0 2>/dev/null | sort | tail -1)
+    src=$(ls -d "${runtimes}"/SteamLinuxRuntime_sniper/sniper_platform_*/files/lib/x86_64-linux-gnu/libxkbcommon.so.0.0.0 2>/dev/null | sort | tail -1 || true)
     if [ -n "$src" ]; then
       $DRY_RUN_CMD install -Dm644 "$src" "${dest}"
     else
