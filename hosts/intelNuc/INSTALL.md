@@ -26,7 +26,7 @@ live stick is a stock installer, its commands are sh.
       ```nu
       let tmp = (mktemp -d)
       sudo tar -C / -czf $"($tmp)/intelNuc-identity.tgz" etc/ssh var/lib/tailscale
-      tar -C ~ -czf $"($tmp)/intelNuc-user-identity.tgz" .ssh .local/state/syncthing/cert.pem .local/state/syncthing/key.pem
+      tar -C ~ -czf $"($tmp)/intelNuc-user-identity.tgz" .ssh .local/state/syncthing/cert.pem .local/state/syncthing/key.pem .local/share/rbw/device_id
       scp $"($tmp)/intelNuc-identity.tgz" $"($tmp)/intelNuc-user-identity.tgz" P14E:
       ssh P14E "ls intelNuc-*.tgz; tar -tzf intelNuc-user-identity.tgz | lines"
       ```
@@ -34,67 +34,53 @@ live stick is a stock installer, its commands are sh.
       `secrets/secrets.nix`; `~/.ssh/id_ed25519` is in `modules/shared/ssh-keys.nix`
       and on GitHub; the Syncthing cert is the device ID and
       `/var/lib/tailscale` the tailnet IP, both in
-      `modules/shared/syncthing-devices.nix`. Transferring them means the
+      `modules/shared/syncthing-devices.nix`; rbw's `device_id` spares
+      registering the device with Bitwarden again. Transferring them means the
       config does not change at all. There are no Secure Boot keys to save,
       they are generated on the new install.
-- [ ] Merge the disko branch, then build and flash the stick from it, so
-      `/nixos-config` on the stick carries this layout:
-      ```nu
-      nix build .#recovery -o result-recovery
-      udisksctl unmount -b /dev/sdX1
-      sudo dd if=(glob result-recovery/iso/*.iso | first) of=/dev/sdX bs=4M status=progress oflag=sync
-      ```
-      From that merge on, do not `nixos-rebuild` the old install.
+- [ ] Merge the disko branch, then build and flash the stick from it
+      (`hosts/recovery/INSTALL.md`, Stick). From that merge on, do not
+      `nixos-rebuild` the old install.
 
 ## Partition & install (on the live stick, sh)
 
-- [ ] Boot the stick, connect network, note the IP from `ip a`
-- [ ] `sudo disko --mode destroy,format,mount --flake /nixos-config#intelNuc`
+The numbered steps are `hosts/recovery/INSTALL.md`; only intelNuc's own
+parts are spelled out here.
+
+- [ ] Steps 1 and 2: network, `tailscale up`
+- [ ] Step 3: `sudo disko --mode destroy,format,mount --flake /nixos-config#intelNuc`
       and set the LUKS passphrase when asked
-- [ ] Bring the identity back. The stick has no key P14E would accept, so
-      push from P14E; the stick's sshd accepts the workstation keys:
+- [ ] Steps 4 and 5: `swapon /dev/pool/swap` (~20G), build dir bind mounts
+- [ ] Step 6: bring the identity back. The stick has no key P14E would
+      accept, so push from P14E; the stick's sshd takes the workstation keys
+      on the `nixos` user (root login is off):
       ```nu
       # on P14E
-      scp intelNuc-identity.tgz intelNuc-user-identity.tgz root@<live-ip>:
+      scp intelNuc-identity.tgz intelNuc-user-identity.tgz nixos@<live-ip>:
       ```
       ```sh
       # on the stick
-      tar -C /mnt -xzf ~/intelNuc-identity.tgz etc/ssh var/lib/tailscale
-      ls -l /mnt/etc/ssh/ssh_host_ed25519_key     # 600 root:root
+      sudo tar -C /mnt -xzf ~/intelNuc-identity.tgz etc/ssh var/lib/tailscale
+      sudo ls -l /mnt/etc/ssh/ssh_host_ed25519_key     # 600 root:root
       ```
       This has to happen **before** installing: agenix decrypts with this
-      key and the login password is an agenix secret, so without it the first
-      boot has no usable account. sshd only generates keys that are missing.
-- [ ] Turn on swap. disko creates the LV but does not activate it, and the
-      Rust builds OOM-kill the install on 16G without it:
-      ```sh
-      sudo swapon /dev/pool/swap     # "read swap header failed": mkswap it first
-      swapon --show                  # ~20G
-      ```
-- [ ] Put the build directories on the disk. Builds land in the live
-      system's `/nix/var/nix/builds`, on the RAM-backed `/`, whatever
-      `TMPDIR` says, and rio's `target/` fills it ("No space left on
-      device" on a 1T disk). A bind mount holds whichever path Nix picks:
-      ```sh
-      for d in /nix/var/nix/builds /tmp; do
-        sudo mkdir -p "/mnt/scratch$d" "$d"
-        sudo mount --bind "/mnt/scratch$d" "$d"
-      done
-      findmnt /nix/var/nix/builds; findmnt /tmp    # both on pool-root
-      ```
-- [ ] `sudo nixos-install --flake /nixos-config#intelNuc --max-jobs 1 --cores 8`
-      The host's `max-jobs`/`cores` only apply once it runs; the installer
-      defaults to every thread for every job.
-- [ ] Drop the scratch space, so it does not ship with the new root:
-      `sudo umount /nix/var/nix/builds /tmp; sudo rm -rf /mnt/scratch`
+      key, so without it the first boot has none of its secrets and no
+      login password. sshd only generates keys that are missing.
+- [ ] Step 7: `sudo nixos-install --flake /nixos-config#intelNuc --max-jobs 1 --cores 8 --no-root-passwd`
 - [ ] Keep the user tarball for after first boot:
-      `cp ~/intelNuc-user-identity.tgz /mnt/root/`
+      `sudo cp ~/intelNuc-user-identity.tgz /mnt/root/`
+- [ ] Step 8: drop the scratch space
 
 ## First boot
 
-- [ ] Before Syncthing first runs, or it mints a new device ID:
-      `sudo tar -C ~ -xzf /root/intelNuc-user-identity.tgz` then
-      `sudo chown -R kronberger:users ~/.ssh ~/.local/state/syncthing`
+- [ ] Restore the user identity. Syncthing starts with the first login and
+      mints a new device ID, so restart it after:
+      ```nu
+      sudo tar -C ~ -xzf /root/intelNuc-user-identity.tgz
+      sudo chown -R kronberger:users ~/.ssh ~/.local/state/syncthing ~/.local/share/rbw
+      systemctl --user restart syncthing
+      ```
+- [ ] Rest of the first boot: `hosts/recovery/INSTALL.md`, First boot
 - [ ] `systemctl hibernate` once, to confirm resume from `/dev/pool/swap`
 - [ ] Restore the Steam library and saves from the external disk with Steam
       closed, same paths as backed up, then start it
