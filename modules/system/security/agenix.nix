@@ -2,9 +2,12 @@
   config,
   inputs,
   username,
+  host,
   lib,
   ...
 }: let
+  rbwDeviceId = "${inputs.self}/secrets/rbw-device-id-${host}.age";
+
   # Every secret has the same shape: an age file in ./secrets, decrypted to
   # /run/secrets/<name> with mode 0400. Only the owner varies (root vs the
   # primary user), so list the names and let mkSecret fill in the rest.
@@ -67,5 +70,12 @@ in {
     # switch instead of the eval.
     // lib.optionalAttrs
     (config.security.agentSandbox.enable && builtins.pathExists "${inputs.self}/secrets/claude-github-token.age")
-    {claude-github-token = mkSecret "claude" "claude-github-token";};
+    {claude-github-token = mkSecret "claude" "claude-github-token";}
+    # This host's rbw device_id, linked into place by apps/bitwarden.nix, so
+    # a reinstall is the device Bitwarden already knows and needs no
+    # `rbw register`. Per host, so the name differs from the file; gated on
+    # the file like the token above, since each is made on its own host.
+    // lib.optionalAttrs (builtins.pathExists rbwDeviceId) {
+      rbw-device-id = (mkSecret username "rbw-device-id") // {file = rbwDeviceId;};
+    };
 }

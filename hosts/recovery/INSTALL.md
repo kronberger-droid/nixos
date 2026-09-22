@@ -80,10 +80,19 @@ sudo dd if=(glob result-recovery/iso/*.iso | first) of=/dev/sdX bs=4M status=pro
 - There is no Wi-Fi until someone logs in at the machine and connects:
   NetworkManager profiles are not part of the config. Ethernet comes up on
   its own, and tailscale with it.
-- rbw needs the device registered again unless `~/.local/share/rbw/device_id`
-  came along with the host's identity: `rbw register` (the API key's
-  client_id and secret, from the web vault under Security > Keys), then
-  `rbw login` and `rbw sync`.
+- rbw: a host with `secrets/rbw-device-id-<host>.age` comes up as the
+  device Bitwarden already knows, so `rbw login` and `rbw sync` are all it
+  takes. A host without one registers once, then stores its ID so it never
+  has to again:
+  ```nu
+  rbw register     # API key client_id + secret: web vault, Security > Keys
+  cd ~/.config/nixos/secrets    # agenix reads ./secrets.nix
+  open ~/.local/share/rbw/device_id | agenix -e rbw-device-id-<host>.age
+  ```
+  Then `git add` it and rebuild: the plain file is swapped for the link
+  (home-manager keeps the old one as a backup).
+  The recipients are already in `secrets/secrets.nix` for the three
+  workstations; a new host needs its line there first.
 - If the `kronberger` login fails, check `systemctl status
   decrypt-user-password`: userborn creates the account from the hash it
   writes, and skips the account if it is missing.

@@ -27,6 +27,13 @@ in {
   "sftp-password.age".publicKeys = [intelNuc spectre P14E];
   "aerc-gmx-password.age".publicKeys = [intelNuc spectre P14E];
   "aerc-uptudate-password.age".publicKeys = [intelNuc spectre P14E];
+  # rbw's device_id, one per host: the UUID Bitwarden knows the device by.
+  # Not a password, but with it and the master password the new-device
+  # email check is skipped, thus not in plaintext. Only the named host
+  # installs its file (security/agenix.nix); all three can re-key.
+  "rbw-device-id-intelNuc.age".publicKeys = [intelNuc spectre P14E];
+  "rbw-device-id-spectre.age".publicKeys = [intelNuc spectre P14E];
+  "rbw-device-id-P14E.age".publicKeys = [intelNuc spectre P14E];
   # Escrow: the three workstation host keys can decrypt the server-only
   # secrets too, so a dead homeserver disk does not take the cache signing
   # key or the tunnel credentials with it, and any of them can re-key. After
