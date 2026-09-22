@@ -1,4 +1,17 @@
-{pkgs, ...}: {
+{
+  config,
+  lib,
+  pkgs,
+  osConfig ? null,
+  ...
+}: {
+  # rbw only reads an existing device_id and writes one when it is missing,
+  # so a read-only link to the agenix copy is safe. Set only on hosts that
+  # have their secrets/rbw-device-id-<host>.age.
+  home.file.".local/share/rbw/device_id" = lib.mkIf ((osConfig.age.secrets or {}) ? rbw-device-id) {
+    source = config.lib.file.mkOutOfStoreSymlink osConfig.age.secrets.rbw-device-id.path;
+  };
+
   home.packages = with pkgs; [
     bitwarden-desktop
     rofi-rbw-wayland

@@ -26,7 +26,7 @@ live stick is a stock installer, its commands are sh.
       ```nu
       let tmp = (mktemp -d)
       sudo tar -C / -czf $"($tmp)/intelNuc-identity.tgz" etc/ssh var/lib/tailscale
-      tar -C ~ -czf $"($tmp)/intelNuc-user-identity.tgz" .ssh .local/state/syncthing/cert.pem .local/state/syncthing/key.pem .local/share/rbw/device_id
+      tar -C ~ -czf $"($tmp)/intelNuc-user-identity.tgz" .ssh .local/state/syncthing/cert.pem .local/state/syncthing/key.pem
       scp $"($tmp)/intelNuc-identity.tgz" $"($tmp)/intelNuc-user-identity.tgz" P14E:
       ssh P14E "ls intelNuc-*.tgz; tar -tzf intelNuc-user-identity.tgz | lines"
       ```
@@ -34,8 +34,7 @@ live stick is a stock installer, its commands are sh.
       `secrets/secrets.nix`; `~/.ssh/id_ed25519` is in `modules/shared/ssh-keys.nix`
       and on GitHub; the Syncthing cert is the device ID and
       `/var/lib/tailscale` the tailnet IP, both in
-      `modules/shared/syncthing-devices.nix`; rbw's `device_id` spares
-      registering the device with Bitwarden again. Transferring them means the
+      `modules/shared/syncthing-devices.nix`. Transferring them means the
       config does not change at all. There are no Secure Boot keys to save,
       they are generated on the new install.
 - [ ] Merge the disko branch, then build and flash the stick from it
@@ -77,7 +76,7 @@ parts are spelled out here.
       mints a new device ID, so restart it after:
       ```nu
       sudo tar -C ~ -xzf /root/intelNuc-user-identity.tgz
-      sudo chown -R kronberger:users ~/.ssh ~/.local/state/syncthing ~/.local/share/rbw
+      sudo chown -R kronberger:users ~/.ssh ~/.local/state/syncthing
       systemctl --user restart syncthing
       ```
 - [ ] Rest of the first boot: `hosts/recovery/INSTALL.md`, First boot
