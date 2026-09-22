@@ -71,9 +71,22 @@ live stick is a stock installer, its commands are sh.
       sudo swapon /dev/pool/swap     # "read swap header failed": mkswap it first
       swapon --show                  # ~20G
       ```
+- [ ] Put the build directories on the disk. Builds land in the live
+      system's `/nix/var/nix/builds`, on the RAM-backed `/`, whatever
+      `TMPDIR` says, and rio's `target/` fills it ("No space left on
+      device" on a 1T disk). A bind mount holds whichever path Nix picks:
+      ```sh
+      for d in /nix/var/nix/builds /tmp; do
+        sudo mkdir -p "/mnt/scratch$d" "$d"
+        sudo mount --bind "/mnt/scratch$d" "$d"
+      done
+      findmnt /nix/var/nix/builds; findmnt /tmp    # both on pool-root
+      ```
 - [ ] `sudo nixos-install --flake /nixos-config#intelNuc --max-jobs 1 --cores 8`
       The host's `max-jobs`/`cores` only apply once it runs; the installer
       defaults to every thread for every job.
+- [ ] Drop the scratch space, so it does not ship with the new root:
+      `sudo umount /nix/var/nix/builds /tmp; sudo rm -rf /mnt/scratch`
 - [ ] Keep the user tarball for after first boot:
       `cp ~/intelNuc-user-identity.tgz /mnt/root/`
 
