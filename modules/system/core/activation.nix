@@ -4,10 +4,10 @@
   #
   # Knock-on: agenix keys its install mechanism off this option, so secrets
   # come from agenix-install-secrets.service rather than an activation script.
-  # That unit orders itself `after = ["systemd-sysusers.service"]`, which does
-  # not exist under userborn, so it is not actually ordered against
-  # userborn.service. If secrets ever come up owned by a numeric gid, that
-  # race is the cause.
+  # That unit orders itself `after = ["systemd-sysusers.service"]`, an alias
+  # of userborn.service, so secrets always arrive after users are made. Any
+  # secret userborn itself reads must not come from agenix: see the password
+  # unit in users.nix.
   services.userborn.enable = true;
 
   # Do not add system.etc.overlay.enable. Tried 2026-08-14: a live `switch`

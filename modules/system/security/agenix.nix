@@ -16,8 +16,9 @@
   };
 
   # Decrypted for root (consumed by system services / login).
+  # kronberger-password is not here: userborn reads it before agenix runs,
+  # so core/users.nix decrypts it itself.
   rootSecrets = [
-    "kronberger-password" # hashed password for user login
     "pia-credentials" # PIA_USER=pXXXXXXX\nPIA_PASS=your_password
     "tuwien-vpn-password"
     "tuwien-vpn-totp"
