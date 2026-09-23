@@ -19,6 +19,7 @@ in {
     ../../modules/system/services/website.nix
     ../../modules/system/services/webdav.nix
     ../../modules/system/services/dns-healthcheck.nix
+    ../../modules/system/services/flake-autoupdate.nix
   ];
 
   # Secrets (homeserver-specific — shared agenix.nix has desktop-only secrets)

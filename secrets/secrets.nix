@@ -56,4 +56,11 @@ in {
   # file sync. Only the server reads it — the Zotero clients hold the same
   # password in their own settings store, not from here.
   "webdav-zotero.age".publicKeys = [homeserver intelNuc spectre P14E];
+  # For the nightly flake-autoupdate job (services/flake-autoupdate.nix),
+  # which pushes update branches and opens PRs on its own. Both are the bare
+  # token, one line. github: a fine-grained PAT on nixos, lab-servers and
+  # oo7-nixos with Contents and Pull requests read/write, nothing else.
+  # claude: the output of `claude setup-token`, a subscription OAuth token.
+  "flake-update-github-token.age".publicKeys = [homeserver intelNuc spectre P14E];
+  "flake-update-claude-token.age".publicKeys = [homeserver intelNuc spectre P14E];
 }
