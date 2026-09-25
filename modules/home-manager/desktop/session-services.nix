@@ -174,6 +174,32 @@ in {
     };
   };
 
+  # ── Manual idle inhibit ─────────────────────────────────────────
+  # Backs the eww bar's idle toggle (eww/nu/idle.nu). wlinhibit holds a
+  # zwp_idle_inhibitor_v1 on an invisible surface for as long as it runs, the
+  # same protocol wayland-pipewire-idle-inhibit above uses for audio, so the
+  # compositor stops reporting idle and every swayidle timeout pauses. What it
+  # does not touch is swayidle itself: before-sleep still fires on a lid close,
+  # so an inhibited session still locks when logind suspends it. The toggle
+  # used to stop swayidle.service outright, which took that hook down with the
+  # timers and left the machine unlocked after every sleep while the toggle
+  # was on.
+  #
+  # Not WantedBy anything: the toggle starts and stops it, and is-active is
+  # the toggle's state. PartOf makes a session teardown clear the inhibit.
+  systemd.user.services.idle-inhibit = {
+    Unit = {
+      Description = "Hold a Wayland idle inhibitor";
+      After = ["graphical-session.target"];
+      PartOf = ["graphical-session.target"];
+      ConditionEnvironment = "WAYLAND_DISPLAY";
+    };
+
+    Service = {
+      ExecStart = "${pkgs.wlinhibit}/bin/wlinhibit";
+    };
+  };
+
   # ── XWayland Satellite ──────────────────────────────────────────
   systemd.user.services.xwayland-satellite = {
     Unit = {
