@@ -16,14 +16,7 @@
     antigravity-cli
 
     # Documents
-    (pkgs.obsidian.overrideAttrs (oldAttrs: {
-      postInstall =
-        (oldAttrs.postInstall or "")
-        + ''
-          substituteInPlace $out/share/applications/obsidian.desktop \
-            --replace "Exec=obsidian" "Exec=obsidian --enable-features=UseOzonePlatform --ozone-platform=wayland"
-        '';
-    }))
+    obsidian
     onlyoffice-desktopeditors
     zotero
 
