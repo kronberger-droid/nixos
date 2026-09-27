@@ -3,12 +3,13 @@
 # waybar's built-in `idle_inhibitor`, which eww has no equivalent for.
 #
 # waybar holds a Wayland idle-inhibitor while activated. A script cannot hold
-# one itself (the inhibitor is bound to a surface, so a client has to stay
-# connected), so idle-inhibit.service in session-services.nix runs wlinhibit
-# to do that, and this toggles the unit. Only the compositor's idle state is
-# affected: swayidle keeps running, so its before-sleep hook still locks when
-# the lid closes. Note that wayland-pipewire-idle-inhibit.service still runs
-# too, so audio playback keeps inhibiting idle independently of this toggle.
+# one itself (an inhibit lives exactly as long as the client holding it), so
+# idle-inhibit.service in session-services.nix runs a holder that fits the
+# compositor (a D-Bus ScreenSaver inhibit on niri, wlinhibit on sway), and
+# this toggles the unit. Only the compositor's idle state is affected:
+# swayidle keeps running, so its before-sleep hook still locks when the lid
+# closes. Note that wayland-pipewire-idle-inhibit.service still runs too, so
+# audio playback keeps inhibiting idle independently of this toggle.
 
 # Binaries by store path; see eww.nix for why these are consts and not
 # spelled inline at the call sites.

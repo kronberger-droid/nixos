@@ -37,6 +37,39 @@
   dpmsOff = dpms "dpms-off" "power-off-monitors" "off";
   dpmsOn = dpms "dpms-on" "power-on-monitors" "on";
 
+  # Manual idle inhibit, one holder per compositor; see idle-inhibit.service
+  # below for why there are two. The niri holder takes an
+  # org.freedesktop.ScreenSaver Inhibit and then just keeps its bus
+  # connection open: niri drops the inhibit the moment that connection goes
+  # away, so the SIGTERM from `systemctl stop` is the release.
+  idleInhibitDbus = pkgs.writers.writePython3 "idle-inhibit-dbus" {
+    libraries = [pkgs.python3Packages.jeepney];
+  } ''
+    import signal
+
+    from jeepney import DBusAddress, new_method_call
+    from jeepney.io.blocking import open_dbus_connection
+
+    SCREENSAVER = DBusAddress(
+        "/ScreenSaver",
+        bus_name="org.freedesktop.ScreenSaver",
+        interface="org.freedesktop.ScreenSaver",
+    )
+
+    conn = open_dbus_connection(bus="SESSION")
+    conn.send_and_get_reply(
+        new_method_call(SCREENSAVER, "Inhibit", "ss", ("eww", "idle toggle"))
+    )
+    # Hold the connection open; closing it releases the inhibit.
+    signal.pause()
+  '';
+  idleInhibit = pkgs.writeShellScript "idle-inhibit" ''
+    if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
+      exec ${idleInhibitDbus}
+    fi
+    exec ${pkgs.wlinhibit}/bin/wlinhibit
+  '';
+
   # Second line of defence behind `hasAccelerometer`, which already keeps this
   # whole block off hosts without the sensor. Kept because it still carries
   # the waybar opt-out toggle, and because a host can claim the sensor while
@@ -175,28 +208,35 @@ in {
   };
 
   # ── Manual idle inhibit ─────────────────────────────────────────
-  # Backs the eww bar's idle toggle (eww/nu/idle.nu). wlinhibit holds a
-  # zwp_idle_inhibitor_v1 on an invisible surface for as long as it runs, the
-  # same protocol wayland-pipewire-idle-inhibit above uses for audio, so the
-  # compositor stops reporting idle and every swayidle timeout pauses. What it
-  # does not touch is swayidle itself: before-sleep still fires on a lid close,
-  # so an inhibited session still locks when logind suspends it. The toggle
-  # used to stop swayidle.service outright, which took that hook down with the
-  # timers and left the machine unlocked after every sleep while the toggle
-  # was on.
+  # Backs the eww bar's idle toggle (eww/nu/idle.nu). Holding an inhibit
+  # pauses every swayidle timeout but leaves swayidle itself alone:
+  # before-sleep still fires on a lid close, so an inhibited session still
+  # locks when logind suspends it. The toggle used to stop swayidle.service
+  # outright, which took that hook down with the timers and left the machine
+  # unlocked after every sleep while the toggle was on.
+  #
+  # The holder depends on the compositor. wlinhibit takes a
+  # zwp_idle_inhibitor_v1 on a surface it never maps; sway counts a
+  # role-less inhibitor as visible, so that is enough there. niri only
+  # honours an inhibitor whose surface was presented in the last rendered
+  # frame (Niri::refresh_idle_inhibit), so it ignores wlinhibit outright:
+  # the bar showed "inhibited" for two days while the timers kept firing.
+  # niri does serve org.freedesktop.ScreenSaver on the session bus, though,
+  # and that path needs no surface, so on niri the unit holds a D-Bus
+  # Inhibit instead (idleInhibit above picks by NIRI_SOCKET).
   #
   # Not WantedBy anything: the toggle starts and stops it, and is-active is
   # the toggle's state. PartOf makes a session teardown clear the inhibit.
   systemd.user.services.idle-inhibit = {
     Unit = {
-      Description = "Hold a Wayland idle inhibitor";
+      Description = "Hold an idle inhibitor";
       After = ["graphical-session.target"];
       PartOf = ["graphical-session.target"];
       ConditionEnvironment = "WAYLAND_DISPLAY";
     };
 
     Service = {
-      ExecStart = "${pkgs.wlinhibit}/bin/wlinhibit";
+      ExecStart = "${idleInhibit}";
     };
   };
 
