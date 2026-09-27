@@ -192,7 +192,12 @@ in {
   systemd.user.services.wayland-pipewire-idle-inhibit = {
     Unit = {
       Description = "Inhibit idle when audio is playing";
-      After = ["pipewire.service" "graphical-session.target"];
+      # wireplumber is what creates the ALSA sinks. Started in the same
+      # second as it, the daemon came up with no sink at all ("List of sinks
+      # is empty"), and days later that instance no longer inhibited anything
+      # while a fresh start worked at once. Ordering after wireplumber gives
+      # it the sink from the start.
+      After = ["pipewire.service" "wireplumber.service" "graphical-session.target"];
       PartOf = ["graphical-session.target"];
     };
 
