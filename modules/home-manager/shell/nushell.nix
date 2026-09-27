@@ -26,6 +26,36 @@
     emulation = "~/Emulation";
     vault = vaultTilde;
   };
+
+  # Two-line fallback for the starship row; the PROMPT_COMMAND wrapper below
+  # switches to it when the single row would not fit the terminal. Starship
+  # has no width-conditional line break of its own, and `$all` cannot be
+  # split, so the fallback is two renders of the same settings: a head with
+  # an explicit format up to `git_status`, and a tail that keeps `$all` with
+  # the head's modules disabled, so every other module, including ones a
+  # newer starship adds, still shows up in its usual order. Both derive from
+  # the final `programs.starship.settings`, so the symbols and formats stay
+  # the ones the single row uses.
+  tomlFormat = pkgs.formats.toml {};
+  starshipHeadModules = [
+    "username"
+    "hostname"
+    "shlvl"
+    "directory"
+    "git_branch"
+    "git_commit"
+    "git_state"
+    "git_metrics"
+    "git_status"
+  ];
+  starshipHead = tomlFormat.generate "starship-head.toml" (config.programs.starship.settings
+    // {
+      format = lib.concatMapStrings (m: "$" + m) starshipHeadModules;
+    });
+  # add_newline is the blank line starship puts before every prompt; the head
+  # keeps it, the tail would put a second one between the two rows.
+  starshipTail = tomlFormat.generate "starship-tail.toml" (lib.recursiveUpdate config.programs.starship.settings
+    ({add_newline = false;} // lib.genAttrs starshipHeadModules (_: {disabled = true;})));
 in {
   home.packages = with pkgs; [
     gitui
@@ -672,10 +702,29 @@ in {
       # The "\n" has to be appended in nushell rather than via starship's
       # `format`, since nushell strips one trailing newline off external command
       # output and would eat it.
+      #
+      # A row as wide as the terminal or wider wraps in the terminal before
+      # the "\n" lands, and reedline's line count for the prompt no longer
+      # matches what was drawn, which is the stray blank line. So measure the
+      # row and, when it would not fit, render the two-line split instead
+      # (starshipHead/starshipTail above), reusing the very same closure under
+      # a different STARSHIP_CONFIG so the flags it passes stay identical. The
+      # count is graphemes, not cells; nerd glyphs are one cell here, and the
+      # `- 1` keeps an exact fit, the case that wraps, on the split side.
       (lib.mkAfter ''
 
         let starship_prompt = $env.PROMPT_COMMAND
-        $env.PROMPT_COMMAND = {|| (do $starship_prompt) + "\n" }
+        $env.PROMPT_COMMAND = {||
+          let row = (do $starship_prompt)
+          let width = ($row | ansi strip | str length --grapheme-clusters)
+          if $width < ((term size).columns - 1) {
+            $row + "\n"
+          } else {
+            let head = (with-env { STARSHIP_CONFIG: "${starshipHead}" } { do $starship_prompt })
+            let tail = (with-env { STARSHIP_CONFIG: "${starshipTail}" } { do $starship_prompt })
+            $head + "\n" + $tail + "\n"
+          }
+        }
       '')
     ];
 
@@ -739,7 +788,9 @@ in {
         # 2nd line (the input line) comes from the PROMPT_COMMAND wrapper above,
         # which appends the newline in nushell. Don't move that newline into this
         # format string: nushell strips one trailing newline off external command
-        # output, so starship's own would never reach reedline.
+        # output, so starship's own would never reach reedline. When the row
+        # would not fit the terminal, that wrapper renders starshipHead and
+        # starshipTail (top of this file) instead, which split after git_status.
         format = "$all";
         line_break.disabled = true;
         character.disabled = true;
