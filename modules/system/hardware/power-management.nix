@@ -100,13 +100,19 @@ in {
       if isNotebook
       then {
         SuspendState = "mem";
-        # No HibernateDelaySec on purpose. Without a fixed delay,
-        # suspend-then-hibernate arms an ACPI low-battery alarm (or, failing
-        # that, wakes hourly via RTC to sample the discharge rate) and only
-        # hibernates when the battery is about to hit 5%. Measured on P14E
-        # (2026-09-06): s2idle drains ~1.1%/h, hibernate ~0.1%/h, so the old
-        # 90m cutoff paid a 44s image write for every lunch break to save
-        # under 2% of battery.
+        # A fixed delay again. From 2026-09-06 to 2026-09-27 there was none,
+        # so suspend-then-hibernate only hibernated once the battery was
+        # about to hit 5%, timed from the discharge rate systemd samples at
+        # its RTC wakes. On P14E that estimate never works: s2idle drains
+        # ~1.1%/h, systemd keeps the rate as integer %/h, and the sample
+        # rounds to 0 and is rejected ("Failed to update battery discharge
+        # rate: Numerical result out of range" at every wake). The battery
+        # exposes no ACPI trip-point alarm either. The night of 2026-09-26
+        # the machine woke twice, re-suspended twice, and reached 2%, at
+        # which point UPower forced a hybrid-sleep. 3h at 1.1%/h costs about
+        # 3% before the 44s image write, still clears a lunch break, and
+        # hibernation actually happens.
+        HibernateDelaySec = "3h";
         # HybridSleepState/HybridSleepMode were removed in systemd 261 and
         # only produced warnings on every sleep transition.
       }
