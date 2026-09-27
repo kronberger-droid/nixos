@@ -765,6 +765,7 @@ in {
         time = {
           disabled = false;
           format = "at [$time]($style) ";
+          time_format = "%R";
         };
       };
   };
