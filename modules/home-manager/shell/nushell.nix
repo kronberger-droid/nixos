@@ -26,30 +26,6 @@
     emulation = "~/Emulation";
     vault = vaultTilde;
   };
-
-  # Split point of the starship row; the PROMPT_COMMAND wrapper below breaks
-  # the row after `git_status` when it would not fit the terminal. Starship
-  # has no width-conditional line break of its own, so the row is rendered
-  # once with this marker in its format and split on it in nushell. `$all`
-  # leaves out every module the format already names, so listing the head
-  # modules in front of it moves them without duplicating them, and every
-  # other module, including ones a newer starship adds, keeps its usual
-  # order. Rendering once matters: the modules run again on every render,
-  # and git_status alone can take hundreds of milliseconds in a big repo.
-  #
-  # U+001F, the unit separator. Nix strings have no \u escape, JSON does.
-  starshipSplitMarker = builtins.fromJSON ''"\u001f"'';
-  starshipHeadModules = [
-    "username"
-    "hostname"
-    "shlvl"
-    "directory"
-    "git_branch"
-    "git_commit"
-    "git_state"
-    "git_metrics"
-    "git_status"
-  ];
 in {
   home.packages = with pkgs; [
     gitui
@@ -696,29 +672,10 @@ in {
       # The "\n" has to be appended in nushell rather than via starship's
       # `format`, since nushell strips one trailing newline off external command
       # output and would eat it.
-      #
-      # A row as wide as the terminal or wider wraps in the terminal before
-      # the "\n" lands, and reedline's line count for the prompt no longer
-      # matches what was drawn, which is the stray blank line. So measure the
-      # row and, when it would not fit, break it at the marker starship put
-      # after git_status (starshipSplitMarker above). The marker is stripped
-      # either way, so a row without one, say from a starship that failed
-      # half-way, comes out as the plain single row. The count is graphemes,
-      # not cells; nerd glyphs are one cell here, and the `- 1` keeps an
-      # exact fit, the case that wraps, on the split side.
       (lib.mkAfter ''
 
         let starship_prompt = $env.PROMPT_COMMAND
-        $env.PROMPT_COMMAND = {||
-          let parts = (do $starship_prompt | split row (char us))
-          let row = ($parts | str join "")
-          let width = ($row | ansi strip | str length --grapheme-clusters)
-          if $width < ((term size).columns - 1) {
-            $row + "\n"
-          } else {
-            ($parts | str join "\n") + "\n"
-          }
-        }
+        $env.PROMPT_COMMAND = {|| (do $starship_prompt) + "\n" }
       '')
     ];
 
@@ -782,10 +739,8 @@ in {
         # 2nd line (the input line) comes from the PROMPT_COMMAND wrapper above,
         # which appends the newline in nushell. Don't move that newline into this
         # format string: nushell strips one trailing newline off external command
-        # output, so starship's own would never reach reedline. The head modules
-        # are spelled out only to place the split marker after git_status (top
-        # of this file); `$all` skips them, so the row reads the same as `$all`.
-        format = (lib.concatMapStrings (m: "$" + m) starshipHeadModules) + starshipSplitMarker + "$all";
+        # output, so starship's own would never reach reedline.
+        format = "$all";
         line_break.disabled = true;
         character.disabled = true;
         # Relabel long, uninteresting paths to short names (git-repo-like).
