@@ -8,6 +8,11 @@ $env.config = {
 	# record by nushell.nix, unconditionally: every host runs the fork
 	# (reedline HelixMode) via the shared overlay. There is no vi fallback.
 	buffer_editor: 'hx'
+	# sqlite keeps cwd, exit status and duration per entry, and lets single
+	# entries be removed with `query db "DELETE FROM history WHERE ..."`.
+	history: {
+		file_format: sqlite
+	}
 	# Cursor per mode (helix_* added by the injection).
 	cursor_shape: {
 		vi_insert: line
