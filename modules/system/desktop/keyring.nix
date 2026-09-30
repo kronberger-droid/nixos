@@ -36,6 +36,7 @@ in {
       # rules there. gnome-keyring reaches the greeter through login.
       security.pam.services = {
         swaylock.enableGnomeKeyring = true;
+        veila.enableGnomeKeyring = true;
         login.enableGnomeKeyring = true;
         passwd.enableGnomeKeyring = true;
       };
@@ -69,7 +70,7 @@ in {
 
       # Survive `nixos-rebuild switch` without relocking the Login collection.
       # The collection key only ever reaches the daemon via pam_oo7 during a
-      # PAM auth (login/greetd/swaylock) and lives in its memory; a restart
+      # PAM auth (login/greetd/swaylock/veila) and lives in its memory; a restart
       # drops it, so the next Secret Service call pops the gcr unlock prompt.
       # And a restart is near-guaranteed: the unit's env drop-in pins PATH,
       # LOCALE_ARCHIVE and TZDIR to store paths, so any nixpkgs bump rewrites
@@ -90,7 +91,7 @@ in {
           # login service. Naming it directly is also an eval error now,
           # since oo7-nixos orders its wait rule against greetd's own
           # rules.session.oo7, which no longer exists.
-          services = ["login" "swaylock" "passwd"];
+          services = ["login" "swaylock" "veila" "passwd"];
         };
         portal.enable = true;
       };

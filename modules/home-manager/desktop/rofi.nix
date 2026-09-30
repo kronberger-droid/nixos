@@ -115,7 +115,7 @@ in {
         		run_cmd --reboot
                 ;;
             $lock)
-        		${config.programs.swaylock.package}/bin/swaylock
+        		${pkgs.veila}/bin/veila lock
                 ;;
             $suspend)
         		run_cmd --suspend
