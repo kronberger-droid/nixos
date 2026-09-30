@@ -17,33 +17,81 @@ in {
   home.packages = [pkgs.veila];
 
   # A user config is layered over the bundled default theme, so every widget
-  # that theme shows has to be switched off here, not merely left out.
+  # that theme shows has to be switched off here, not merely left out. Tables
+  # merge key by key but arrays replace, so `backdrop` below also drops the
+  # theme's now_playing backdrop.
+  #
+  # Layout: a frosted card in the middle holding clock, password field and
+  # battery. Offsets are relative to the screen centre.
   xdg.configFile."veila/config.toml".source = toml.generate "veila.toml" {
     background = {
       mode = "file";
       path = "${./sway/deathpaper.jpg}";
+      blur_strength = 14;
+      dim_strength = 15;
     };
-    battery.enabled = false;
+    battery.enabled = true;
     weather.enabled = false;
     visuals = {
-      clock.enabled = false;
       date.enabled = false;
       avatar.enabled = false;
       username.enabled = false;
       keyboard.enabled = false;
-      battery.enabled = false;
       placeholder.enabled = false;
       eye.enabled = false;
+      now_playing.enabled = false;
+      backdrop = [
+        {
+          name = "card";
+          mode = "blur";
+          blur_strength = 18;
+          color = "#${c.base00}59";
+          border_color = "#${c.base05}14";
+          border_width = 1;
+          width = 380;
+          height = 230;
+          radius = 28;
+          halign = "center";
+          valign = "center";
+          x = 0;
+          y = 0;
+        }
+      ];
+      clock = {
+        enabled = true;
+        format = "24h";
+        font_weight = 200;
+        font_size = 52;
+        color = "#${c.base05}8C";
+        halign = "center";
+        valign = "center";
+        x = 0;
+        y = -50;
+      };
       input = {
         placeholder = "";
-        background_color = "#${c.base00}CC";
-        border_color = "#${c.base00}";
-        border_width = 2;
+        background_color = "#${c.base05}0F";
+        border_color = "#${c.base05}1F";
+        border_width = 1;
         mask_color = "#${c.base05}";
-        width = 280;
-        height = 48;
-        radius = 24;
-        y = 0;
+        width = 300;
+        height = 44;
+        radius = 22;
+        halign = "center";
+        valign = "center";
+        x = 0;
+        y = 30;
+      };
+      battery = {
+        enabled = true;
+        background_color = "#${c.base00}00";
+        background_size = 32;
+        color = "#${c.base05}8C";
+        size = 16;
+        halign = "center";
+        valign = "center";
+        x = 0;
+        y = 85;
       };
       status.rejected_color = "#${c.base08}";
       caps_lock.color = "#${c.base0F}";
