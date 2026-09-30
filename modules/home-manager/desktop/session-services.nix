@@ -89,6 +89,7 @@
 in {
   imports = [
     ./sway/swaylock.nix
+    ./veila.nix
   ];
 
   home.file.".config/swappy/config".text = ''
@@ -170,7 +171,7 @@ in {
       }
       {
         timeout = 400;
-        command = "${config.programs.swaylock.package}/bin/swaylock -f";
+        command = "${pkgs.veila}/bin/veila lock";
       }
       {
         timeout = 460;
@@ -183,7 +184,9 @@ in {
       }
     ];
     events = {
-      "before-sleep" = "${config.programs.swaylock.package}/bin/swaylock -f";
+      # --wait-ready holds swayidle, and with it logind's sleep delay lock,
+      # until the lock surface is up, so the machine never suspends unlocked.
+      "before-sleep" = "${pkgs.veila}/bin/veila lock --wait-ready";
       "after-resume" = "${dpmsOn}";
     };
   };

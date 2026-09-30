@@ -70,6 +70,11 @@ in {
     })
   ];
 
+  # veila (modules/home-manager/desktop/veila.nix) authenticates against a
+  # service named after itself and falls back to system-auth, which NixOS does
+  # not have, so without this entry no password would ever unlock it.
+  security.pam.services.veila = {};
+
   virtualisation.spiceUSBRedirection.enable = true;
 
   programs = {
