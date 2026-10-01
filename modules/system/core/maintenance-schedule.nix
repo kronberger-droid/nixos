@@ -30,6 +30,14 @@
   systemd.timers.fstrim.timerConfig = {
     RandomizedDelaySec = 0;
     AccuracySec = "1min";
+    # util-linux also ships Persistent=true, which replays a slot missed
+    # while the machine was powered off the moment the timer starts, seven
+    # seconds into the next boot. On 2026-10-01 that put an 800 GiB discard
+    # under a cold login: every step of niri's startup ran five to ten
+    # times slower and the bar took 13 s instead of 3 s. A skipped week of
+    # trim on a mostly empty drive costs nothing, so a missed Wednesday
+    # waits for the next one.
+    Persistent = false;
   };
 
   # A slot slept through (days away) is still replayed on resume. Queue
