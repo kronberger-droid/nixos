@@ -175,6 +175,9 @@
     auditd.enable = true;
     audit = {
       enable = true;
+      # systemd loads enough BPF programs before auditd attaches to overflow
+      # the default 1024 hold queue, dropping early boot records.
+      backlogLimit = 8192;
       rules = [
         # Log all administrative actions
         "-w /etc/passwd -p wa -k identity"
