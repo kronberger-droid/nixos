@@ -76,6 +76,14 @@
       DefaultTimeoutStopSec = "10s";
       DefaultTimeoutStartSec = "10s";
     };
+    # The system manager's default above does not propagate to user
+    # instances, which keep systemd's 90 s. Anything in the session that
+    # sits on SIGTERM therefore held shutdown for a minute and a half ("A
+    # stop job is running for User Manager for UID 1001"); user@.service's
+    # own 2 min bound sits outside that. The session's services all stop in
+    # well under a second when they stop at all, so cap the user side the
+    # same way.
+    user.settings.Manager.DefaultTimeoutStopSec = "10s";
   };
 
   # OOM protection — kills largest process before kernel OOM freezes the system
