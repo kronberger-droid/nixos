@@ -16,6 +16,12 @@
     #   nix build --dry-run 'path:<that path>#freecad-wayland'
     # must report nothing to build. Then delete the input and the overlay.
     nixpkgs-freecad.url = "github:NixOS/nixpkgs/d407951447dcd00442e97087bf374aad70c04cea";
+    # zotero 10.0.2 copies nixpkgs' firefox-esr-153 and its build script
+    # patches ActorManagerParent.sys.mjs, which no longer matches on 153.4
+    # (NixOS/nixpkgs#568692). Pin to the last rev on 153.3, where zotero is
+    # cached. The fix (zotero 10.0.4, #567192) is on master; drop this input
+    # and the overlay entry once the locked nixpkgs carries it.
+    nixpkgs-zotero.url = "github:NixOS/nixpkgs/7a0f122f5090cf4c2ade2a13a0e229d4e19ba71f";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -303,6 +309,9 @@
                       config.allowUnfree = true;
                     })
                     .freecad-wayland;
+                  # zotero 10.0.2 fails on unstable's firefox-esr 153.4. See
+                  # the nixpkgs-zotero input above.
+                  zotero = (import inputs.nixpkgs-zotero {inherit system;}).zotero;
                 })
               ];
             }
