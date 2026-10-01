@@ -100,14 +100,13 @@ in {
       # without this line every `nix build` in the sandbox is refused.
       nix.settings.allowed-users = [user];
 
-      environment.systemPackages = [launcher];
-
       # The launcher forwards TERM, so the sandbox shell sees `xterm-rio`,
       # and rio's terminfo lives in the primary user's home-manager profile
-      # where this account cannot read it. Every terminfo nixpkgs knows,
-      # system-wide, is a few hundred kilobytes and stops mattering which
-      # emulator the session was started from.
-      environment.enableAllTerminfo = true;
+      # where this account cannot read it. Install it system-wide. Not
+      # enableAllTerminfo: that builds every listed emulator just for its
+      # terminfo, so one broken package (urxvt under GCC 16) fails the
+      # whole system build.
+      environment.systemPackages = [launcher pkgs.rio.terminfo];
 
       # machined checks host-shell with the target user in the action
       # details (src/machine/machine-dbus.c), so the grant can name both
