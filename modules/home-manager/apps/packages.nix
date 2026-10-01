@@ -30,7 +30,6 @@
     ffmpeg
     vlc
     obs-studio
-    ipe
     (pkgs.callPackage ../../shared/gwyddion3.nix {})
 
     # PDF
