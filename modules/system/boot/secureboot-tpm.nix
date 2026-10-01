@@ -48,5 +48,15 @@
     tctiEnvironment.enable = true;
   };
 
+  # systemd 258 added systemd-pcrlogin@.service: logind runs it for every
+  # new user and it extends an NvPCR named "login" with the user record. It
+  # is ordering-only (user-runtime-dir@ has After= but no Wants=, and the
+  # unit's own comment says a failure must never block login), nothing here
+  # seals against that NvPCR, and on intelNuc it fails anyway with "TPM NV
+  # index space is exhausted". What it does cost is ~0.5 s, serially, before
+  # the greeter's session and again before the user's: a second of boot for
+  # nothing. Masked.
+  systemd.units."systemd-pcrlogin@.service".enable = false;
+
   environment.systemPackages = [pkgs.sbctl];
 }
