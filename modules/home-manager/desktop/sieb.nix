@@ -137,7 +137,15 @@
       pkgs.wl-clipboard
       pkgs.libnotify
     ]}:$PATH
-    rbw unlock || exit
+    # Bound to a key, so a failed unlock says why rather than nothing.
+    # Escape on the prompt is no failure worth a toast.
+    if ! err=$(rbw unlock 2>&1); then
+      case $err in
+        *"pinentry cancelled"*) ;;
+        *) notify-send -a rbw -u critical "Vault still locked" "$(printf %s "$err" | tr -d '<>&')" ;;
+      esac
+      exit 1
+    fi
     exec ${sieb}/bin/sieb --config ${launcherTheme} --script ${examples}/rbw/rbw.nu
   '';
 
