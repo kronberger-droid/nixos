@@ -75,6 +75,19 @@
       url = "github:kronberger-droid/dropkitten";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # sieb: the dmenu-first picker behind Mod+D and Mod+Shift+E on niri,
+    # replacing rofi there (rofi stays for sway and rofi-rbw). See
+    # modules/home-manager/desktop/sieb.nix.
+    #
+    # TEMPORARY: points at the local checkout's branch, which only exists on
+    # intelNuc, because the work is not pushed yet. Once it is on GitHub,
+    # switch to `github:kronberger-droid/sieb` and `nix flake update sieb`;
+    # until then the other hosts cannot evaluate.
+    sieb = {
+      url = "git+file:///home/kronberger/Projects/rust/sieb?ref=worktree-handoff-next-steps";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
+    };
     # Matt Pocock's Claude Code skills collection. Consumed as plain files
     # (flake = false): claude.nix symlinks each skill folder into
     # ~/.claude/skills/, and kronberger.nix derives the set from the repo's
