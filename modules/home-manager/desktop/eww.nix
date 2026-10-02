@@ -128,7 +128,7 @@
       inherit (pkgs) systemd libnotify tailscale;
     };
     audio = {
-      inherit eww;
+      inherit eww utilLinux;
       inherit (pkgs) wireplumber;
     };
     bluetooth = {
