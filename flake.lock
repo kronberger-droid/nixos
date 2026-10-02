@@ -777,18 +777,18 @@
         ]
       },
       "locked": {
-        "lastModified": 1790927445,
-        "narHash": "sha256-nyXOzwGurKEqUeejSkzSvedo1JsPlZRzHzU7tc5mEdE=",
-        "ref": "worktree-handoff-next-steps",
-        "rev": "a95a5cce6f24f3efd7c278c66c8a5d0064cfa7d9",
-        "revCount": 38,
-        "type": "git",
-        "url": "file:///home/kronberger/Projects/rust/sieb"
+        "lastModified": 1790926564,
+        "narHash": "sha256-uramh+EN4ptxhr54fisXPSYZJfshWT0m2KL4wfYcoMg=",
+        "owner": "kronberger-droid",
+        "repo": "sieb",
+        "rev": "47135bf518198eb16b658eb3fdf50fe1cb6c9bef",
+        "type": "github"
       },
       "original": {
-        "ref": "worktree-handoff-next-steps",
-        "type": "git",
-        "url": "file:///home/kronberger/Projects/rust/sieb"
+        "owner": "kronberger-droid",
+        "ref": "main",
+        "repo": "sieb",
+        "type": "github"
       }
     },
     "systems": {
