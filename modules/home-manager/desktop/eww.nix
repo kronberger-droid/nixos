@@ -108,9 +108,11 @@
   };
 
   scripts = {
+    # sieb.commands are argv lists; one wrapper each so menu.nu gets a path.
     menu = {
       inherit utilLinux;
-      inherit (pkgs) rofi;
+      siebLauncher = pkgs.writeShellScript "sieb-launcher" "exec ${lib.escapeShellArgs config.sieb.commands.launcher}";
+      siebPower = pkgs.writeShellScript "sieb-power" "exec ${lib.escapeShellArgs config.sieb.commands.power}";
     };
     bars = {inherit eww;};
     workspaces = {};
