@@ -16,9 +16,7 @@
 ;; Adding box spacing on top made every gap 20px.
 (defwidget bar-left [mon]
   (box :halign "start" :valign "center" :space-evenly false :spacing 0
-    ;; rofi, as waybar's custom/menu did. The eww launcher this briefly
-    ;; pointed at is gone: rofi's drun already handles the environment an
-    ;; application expects, which the eww one did not (steam would not start).
+    ;; sieb's launcher, the same one as Mod+D; see scripts/menu.
     (eventbox :cursor "pointer"
       (button :class "menu" :onclick "${EWW_CONFIG_DIR}/scripts/menu launcher"
         (label :text "")))
@@ -56,7 +54,7 @@
     (eventbox :cursor "pointer"
       (button :class "clock" :onclick "${EWW_CONFIG_DIR}/scripts/tui calendar"
         (label :text clock)))
-    ;; waybar's custom/power ran the rofi script, and so does this again.
+    ;; sieb's power menu, the same one as Mod+Shift+E.
     (eventbox :cursor "pointer"
       (button :class "power" :onclick "${EWW_CONFIG_DIR}/scripts/menu power"
         (label :text "")))))
