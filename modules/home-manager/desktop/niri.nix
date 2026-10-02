@@ -197,7 +197,7 @@ in
         "${modifier}+Shift+Q".action.close-window = [];
         "${modifier}+Shift+E".action.spawn = config.sieb.commands.power;
         "${modifier}+Shift+P".action.spawn = ["${pkgs.bitwarden-desktop}/bin/bitwarden"];
-        "${modifier}+Shift+W".action.spawn = ["${pkgs.rofi-rbw-wayland}/bin/rofi-rbw"];
+        "${modifier}+Shift+W".action.spawn = config.sieb.commands.rbw;
         "${modifier}+Shift+B".action.spawn = ["${config.programs.qutebrowser.package}/bin/qutebrowser"];
 
         # Notifications
