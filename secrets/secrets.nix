@@ -1,8 +1,5 @@
 let
-  intelNuc = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG2nXGswPYhgVX6zwQAg3Wk8pfVw64pY+wIRIUoSyXYr root@intelNuc";
-  spectre = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMo/agXzq/uXYxPRHuxy20rD/T09I/zQzLFjFmA5b5Ic root@spectre";
-  homeserver = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGfoblAvhTOErUvBVJXFrlzUwwQeQxcsu0864ffnllpW root@homeserver";
-  P14E = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEk1t3/oxPz8Rz5UDZPyYZn0GjUkleGMfKDytYdrtzUY root@nixos";
+  inherit (import ../modules/shared/host-keys.nix) intelNuc spectre homeserver P14E;
 in {
   "kronberger-password.age".publicKeys = [intelNuc spectre P14E];
   "pia-credentials.age".publicKeys = [intelNuc spectre P14E];

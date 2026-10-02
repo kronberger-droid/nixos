@@ -4,7 +4,9 @@
   inputs,
   username,
   ...
-}: {
+}: let
+  hostKeys = import ../../modules/shared/host-keys.nix;
+in {
   imports = [
     ./hardware-configuration.nix
     ../../modules/system/core/nix-settings.nix
@@ -162,8 +164,8 @@
   };
 
   # Builder account: `nix flake archive --to ssh-ng://nix-remote@homeserver`
-  # and `nix build` under this user, plus the dormant buildMachines entry and
-  # the phone's `builders`. Uploading unsigned paths needs trusted-user;
+  # and `nix build` under this user, plus the workstations' buildMachines
+  # entry and the phone's `builders`. Uploading unsigned paths needs trusted-user;
   # nothing here needs wheel, sudo, or a login shell beyond running nix.
   # Normal user rather than system user so it gets a home for nix's own
   # caches and for the gcroots `flake --remote` leaves under ~/.local/state.
@@ -174,9 +176,11 @@
     openssh.authorizedKeys.keys =
       builtins.attrValues (import ../../modules/shared/ssh-keys.nix)
       ++ [
-        # spectre's root key, for the buildMachines entry (nix-daemon runs
-        # the builder connection as root).
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBhJDPNrVbt//EeQVXT4stPOH+gFCjrYKHrrAvqbUKBE root@spectre"
+        # The workstations' host keys, for the buildMachines entry: their
+        # nix-daemon connects as root with /etc/ssh/ssh_host_ed25519_key.
+        hostKeys.intelNuc
+        hostKeys.spectre
+        hostKeys.P14E
         # Nothing Phone (Termux). Only ever needs the store, so it is not in
         # the shared key set any more; key was generated on the homeserver,
         # hence the comment.
@@ -452,9 +456,6 @@
       }
     ];
   };
-
-  # Override: don't list self as a remote builder
-  nix.buildMachines = lib.mkForce [];
 
   # Limit build parallelism to avoid OOM
   nix.settings.max-jobs = 4;
