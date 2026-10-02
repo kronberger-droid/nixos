@@ -102,6 +102,45 @@
       };
     });
 
+  # sieb-pinentry's panel, after the power menu's: a small card with a lock
+  # badge. No placeholder, which would read like a search field.
+  pinentryTheme = toml.generate "sieb-pinentry.toml" (common
+    // {
+      width = 480;
+      padding = 20;
+      radius = 12;
+      input-padding = 10;
+      message-padding = 10;
+      placeholder = "";
+      badge = glyph "f023";
+      colors = {
+        inherit background;
+        text = foreground;
+        accent = foreground;
+        badge = dark;
+        badge-background = urgent;
+        prompt = dark;
+        prompt-background = active;
+        message = foreground;
+        message-background = alternate;
+        backdrop = "#00000000";
+      };
+    });
+
+  # The vault picker. Unlocking first, so the master password prompt (a
+  # sieb-pinentry panel) is not opened under a picker that already holds
+  # the keyboard. rbw.nu calls its tools bare, so they go on PATH here.
+  rbw = pkgs.writeShellScript "sieb-rbw" ''
+    export PATH=${lib.makeBinPath [
+      config.programs.rbw.package
+      pkgs.wtype
+      pkgs.wl-clipboard
+      pkgs.libnotify
+    ]}:$PATH
+    rbw unlock || exit
+    exec ${sieb}/bin/sieb --config ${launcherTheme} --script ${examples}/rbw/rbw.nu
+  '';
+
   # rofi's drun, run, filebrowser and window modes, labelled with the
   # glyphs rofi's display-* used.
   mode = code: script: "${glyph code}:${examples}/${script}";
@@ -139,6 +178,12 @@ in {
       default = power;
       description = "argv of the power menu, for compositor binds.";
     };
+    rbw = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      readOnly = true;
+      default = ["${rbw}"];
+      description = "argv of the Bitwarden picker, for compositor binds.";
+    };
   };
 
   config = {
@@ -148,5 +193,7 @@ in {
     # at hand for `sieb --config ~/.config/sieb/power.toml`.
     xdg.configFile."sieb/config.toml".source = launcherTheme;
     xdg.configFile."sieb/power.toml".source = powerTheme;
+    # Read by sieb-pinentry on its own, since rbw passes it no flags.
+    xdg.configFile."sieb/pinentry.toml".source = pinentryTheme;
   };
 }

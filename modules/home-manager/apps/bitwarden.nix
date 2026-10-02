@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   osConfig ? null,
   ...
 }: {
@@ -15,14 +16,16 @@
   home.packages = with pkgs; [
     bitwarden-desktop
     rofi-rbw-wayland
-    pinentry-rofi
   ];
   programs.rbw = {
     enable = true;
     settings = {
       email = "kronberger@proton.me";
       base_url = "https://vault.bitwarden.eu";
-      pinentry = pkgs.pinentry-rofi;
+      # The unlock prompt as a sieb panel, themed by sieb/pinentry.toml
+      # from desktop/sieb.nix. Any layer-shell compositor will do, so sway
+      # hosts and rofi-rbw get it too.
+      pinentry = inputs.sieb.packages.${pkgs.stdenv.hostPlatform.system}.pinentry;
     };
   };
 
