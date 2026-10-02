@@ -2,6 +2,7 @@
   home.packages = with pkgs; [
     # Browsers
     helium
+    ladybird
 
     # Messaging
     aerion
