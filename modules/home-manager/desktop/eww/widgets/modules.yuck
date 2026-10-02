@@ -192,12 +192,17 @@
 ;; of an "Unknown attribute" warning that a made-up attribute does draw.
 
 (defpoll audio_state :interval "2s"
-  :initial '{"vol": 0, "muted": false, "suffix": "", "tooltip": "", "class": ""}'
+  :initial '{"vol": 0, "muted": false, "suffix": "", "tooltip": "", "class": "", "name": "", "src_muted": false}'
   "scripts/audio")
 
+;; name and src_muted go back to the scroll handler so it can redraw without
+;; asking PipeWire for them again. :timeout because eww kills an onscroll
+;; command after 200ms by default, and the handler queues ticks behind a lock;
+;; audio.nu has the why of both.
 (defwidget pulseaudio []
   (eventbox :cursor "pointer"
-            :onscroll "${EWW_CONFIG_DIR}/scripts/audio scroll {}"
+            :timeout "2s"
+            :onscroll "${EWW_CONFIG_DIR}/scripts/audio scroll {} '${audio_state.name}' ${audio_state.src_muted}"
     (button :class "mod" :tooltip {audio_state.tooltip}
             :onclick "${EWW_CONFIG_DIR}/scripts/tui audio"
             :onrightclick "${EWW_CONFIG_DIR}/scripts/audio toggle-mute"
