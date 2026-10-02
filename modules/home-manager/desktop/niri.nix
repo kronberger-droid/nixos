@@ -177,7 +177,7 @@ in
       binds = {
         # Applications
         "${modifier}+Return".action.spawn = termSpawn {cwdArg = true;};
-        "${modifier}+D".action.spawn = ["${pkgs.rofi}/bin/rofi" "-show" "drun"];
+        "${modifier}+D".action.spawn = config.sieb.commands.launcher;
         "${modifier}+Shift+S".action.spawn = wsSpawn ["${pkgs.helium}/bin/helium"];
         "${modifier}+Shift+Return".action.spawn = termSpawn {
           floating = true;
@@ -195,7 +195,7 @@ in
 
         # Session
         "${modifier}+Shift+Q".action.close-window = [];
-        "${modifier}+Shift+E".action.spawn = ["${config.xdg.configHome}/rofi/powermenu/powermenu.sh"];
+        "${modifier}+Shift+E".action.spawn = config.sieb.commands.power;
         "${modifier}+Shift+P".action.spawn = ["${pkgs.bitwarden-desktop}/bin/bitwarden"];
         "${modifier}+Shift+W".action.spawn = ["${pkgs.rofi-rbw-wayland}/bin/rofi-rbw"];
         "${modifier}+Shift+B".action.spawn = ["${config.programs.qutebrowser.package}/bin/qutebrowser"];

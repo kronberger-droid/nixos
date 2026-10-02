@@ -669,6 +669,7 @@
         "rio-upstream": "rio-upstream",
         "rust-glancer-src": "rust-glancer-src",
         "rust-overlay": "rust-overlay_3",
+        "sieb": "sieb",
         "website": "website"
       }
     },
@@ -764,6 +765,30 @@
         "owner": "andreymatin",
         "repo": "scss-reset",
         "type": "github"
+      }
+    },
+    "sieb": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": [
+          "rust-overlay"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790927445,
+        "narHash": "sha256-nyXOzwGurKEqUeejSkzSvedo1JsPlZRzHzU7tc5mEdE=",
+        "ref": "worktree-handoff-next-steps",
+        "rev": "a95a5cce6f24f3efd7c278c66c8a5d0064cfa7d9",
+        "revCount": 38,
+        "type": "git",
+        "url": "file:///home/kronberger/Projects/rust/sieb"
+      },
+      "original": {
+        "ref": "worktree-handoff-next-steps",
+        "type": "git",
+        "url": "file:///home/kronberger/Projects/rust/sieb"
       }
     },
     "systems": {
