@@ -18,13 +18,7 @@
     fastfetch = {
       enable = true;
       settings = {
-        logo = {
-          source = "nixos_small";
-          padding = {
-            top = 1;
-            right = 3;
-          };
-        };
+        logo.type = "none";
         display.separator = "  ";
         # No Packages module: counting the store costs ~230ms of the ~280ms
         # default run, which is most of what makes fastfetch feel sluggish here.
