@@ -106,16 +106,19 @@ def "main toggle-mute" [] {
 # `src_muted` are the widget's current audio_state handed back, neither of
 # which a scroll changes.
 #
-# eww runs one handler per tick, each in its own thread, so a flick of the
-# wheel starts several at once. Two things went wrong with that:
-#   - `wpctl set-volume 1%-` reads the volume and writes it back, so
-#     concurrent calls read the same base and collapse into one step. Eight
-#     ticks moved the volume 3%.
-#   - pushes landed in whatever order the handlers finished, so the number
-#     could step backwards until the next poll.
-# Hence the lock around the whole set, read and push: each tick then reads
-# after its own write and the pushes come out in order. Queued ticks wait,
-# which is what the widget's raised :timeout is for.
+# eww runs one handler per GTK scroll event and passes only the sign, never
+# the amount. A hi-res wheel sends a notch as a burst of small events (the
+# M705 here: 8, about 8ms apart, so ~70ms a notch) and a touchpad sends a
+# stream, so stepping once per event made a notch 8%. Without the amount,
+# time is the only thing left to go by: the first event of a burst takes a
+# step and holds the lock for THROTTLE, and every event that finds it held
+# is dropped. A notch on any wheel is then one step, a fast spin still gives
+# one step per notch up to 10 a second, and a touchpad swipe scrolls at a
+# steady rate. Holding the lock also keeps two steps from ever overlapping,
+# which matters since `wpctl set-volume 1%-` reads the volume and writes it
+# back, and overlapping calls collapsed into one step.
+const THROTTLE = 100ms
+
 def "main scroll" [dir: string, name: string, src_muted: bool] {
   # eww only ever sends those two. Anything else is not ours to interpret,
   # and a bar handler has no stderr anyone would read, so bail silently.
@@ -125,15 +128,17 @@ def "main scroll" [dir: string, name: string, src_muted: bool] {
     _ => { return }
   }
   let lock = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "eww-audio-scroll.lock")
-  (^$FLOCK $lock $NU -n $env.CURRENT_FILE scroll-locked $step $name
-    ($src_muted | into string))
+  # -n fails at once rather than queueing; that failure is the drop.
+  (^$FLOCK -n $lock $NU -n $env.CURRENT_FILE scroll-locked $step $name
+    ($src_muted | into string)) | complete | ignore
 }
 
 # The body `main scroll` runs under the lock. Kept to two wpctl calls on an
 # ordinary tick: every wpctl call opens its own PipeWire connection, and the
-# full state-json here took a tick to 100-130ms, which serialised is a flick
-# of ten notches taking over a second to land.
+# full state-json here took a step to 100-130ms, more than THROTTLE itself.
 def "main scroll-locked" [step: string, name: string, src_muted: bool] {
+  let start = (date now)
+
   # wpctl's relative form is VOL%[-/+]. -l takes a fraction, 1.0 being 100%,
   # and caps the result rather than the step, so it only bites on the way up.
   ^$WPCTL set-volume -l 1.0 $SINK $step | complete | ignore
@@ -152,4 +157,8 @@ def "main scroll-locked" [step: string, name: string, src_muted: bool] {
   let cfg = ($env.FILE_PWD | path dirname)
   let state = (render $name $sink $src_muted)
   ^$EWW -c $cfg update $"audio_state=($state)" | complete | ignore
+
+  # Hold the lock out to THROTTLE; the rest of this burst lands on it.
+  let left = ($THROTTLE - ((date now) - $start))
+  if $left > 0sec { sleep $left }
 }

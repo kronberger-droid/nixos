@@ -197,8 +197,8 @@
 
 ;; name and src_muted go back to the scroll handler so it can redraw without
 ;; asking PipeWire for them again. :timeout because eww kills an onscroll
-;; command after 200ms by default, and the handler queues ticks behind a lock;
-;; audio.nu has the why of both.
+;; command after 200ms by default, and the step that wins the throttle holds
+;; on for 100ms past its own work; audio.nu has the why of both.
 (defwidget pulseaudio []
   (eventbox :cursor "pointer"
             :timeout "2s"
