@@ -146,6 +146,29 @@ in {
         "${home}/src" = owned;
       };
 
+      # The source side needs the same treatment. For a bind mount systemd
+      # also mkdirs the source when it is missing, as root. On a fresh host,
+      # before syncthing or a restore has delivered the vault, that leaves
+      # ~/Documents, ~/Documents/notes and the vault root owned by root, and
+      # syncthing then cannot write anywhere in the documents folder. The
+      # vault itself kept working only through the ACL below. No mode: with
+      # one, tmpfiles would chmod the vault root on every activation and clip
+      # its ACL mask to r-x. Left unset, a missing directory is still created
+      # 0755 and an existing one only has its owner fixed.
+      systemd.tmpfiles.settings."10-claude-sandbox-source" = let
+        primary = config.users.users.${username};
+        owned = {
+          d = {
+            user = username;
+            inherit (primary) group;
+          };
+        };
+      in {
+        "${primary.home}/Documents" = owned;
+        "${primary.home}/Documents/notes" = owned;
+        ${vaultSrc} = owned;
+      };
+
       # A bind mount resolves permissions on the vault's own inodes, never on
       # /home/<primary> above it, so the 700 there stays intact while the
       # vault inside is reachable. nofail: on a host where syncthing has not
