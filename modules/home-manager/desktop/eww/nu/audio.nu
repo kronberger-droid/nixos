@@ -123,8 +123,8 @@ def "main scroll" [dir: string, name: string, src_muted: bool] {
   # eww only ever sends those two. Anything else is not ours to interpret,
   # and a bar handler has no stderr anyone would read, so bail silently.
   let step = match $dir {
-    "up" => "1%+"
-    "down" => "1%-"
+    "up" => "2%+"
+    "down" => "2%-"
     _ => { return }
   }
   let lock = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "eww-audio-scroll.lock")
