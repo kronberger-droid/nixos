@@ -17,8 +17,20 @@ const BLUETOOTHCTL = "@bluez@/bin/bluetoothctl"
 const BUSCTL       = "@systemd@/bin/busctl"
 const EWW          = "@eww@/bin/eww"
 
+# The adapter's object path, looked up on every call instead of assumed to be
+# hci0. When the controller resets (firmware reload, USB re-enumeration) the
+# kernel hands it the next free index, so it comes back as hci1 and a fixed
+# path reads as "off" until reboot. null when BlueZ has no adapter at all.
+def adapter []: nothing -> any {
+  let out = (^$BUSCTL --system tree org.bluez --list | complete)
+  if $out.exit_code != 0 { return null }
+  $out.stdout | lines | where {|l| $l =~ '^/org/bluez/hci\d+$' } | get 0?
+}
+
 def powered? []: nothing -> bool {
-  let out = (^$BUSCTL --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Powered | complete)
+  let path = (adapter)
+  if $path == null { return false }
+  let out = (^$BUSCTL --system get-property org.bluez $path org.bluez.Adapter1 Powered | complete)
   ($out.stdout | str trim) == "b true"
 }
 
