@@ -218,9 +218,13 @@
   :initial '{"text": "", "tooltip": "", "class": ""}'
   "scripts/bluetooth")
 
+;; :timeout because eww kills an onclick after 200ms by default, and toggle
+;; waits for BlueZ to settle before it pushes the new state. Killed mid-wait,
+;; the push never happens and the label sits on the old value until the poll.
 (defwidget bluetooth []
   (eventbox :cursor "pointer"
     (button :class "mod" :tooltip {bt_state.tooltip}
+            :timeout "2s"
             :onclick "${EWW_CONFIG_DIR}/scripts/tui bluetooth"
             :onrightclick "${EWW_CONFIG_DIR}/scripts/bluetooth toggle"
       (label :text {bt_state.text}))))
