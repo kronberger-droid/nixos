@@ -38,7 +38,14 @@ def outputs []: nothing -> any {
   if ($env.NIRI_SOCKET? | is-not-empty) {
     let r = (^niri msg --json outputs | complete)
     if $r.exit_code != 0 { return null }
-    $r.stdout | from json | columns
+    # niri lists every connected output, including ones it has turned off: a
+    # closed laptop lid keeps eDP-1 in here with `logical: null`. GTK has no
+    # monitor for those, so `eww open` on one fails on every pass and the
+    # retry loop below spins against the daemon. Only outputs with a logical
+    # layout are being drawn on.
+    $r.stdout | from json | transpose name info
+    | where {|o| $o.info.logical? != null }
+    | get name
   } else if ($env.SWAYSOCK? | is-not-empty) {
     # UNTESTED, like workspaces.nu's sway arm. `active` filters out outputs
     # sway knows about but is not driving.
@@ -56,9 +63,17 @@ def outputs []: nothing -> any {
 # back off the daemon is what lets this hold no state of its own. Null on
 # failure for the same reason as `outputs`: an unreachable daemon read as "no
 # bars are open" would have reconcile open one per output against nothing.
+#
+# Empty stdout is a failure too, and the one exit_code cannot see. The daemon's
+# IPC server waits only 100ms for the GTK thread to answer, and past that it
+# hangs up without replying; the client then prints nothing and exits 0. A real
+# answer always goes through println, so even "no windows" arrives as "\n".
+# Right after a daemon restart the GTK thread is busy often enough for this to
+# bite, and reading the silence as "no bars" made reconcile `eww open` a bar
+# that was already up, which eww does by tearing it down and rebuilding it.
 def open-bars []: nothing -> any {
   let r = (^$EWW active-windows | complete)
-  if $r.exit_code != 0 { return null }
+  if ($r.exit_code != 0) or ($r.stdout | is-empty) { return null }
   ($r.stdout
    | lines
    | each {|l| $l | split row ":" | get 0? | default "" | str trim }
