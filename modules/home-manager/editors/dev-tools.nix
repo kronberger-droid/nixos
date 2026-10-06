@@ -97,4 +97,43 @@ in {
         touying
       ]))
   ];
+
+  # Weekly cleanup of what cargo never collects on its own. cargo-sweep only
+  # knows a project's target/, which since the per-workspace build-dir (see
+  # cargo.nix) holds just the final binaries; the bulk sits under
+  # ~/.cargo/build/<hash>/. A hash dir maps to no path cargo will tell us, so
+  # it goes once nothing in it has been touched for 30 days: its checkout was
+  # deleted, or is idle enough that a rebuild is fine.
+  systemd.user.services.cargo-sweep = {
+    Unit.Description = "Prune stale cargo build artifacts";
+    Service = {
+      Type = "oneshot";
+      Nice = 19;
+      IOSchedulingClass = "idle";
+      ExecStart = toString (pkgs.writeShellScript "cargo-sweep" ''
+        export PATH=${pkgs.lib.makeBinPath [rustToolchain pkgs.cargo-sweep pkgs.coreutils pkgs.findutils]}
+        if [ -d "$HOME/Projects" ]; then
+          cargo sweep --time 30 -r "$HOME/Projects" || true
+        fi
+        build="''${CARGO_HOME:-$HOME/.cargo}/build"
+        [ -d "$build" ] || exit 0
+        for d in "$build"/*/*/; do
+          [ -f "$d/CACHEDIR.TAG" ] || continue
+          if [ -z "$(find "$d" -newermt '30 days ago' -print -quit)" ]; then
+            echo "removing idle build dir $d"
+            rm -rf "$d"
+          fi
+        done
+      '');
+    };
+  };
+  systemd.user.timers.cargo-sweep = {
+    Unit.Description = "Weekly cargo-sweep";
+    Timer = {
+      OnCalendar = "weekly";
+      Persistent = true;
+      RandomizedDelaySec = "1h";
+    };
+    Install.WantedBy = ["timers.target"];
+  };
 }
