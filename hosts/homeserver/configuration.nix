@@ -116,10 +116,11 @@ in {
       # reached over the tailnet, so it is opened on tailscale0 alone, the
       # same way modules/system/services/webdav.nix scopes port 8081.
       # Tailscale's subnet route still lets tailnet peers reach the LAN, not
-      # the reverse. Two things this list does not govern: docker's own
-      # DOCKER chains sit ahead of nixos-fw, so any container port published
-      # with -p is LAN-reachable regardless; and `flake --remote` depends on
-      # the tailnet end to end (ssh via MagicDNS, the cache on 5001).
+      # the reverse. This list does not govern docker: a port published with
+      # -p is DNAT'd to the container and forwarded, never reaching nixos-fw.
+      # DOCKER-USER in extraCommands below scopes those to the tailnet. Also
+      # `flake --remote` depends on the tailnet end to end (ssh via
+      # MagicDNS, the cache on 5001).
       allowedTCPPorts = [22 53];
       allowedUDPPorts = [53];
       interfaces."tailscale0".allowedTCPPorts = [
@@ -135,6 +136,27 @@ in {
       # did the same job on top of it, without a matching stop command, so it
       # stacked a duplicate on every firewall reload.
       logRefusedConnections = true;
+
+      # Published container ports, tailnet only. DOCKER-USER is the chain
+      # docker jumps to from FORWARD ahead of its own rules and never
+      # rewrites, so this holds whatever a compose file publishes, including
+      # an explicit 0.0.0.0. Matching on the inbound interface rather than
+      # ports, since after DNAT the port is the container's (Open WebUI's
+      # 3000 is 8080 there). The bridges stay open so containers reach each
+      # other and the internet. Flushed, not deleted, on stop: docker keeps
+      # its FORWARD jump into the chain.
+      extraCommands = ''
+        ip46tables -N DOCKER-USER 2>/dev/null || true
+        ip46tables -F DOCKER-USER
+        ip46tables -A DOCKER-USER -m conntrack --ctstate RELATED,ESTABLISHED -j RETURN
+        ip46tables -A DOCKER-USER -i tailscale0 -j RETURN
+        ip46tables -A DOCKER-USER -i docker0 -j RETURN
+        ip46tables -A DOCKER-USER -i br-+ -j RETURN
+        ip46tables -A DOCKER-USER -j DROP
+      '';
+      extraStopCommands = ''
+        ip46tables -F DOCKER-USER 2>/dev/null || true
+      '';
     };
   };
 
