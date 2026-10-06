@@ -215,10 +215,70 @@
       "update_pull_request_branch"
     ];
 
+  # PreToolUse hook on Bash. Two jobs, both keyed off the command text:
+  #
+  # 1. `ask` on any push or GitHub write, wherever it sits in the command.
+  #    The `outwardFacing` prefixes above miss `timeout 110 git push`,
+  #    `git -c credential.helper=... push` and `nu -c "git push"`, all of
+  #    which ran unprompted in real sessions. The git pattern stays inside one
+  #    simple command (no `;&|` between `git` and `push`), so a commit message
+  #    that merely says "push" still trips it; that costs a keystroke, not a
+  #    wall. `git stash push` stays local and is exempt.
+  # 2. A reminder on commits and PR bodies to have commit-writer/github-voice
+  #    loaded. Both get dropped by /compact, and a long session went on to
+  #    write ~20 commits and 3 PR bodies without either.
+  bashGuardHook = pkgs.writeShellScript "claude-bash-guard" ''
+    cmd=$(${pkgs.jq}/bin/jq -r '.tool_input.command // ""')
+    has() { printf '%s' "$cmd" | ${pkgs.gnugrep}/bin/grep -Eq "$1"; }
+
+    decision=""
+    reason=""
+    # One line per simple command, so the stash exemption cannot cover a
+    # real push chained after it.
+    pushes() {
+      printf '%s' "$cmd" | tr ';&|' '\n\n\n' \
+        | ${pkgs.gnugrep}/bin/grep -E '\bgit\b.*\bpush\b' \
+        | ${pkgs.gnugrep}/bin/grep -Evq '\bgit\b.*\bstash\b.*\bpush\b'
+    }
+
+    if pushes \
+      || has '\bgh[[:space:]]+(pr|issue|release|repo|gist)[[:space:]]+(create|edit|merge|ready|comment|review|close|reopen|delete)\b'; then
+      decision="ask"
+      reason="Outward-facing: this pushes to or writes on a remote."
+    fi
+
+    context=""
+    if has '\bgit\b[^;&|]*\bcommit\b'; then
+      context="Commit messages follow the commit-writer skill. Load it now if its text is not in context since the last compaction."
+    elif has '\bgh[[:space:]]+pr[[:space:]]+(create|edit)\b'; then
+      context="PR bodies follow the github-voice skill. Load it now if its text is not in context since the last compaction."
+    fi
+
+    [ -z "$decision" ] && [ -z "$context" ] && exit 0
+    ${pkgs.jq}/bin/jq -n --arg d "$decision" --arg r "$reason" --arg c "$context" '
+      {hookSpecificOutput: (
+        {hookEventName: "PreToolUse"}
+        + (if $d != "" then {permissionDecision: $d, permissionDecisionReason: $r} else {} end)
+        + (if $c != "" then {additionalContext: $c} else {} end)
+      )}'
+  '';
+
   # JSON to merge into ~/.claude/settings.json (statusline + plugins)
   settingsToMerge =
     {
       permissions.ask = outwardFacing;
+
+      hooks.PreToolUse = [
+        {
+          matcher = "Bash";
+          hooks = [
+            {
+              type = "command";
+              command = "${bashGuardHook}";
+            }
+          ];
+        }
+      ];
 
       # The rules above match a command's leading text, which `nu -c "git
       # push"`, a `git -C` elsewhere, or a one-line script all walk straight
@@ -245,6 +305,12 @@
       # PR-body line, again above CLAUDE.md. This is the switch that stops the
       # injection; claude-md.md restates the rule as a backstop.
       attribution.sessionUrl = false;
+
+      # Lix's default `log-format = auto` paints its progress bar
+      # (`\e[?2026h\r\e[K`, once per frame) even when stderr is a pipe, so
+      # every nix call the agent made came back as tens of KB of escape codes
+      # around a few lines of answer. Raw keeps only the log lines.
+      env.NIX_CONFIG = "log-format = raw";
       # Not set here: the fullscreen renderer (CLAUDE_CODE_NO_FLICKER=1, or
       # `/tui fullscreen` per session) that works around the inline
       # renderer's ghosting once output scrolls past the viewport (upstream
