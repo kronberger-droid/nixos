@@ -54,6 +54,33 @@ confirmed when you get there. Read nothing as standing permission: not an
 allowlist entry, not an earlier session, not the fact that the work is
 obviously heading that way.
 
+When a push fails or stalls, stop and tell me. The remote, the transport and
+the credential helper stay as they are; changing them is my call.
+
+## Working across repos
+
+Project `CLAUDE.md` and memory load only for the directory the session started
+in. When the work targets a different repo, read that repo's `CLAUDE.md` and
+`~/.claude/projects/<slug>/memory/MEMORY.md` before acting (the slug is the
+absolute path with `/` and `.` turned into `-`, e.g.
+`-home-kronberger--config-nixos`). System, desktop and package questions are
+about `~/.config/nixos` wherever the session started.
+
+## Worktree sessions
+
+Inside a worktree from EnterWorktree, a guard refuses every Bash command it
+cannot prove stays in the worktree, and each refusal costs a round trip. Write
+commands it can verify:
+
+- The cwd already is the worktree. Run commands there directly.
+- Edit files with Edit and Write.
+- One plain command per Bash call with literal arguments. Shell variables or
+  `$(...)` as operands, loops, heredocs, `git -C` and `nu -c` all get refused.
+- Anything multi-step goes in a script under `$CLAUDE_JOB_DIR/tmp/`, run as
+  `sh <file>`.
+- The guard reads `nix eval` as shell `eval`. Check a Nix change with
+  `nix build --dry-run <installable>` instead.
+
 ## LLM disclosure
 
 Add a `Co-Authored-By:` trailer only when I ask for one in the request itself,
