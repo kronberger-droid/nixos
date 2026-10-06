@@ -1,0 +1,37 @@
+#!/bin/sh
+# Pre-commit: the fast half of `nix flake check`, on staged files only.
+# alejandra on .nix, nu-check on .nu (placeholders like `@nu@` swapped for a
+# dummy path first, as the nu-parse check does). The host evaluations take
+# minutes, so they stay in `nix flake check` before a switch.
+#
+# Wired by `core.hooksPath` in this repo's .git/config.
+# Bypass once: git commit --no-verify
+fail=0
+
+nix_files=$(git diff --cached --name-only --diff-filter=ACM -- '*.nix')
+if [ -n "$nix_files" ]; then
+  if command -v alejandra >/dev/null 2>&1; then
+    # shellcheck disable=SC2086 # one path per word is the point
+    alejandra --check --quiet $nix_files || {
+      echo "pre-commit: run 'nix fmt -- .' and stage the result." >&2
+      fail=1
+    }
+  else
+    echo "pre-commit: alejandra not on PATH, skipping the format check." >&2
+  fi
+fi
+
+nu_files=$(git diff --cached --name-only --diff-filter=ACM -- '*.nu')
+if [ -n "$nu_files" ] && command -v nu >/dev/null 2>&1; then
+  tmp=$(mktemp --suffix=.nu)
+  for f in $nu_files; do
+    git show ":$f" | sed 's/@[A-Za-z_]*@/\/placeholder/g' > "$tmp"
+    if ! nu --no-config-file -c "if not (nu-check '$tmp') { exit 1 }" 2>/dev/null; then
+      echo "pre-commit: $f does not parse (nu-check --debug shows why)." >&2
+      fail=1
+    fi
+  done
+  rm -f "$tmp"
+fi
+
+exit $fail
