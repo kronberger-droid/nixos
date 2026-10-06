@@ -1,12 +1,12 @@
 ---
 name: github-voice
-description: Draft GitHub prose as Martin — review comments, issue replies, and PR bodies.
+description: Draft GitHub prose as Martin — review comments, issue replies, new issues, and PR bodies.
 when_to_use: >-
   When writing anything that will be posted to GitHub under Martin's name: a
-  review comment or reply, an issue comment, or a pull request body. Covers
+  review comment or reply, an issue comment, a new issue, or a pull request body. Covers
   drafts written to a scratch file, and PRs you open yourself as one step of a
   larger task. For commit messages use `commit-writer` instead.
-argument-hint: [review|issue|pr]
+argument-hint: [review|issue|new-issue|pr]
 user-invocable: true
 allowed-tools: Read Grep Bash WebFetch
 ---
@@ -18,6 +18,11 @@ and the fuller short-form/long-form breakdown, is at
 `~/Documents/notes/general-vault/_context/claude/github-writing-style.md`.
 Read it to calibrate phrasing closely, or when a rule below feels
 underspecified.
+
+Write every draft to the vault at
+`~/Documents/notes/general-vault/_context/claude/draft-<kind>-<topic>.md`
+(`draft-issue-esc-history-search.md`, `draft-pr-1231-lazy-anchor.md`). A draft
+there survives the session; the job tmp dir is deleted with the job.
 
 ## Both registers
 
@@ -56,7 +61,25 @@ underspecified.
   ... `Sorry for the churn.`). Empathy before a "no".
 - `@name` on its own line, body underneath.
 
+## New issues
+
+- **The repo's issue template wins**, the same way a PR template does
+  (`.github/ISSUE_TEMPLATE/`). Fill its headings; the shape below fills the
+  gaps.
+- **Aim for ~25 lines.** Long enough to reproduce, short enough to read in one
+  go.
+- **Description**: what breaks and, when known, why, in 2-3 lines.
+- **Steps to reproduce**: numbered, minimal, with a fenced snippet when code
+  triggers it.
+- **Expected behavior**: always present, even when the template lacks the
+  heading. One line is enough.
+- **Possible fix**: 1-2 lines when you have a lead, otherwise leave it out.
+
 ## PR bodies
+
+- **The body states the change and its user-visible effect.** Measurements,
+  investigation history and residual caveats stay in the session or the commit
+  log unless I ask for them.
 
 - Conventional-commit title, scope in parens, `!` for breaking:
   `feat(vi)!: visual mode on a unified Cursor + rest-policy model`.
