@@ -462,9 +462,57 @@
         self.nixosConfigurations.homeserver;
     };
 
+    # `nix flake check` is the whole pre-switch gate, so nobody has to
+    # hand-roll a loop over the hosts again.
     checks = nixpkgs.lib.genAttrs [x86System] (
-      system:
+      system: let
+        pkgs = nixpkgs.legacyPackages.${system};
+        lib = nixpkgs.lib;
+        hosts =
+          lib.filterAttrs
+          (_: c: c.pkgs.stdenv.hostPlatform.system == system)
+          self.nixosConfigurations;
+      in
         inputs.deploy-rs.lib.${system}.deployChecks self.deploy
+        # One per host: evaluates the whole system without building it. The
+        # drv path is written out with its context dropped, so forcing it
+        # instantiates the toplevel but never realises it.
+        // lib.mapAttrs' (name: c:
+          lib.nameValuePair "eval-${name}" (pkgs.writeText "eval-${name}"
+            (builtins.unsafeDiscardStringContext c.config.system.build.toplevel.drvPath)))
+        hosts
+        // {
+          format = pkgs.runCommand "alejandra-check" {} ''
+            ${pkgs.alejandra}/bin/alejandra --check --quiet ${self} && touch $out
+          '';
+          # The .nu files are templates: `@nu@`, `@eww@` and friends are
+          # substituted at build time, so each placeholder becomes a dummy
+          # path before parsing. nu-check is false on a parse error.
+          #
+          # The nushell is a host's, i.e. the overlay's build of upstream
+          # main: parsing with nixpkgs' release would check against a
+          # language one version behind the shell that runs these. `source`
+          # resolves at parse time, so every `source ~/...` target gets an
+          # empty stub; each sourced file is checked on its own anyway.
+          nu-parse =
+            pkgs.runCommand "nu-parse-check" {
+              nativeBuildInputs = [(lib.head (lib.attrValues hosts)).pkgs.nushell];
+            } ''
+              export HOME=$TMPDIR
+              for p in $(grep -rhoE '^\s*source ~/[^ ]+' ${self} --include='*.nu' | sed 's/.*source ~\///'); do
+                mkdir -p "$HOME/$(dirname "$p")" && touch "$HOME/$p"
+              done
+              fail=0
+              for f in $(cd ${self} && find . -name '*.nu'); do
+                sed 's/@[A-Za-z_]*@/\/placeholder/g' "${self}/$f" > "$TMPDIR/check.nu"
+                if ! nu --no-config-file -c "if not (nu-check '$TMPDIR/check.nu') { exit 1 }"; then
+                  echo "nu-check: $f does not parse" >&2
+                  fail=1
+                fi
+              done
+              [ $fail -eq 0 ] && touch $out
+            '';
+        }
     );
 
     # `nix fmt -- .` — alejandra, the same formatter helix runs on save (see
