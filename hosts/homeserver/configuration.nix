@@ -159,9 +159,18 @@ in {
     createHome = true;
     isNormalUser = true;
     extraGroups = ["wheel"];
-    shell = pkgs.nushell;
+    # bash as the login shell, so `ssh homeserver <cmd>` and scripts piped
+    # over ssh get POSIX sh. Interactive logins hop into nu below.
+    shell = pkgs.bash;
     openssh.authorizedKeys.keys = builtins.attrValues (import ../../modules/shared/ssh-keys.nix);
   };
+  # Only interactive login shells: a plain `bash` started from nu stays bash,
+  # and root's `sudo -i` and the other accounts are left alone.
+  programs.bash.interactiveShellInit = ''
+    if shopt -q login_shell && [[ $(id -un) == ${username} ]]; then
+      exec ${pkgs.nushell}/bin/nu --login
+    fi
+  '';
 
   # Builder account: `nix flake archive --to ssh-ng://nix-remote@homeserver`
   # and `nix build` under this user, plus the workstations' buildMachines
