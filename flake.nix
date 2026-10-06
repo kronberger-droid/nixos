@@ -53,11 +53,6 @@
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
-      # agenix pins its own home-manager and nix-darwin for its HM/darwin
-      # modules; neither is used here, so they were two stale trees
-      # (2025-04) fetched and hashed on every `nix flake update`.
-      inputs.home-manager.follows = "home-manager";
-      inputs.darwin.follows = "";
     };
     claude-code = {
       # Tracks latest. We briefly pinned to 2.1.168 chasing a TUI render glitch
