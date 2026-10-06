@@ -50,19 +50,21 @@ in {
       # per test target, so cheaper linking compounds across a workspace, and
       # opt-level = 1 on deps shows up directly in test runtime.
 
-      # Intermediate artifacts (deps, fingerprints, incremental) go to one
-      # machine-wide dir, so a second worktree of the same repo reuses the
-      # dependency build instead of starting from zero. Final binaries still
-      # land in each checkout's target/, so target/debug/<bin> stays
-      # unambiguous. {cargo-cache-home} is cargo's own template for
-      # $CARGO_HOME, so the path needs no per-host interpolation.
+      # Intermediate artifacts (deps, fingerprints, incremental) live under
+      # $CARGO_HOME instead of in each checkout, one dir per workspace path.
+      # Final binaries still land in each checkout's target/.
       #
-      # Shared across every Rust project on the machine, and `cargo clean`
-      # in any of them clears the whole dir; use `cargo clean -p <crate>`
-      # for targeted cleanups. Lowest-priority config file, so a project's
-      # own .cargo/config.toml can still redirect it.
+      # Per workspace, not one shared dir: with every checkout in one dir,
+      # two worktrees of the same crate shared fingerprints, freshness is
+      # mtime based, and a worktree's target/ got hardlinked to the other's
+      # test binary. Costs the dependency reuse across worktrees. Dirs of
+      # deleted or idle checkouts are pruned by the cargo-sweep timer in
+      # dev-tools.nix.
+      #
+      # Lowest-priority config file, so a project's own .cargo/config.toml
+      # can still redirect it.
       [build]
-      build-dir = "{cargo-cache-home}/build"
+      build-dir = "{cargo-cache-home}/build/{workspace-path-hash}"
 
       [alias]
       t = "nextest run"
