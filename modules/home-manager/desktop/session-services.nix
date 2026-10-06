@@ -42,27 +42,28 @@
   # org.freedesktop.ScreenSaver Inhibit and then just keeps its bus
   # connection open: niri drops the inhibit the moment that connection goes
   # away, so the SIGTERM from `systemctl stop` is the release.
-  idleInhibitDbus = pkgs.writers.writePython3 "idle-inhibit-dbus" {
-    libraries = [pkgs.python3Packages.jeepney];
-  } ''
-    import signal
+  idleInhibitDbus =
+    pkgs.writers.writePython3 "idle-inhibit-dbus" {
+      libraries = [pkgs.python3Packages.jeepney];
+    } ''
+      import signal
 
-    from jeepney import DBusAddress, new_method_call
-    from jeepney.io.blocking import open_dbus_connection
+      from jeepney import DBusAddress, new_method_call
+      from jeepney.io.blocking import open_dbus_connection
 
-    SCREENSAVER = DBusAddress(
-        "/ScreenSaver",
-        bus_name="org.freedesktop.ScreenSaver",
-        interface="org.freedesktop.ScreenSaver",
-    )
+      SCREENSAVER = DBusAddress(
+          "/ScreenSaver",
+          bus_name="org.freedesktop.ScreenSaver",
+          interface="org.freedesktop.ScreenSaver",
+      )
 
-    conn = open_dbus_connection(bus="SESSION")
-    conn.send_and_get_reply(
-        new_method_call(SCREENSAVER, "Inhibit", "ss", ("eww", "idle toggle"))
-    )
-    # Hold the connection open; closing it releases the inhibit.
-    signal.pause()
-  '';
+      conn = open_dbus_connection(bus="SESSION")
+      conn.send_and_get_reply(
+          new_method_call(SCREENSAVER, "Inhibit", "ss", ("eww", "idle toggle"))
+      )
+      # Hold the connection open; closing it releases the inhibit.
+      signal.pause()
+    '';
   idleInhibit = pkgs.writeShellScript "idle-inhibit" ''
     if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
       exec ${idleInhibitDbus}
