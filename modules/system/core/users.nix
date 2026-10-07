@@ -39,6 +39,12 @@ in {
       mv -f ${passwordFile}.tmp ${passwordFile}
     '';
   };
+  # userborn only sees the path above, which never changes, so a new hash
+  # otherwise waits for the next boot. A mistyped hash goes live on switch
+  # too, so check a fresh hash with `crypt()` before encrypting it. Keyed on
+  # the file's content: its path sits under the flake's own store path,
+  # which changes with every commit.
+  systemd.services.userborn.restartTriggers = [(builtins.hashFile "sha256" passwordSecret)];
 
   users.users.${username} = {
     createHome = true;
