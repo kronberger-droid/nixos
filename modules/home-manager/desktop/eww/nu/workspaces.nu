@@ -1,4 +1,4 @@
-#!@nu@/bin/nu -n
+#!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 #
 # niri and swaymsg are called bare rather than by store path. waybar.nix has to
 # gate its niri interpolation on compositor.primary, because pulling the

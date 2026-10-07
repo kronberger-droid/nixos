@@ -25,8 +25,18 @@
   #
   # Installed names carry no extension and consumers go through `scriptPath`,
   # matching waybar's convention.
+  #
+  # The shebang runs nu through `env -S` because the kernel hands everything
+  # after the interpreter to it as one argv entry, and nu rejects
+  # "-n --no-std-lib" packed that way. --no-std-lib is worth the extra exec:
+  # it took startup from ~11 ms to ~7 ms on 0.116, which the defpoll widgets
+  # pay on every poll. None of the scripts `use std`.
   script = name: vars:
-    pkgs.replaceVars (./eww/nu + "/${name}.nu") (vars // {nu = pkgs.nushell;});
+    pkgs.replaceVars (./eww/nu + "/${name}.nu") (vars
+      // {
+        inherit (pkgs) coreutils;
+        nu = pkgs.nushell;
+      });
 
   scriptPath = name: "${config.xdg.configHome}/eww/scripts/${name}";
 

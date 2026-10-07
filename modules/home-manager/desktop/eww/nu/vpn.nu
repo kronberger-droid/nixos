@@ -1,4 +1,4 @@
-#!@nu@/bin/nu -n
+#!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 
 # VPN status, menu contents, and toggling. Merged from three waybar helpers:
 # vpn-status.nu (unchanged logic), vpn-picker.nu (minus its rofi call) and

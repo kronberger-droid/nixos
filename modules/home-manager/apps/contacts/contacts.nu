@@ -1,4 +1,4 @@
-#!@nu@/bin/nu -n
+#!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 
 # Fuzzy picker over the khard address book, in the style of eww/nu/*.nu:
 # a real .nu file, store paths substituted by replaceVars, no bare names.

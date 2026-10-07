@@ -1,4 +1,4 @@
-#!@nu@/bin/nu -n
+#!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 
 # The bar's launcher and power buttons, opening the same sieb menus as niri's
 # Mod+D and Mod+Shift+E.
