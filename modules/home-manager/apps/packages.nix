@@ -47,6 +47,7 @@
     # Networking
     localsend
     sshfs # mount remote SFTP/SSH dirs locally (see sftp-mount in nushell)
+    xcp # cp with progress and parallel copies, for the sshfs mounts
 
     # System
     ltunify
