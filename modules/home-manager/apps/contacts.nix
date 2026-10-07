@@ -12,6 +12,7 @@
     install -Dm755 ${
       pkgs.replaceVars ./contacts/contacts.nu {
         nu = pkgs.nushell;
+        inherit (pkgs) coreutils;
         khard = config.programs.khard.package;
         inherit (pkgs) skim vdirsyncer;
       }

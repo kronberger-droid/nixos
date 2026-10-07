@@ -1,4 +1,4 @@
-#!@nu@/bin/nu -n
+#!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 
 # Do Not Disturb, merged from waybar/nu/dnd-status.nu and dnd-toggle.nu.
 # Logic unchanged; only the refresh differs, since eww has no signal mechanism.

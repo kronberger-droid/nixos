@@ -1,4 +1,4 @@
-#!@nu@/bin/nu -n
+#!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 
 # waybar's `pulseaudio` module, on wpctl. Its config:
 #   format               "{volume}% {icon} {format_source}"
@@ -129,7 +129,7 @@ def "main scroll" [dir: string, name: string, src_muted: bool] {
   }
   let lock = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "eww-audio-scroll.lock")
   # -n fails at once rather than queueing; that failure is the drop.
-  (^$FLOCK -n $lock $NU -n $env.CURRENT_FILE scroll-locked $step $name
+  (^$FLOCK -n $lock $NU -n --no-std-lib $env.CURRENT_FILE scroll-locked $step $name
     ($src_muted | into string)) | complete | ignore
 }
 

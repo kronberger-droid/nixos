@@ -1,4 +1,4 @@
-#!@nu@/bin/nu -n
+#!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 
 # waybar's built-in `idle_inhibitor`, which eww has no equivalent for.
 #
