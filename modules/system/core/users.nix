@@ -14,6 +14,10 @@
   # is decrypted ahead of userborn instead.
   passwordFile = "/run/user-passwords/${username}";
   passwordSecret = "${inputs.self}/secrets/kronberger-password.age";
+  # Restart trigger for both units below. Keyed on the file's content: its
+  # path sits under the flake's own store path, which changes with every
+  # commit.
+  passwordSecretHash = builtins.hashFile "sha256" passwordSecret;
 in {
   systemd.services.decrypt-user-password = {
     description = "Decrypt the login password hash for userborn";
@@ -22,7 +26,7 @@ in {
     wantedBy = ["sysinit.target" "userborn.service"];
     before = ["userborn.service"];
     unitConfig.DefaultDependencies = false;
-    restartTriggers = [passwordSecret];
+    restartTriggers = [passwordSecretHash];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -41,10 +45,8 @@ in {
   };
   # userborn only sees the path above, which never changes, so a new hash
   # otherwise waits for the next boot. A mistyped hash goes live on switch
-  # too, so check a fresh hash with `crypt()` before encrypting it. Keyed on
-  # the file's content: its path sits under the flake's own store path,
-  # which changes with every commit.
-  systemd.services.userborn.restartTriggers = [(builtins.hashFile "sha256" passwordSecret)];
+  # too, so check a fresh hash with `crypt()` before encrypting it.
+  systemd.services.userborn.restartTriggers = [passwordSecretHash];
 
   users.users.${username} = {
     createHome = true;
