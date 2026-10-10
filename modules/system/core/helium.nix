@@ -30,7 +30,7 @@
             install -m 444 -D ${appimageContents}/helium.png \
               $out/share/icons/hicolor/512x512/apps/helium.png
             substituteInPlace $out/share/applications/helium.desktop \
-              --replace 'Exec=helium' 'Exec=helium --enable-features=UseOzonePlatform --ozone-platform=wayland'
+              --replace 'Exec=helium' 'Exec=helium --ozone-platform=wayland'
           '';
 
           meta = {
