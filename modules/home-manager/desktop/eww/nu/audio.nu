@@ -93,7 +93,7 @@ def main [] {
 }
 
 # waybar's on-click opens wiremix; its scroll-to-change-volume is `main
-# scroll` below.
+# scroll` below, and the hover slider waybar never had is `main set`.
 def "main toggle-mute" [] {
   ^$WPCTL set-mute $SINK toggle | complete | ignore
   # Push rather than wait for the 2s poll, as the other toggles do.
@@ -142,8 +142,16 @@ def "main scroll-locked" [step: string, name: string, src_muted: bool] {
   # wpctl's relative form is VOL%[-/+]. -l takes a fraction, 1.0 being 100%,
   # and caps the result rather than the step, so it only bites on the way up.
   ^$WPCTL set-volume -l 1.0 $SINK $step | complete | ignore
+  settle $name $src_muted
 
-  # Unmute in both directions: scrolling a muted sink and hearing nothing is
+  # Hold the lock out to THROTTLE; the rest of this burst lands on it.
+  let left = ($THROTTLE - ((date now) - $start))
+  if $left > 0sec { sleep $left }
+}
+
+# The tail every volume change shares, after the new volume is written.
+def settle [name: string, src_muted: bool] {
+  # Unmute in both directions: changing a muted sink and hearing nothing is
   # the papercut this avoids. Only when the read says muted, which spares a
   # call on every ordinary tick.
   let sink = (vol-of $SINK)
@@ -152,13 +160,47 @@ def "main scroll-locked" [step: string, name: string, src_muted: bool] {
     $sink | update muted false
   } else { $sink }
 
-  # Push rather than wait for the 2s poll, as toggle-mute does. `cfg`, not
-  # `dir`: that name is the scroll direction here.
+  # Push rather than wait for the 2s poll, as toggle-mute does.
   let cfg = ($env.FILE_PWD | path dirname)
   let state = (render $name $sink $src_muted)
   ^$EWW -c $cfg update $"audio_state=($state)" | complete | ignore
+}
 
-  # Hold the lock out to THROTTLE; the rest of this burst lands on it.
-  let left = ($THROTTLE - ((date now) - $start))
-  if $left > 0sec { sleep $left }
+# The hover slider's onchange. `value` is the slider position eww substituted
+# into {}, an absolute percentage; `name` and `src_muted` ride along as they
+# do for scroll.
+#
+# A drag fires once per whole percent it crosses, so this sees the same kind
+# of burst scroll does, but scroll's drop-the-losers throttle is wrong here.
+# Scroll steps are relative and any one of them will do; a slider position is
+# absolute and the one that matters is the last, which is exactly the one most
+# likely to land on a held lock and be dropped. So the last value wins
+# instead: every call parks its value in TARGET, then queues on the lock, and
+# whoever holds it applies whatever TARGET says at that moment and consumes
+# it. Since each call writes before it queues, the final position is always
+# read by some later holder; the calls behind it find TARGET gone and exit.
+#
+# The write is a rename so a holder never reads a half-written file, or
+# unlinks one that is still being written and loses the value with it.
+def "main set" [value: float, name: string, src_muted: bool] {
+  let run = ($env.XDG_RUNTIME_DIR? | default "/tmp")
+  let target = ($run | path join "eww-audio-set.target")
+  let tmp = $"($target).($nu.pid)"
+  $value | math round | into string | save -f $tmp
+  mv -f $tmp $target
+  # Blocking, unlike scroll's -n: queueing is the point.
+  (^$FLOCK ($run | path join "eww-audio-set.lock")
+    $NU -n --no-std-lib $env.CURRENT_FILE set-locked $name ($src_muted | into string))
+  | complete | ignore
+}
+
+def "main set-locked" [name: string, src_muted: bool] {
+  let target = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "eww-audio-set.target")
+  if not ($target | path exists) { return }
+  let pct = (try { open --raw $target | into string | str trim | into int } catch { null })
+  rm -f $target
+  if $pct == null { return }
+
+  ^$WPCTL set-volume $SINK $"($pct)%" | complete | ignore
+  settle $name $src_muted
 }
