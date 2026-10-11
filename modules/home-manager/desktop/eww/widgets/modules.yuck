@@ -202,7 +202,14 @@
 ;; the bar into it. The hover eventbox wraps the slider as well as the module
 ;; for the same reason, and bar.yuck's backstop clears audio_hover with the
 ;; clusters' flags.
+;;
+;; audio_busy is the second flag holding it out: a drag that leaves the bar
+;; is a hover-lost too, and collapsed the slider under the pointer. `audio
+;; set` raises it on every change and drops it shortly after the last one;
+;; audio.nu has the why. It stays out of the backstop, since leaving the bar
+;; is exactly the event it has to survive.
 (defvar audio_hover false)
+(defvar audio_busy false)
 
 ;; name and src_muted go back to the scroll handler so it can redraw without
 ;; asking PipeWire for them again. :timeout because eww kills an onscroll
@@ -212,7 +219,7 @@
   (eventbox :onhover "${EWW_CMD} update audio_hover=true"
             :onhoverlost "${EWW_CMD} update audio_hover=false"
     (box :space-evenly false :spacing 0
-      (revealer :transition "slideleft" :duration "300ms" :reveal audio_hover
+      (revealer :transition "slideleft" :duration "300ms" :reveal {audio_hover || audio_busy}
         ;; :max 101, not 100: eww gives the scale a page size of 1, and GTK
         ;; stops a range at max minus the page size. :timeout because a set
         ;; queues behind the one applying; audio.nu has the why.
