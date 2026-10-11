@@ -138,8 +138,10 @@
 // is spelled out here. The trough carries the length; the slider's negative
 // margin lets the knob stand taller than the 4px trough it sits on.
 //
-// Fill in the foreground colour, dimmed when muted the same way the separator
-// is dim: the muted sink still has a volume, it just is not the one you hear.
+// The trough takes the workspace pills' background, so the slider reads as
+// part of the same bar. Fill in the foreground colour, knob in the accent;
+// both dim when muted the same way the separator is dim: the muted sink
+// still has a volume, it just is not the one you hear.
 .bar .volume {
   margin: 0 0 0 5px;
 
@@ -147,7 +149,7 @@
     min-width: 100px;
     min-height: 4px;
     border-radius: 2px;
-    background-color: $base02;
+    background-color: $panel-bg;
   }
 
   highlight {
@@ -160,7 +162,7 @@
     min-height: 12px;
     margin: -4px 0;
     border-radius: 6px;
-    background-color: $base05;
+    background-color: $base0F;
   }
 
   &.muted highlight,
