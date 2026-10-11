@@ -82,9 +82,10 @@
   ;; the drawer sticks part-open.
   ;;
   ;; Leaving the bar is a much larger target and a much less racy event, so this
-  ;; is the backstop. Both flags are cleared in one `eww update`, which takes
-  ;; several assignments at once.
-  (eventbox :onhoverlost "${EWW_CMD} update tray_hover=false toggles_hover=false"
+  ;; is the backstop. Every flag is cleared in one `eww update`, which takes
+  ;; several assignments at once. audio_hover is the volume slider's, which
+  ;; is the same drawer on a single module.
+  (eventbox :onhoverlost "${EWW_CMD} update tray_hover=false toggles_hover=false audio_hover=false"
     (centerbox :class "bar"
       (bar-left :mon mon)
       (box)

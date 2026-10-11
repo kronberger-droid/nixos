@@ -132,3 +132,39 @@
 .bar .ncspot {
   color: $base0B;
 }
+
+// The audio module's hover slider. _base.scss's `* { all: unset }` takes
+// GtkScale down to nothing, with no size and no colour, so every part of it
+// is spelled out here. The trough carries the length; the slider's negative
+// margin lets the knob stand taller than the 4px trough it sits on.
+//
+// Fill in the foreground colour, dimmed when muted the same way the separator
+// is dim: the muted sink still has a volume, it just is not the one you hear.
+.bar .volume {
+  margin: 0 0 0 5px;
+
+  trough {
+    min-width: 100px;
+    min-height: 4px;
+    border-radius: 2px;
+    background-color: $base02;
+  }
+
+  highlight {
+    border-radius: 2px;
+    background-color: $base05;
+  }
+
+  slider {
+    min-width: 12px;
+    min-height: 12px;
+    margin: -4px 0;
+    border-radius: 6px;
+    background-color: $base05;
+  }
+
+  &.muted highlight,
+  &.muted slider {
+    background-color: $base03;
+  }
+}
