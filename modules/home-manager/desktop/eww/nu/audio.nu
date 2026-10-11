@@ -15,6 +15,7 @@
 const EWW   = "@eww@/bin/eww"
 const WPCTL = "@wireplumber@/bin/wpctl"
 const FLOCK = "@utilLinux@/bin/flock"
+const SETSID = "@utilLinux@/bin/setsid"
 const NU    = "@nu@/bin/nu"
 
 # wpctl's own identifiers happen to look like replaceVars placeholders, and
@@ -184,6 +185,8 @@ def settle [name: string, src_muted: bool] {
 # unlinks one that is still being written and loses the value with it.
 def "main set" [value: float, name: string, src_muted: bool] {
   let run = ($env.XDG_RUNTIME_DIR? | default "/tmp")
+  hold $run
+
   let target = ($run | path join "eww-audio-set.target")
   let tmp = $"($target).($nu.pid)"
   $value | math round | into string | save -f $tmp
@@ -203,4 +206,43 @@ def "main set-locked" [name: string, src_muted: bool] {
 
   ^$WPCTL set-volume $SINK $"($pct)%" | complete | ignore
   settle $name $src_muted
+}
+
+# Keeps the slider out while it is being dragged. Dragging off the bar is a
+# hover-lost like any other, and eww hands onhoverlost neither the button
+# state nor the crossing mode, nor gives the scale a press or release event.
+# A recent slider change is the only sign of a drag left, so every set holds
+# audio_busy up for LINGER past itself, which the widget ORs with
+# audio_hover. Holding the pointer still off the bar for longer than that
+# still collapses it.
+#
+# Each set writes its own token to STAMP and leaves a detached linger behind
+# it; a linger clears the flag only if STAMP still holds its token when it
+# wakes, so only the last set of a drag clears it. Lockless on purpose: a
+# single worker that loops until things go quiet can decide to exit just as
+# another set arrives, and then nothing ever clears the flag. The token goes
+# in before the flag goes up, which keeps a linger that is just waking from
+# clearing a flag this set has only now raised.
+const LINGER = 800ms
+
+def hold [run: string] {
+  let stamp = ($run | path join "eww-audio-set.stamp")
+  let tok = (date now | into int | into string)
+  let tmp = $"($stamp).($nu.pid)"
+  $tok | save -f $tmp
+  mv -f $tmp $stamp
+
+  let cfg = ($env.FILE_PWD | path dirname)
+  ^$EWW -c $cfg update audio_busy=true | complete | ignore
+  (^$SETSID -f $NU -n --no-std-lib $env.CURRENT_FILE linger $tok
+    out> /dev/null err> /dev/null)
+}
+
+def "main linger" [tok: string] {
+  sleep $LINGER
+  let stamp = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "eww-audio-set.stamp")
+  let now = (try { open --raw $stamp | into string | str trim } catch { "" })
+  if $now != $tok { return }
+  let cfg = ($env.FILE_PWD | path dirname)
+  ^$EWW -c $cfg update audio_busy=false | complete | ignore
 }
