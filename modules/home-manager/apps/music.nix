@@ -1,6 +1,7 @@
 {
   pkgs,
   config,
+  lib,
   ...
 }: {
   programs.spotify-player = {
@@ -12,6 +13,11 @@
       # Playlist GETs default to ncspot's shared ID, which hits the same rate
       # limit. Send them through ours; a 4xx still falls back to ncspot.
       ncspot_only_get_endpoints = [];
+      # Audio comes from the daemon below; the popup TUI only remote-controls
+      # it, so closing the popup does not stop playback.
+      enable_streaming = "DaemonOnly";
+      # The TUI would otherwise notify on the same track changes as well.
+      notify_streaming_only = true;
       copy_command = {
         command = "${pkgs.wl-clipboard}/bin/wl-copy";
         args = [];
@@ -66,6 +72,25 @@
         };
       })
     ];
+  };
+
+  # The Spotify Connect device that plays audio and serves MPRIS. It used to
+  # be the TUI itself inside a zellij session, but zellij drops the kitty
+  # graphics protocol, and with it the cover art.
+  systemd.user.services.spotify-player = {
+    Unit = {
+      Description = "spotify-player daemon";
+      PartOf = ["graphical-session.target"];
+      After = ["graphical-session.target"];
+      X-Restart-Triggers = ["${config.xdg.configFile."spotify-player/app.toml".source}"];
+    };
+    Service = {
+      # `--daemon` forks through the daemonize crate and the parent exits.
+      Type = "forking";
+      ExecStart = "${lib.getExe config.programs.spotify-player.package} --daemon";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = ["graphical-session.target"];
   };
 
   # spotifyd is a Spotify Connect target (lets other devices cast here);

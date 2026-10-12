@@ -160,7 +160,7 @@
       wlScreenrec = pkgs.wl-screenrec;
     };
     scratchpad = terminalVars // {inherit (pkgs) zellij;};
-    spotify = terminalVars // {inherit (pkgs) zellij;};
+    spotify = terminalVars // {spotifyPlayer = lib.getExe config.programs.spotify-player.package;};
     tui =
       terminalVars
       // {
@@ -286,7 +286,7 @@ in {
       # Not a side effect of starting: this is the unit's readiness signal,
       # and eww-bars.service's `After=` is what waits on it.
       ExecStartPost = "${waitForDaemon}";
-      # The scratchpad and spotify popups spawn a terminal that inherits this
+      # The scratchpad popup spawns a terminal that inherits this
       # directory, so zellij opens in $HOME rather than wherever the daemon
       # happened to be started from.
       WorkingDirectory = config.home.homeDirectory;
