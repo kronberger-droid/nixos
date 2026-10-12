@@ -20,14 +20,6 @@ in {
 
   home.packages = [pkgs.zellij];
 
-  xdg.configFile."zellij/layouts/spotify.kdl".text = ''
-    layout {
-        tab name="spotify" {
-            pane command="${lib.getExe config.programs.spotify-player.package}"
-        }
-    }
-  '';
-
   xdg.configFile."zellij/config.kdl".text =
     commonKdl
     + ''
