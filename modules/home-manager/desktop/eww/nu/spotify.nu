@@ -1,13 +1,13 @@
 #!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 
-# Copied from waybar/nu/ncspot-toggle.nu, logic unchanged.
+# Copied from waybar/nu/ncspot-toggle.nu, now launching spotify_player.
 #
-# waybar's custom/ncspot is a static icon: `interval = "once"` over an echoed
+# waybar's custom/ncspot was a static icon: `interval = "once"` over an echoed
 # JSON literal, with the real work in this script. So unlike the scratchpad
 # there is no status half to port, and the widget is a plain button.
 #
 # See scratchpad.nu: same shape, different spawn branch. The zellij session is
-# started with `-n ncspot` when it does not exist, and attached when it does.
+# started with `-n spotify` when it does not exist, and attached when it does.
 
 # Binaries by store path; see eww.nix for why these are consts and not
 # spelled inline at the call sites.
@@ -36,8 +36,8 @@ def await-state [app_id: string, want: string] {
 }
 
 def main [] {
-  let app_id = "ncspot_popup"
-  let session = "ncspot"
+  let app_id = "spotify_popup"
+  let session = "spotify"
   let id = (window-id $app_id)
 
   if $id != null {
@@ -56,7 +56,7 @@ def main [] {
     }
   } else {
     # Drop a resurrectable-but-dead session of the same name so we don't attach
-    # to a ghost where ncspot is no longer running.
+    # to a ghost where spotify_player is no longer running.
     let dead = (^$ZELLIJ list-sessions -n | complete | get stdout | lines)
     if ($dead | any {|l| ($l | str starts-with $"($session) ") and ($l | str contains "EXITED")}) {
       ^$ZELLIJ delete-session $session --force | complete | ignore
@@ -67,7 +67,7 @@ def main [] {
     if ($live | any {|l| $l == $session}) {
       ^$TERMINAL $TERM_APPID_FLAG $app_id $TERM_EXEC_FLAG $ZELLIJ attach $session | complete | ignore
     } else {
-      ^$TERMINAL $TERM_APPID_FLAG $app_id $TERM_EXEC_FLAG $ZELLIJ -s $session -n ncspot | complete | ignore
+      ^$TERMINAL $TERM_APPID_FLAG $app_id $TERM_EXEC_FLAG $ZELLIJ -s $session -n spotify | complete | ignore
     }
     await-state $app_id "open"
   }

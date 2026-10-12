@@ -31,8 +31,8 @@
         (button :class "handle" :onclick onpin
           (label :text handle))))))
 
-;; ── Tray cluster ─────────────────────────────────────────────────
-;; waybar: modules = [custom/tray-handle, custom/ncspot, tray]. ncspot
+;; waybar: modules = [custom/tray-handle, custom/ncspot, tray]. The ncspot
+;; button now opens spotify_player, next to the handle and the tray.
 ;; is not ported yet, so this is the handle and the tray.
 
 (defvar tray_pinned false)
@@ -47,9 +47,9 @@
            :onpin "${EWW_CMD} update tray_pinned=${!tray_pinned}"
     ;; waybar: modules = [custom/tray-handle, custom/ncspot, tray].
     (eventbox :cursor "pointer"
-      (button :class "mod" :tooltip "Open ncspot"
-              :onclick "${EWW_CONFIG_DIR}/scripts/ncspot"
-        (label :class "ncspot" :text "")))
+      (button :class "mod" :tooltip "Open spotify_player"
+              :onclick "${EWW_CONFIG_DIR}/scripts/spotify"
+        (label :class "spotify" :text "")))
     (tray)))
 
 ;; ── Toggles cluster ──────────────────────────────────────────────

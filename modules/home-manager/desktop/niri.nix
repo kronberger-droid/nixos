@@ -123,7 +123,7 @@ in
         };
 
         # Drop shadow — mainly adds depth where floating windows
-        # (scratchpad, ncspot, dialogs) overlap the tiled strip.
+        # (scratchpad, spotify, dialogs) overlap the tiled strip.
         shadow = {
           enable = true;
         };
@@ -526,11 +526,11 @@ in
           max-height = 860;
         }
 
-        # ncspot popup (right-side panel)
+        # spotify_player popup (right-side panel)
         {
-          matches = [{app-id = "^ncspot_popup$";}];
+          matches = [{app-id = "^spotify_popup$";}];
           open-floating = true;
-          default-column-width = {proportion = 0.33333;};
+          default-column-width = {proportion = 0.45;};
           default-window-height = {proportion = 1.0;};
           default-floating-position = {
             x = -4;
