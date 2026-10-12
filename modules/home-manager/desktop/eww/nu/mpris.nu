@@ -28,7 +28,10 @@ def render [line: string]: nothing -> string {
   # waybar pipes through `sd '[Cc]hromium|chrome' 'Brave'`; nushell's own
   # replace does it without the extra dependency, as the nu ports in
   # waybar/nu/ already do elsewhere.
-  let name = ($player | str replace --all --regex '[Cc]hromium|chrome' 'Brave')
+  # spotify-player hardcodes its MPRIS bus name with no config option.
+  let name = ($player
+    | str replace --all --regex '[Cc]hromium|chrome' 'Brave'
+    | str replace --regex '^spotify_player$' 'spotify')
 
   # waybar-mpris shows --play while playing and --pause otherwise.
   let symbol = if $status == "Playing" { "" } else { "" }
