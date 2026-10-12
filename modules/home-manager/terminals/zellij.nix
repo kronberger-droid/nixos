@@ -20,10 +20,10 @@ in {
 
   home.packages = [pkgs.zellij];
 
-  xdg.configFile."zellij/layouts/ncspot.kdl".text = ''
+  xdg.configFile."zellij/layouts/spotify.kdl".text = ''
     layout {
-        tab name="ncspot" {
-            pane command="${pkgs.ncspot}/bin/ncspot"
+        tab name="spotify" {
+            pane command="${lib.getExe config.programs.spotify-player.package}"
         }
     }
   '';

@@ -110,7 +110,7 @@
   utilLinux = pkgs.util-linux;
 
   # config.terminal.* drive the two zellij popups, the same three values
-  # waybar.nix passes to its scratchpad and ncspot helpers.
+  # waybar.nix passes to its scratchpad and spotify helpers.
   terminalVars = {
     terminalBin = config.terminal.bin;
     terminalAppIdFlag = config.terminal.appIdFlag;
@@ -160,7 +160,7 @@
       wlScreenrec = pkgs.wl-screenrec;
     };
     scratchpad = terminalVars // {inherit (pkgs) zellij;};
-    ncspot = terminalVars // {inherit (pkgs) zellij;};
+    spotify = terminalVars // {inherit (pkgs) zellij;};
     tui =
       terminalVars
       // {
@@ -286,7 +286,7 @@ in {
       # Not a side effect of starting: this is the unit's readiness signal,
       # and eww-bars.service's `After=` is what waits on it.
       ExecStartPost = "${waitForDaemon}";
-      # The scratchpad and ncspot popups spawn a terminal that inherits this
+      # The scratchpad and spotify popups spawn a terminal that inherits this
       # directory, so zellij opens in $HOME rather than wherever the daemon
       # happened to be started from.
       WorkingDirectory = config.home.homeDirectory;
