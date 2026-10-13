@@ -100,7 +100,7 @@ in {
     # This host runs the LAN's resolver, so it resolves through itself.
     # 8.8.8.8 on UDP/53 was never reachable here: the ISP blocks outbound
     # UDP/53 to every destination (see hosts/edgerouter/README.md), which is
-    # why AdGuard's upstreams are IP-literal DoH. With Google listed first
+    # why blocky's upstreams are IP-literal DoH. With Google listed first
     # every local lookup depended on Tailscale's DNS proxy answering.
     nameservers = ["127.0.0.1"];
 
@@ -124,7 +124,6 @@ in {
       allowedTCPPorts = [22 53];
       allowedUDPPorts = [53];
       interfaces."tailscale0".allowedTCPPorts = [
-        3080 # AdGuard admin UI
         5001 # harmonia binary cache
         8070 # miniflux
         2283 # immich
@@ -363,71 +362,74 @@ in {
     };
   };
 
-  # DNS + ad blocking — :53 on the LAN, web UI (:3080) on the tailnet only.
-  services.adguardhome = {
+  # DNS + ad blocking for the LAN, on :53. Blocky rather than AdGuard Home:
+  # the whole config is here and nowhere else, and there is no admin UI, so
+  # no password to keep out of this public repo. No `ports.http` on purpose:
+  # that would bring up blocky's REST API, whose /blocking/disable takes no
+  # authentication.
+  services.blocky = {
     enable = true;
-    mutableSettings = false;
-    port = 3080;
     settings = {
-      # mutableSettings = false means the module copies this YAML over the
-      # state file on every start, so an admin user set through the UI was
-      # wiped on the next restart (including the ones dns-healthcheck
-      # triggers) and the UI, which can rewrite DNS for the whole LAN, ran
-      # with no login at all. The bcrypt hash lives here in plain sight on
-      # purpose: settings are evaluated at build time, so an agenix file
-      # cannot feed it, and a hash for a tailnet-only LAN admin page is an
-      # acceptable thing to commit. The password itself is in Bitwarden.
-      users = [
-        {
-          name = "kronberger";
-          password = "$2y$10$E49TmMek9cObE1k2Y191a.nDMDOGO41g0u1fR/r/f0bT8dNrdDWPW";
-        }
-      ];
-      dns = {
-        bind_hosts = ["0.0.0.0"];
-        port = 53;
+      ports.dns = 53;
+
+      upstreams = {
         # IP-literal DoH endpoints on purpose. The ISP blocks outbound UDP/53
         # entirely (every destination, including their own resolver), so a
-        # hostname upstream like https://dns.cloudflare.com/dns-query can never
-        # resolve its own bootstrap and AdGuard then answers nothing at all,
+        # hostname upstream like https://dns.cloudflare.com/dns-query could
+        # never resolve itself, and the resolver would answer nothing at all,
         # not even on loopback. Bare IPs need no bootstrap, and DoH rides
         # TCP/443, which the block does not touch. Google is deliberately
         # absent: https://8.8.8.8/dns-query serves HTML without the dns.google
         # SNI, so it is unusable as an IP literal. Cloudflare and Quad9 both
         # answer correctly on their bare addresses.
-        upstream_dns = [
+        groups.default = [
           "https://1.1.1.1/dns-query"
           "https://1.0.0.1/dns-query"
           "https://9.9.9.9/dns-query"
           "https://149.112.112.112/dns-query"
         ];
-        # Unused now that no upstream carries a hostname, but AdGuard wants a
-        # value. Keep it non-empty so adding a hostname upstream later fails
-        # loudly rather than silently.
-        bootstrap_dns = ["1.1.1.1" "9.9.9.9"];
+        # Serve right away and keep retrying, rather than refusing to start
+        # while the uplink is down. dns-healthcheck tells the two apart.
+        init.strategy = "fast";
       };
-      filtering.rewrites = [
-        # Local names for the services on this box. They answer with the
-        # tailnet address, not the LAN one: the ports behind them (3080,
-        # 8070, 2283) are opened on tailscale0 only, so a LAN answer would
-        # resolve and then hang on a dropped SYN. A client without Tailscale
-        # cannot reach these services either way.
-        {
-          domain = "adguard.home.lan";
-          answer = "100.92.46.97";
-          enabled = true;
-        }
-        {
-          domain = "rss.home.lan";
-          answer = "100.92.46.97";
-          enabled = true;
-        }
-        {
-          domain = "photos.home.lan";
-          answer = "100.92.46.97";
-          enabled = true;
-        }
+
+      # What blocky resolves its own lookups with, the list downloads among
+      # them. The default is the system resolver, which on this host is
+      # blocky itself, and plain DNS anywhere else is blocked. So the same
+      # IP-literal DoH as the upstreams.
+      bootstrapDns = [
+        {upstream = "https://1.1.1.1/dns-query";}
+        {upstream = "https://9.9.9.9/dns-query";}
       ];
+
+      # Local names for the services on this box. They answer with the
+      # tailnet address, not the LAN one: the ports behind them (8070, 2283)
+      # are opened on tailscale0 only, so a LAN answer would resolve and then
+      # hang on a dropped SYN. A client without Tailscale cannot reach these
+      # services either way.
+      customDNS.mapping = {
+        "rss.home.lan" = "100.92.46.97";
+        "photos.home.lan" = "100.92.46.97";
+      };
+
+      blocking = {
+        # HaGeZi Multi NORMAL, the usual stand-in for the AdGuard DNS filter
+        # that AdGuard ran here (about 160k entries against its 185k).
+        # Blocky reads no adblock syntax, so that list itself is out; the
+        # wildcard build of this one blocks each domain with its subdomains,
+        # the way `||domain^` did.
+        denylists.ads = [
+          "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/multi.txt"
+        ];
+        # Lists only apply to clients mapped to a group.
+        clientGroupsBlock.default = ["ads"];
+        loading = {
+          refreshPeriod = "24h";
+          # Start answering before the list is in; a failed download leaves
+          # DNS unfiltered rather than down.
+          strategy = "fast";
+        };
+      };
     };
   };
   # CardDAV/CalDAV server — contacts sync to the phone (DAVx5 -> stock Contacts)
