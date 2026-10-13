@@ -21,11 +21,11 @@ pinned source port 547, which is what RFC 8415 says a DHCPv6 server sends from,
 but Magenta replies from an ephemeral port, so replies were silently dropped.
 Dormant while IPv6 is off, correct for whenever it is not.
 
-## DNS goes to AdGuard on homeserver
+## DNS goes to blocky on homeserver
 
 Forced, not preferred. Magenta blocks outbound UDP/53 to every destination
 including their own resolver, thus dnsmasq has no upstream it can reach, since
-it only speaks plain DNS. AdGuard resolves over DoH on TCP/443, which the block
+it only speaks plain DNS. Blocky resolves over DoH on TCP/443, which the block
 does not touch. DHCP hands out `192.168.2.54` and dnsmasq forwards there too.
 
 The consequence is that homeserver going down takes LAN DNS with it, and no
