@@ -160,7 +160,12 @@
       wlScreenrec = pkgs.wl-screenrec;
     };
     scratchpad = terminalVars // {inherit (pkgs) zellij;};
-    spotify = terminalVars // {spotifyPlayer = lib.getExe config.programs.spotify-player.package;};
+    spotify =
+      terminalVars
+      // {
+        spotifyPlayer = lib.getExe config.programs.spotify-player.package;
+        spotifyDevice = config.programs.spotify-player.settings.device.name;
+      };
     tui =
       terminalVars
       // {

@@ -15,6 +15,7 @@ const TERMINAL        = "@terminalBin@"
 const TERM_APPID_FLAG = "@terminalAppIdFlag@"
 const TERM_EXEC_FLAG  = "@terminalExecFlag@"
 const SPOTIFY_PLAYER  = "@spotifyPlayer@"
+const SPOTIFY_DEVICE  = "@spotifyDevice@"
 
 def niri-windows [] {
   let r = (^niri msg -j windows | complete)
@@ -54,6 +55,11 @@ def main [] {
       ^niri msg action focus-window --id $id | complete | ignore
     }
   } else {
+    # With `DaemonOnly` the TUI has no device of its own and attaches to
+    # whichever one is active, or the first listed, often another host's.
+    # Moving playback onto the local daemon first leaves it nothing else to
+    # pick. The daemon serves the request; play/pause state carries over.
+    ^$SPOTIFY_PLAYER connect --name $SPOTIFY_DEVICE | complete | ignore
     # The daemon already owns the MPRIS name; a second registration from the
     # TUI would show up as a duplicate player in the mpris widget.
     ^$TERMINAL $TERM_APPID_FLAG $app_id $TERM_EXEC_FLAG $SPOTIFY_PLAYER -o enable_media_control=false | complete | ignore
