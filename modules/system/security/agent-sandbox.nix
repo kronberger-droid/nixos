@@ -120,6 +120,11 @@ in {
       # ends: this user, opening a shell as the sandbox account, nobody
       # else and nothing else. Any other target still gets polkit's admin
       # prompt, same as before.
+      #
+      # Enabled here, not left to the host: the workstations get polkit from
+      # core/users.nix, the homeserver had none, and without it the rule
+      # never runs and machined refuses the shell outright.
+      security.polkit.enable = true;
       security.polkit.extraConfig = ''
         polkit.addRule(function(action, subject) {
           if (action.id == "org.freedesktop.machine1.host-shell" &&
@@ -195,13 +200,33 @@ in {
       # effective and not merely present, and the syncthing folder carries
       # ignorePerms (home-manager/apps/syncthing.nix), since a chmod 644 on
       # a synced file would otherwise clip the mask back to read-only.
+      #
+      # Except `.obsidian/`. Obsidian loads the plugins there as Martin, so
+      # write access to it is code execution as him, and syncthing would
+      # carry a tampered plugin to every device. Removing the entries there
+      # also drops the default ACL, so files created inside later stay
+      # closed. The vault root's own default still applies to a freshly made
+      # `.obsidian`, which the next run (every boot, every change to this
+      # unit) strips again. Write access on the directory itself is what
+      # renaming or emptying it needs, so it cannot be swapped out either.
+      # Mode bits still apply, so the agent keeps whatever read access the
+      # files give everyone.
       systemd.services.claude-sandbox-vault-acl = {
         description = "Grant the Claude Code sandbox user write access to the vault";
         wantedBy = ["multi-user.target"];
         unitConfig.ConditionPathIsDirectory = vaultSrc;
-        serviceConfig.Type = "oneshot";
+        # Stays active after the run, so a switch that changes the script
+        # restarts it instead of waiting for the next boot.
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
         script = ''
-          ${pkgs.acl}/bin/setfacl -R -m g:${user}:rwX,d:g:${user}:rwX ${lib.escapeShellArg vaultSrc}
+          vault=${lib.escapeShellArg vaultSrc}
+          ${pkgs.acl}/bin/setfacl -R -m g:${user}:rwX,d:g:${user}:rwX "$vault"
+          if [ -d "$vault/.obsidian" ]; then
+            ${pkgs.acl}/bin/setfacl -R -x g:${user},d:g:${user} "$vault/.obsidian"
+          fi
         '';
       };
 
