@@ -64,7 +64,17 @@
         # A user unit starts with a bare PATH. The spawned sessions need the
         # same tools a login shell has: this profile, then the system's.
         Environment = ["PATH=/etc/profiles/per-user/claude/bin:/run/wrappers/bin:/run/current-system/sw/bin"];
-        ExecStart = "${lib.getExe' pkgs.claude-code-bin "claude"} remote-control";
+        # Through a wrapper for the GitHub token. Interactive shells get it
+        # from extra_env.nu, but nothing here starts a login shell, so the
+        # spawned sessions would otherwise run with no GitHub credential.
+        ExecStart = lib.getExe (pkgs.writeShellScriptBin "claude-remote-control" ''
+          token=/run/secrets/claude-github-token
+          if [ -r "$token" ]; then
+            GH_TOKEN="$(< "$token")"
+            export GH_TOKEN GITHUB_PERSONAL_ACCESS_TOKEN="$GH_TOKEN"
+          fi
+          exec ${lib.getExe' pkgs.claude-code-bin "claude"} remote-control
+        '');
         Restart = "always";
         RestartSec = 30;
       };
