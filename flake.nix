@@ -387,6 +387,10 @@
               (_: _: {
                 claude-code-bin = inputs.claude-code.packages.${x86System}.claude-code;
               })
+              # `pkgs.rust-bin` for the Claude Code sandbox account, whose
+              # home imports editors/dev-tools.nix. Additive, so nothing
+              # else on the host is rebuilt.
+              inputs.rust-overlay.overlays.default
             ];
           }
           home-manager.nixosModules.home-manager

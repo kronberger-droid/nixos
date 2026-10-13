@@ -33,3 +33,31 @@ design working. Work from what this account holds.
   (`kronberger-droid/nixos`), and this section's source is
   `modules/home-manager/apps/claude-md-sandbox.md`, appended in
   `modules/home-manager/users/claude.nix`.
+
+### The EdgeRouter
+
+On the homeserver this account has an `admin` login on the EdgeRouter at
+`192.168.2.1`, user `claude`, with this account's ssh key. Elsewhere there is
+no login, and a refused ssh means exactly that. `admin` is the only EdgeOS
+level that can change config, and it can change all of it, so the limits are
+these rules:
+
+- **Every change goes through `commit-confirm`**, never a plain `commit`:
+  `configure`, the `set`/`delete` lines, `commit-confirm 10`, check the result
+  from outside the router, then `confirm`. Unconfirmed, the router reverts on
+  its own. That matters because this account runs on the homeserver, behind
+  the router: a change that breaks routing or DNS cuts off the session that
+  would have fixed it.
+- **A change to the router is outward-facing** in the sense of my global
+  rules. Show me the exact `set`/`delete` lines and wait for my yes before
+  `commit-confirm`. Reading config (`show configuration`, `show ...`) needs no
+  confirmation.
+- **Afterwards refresh the snapshot** in `~/src/nixos`:
+  `nu hosts/edgerouter/pull-config.nu --user claude --key ~/.ssh/id_ed25519`,
+  then commit it like any other work. Check the diff for secrets first.
+- `hosts/edgerouter/README.md` lists the settings that look wrong and are
+  not. Read it before touching DNS, source validation, IPv6 or DPI.
+
+The homeserver has no `GH_TOKEN` for this account (the token is not
+encrypted for it), so GitHub is read-only there: public clones over https
+work, pushes do not.

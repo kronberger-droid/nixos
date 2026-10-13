@@ -281,6 +281,17 @@ in {
   # ${username} is already in the list from the shared module.
   services.openssh.settings.AllowUsers = ["nix-remote" "wiesinger"];
 
+  # The Claude Code sandbox, the same account the workstations have. It is
+  # deliberately not in AllowUsers above: the way in is `ssh -t homeserver
+  # claude-sandbox`, or a session spawned from claude.ai through Remote
+  # Control. Its network reach matches intelNuc's sandbox (LAN and tailnet,
+  # no egress filter), plus an admin login on the EdgeRouter that is set up
+  # by hand on the router.
+  security.agentSandbox = {
+    enable = true;
+    remoteControl.enable = true;
+  };
+
   # Subnet router for the LAN. Advertising 192.168.2.0/24 lets every tailnet
   # device reach hardware that will never run Tailscale itself: the EdgeRouter
   # at .1, the AP at .38, and the Bambu printer at .39, whose MQTT, FTPS and

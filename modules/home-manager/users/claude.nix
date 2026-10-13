@@ -47,6 +47,30 @@
     # section, on how to work from inside the sandbox.
     claude.claudeMd = lib.mkAfter (builtins.readFile ../apps/claude-md-sandbox.md);
 
+    # Sessions started from claude.ai/code or the mobile app spawn here, as
+    # this account, with no ssh in between. Linger (agent-sandbox.nix) keeps
+    # it running without a login. It needs the account logged in to claude.ai
+    # once (`claude-sandbox`, then `claude`); until then it exits and the
+    # restart loop below just keeps trying, so the order of the two steps
+    # does not matter.
+    systemd.user.services.claude-remote-control = lib.mkIf config.security.agentSandbox.remoteControl.enable {
+      Unit = {
+        Description = "Claude Code Remote Control server";
+        # Retry forever: the first failures are expected, before the login.
+        StartLimitIntervalSec = 0;
+      };
+      Service = {
+        WorkingDirectory = "%h/src";
+        # A user unit starts with a bare PATH. The spawned sessions need the
+        # same tools a login shell has: this profile, then the system's.
+        Environment = ["PATH=/etc/profiles/per-user/claude/bin:/run/wrappers/bin:/run/current-system/sw/bin"];
+        ExecStart = "${lib.getExe' pkgs.claude-code-bin "claude"} remote-control";
+        Restart = "always";
+        RestartSec = 30;
+      };
+      Install.WantedBy = ["default.target"];
+    };
+
     programs.home-manager.enable = true;
   };
 }
