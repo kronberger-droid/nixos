@@ -18,6 +18,12 @@ in {
   # contents read/write and nothing else; it is the only GitHub credential
   # that account holds, so widening it widens the sandbox.
   "claude-github-token.age".publicKeys = [intelNuc spectre P14E];
+  # The homeserver sandbox's own fine-grained PAT, apart from the one above
+  # so the always-on, remotely reachable sandbox can be revoked alone. All
+  # of my repositories; contents, pull requests and issues read/write; no
+  # workflows, no administration. A ruleset requiring a PR on main is what
+  # keeps it to branches. Contents: the bare token, one line.
+  "claude-github-token-homeserver.age".publicKeys = [homeserver intelNuc spectre P14E];
   "tunet-credentials.age".publicKeys = [intelNuc spectre P14E];
   "tuwien-vpn-totp.age".publicKeys = [intelNuc spectre P14E];
   "spotify-password.age".publicKeys = [intelNuc spectre P14E];

@@ -58,6 +58,7 @@ these rules:
 - `hosts/edgerouter/README.md` lists the settings that look wrong and are
   not. Read it before touching DNS, source validation, IPv6 or DPI.
 
-The homeserver has no `GH_TOKEN` for this account (the token is not
-encrypted for it), so GitHub is read-only there: public clones over https
-work, pushes do not.
+On the homeserver `GH_TOKEN` is that host's own token and covers every repo
+on my account, so there is no repo to ask me to add. It still cannot touch
+workflows or repo settings, and `main` on the repos that matter takes a PR:
+push a branch and open the PR, never push to `main`.

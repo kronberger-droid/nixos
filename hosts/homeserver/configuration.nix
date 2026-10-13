@@ -53,6 +53,19 @@ in {
     owner = "radicale";
   };
 
+  # The Claude Code sandbox's GitHub token, this host's own (see
+  # secrets/secrets.nix). Same path as the workstations' token, so
+  # extra_env.nu and the remote-control wrapper in users/claude.nix read it
+  # without knowing which host they are on. Gated on the file like the
+  # workstation one in agenix.nix, so the config evaluates before the token
+  # is minted.
+  age.secrets.claude-github-token = lib.mkIf (builtins.pathExists "${inputs.self}/secrets/claude-github-token-homeserver.age") {
+    file = "${inputs.self}/secrets/claude-github-token-homeserver.age";
+    path = "/run/secrets/claude-github-token";
+    mode = "0400";
+    owner = "claude";
+  };
+
   # ZOTERO_DAV_USER / ZOTERO_DAV_PASSWORD, in systemd EnvironmentFile form.
   # Stays root-owned: systemd reads it as root before dropping to the webdav
   # user (see the comment in services/webdav.nix).
