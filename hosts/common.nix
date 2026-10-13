@@ -16,7 +16,6 @@ _: {
   hardware.enableRedistributableFirmware = true;
 
   # The `claude` account for sandboxed Claude Code sessions, on every
-  # workstation. The homeserver imports agent-sandbox.nix for its packages
-  # but leaves this off: nothing there runs the agent under a second uid.
+  # workstation. The homeserver, which skips this file, enables it in its own.
   security.agentSandbox.enable = true;
 }

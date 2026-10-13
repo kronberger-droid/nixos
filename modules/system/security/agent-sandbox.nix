@@ -74,7 +74,14 @@
 in {
   imports = [../../home-manager/users/claude.nix];
 
-  options.security.agentSandbox.enable = lib.mkEnableOption "a dedicated unix account for Claude Code";
+  options.security.agentSandbox = {
+    enable = lib.mkEnableOption "a dedicated unix account for Claude Code";
+
+    # For a host nobody sits at. The service itself lives in
+    # home-manager/users/claude.nix; this half only keeps the account's user
+    # manager running without a login, so the service is up from boot.
+    remoteControl.enable = lib.mkEnableOption "an always-on `claude remote-control` server in the sandbox account";
+  };
 
   config = lib.mkMerge [
     {
@@ -218,6 +225,10 @@ in {
             -C "${user}@${config.networking.hostName}" -f ${home}/.ssh/id_ed25519
         '';
       };
+    })
+
+    (lib.mkIf (cfg.enable && cfg.remoteControl.enable) {
+      users.users.${user}.linger = true;
     })
   ];
 }
