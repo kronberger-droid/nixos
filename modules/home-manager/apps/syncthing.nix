@@ -23,6 +23,15 @@ in
     services.syncthing = {
       enable = true;
 
+      # A unix socket, not 127.0.0.1:8384. With no GUI password, anything
+      # that can reach the GUI can drive the REST API, and loopback is open
+      # to every uid on the box, the Claude Code sandbox account included.
+      # That would let it share this home out to a device of its choosing.
+      # The socket sits in a 700 directory in a 700 home, so only this user
+      # gets to it. For the web UI, forward it:
+      # `ssh -L 8384:<this path> <host>`, then http://localhost:8384.
+      guiAddress = "${config.home.homeDirectory}/.local/state/syncthing/gui.sock";
+
       # Let Nix manage devices; allow adding folders via UI too
       overrideDevices = true;
       overrideFolders = false;

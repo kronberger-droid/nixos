@@ -34,9 +34,12 @@ in
       dataDir = homeDir;
       configDir = "${homeDir}/.config/syncthing";
 
-      # Localhost only — access remote UIs via SSH tunnel:
-      # ssh -L 8384:127.0.0.1:8384 <user>@<host>
-      guiAddress = "127.0.0.1:8384";
+      # A unix socket inside the 700 home rather than 127.0.0.1:8384, for the
+      # reason in home-manager/apps/syncthing.nix: with no GUI password the
+      # REST API is open to any local uid, the Claude Code sandbox included.
+      # Web UI through ssh: `ssh -L 8384:${homeDir}/.config/syncthing/gui.sock
+      # <host>`, then http://localhost:8384.
+      guiAddress = "unix://${homeDir}/.config/syncthing/gui.sock";
 
       # Let Nix manage devices; allow adding folders via UI too
       overrideDevices = true;
