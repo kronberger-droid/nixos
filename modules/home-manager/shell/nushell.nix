@@ -186,7 +186,10 @@ in {
         let remote = "/sph"
         let port = 10222
         let mountpoint = ("~/Network/iap-server" | path expand)
-        let mounted = (^mount | lines | where ($it | str contains $mountpoint) | is-not-empty)
+        let listed = (^mount | lines | where ($it | str contains $mountpoint) | is-not-empty)
+        # A listed mount whose sshfs died (or whose link hangs) is stale, not mounted
+        let mounted = $listed and ((^timeout 2 ls $mountpoint | complete).exit_code == 0)
+        let stale = $listed and not $mounted
 
         match $action {
             "mount" => {
@@ -194,13 +197,17 @@ in {
                     print $"(ansi yellow)Already mounted at ($mountpoint)(ansi reset)"
                     return
                 }
+                if $stale {
+                    fusermount3 -uz $mountpoint
+                    print $"(ansi yellow)Detached stale mount at ($mountpoint)(ansi reset)"
+                }
                 mkdir $mountpoint
                 $"(open /run/secrets/sftp-password | str trim)(char newline)"
                 | sshfs $"($host):($remote)" $mountpoint -o $"password_stdin,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,port=($port)"
                 print $"(ansi green)Mounted ($host):($remote) -> ($mountpoint)(ansi reset)"
             }
             "unmount" => {
-                if $force {
+                if $force or $stale {
                     fusermount3 -uz $mountpoint   # lazy: detach even while "busy"
                     print $"(ansi green)Force-unmounted ($mountpoint)(ansi reset)"
                 } else if not $mounted {
@@ -213,6 +220,8 @@ in {
             "status" => {
                 if $mounted {
                     print $"(ansi green)mounted(ansi reset) at ($mountpoint)"
+                } else if $stale {
+                    print $"(ansi red)stale(ansi reset) at ($mountpoint) \(run `iap-server` to remount)"
                 } else {
                     print $"(ansi yellow)not mounted(ansi reset)"
                 }
