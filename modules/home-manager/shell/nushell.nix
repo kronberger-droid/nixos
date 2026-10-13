@@ -178,8 +178,9 @@ in {
     #   iap-server unmount    unmount before dropping the VPN
     #   iap-server unmount -f lazy-detach a wedged mount (connection died)
     #   iap-server status     show whether it's mounted
+    #   iap-server connect    interactive ssh, e.g. to accept the host key once
     def iap-server [
-        action: string = "mount"   # mount, unmount, status
+        action: string = "mount"   # mount, unmount, status, connect
         --force (-f)               # for unmount: lazy-detach a wedged mount
     ] {
         let host = "kronberger@iap-fileserver-1.iap.tuwien.ac.at"
@@ -226,9 +227,12 @@ in {
                     print $"(ansi yellow)not mounted(ansi reset)"
                 }
             }
+            "connect" => {
+                ^ssh -p $port $host
+            }
             _ => {
                 print $"(ansi red)Unknown action '($action)'(ansi reset)"
-                print "Usage: iap-server [mount | unmount | status]  (unmount -f to force)"
+                print "Usage: iap-server [mount | unmount | status | connect]  (unmount -f to force)"
             }
         }
     }
