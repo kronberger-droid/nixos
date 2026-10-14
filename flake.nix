@@ -316,6 +316,26 @@
                   # the nixpkgs-zotero input above.
                   zotero = (import inputs.nixpkgs-zotero {inherit system;}).zotero;
                 })
+                # Ladybird's desktop and D-Bus files launch it with
+                # --force-new-process, which upstream turned into an alias for
+                # --temporary-profile. Every launcher start got a throwaway
+                # profile in /tmp, so settings and logins never stuck.
+                # Rewritten in a symlinkJoin so the cached build is reused.
+                # --replace-fail breaks this once upstream drops the flag
+                # (LadybirdBrowser/ladybird#12576); delete it then.
+                (_: prev: {
+                  ladybird = prev.symlinkJoin {
+                    name = "ladybird-${prev.ladybird.version}";
+                    inherit (prev.ladybird) version meta;
+                    paths = [prev.ladybird];
+                    postBuild = ''
+                      for f in share/applications/org.ladybird.Ladybird.desktop share/dbus-1/services/org.ladybird.Ladybird.service; do
+                        rm "$out/$f"
+                        substitute "${prev.ladybird}/$f" "$out/$f" --replace-fail " --force-new-process" ""
+                      done
+                    '';
+                  };
+                })
               ];
             }
             home-manager.nixosModules.home-manager
