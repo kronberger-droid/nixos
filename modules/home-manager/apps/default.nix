@@ -10,7 +10,6 @@
     ./yazi.nix
     ./taskwarrior.nix
     ./music.nix
-    ./aerc.nix
     ./contacts.nix
     ./ai.nix
     ./qutebrowser.nix
