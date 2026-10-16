@@ -1,6 +1,6 @@
 {...}: {
   imports = [
+    ./quickemu.nix
     ./torrent.nix
-    ./virtualisation.nix
   ];
 }
