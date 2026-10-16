@@ -287,3 +287,19 @@
             :tooltip {scratchpad_state.tooltip}
             :onclick "${EWW_CONFIG_DIR}/scripts/scratchpad toggle"
       (label :text {scratchpad_state.text}))))
+
+;; ── Screen recording ─────────────────────────────────────────────
+;; A red pill while wl-screenrec runs, nothing otherwise. Outside any
+;; cluster so it shows without hovering. Clicking stops the recording, the
+;; same toggle as Mod+Shift+R. The toggle pushes its state on start and
+;; stop, so the poll only catches a recorder that died on its own.
+(defpoll screenrec_state :interval "30s"
+  :initial '{"text": "", "class": "idle"}' "scripts/screenrec")
+
+(defwidget screenrec []
+  (eventbox :cursor "pointer"
+            :visible {screenrec_state.class == "recording"}
+    (button :class "recording" :tooltip "Stop recording"
+            :timeout "2s"
+            :onclick "${EWW_CONFIG_DIR}/scripts/screenrec toggle"
+      (label :text " ${screenrec_state.text}"))))

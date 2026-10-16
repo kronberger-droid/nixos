@@ -73,6 +73,17 @@
   color: $base03;
 }
 
+// The screen recording indicator: an accent pill in the urgent red, so it
+// reads as "something is capturing" from the corner of the eye.
+.bar .recording {
+  @include bar-pill;
+  background-color: $urgent-bg;
+}
+
+.bar .recording:hover label {
+  color: $base03;
+}
+
 // temperature { critical-threshold = 80 }, and battery { states.critical = 15 }
 .bar .critical {
   color: $base08;
