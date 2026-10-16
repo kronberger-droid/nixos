@@ -14,10 +14,9 @@
 
 # Binaries by store path; see eww.nix for why these are consts and not
 # spelled inline at the call sites.
-const TERMINAL        = "@terminalBin@"
-const TERM_APPID_FLAG = "@terminalAppIdFlag@"
-const TERM_EXEC_FLAG  = "@terminalExecFlag@"
-const ZELLIJ          = "@zellij@/bin/zellij"
+const ZELLIJ = "@zellij@/bin/zellij"
+
+use "@ewwLib@" *
 
 def niri-windows []: nothing -> list {
   let r = (^niri msg -j windows | complete)
@@ -86,9 +85,12 @@ def "main toggle" [] {
       ^$ZELLIJ delete-session $session --force | complete | ignore
     }
 
-    # Foreground, as in bash: blocks until the terminal exits, so await-state
-    # only runs afterwards.
-    ^$TERMINAL $TERM_APPID_FLAG $app_id $TERM_EXEC_FLAG $ZELLIJ attach $session --create | complete | ignore
+    # Detached. This used to run in the foreground, as the bash original did,
+    # which from the bar meant eww killed the script at its 200ms :timeout and
+    # left the terminal writing into a pipe nobody read; from Mod+Minus it
+    # held the script until the terminal closed, so await-state only ever ran
+    # on a window that was already gone.
+    spawn-terminal $app_id ...[$ZELLIJ "attach" $session "--create"]
     await-state $app_id "open"
   }
 

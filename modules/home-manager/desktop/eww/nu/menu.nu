@@ -23,21 +23,10 @@
 # spelled inline at the call sites.
 const LAUNCHER = "@siebLauncher@"
 const POWER    = "@siebPower@"
-const SETSID   = "@utilLinux@/bin/setsid"
 
-# Detached, and screenrec.nu's shape rather than tui.nu's. eww kills an onclick
-# handler that outlives the widget's :timeout, 200ms by default, which is what
-# the "command ... timed out" lines in the journal are; anything that waits on a
-# menu session has to leave the process tree first.
-#
-# The redirects, not `| complete | ignore`, are what does the leaving. `complete`
-# waits for EOF on the pipe rather than for the process, and the detached
-# grandchild inherits the write end, so it blocks for as long as the thing it
-# just detached from stays alive: measured at the full two minutes for a
-# `setsid --fork sleep 120`. Fresh descriptors return in 11ms instead.
-def detach [...cmd: string] {
-  ^$SETSID -f ...$cmd out> /dev/null err> /dev/null
-}
+# Detached, since eww kills an onclick handler that outlives its :timeout and a
+# menu session easily does. lib.nu has the details.
+use "@ewwLib@" *
 
 def main [what: string] {
   match $what {

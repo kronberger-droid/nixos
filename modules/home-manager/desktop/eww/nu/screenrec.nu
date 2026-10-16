@@ -14,10 +14,12 @@ const EWW          = "@eww@/bin/eww"
 const NOTIFY_SEND  = "@libnotify@/bin/notify-send"
 const PGREP        = "@procps@/bin/pgrep"
 const PKILL        = "@procps@/bin/pkill"
-const SETSID       = "@utilLinux@/bin/setsid"
 const PROMPT       = "@siebPrompt@"
 const SLURP        = "@slurp@/bin/slurp"
 const WL_SCREENREC = "@wlScreenrec@/bin/wl-screenrec"
+
+# `detach`, which a recording needs to outlive this script.
+use "@ewwLib@" *
 
 def status-json []: nothing -> string {
   if (recording?) {
@@ -42,13 +44,6 @@ def notify [body: string] {
 def refresh [] {
   let dir = ($env.FILE_PWD | path dirname)
   ^$EWW -c $dir update $"screenrec_state=(status-json)" | complete | ignore
-}
-
-# Same shape as the `detach` in utilities.nu. Nushell has no `&`, and its
-# `job spawn` runs in a thread of *this* process, so a recording started that
-# way would die when this script exits.
-def detach [...cmd: string] {
-  ^$SETSID -f ...$cmd out> /dev/null err> /dev/null
 }
 
 def "main toggle" [] {

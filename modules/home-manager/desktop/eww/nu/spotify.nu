@@ -11,12 +11,10 @@
 
 # Binaries by store path; see eww.nix for why these are consts and not
 # spelled inline at the call sites.
-const SETSID          = "@utilLinux@/bin/setsid"
-const TERMINAL        = "@terminalBin@"
-const TERM_APPID_FLAG = "@terminalAppIdFlag@"
-const TERM_EXEC_FLAG  = "@terminalExecFlag@"
 const SPOTIFY_PLAYER  = "@spotifyPlayer@"
 const SPOTIFY_DEVICE  = "@spotifyDevice@"
+
+use "@ewwLib@" *
 
 def niri-windows [] {
   let r = (^niri msg -j windows | complete)
@@ -62,10 +60,9 @@ def main [] {
     # pick. The daemon serves the request; play/pause state carries over.
     ^$SPOTIFY_PLAYER connect --name $SPOTIFY_DEVICE | complete | ignore
     # The daemon already owns the MPRIS name; a second registration from the
-    # TUI would show up as a duplicate player in the mpris widget. Forked, and
-    # to /dev/null rather than a pipe rio would hold open, so the script
-    # returns once the window is up instead of when it closes.
-    ^$SETSID --fork $TERMINAL $TERM_APPID_FLAG $app_id $TERM_EXEC_FLAG $SPOTIFY_PLAYER -o enable_media_control=false o+e> /dev/null
+    # TUI would show up as a duplicate player in the mpris widget. Detached,
+    # so the script returns once the window is up instead of when it closes.
+    spawn-terminal $app_id ...[$SPOTIFY_PLAYER "-o" "enable_media_control=false"]
     await-state $app_id "open"
   }
 }
