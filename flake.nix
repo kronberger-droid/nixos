@@ -199,8 +199,11 @@
       # overlay) is droid's remote builder/substituter, so it hands back the
       # prebuilt output instead of compiling on the phone.
       (import ./modules/shared/nushell-overlay.nix inputs)
-      (_: _: {
+      (final: _: {
         claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
+        # What an update would change beyond the closure diff; used by hand
+        # and by the homeserver's flake-autoupdate job. See its default.nix.
+        flake-versions = final.callPackage ./pkgs/flake-versions {};
       })
     ];
 
