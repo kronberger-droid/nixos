@@ -15,11 +15,22 @@
 
 const COLLECT = "@collect@"
 
+# The nearest directory at or above `dir` with a flake.nix, so the tool
+# works from anywhere inside a checkout, like `nix build .#…` does.
+def flake-root [dir: path]: nothing -> path {
+  mut d = ($dir | path expand)
+  while not ($d | path join flake.nix | path exists) {
+    let up = ($d | path dirname)
+    if $up == $d { error make {msg: $"no flake.nix in ($dir | path expand) or above it"} }
+    $d = $up
+  }
+  $d
+}
+
 # A flake reference nix accepts for a local checkout. git+file keeps nix to
 # tracked files, the same view `nix build .#…` has.
-def flake-url [dir: path]: nothing -> string {
-  let abs = ($dir | path expand)
-  if ($abs | path join .git | path exists) { $"git+file://($abs)" } else { $"path:($abs)" }
+def flake-url [root: path]: nothing -> string {
+  if ($root | path join .git | path exists) { $"git+file://($root)" } else { $"path:($root)" }
 }
 
 # The derivations a `nix build --dry-run` would build, from its stderr.
@@ -92,27 +103,29 @@ def pins [collected: record]: nothing -> table {
       or (normalize-url $p.homepage) == (normalize-url $p.nixpkgsHomepage)
     )
     let cmp = if $comparable and $same_project { $p.cmp } else { null }
-    let status = if not $same_project { "other project: only the name matches" } else { match $cmp {
+    # One word for the table column, the sentence for the preview.
+    let verdict = if not $same_project { ["other" "only the name matches nixpkgs"] } else { match $cmp {
       1 => {
         if $p.nixpkgsDrvPath in $uncached {
-          "keep: nixpkgs is newer but not in the cache"
+          ["keep" "nixpkgs is newer but not in the cache"]
         } else {
-          "droppable: nixpkgs is newer and cached"
+          ["droppable" "nixpkgs is newer and cached"]
         }
       }
-      0 => "patched: same version, rebuilt by an overlay"
-      -1 => "ahead: newer than nixpkgs"
-      _ => "custom: versions not comparable"
+      0 => ["patched" "same version, rebuilt by an overlay"]
+      -1 => ["ahead" "newer than nixpkgs"]
+      _ => ["custom" "versions not comparable"]
     } }
     {
       package: $g.pname
       flake: $p.version
       nixpkgs: $p.nixpkgsVersion
-      status: $status
+      status: $verdict.0
+      note: $verdict.1
       hosts: ($g.rows | get host | uniq)
     }
   }
-  | sort-by status package
+  | sort-by {|r| [droppable keep ahead custom other patched] | enumerate | where item == $r.status | get 0.index } package
 }
 
 # Packages each host would compile. Taken from the toplevel's dry run, so a
@@ -226,7 +239,8 @@ def "main report" [
   --upstream                   # also ask Repology, about one second per package
   --json                       # print JSON instead of a table, for the update job
 ] {
-  let url = (flake-url $flake)
+  let root = (flake-root $flake)
+  let url = (flake-url $root)
   let hosts = (host-list $hosts $all_hosts)
   let collected = (collect-packages $url $hosts)
   let report = {
@@ -234,7 +248,7 @@ def "main report" [
     hosts: ($collected | columns)
     pins: (pins $collected)
     uncached: (uncached $url ($collected | columns))
-    inputs: (inputs $flake)
+    inputs: (inputs $root)
     upstream: (if $upstream { upstream $collected | collect } else { null })
   }
   if $json { $report | to json } else { $report }
@@ -249,14 +263,15 @@ def "main tui" [
   --from: path                 # read a report written by `report --json` instead
 ] {
   let report = if $from != null { open $from } else {
-    let url = (flake-url $flake)
+    let root = (flake-root $flake)
+  let url = (flake-url $root)
     let hosts = (host-list $hosts $all_hosts)
     let collected = (collect-packages $url $hosts)
     {
       hosts: ($collected | columns)
       pins: (pins $collected)
       uncached: (uncached $url ($collected | columns))
-      inputs: (inputs $flake)
+      inputs: (inputs $root)
       collected: $collected
     }
   }
