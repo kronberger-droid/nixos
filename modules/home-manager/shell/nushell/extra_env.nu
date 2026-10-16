@@ -19,9 +19,6 @@ if ($env.XDG_RUNTIME_DIR? | is-not-empty) {
 # Force TTY passphrase prompts; suppress OpenSSH's bundled GUI askpass fallback
 $env.SSH_ASKPASS_REQUIRE = "never"
 
-# Use skim instead of fzf for navi
-$env.NAVI_FINDER = "skim"
-
 # Add ~/.local/bin to PATH
 $env.PATH = ($env.PATH | prepend ($env.HOME | path join ".local" "bin"))
 

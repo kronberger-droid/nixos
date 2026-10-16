@@ -65,7 +65,7 @@
     else storePath;
 
   # When false, drop the heavyweight language tooling (Typst, Python, CSV,
-  # GLSL, PDF viewer, compilers) and keep only Nix + Markdown + Rust editing.
+  # PDF viewer, compilers) and keep only Nix + Markdown + Rust editing.
   full = !config.helix.minimal;
 
   # Edition-aware rustfmt for helix's `formatter` hook, which pipes the buffer
@@ -126,7 +126,7 @@ in {
       description = ''
         Trim the language tooling to a lean core (Nix + Markdown + Rust
         editing), omitting heavyweight servers/formatters (Typst, Python,
-        CSV, GLSL, PDF viewer, compilers). For constrained targets like
+        CSV, PDF viewer, compilers). For constrained targets like
         nix-on-droid. Also prunes the matching languages.toml entries so the
         omitted tools don't get pulled into the closure by store-path refs.
       '';
@@ -149,7 +149,6 @@ in {
           # Typst
           typst
           typstyle
-          typst-live
           tinymist
         ]
         ++ [
@@ -165,9 +164,6 @@ in {
           # CSV
           prettier
 
-          # General Compilers
-          gcc
-
           # Rust
           bacon
           rust-script
@@ -175,9 +171,6 @@ in {
           # Python
           ruff
           pyright
-
-          # OpenGL
-          glsl_analyzer
 
           # JSON / web (Biome: LSP + formatter)
           biome

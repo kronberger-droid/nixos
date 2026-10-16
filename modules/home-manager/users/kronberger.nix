@@ -69,7 +69,6 @@ in {
           dropkittenPkg
           nemo-with-extensions
           # Nix tooling (was in devShell)
-          nixpkgs-fmt
           nix-tree
           nvd
           deploy-rs
