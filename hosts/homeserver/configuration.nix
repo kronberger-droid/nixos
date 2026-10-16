@@ -9,6 +9,7 @@
 in {
   imports = [
     ./hardware-configuration.nix
+    ../../modules/system/boot/boot-systemd.nix
     ../../modules/system/core/nix-settings.nix
     ../../modules/system/core/activation.nix
     ../../modules/system/core/locale.nix
@@ -77,15 +78,10 @@ in {
     owner = "root";
   };
 
-  # Bootloader. Set directly rather than via boot-systemd.nix, so the two
-  # defaults that module would give us are spelled out here: no boot-time
-  # cmdline editor (init=/bin/sh at the menu is root), and a generation cap
-  # so the ESP does not fill up between weekly GCs.
-  boot.loader.systemd-boot = {
-    enable = true;
-    editor = false;
-    configurationLimit = 20;
-  };
+  # Bootloader: boot-systemd.nix's defaults, among them no boot-time cmdline
+  # editor (init=/bin/sh at the menu is root) and a generation cap so the
+  # ESP does not fill up between weekly GCs.
+  boot.systemd-boot-defaults.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # The generated hardware config ties Intel microcode updates to this flag
