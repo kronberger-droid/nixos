@@ -70,8 +70,8 @@
       url = "github:kronberger-droid/dropkitten";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # sieb: the dmenu-first picker behind Mod+D and Mod+Shift+E on niri,
-    # replacing rofi there (rofi stays for sway and rofi-rbw). See
+    # sieb: the dmenu-first picker behind the launcher, power menu, rbw
+    # picker and screenrec prompts, which replaced rofi everywhere. See
     # modules/home-manager/desktop/sieb.nix.
     sieb = {
       url = "github:kronberger-droid/sieb/main";

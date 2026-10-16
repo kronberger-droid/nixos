@@ -3,10 +3,9 @@
 # Screen recording, merged from waybar/nu/screenrec-status.nu and
 # screenrec-toggle.nu. The recording logic is unchanged.
 #
-# Still rofi-driven: the mode picker (area/output) and the output picker are
-# both `rofi -dmenu`. They are the same shape as the VPN picker was, so they
-# are the obvious next candidates for an eww dropdown; left alone for now to
-# keep this port a port.
+# The mode picker (area/output) and the output picker are sieb in dmenu mode,
+# themed by the launcher's config.toml. Escape exits sieb with 1 and empty
+# stdout, which the match below already reads as "abort".
 
 # Binaries by store path; see eww.nix for why these are consts and not
 # spelled inline at the call sites.
@@ -14,8 +13,8 @@ const EWW          = "@eww@/bin/eww"
 const NOTIFY_SEND  = "@libnotify@/bin/notify-send"
 const PGREP        = "@procps@/bin/pgrep"
 const PKILL        = "@procps@/bin/pkill"
-const ROFI         = "@rofi@/bin/rofi"
 const SETSID       = "@utilLinux@/bin/setsid"
+const SIEB         = "@siebBin@"
 const SLURP        = "@slurp@/bin/slurp"
 const WL_SCREENREC = "@wlScreenrec@/bin/wl-screenrec"
 
@@ -60,7 +59,7 @@ def "main toggle" [] {
   }
 
   let mode = ("area\noutput"
-    | ^$ROFI -dmenu -p "Record" -theme-str 'listview {lines: 2;}'
+    | ^$SIEB -p "Record"
     | complete
     | get stdout
     | str trim)
@@ -81,7 +80,7 @@ def "main toggle" [] {
           | from json
           | columns
           | str join "\n"
-          | ^$ROFI -dmenu -p "Output" -theme-str 'listview {lines: 3;}'
+          | ^$SIEB -p "Output"
           | complete
           | get stdout
           | str trim)

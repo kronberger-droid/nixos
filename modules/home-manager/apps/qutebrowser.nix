@@ -267,8 +267,8 @@ in {
         "x" = "tab-close";
         "X" = "undo";
 
-        # Password fill via rofi-rbw
-        ",p" = "spawn --detach ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw";
+        # Password fill via the sieb rbw picker (Mod+Shift+W on niri)
+        ",p" = "spawn --detach ${builtins.head config.sieb.commands.rbw}";
       };
     };
   };
