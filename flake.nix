@@ -116,6 +116,7 @@
     lanzaboote = {
       url = "github:nix-community/lanzaboote";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
     };
     # Declarative partitioning. Hosts that import modules/system/boot/disk-layout.nix
     # get their disk described in the flake, so an install is `disko` plus
