@@ -42,7 +42,6 @@
   };
 
   hardware = {
-    enableRedistributableFirmware = true;
     keyboard.qmk.enable = true;
     graphics.extraPackages = [pkgs.intel-media-driver];
   };
