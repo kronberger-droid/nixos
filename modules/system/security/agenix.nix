@@ -35,8 +35,6 @@
     "radicale-password" # plaintext CardDAV password, read by vdirsyncer
     "spotify-password"
     "sftp-password" # single-line SFTP password, read by the sftp-mount nushell helper
-    "aerc-gmx-password" # aerc mail passwords, read via *-cred-cmd (cat) in apps/aerc.nix
-    "aerc-uptudate-password"
   ];
 in {
   # sshd itself (which agenix relies on for the host key) is configured in

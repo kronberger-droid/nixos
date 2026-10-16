@@ -64,7 +64,7 @@ in {
         inherit username;
         homeDirectory = "/home/${username}";
         # One home for each package: statix/deadnix live with the Nix LSP
-        # set in editors/helix.nix, pandoc with aerc's compose pipeline.
+        # set in editors/helix.nix.
         packages = with pkgs; [
           dropkittenPkg
           nemo-with-extensions

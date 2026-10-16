@@ -24,7 +24,7 @@ in {
   home.packages = [pkgs.vdirsyncer contactsScript];
 
   # Contacts pipeline: Radicale (homeserver, over tailnet) <-> vdirsyncer <->
-  # local vCard dir <-> khard, which aerc queries for address autocomplete.
+  # local vCard dir <-> khard.
   # The phone syncs the same Radicale via DAVx5 into its stock Contacts app.
   accounts.contact = {
     basePath = "${config.home.homeDirectory}/.local/share/contacts";
