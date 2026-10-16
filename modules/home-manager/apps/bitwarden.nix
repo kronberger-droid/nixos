@@ -22,8 +22,7 @@
       email = "kronberger@proton.me";
       base_url = "https://vault.bitwarden.eu";
       # The unlock prompt as a sieb panel, themed by sieb/pinentry.toml
-      # from desktop/sieb.nix. Any layer-shell compositor will do, so sway
-      # hosts get it too.
+      # from desktop/sieb.nix.
       pinentry = inputs.sieb.packages.${pkgs.stdenv.hostPlatform.system}.pinentry;
     };
   };

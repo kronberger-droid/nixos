@@ -6,13 +6,12 @@
   c = config.scheme;
   toml = pkgs.formats.toml {};
 in {
-  # Trial replacement for swaylock-effects. veila speaks
-  # wp_fractional_scale_v1 + wp_viewporter, so it renders at the output's real
-  # scale and needs none of the per-host `scale` swaylock.nix carries.
+  # The screen locker. veila speaks wp_fractional_scale_v1 + wp_viewporter, so
+  # it renders at the output's real scale and needs no per-host `scale`.
   #
-  # Unlike swaylock it is a client of a long-running daemon: `veila lock` only
-  # asks veilad to lock, so veilad has to be up before swayidle fires. The
-  # PAM service lives in modules/system/desktop/desktop.nix; without
+  # It is a client of a long-running daemon: `veila lock` only asks veilad to
+  # lock, so veilad has to be up before swayidle fires. The PAM service lives
+  # in modules/system/desktop/desktop.nix; without
   # /etc/pam.d/veila it falls back to system-auth, which NixOS lacks.
   home.packages = [pkgs.veila];
 
@@ -26,7 +25,7 @@ in {
   xdg.configFile."veila/config.toml".source = toml.generate "veila.toml" {
     background = {
       mode = "file";
-      path = "${./sway/deathpaper.jpg}";
+      path = "${./deathpaper.jpg}";
       blur_strength = 14;
       dim_strength = 15;
     };

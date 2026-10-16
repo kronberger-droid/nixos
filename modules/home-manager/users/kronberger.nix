@@ -5,7 +5,6 @@
   host,
   isNotebook,
   hasAccelerometer,
-  primaryCompositor,
   username,
   ...
 }: let
@@ -13,7 +12,7 @@
 in {
   home-manager = {
     extraSpecialArgs = {
-      inherit inputs host isNotebook hasAccelerometer dropkittenPkg primaryCompositor;
+      inherit inputs host isNotebook hasAccelerometer dropkittenPkg;
     };
     useGlobalPkgs = true;
     useUserPackages = true;
@@ -29,10 +28,6 @@ in {
       # The one terminal that gets installed and configured (terminals/*.nix
       # are gated on this).
       terminal.emulator = "rio";
-
-      # The one compositor that gets configured and offered by greetd. The
-      # value comes from mkHost so the NixOS and home sides agree.
-      compositor.primary = primaryCompositor;
 
       programs.ssh = {
         enable = true;

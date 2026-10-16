@@ -13,7 +13,6 @@
       execFlag = "-e";
       workingDirFlag = "--working-dir";
       appIdFlag = "--app-id";
-      hasKittens = false;
       floatingAppId = "floating_shell";
       # --working-dir was broken on the April 2026 fork build, hence the
       # cwdViaExec machinery. It was never broken for `-e` commands, only
@@ -23,38 +22,18 @@
       # both still honour it.
       cwdViaExec = false;
     };
-
-    kitty = {
-      bin = "${pkgs.kitty}/bin/kitty";
-      execFlag = "-e";
-      workingDirFlag = "--working-directory";
-      appIdFlag = "--app-id";
-      hasKittens = true;
-      floatingAppId = "floating_shell";
-      cwdViaExec = false;
-    };
-
-    alacritty = {
-      bin = "${pkgs.alacritty}/bin/alacritty";
-      execFlag = "-e";
-      workingDirFlag = "--working-directory";
-      appIdFlag = "--class";
-      hasKittens = false;
-      floatingAppId = "floating_shell";
-      cwdViaExec = false;
-    };
   };
 
   selectedConfig = terminalConfigs.${cfg.emulator};
 in {
   options.terminal = {
     emulator = lib.mkOption {
-      type = lib.types.enum ["rio" "kitty" "alacritty"];
-      default = "kitty";
+      type = lib.types.enum ["rio"];
+      default = "rio";
       description = ''
         The terminal emulator to use system-wide.
-        This setting affects all terminal keybindings in Sway,
-        Waybar commands, and nushell aliases.
+        This setting affects the terminal keybindings in niri,
+        the eww bar's commands, and nushell aliases.
       '';
     };
 
@@ -81,12 +60,6 @@ in {
       type = lib.types.nullOr lib.types.str;
       readOnly = true;
       description = "Flag to set application ID (null if not supported)";
-    };
-
-    hasKittens = lib.mkOption {
-      type = lib.types.bool;
-      readOnly = true;
-      description = "Whether this terminal supports kitty kittens";
     };
 
     floatingAppId = lib.mkOption {
@@ -119,38 +92,22 @@ in {
       execFlag = lib.mkDefault selectedConfig.execFlag;
       workingDirFlag = lib.mkDefault selectedConfig.workingDirFlag;
       appIdFlag = lib.mkDefault selectedConfig.appIdFlag;
-      hasKittens = lib.mkDefault selectedConfig.hasKittens;
       floatingAppId = lib.mkDefault selectedConfig.floatingAppId;
       cwdViaExec = lib.mkDefault selectedConfig.cwdViaExec;
       cwdScript = "${config.xdg.configHome}/wm/cwd.sh";
     };
 
-    # Used to be kitty/cwd.sh inside terminals/kitty.nix, so niri and sway
-    # both depended on the kitty module even on rio hosts.
-    xdg.configFile."wm/cwd.sh" = let
-      # The niri branch interpolates ${pkgs.niri} (the source-built fork) and
-      # is only emitted when niri is the primary compositor. Note the sway
-      # branch below always references ${pkgs.sway} for swaymsg, as do
-      # rofi.nix and session-services.nix, so sway itself is in every
-      # closure; the gate here only keeps a sway-primary host from also
-      # building the niri fork for a script branch it never takes.
-      niriPrimary = config.compositor.primary == "niri";
-    in {
+    # Lives here rather than with any one emulator so the compositor binds
+    # depend on the terminal option alone.
+    xdg.configFile."wm/cwd.sh" = {
       executable = true;
       text = ''
         #!${pkgs.bash}/bin/bash
         # Print working directory of the focused window, or $HOME.
         # Only uses cwd for terminals and file managers, not browsers/other apps.
-        # Supports both sway and niri.
 
-        ${lib.optionalString niriPrimary ''
-          if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
-              focused=$(${pkgs.niri}/bin/niri msg -j focused-window)
-              app_id=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.app_id // empty')
-              pid=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.pid')
-          el''}if [ -n "$SWAYSOCK" ] && [ -S "$SWAYSOCK" ]; then
-            focused=$(${pkgs.sway}/bin/swaymsg -t get_tree | ${pkgs.jq}/bin/jq -r \
-                  '.. | select(.type?) | select(.type=="con") | select(.focused==true)')
+        if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
+            focused=$(${pkgs.niri}/bin/niri msg -j focused-window)
             app_id=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.app_id // empty')
             pid=$(echo "$focused" | ${pkgs.jq}/bin/jq -r '.pid')
         else
@@ -158,7 +115,7 @@ in {
             exit 0
         fi
 
-        relevant_apps="kitty|rio|foot|alacritty|wezterm|ghostty|nemo|nautilus|thunar|yazi|ranger|helix|nvim|vim|emacs|code|zed"
+        relevant_apps="rio|foot|wezterm|ghostty|nemo|nautilus|thunar|yazi|ranger|helix|nvim|vim|emacs|code|zed"
 
         if [[ "$app_id" =~ ^($relevant_apps) ]]; then
             ppid=$(${pkgs.procps}/bin/pgrep --newest --parent "$pid")

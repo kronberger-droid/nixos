@@ -29,7 +29,7 @@ const EWW = "@eww@/bin/eww"
 
 def bar-id [out: string]: nothing -> string { $"bar-($out)" }
 
-# niri keys its outputs object by connector name; sway returns a list.
+# niri keys its outputs object by connector name.
 #
 # Null, not an empty list, when the query fails: an empty set of outputs is a
 # meaningful answer here (it closes every bar), and a compositor that did not
@@ -46,15 +46,9 @@ def outputs []: nothing -> any {
     $r.stdout | from json | transpose name info
     | where {|o| $o.info.logical? != null }
     | get name
-  } else if ($env.SWAYSOCK? | is-not-empty) {
-    # UNTESTED, like workspaces.nu's sway arm. `active` filters out outputs
-    # sway knows about but is not driving.
-    let r = (^swaymsg -t get_outputs --raw | complete)
-    if $r.exit_code != 0 { return null }
-    $r.stdout | from json | where active | get name
   } else {
-    # No compositor socket at all. Nothing to draw on, and unlike the two
-    # failures above this will not fix itself, so it stays an empty list.
+    # No compositor socket at all. Nothing to draw on, and unlike the failure
+    # above this will not fix itself, so it stays an empty list.
     []
   }
 }
@@ -134,12 +128,6 @@ def main [] {
     | each {|line|
         if ($line | str starts-with '{"WorkspacesChanged') { reconcile-until-ok }
       }
-    | ignore
-  } else if ($env.SWAYSOCK? | is-not-empty) {
-    # UNTESTED. sway does have a real output event, so no proxy needed here.
-    ^swaymsg -t subscribe -m '["output"]'
-    | lines
-    | each {|_| reconcile-until-ok }
     | ignore
   }
 }

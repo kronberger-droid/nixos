@@ -248,36 +248,6 @@ in {
           }
       }
 
-      # Sway development layout setup
-      def swayDevSetup [] {
-          print "Setting up Sway development layout..."
-          let cwd = $env.PWD
-          let dev_env = detectDevEnv
-
-          ^swaymsg layout splith
-          ^swaymsg layout stacking
-
-          ^swaymsg exec (termCmd $cwd $dev_env "nu --login")
-          sleep 500ms
-
-          ^swaymsg focus parent
-          ^swaymsg exec (claudeCmd $cwd $dev_env)
-          sleep 500ms
-
-          ^swaymsg layout stacking
-          ^swaymsg focus left
-
-          if $dev_env.has_direnv or not $dev_env.has_flake {
-              ^sh -c 'exec hx .'
-              cd $cwd
-              nu --login
-          } else {
-              ^nix develop ($dev_env.dev_shell) -c sh -c 'exec hx .'
-              cd $cwd
-              nu --login
-          }
-      }
-
       # Niri development layout setup
       # Layout: left tabbed column = helix + shell, right column = claude
       # Typst: left tabbed column = zathura + typst watch, right tabbed column = helix + claude
@@ -473,14 +443,12 @@ in {
           }
       }
 
-      # Detect compositor and run the appropriate dev setup
+      # Run the dev layout setup, which needs a niri session to drive
       def compositorDevSetup [] {
           if ("NIRI_SOCKET" in $env) {
               niriDevSetup
-          } else if ("SWAYSOCK" in $env) {
-              swayDevSetup
           } else {
-              print "No supported compositor detected (checked NIRI_SOCKET, SWAYSOCK)"
+              print "No niri session detected (NIRI_SOCKET unset)"
           }
       }
 
@@ -648,9 +616,6 @@ in {
       }
       // lib.optionalAttrs hasTerminal {
         icat = "chafa";
-      }
-      // lib.optionalAttrs (hasTerminal && config.terminal.hasKittens) {
-        ssh = "kitty +kitten ssh";
       };
   };
 

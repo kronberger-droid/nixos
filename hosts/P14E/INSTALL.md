@@ -48,12 +48,12 @@ here.
       pattern relevant, and even then you'd need a fresh VBT dump for *this*
       panel, not spectre's file
 - [ ] Touchpad: `libinput list-devices` — add per-device tuning to
-      `modules/home-manager/desktop/niri.nix` / `sway.nix` if it needs it
+      `modules/home-manager/desktop/niri.nix` if it needs it
       (spectre's touchpad ID won't match this hardware)
 - [ ] HiDPI scale: panel is 3000×2000 on 13.9" (~260 DPI, notably denser than
-      spectre's 1.25 scale) — add a `P14E` case to
-      `modules/home-manager/desktop/sway/swaylock.nix` once you've picked a
-      scale that feels right in the actual session
+      spectre's 1.25 scale) — the panel's scale is set per profile in the
+      `P14E` case of `modules/home-manager/desktop/shikane.nix`; adjust it
+      once you've picked a scale that feels right in the actual session
 - [ ] Bluetooth: default is `powerOnBoot = mkDefault false` (laptop default)
       — override in `hosts/P14E/configuration.nix` only if you want an
       always-on radio like intelNuc

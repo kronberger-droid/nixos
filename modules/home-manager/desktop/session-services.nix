@@ -17,31 +17,18 @@
     then "suspend-then-hibernate"
     else "suspend";
 
-  # DPMS control, dispatching on whichever compositor's socket is live. The niri
-  # branch interpolates ${pkgs.niri} (the source-built fork), so only emit it
-  # when niri is the primary compositor — otherwise it drags the fork into the
-  # closure of sway-only hosts for a code path that never runs there.
-  niriPrimary = config.compositor.primary == "niri";
-  dpms = name: niriAction: swayState:
+  # DPMS control through niri's own power-off/power-on actions.
+  dpms = name: niriAction:
     pkgs.writeShellScript name ''
-      ${lib.optionalString niriPrimary ''
-        if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
-          ${pkgs.niri}/bin/niri msg action ${niriAction}
-          exit 0
-        fi
-      ''}
-      if [ -n "$SWAYSOCK" ] && [ -S "$SWAYSOCK" ]; then
-        ${pkgs.sway}/bin/swaymsg 'output * dpms ${swayState}'
-      fi
+      ${pkgs.niri}/bin/niri msg action ${niriAction}
     '';
-  dpmsOff = dpms "dpms-off" "power-off-monitors" "off";
-  dpmsOn = dpms "dpms-on" "power-on-monitors" "on";
+  dpmsOff = dpms "dpms-off" "power-off-monitors";
+  dpmsOn = dpms "dpms-on" "power-on-monitors";
 
-  # Manual idle inhibit, one holder per compositor; see idle-inhibit.service
-  # below for why there are two. The niri holder takes an
-  # org.freedesktop.ScreenSaver Inhibit and then just keeps its bus
-  # connection open: niri drops the inhibit the moment that connection goes
-  # away, so the SIGTERM from `systemctl stop` is the release.
+  # Manual idle inhibit; see idle-inhibit.service below for why it goes over
+  # D-Bus. The holder takes an org.freedesktop.ScreenSaver Inhibit and then
+  # just keeps its bus connection open: niri drops the inhibit the moment that
+  # connection goes away, so the SIGTERM from `systemctl stop` is the release.
   idleInhibitDbus =
     pkgs.writers.writePython3 "idle-inhibit-dbus" {
       libraries = [pkgs.python3Packages.jeepney];
@@ -64,13 +51,6 @@
       # Hold the connection open; closing it releases the inhibit.
       signal.pause()
     '';
-  idleInhibit = pkgs.writeShellScript "idle-inhibit" ''
-    if [ -n "$NIRI_SOCKET" ] && [ -S "$NIRI_SOCKET" ]; then
-      exec ${idleInhibitDbus}
-    fi
-    exec ${pkgs.wlinhibit}/bin/wlinhibit
-  '';
-
   # Second line of defence behind `hasAccelerometer`, which already keeps this
   # whole block off hosts without the sensor. Kept because a host can claim
   # the sensor while
@@ -87,12 +67,11 @@
   '';
 in {
   imports = [
-    ./sway/swaylock.nix
     ./veila.nix
   ];
 
   home.packages = with pkgs; [
-    # Shared wayland session packages (used by both sway and niri)
+    # Shared wayland session packages
     wl-clipboard
     brightnessctl
     slurp
@@ -112,8 +91,7 @@ in {
     wl-screenrec
 
     # Image viewer: xdg.nix's image/* default and yazi's opener. Compositor
-    # agnostic despite the name, so it lives here rather than in sway.nix,
-    # which is gated on compositor.primary.
+    # agnostic despite the name.
     swayimg
   ];
 
@@ -203,15 +181,13 @@ in {
   # outright, which took that hook down with the timers and left the machine
   # unlocked after every sleep while the toggle was on.
   #
-  # The holder depends on the compositor. wlinhibit takes a
-  # zwp_idle_inhibitor_v1 on a surface it never maps; sway counts a
-  # role-less inhibitor as visible, so that is enough there. niri only
-  # honours an inhibitor whose surface was presented in the last rendered
-  # frame (Niri::refresh_idle_inhibit), so it ignores wlinhibit outright:
-  # the bar showed "inhibited" for two days while the timers kept firing.
-  # niri does serve org.freedesktop.ScreenSaver on the session bus, though,
-  # and that path needs no surface, so on niri the unit holds a D-Bus
-  # Inhibit instead (idleInhibit above picks by NIRI_SOCKET).
+  # The holder is a D-Bus Inhibit rather than a Wayland one. wlinhibit takes
+  # a zwp_idle_inhibitor_v1 on a surface it never maps, but niri only honours
+  # an inhibitor whose surface was presented in the last rendered frame
+  # (Niri::refresh_idle_inhibit), so it ignores wlinhibit outright: the bar
+  # showed "inhibited" for two days while the timers kept firing. niri does
+  # serve org.freedesktop.ScreenSaver on the session bus, though, and that
+  # path needs no surface.
   #
   # Not WantedBy anything: the toggle starts and stops it, and is-active is
   # the toggle's state. PartOf makes a session teardown clear the inhibit.
@@ -224,7 +200,7 @@ in {
     };
 
     Service = {
-      ExecStart = "${idleInhibit}";
+      ExecStart = "${idleInhibitDbus}";
     };
   };
 
@@ -270,8 +246,8 @@ in {
   # ── Clipboard persistence ──────────────────────────────────────
   # Wayland clipboards belong to the source window: close the terminal you
   # copied from and the selection is gone. That bites with rio's
-  # copy-on-select and with rofi-rbw's clear-after flow (a password copied
-  # in a window you then close). wl-clip-persist re-owns the regular
+  # copy-on-select and with a password copied from sieb's Bitwarden
+  # picker in a window you then close. wl-clip-persist re-owns the regular
   # clipboard only; the primary selection is left alone so select-to-copy
   # keeps its usual semantics.
   systemd.user.services.wl-clip-persist = {
