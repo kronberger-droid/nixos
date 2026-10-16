@@ -667,26 +667,9 @@
         "nushell-src": "nushell-src",
         "oo7-nixos": "oo7-nixos",
         "rio-upstream": "rio-upstream",
-        "rust-glancer-src": "rust-glancer-src",
         "rust-overlay": "rust-overlay_3",
         "sieb": "sieb",
         "website": "website"
-      }
-    },
-    "rust-glancer-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1791780083,
-        "narHash": "sha256-7xmxXOBPOE7LEc2qtp24vxfsqgToaRt7dCV5OYHhv8Y=",
-        "owner": "rust-glancer",
-        "repo": "rust-glancer",
-        "rev": "688baa67a30046a93ade61e4478ce26be5c68da0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "rust-glancer",
-        "repo": "rust-glancer",
-        "type": "github"
       }
     },
     "rust-overlay": {
