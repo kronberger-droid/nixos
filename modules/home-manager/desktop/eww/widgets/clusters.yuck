@@ -31,9 +31,7 @@
         (button :class "handle" :onclick onpin
           (label :text handle))))))
 
-;; waybar: modules = [custom/tray-handle, custom/ncspot, tray]. The ncspot
-;; button now opens spotify_player, next to the handle and the tray.
-;; is not ported yet, so this is the handle and the tray.
+;; The spotify_player button, next to the handle and the tray.
 
 (defvar tray_pinned false)
 (defvar tray_hover false)
@@ -45,9 +43,11 @@
            :onenter "${EWW_CMD} update tray_hover=true"
            :onleave "${EWW_CMD} update tray_hover=false"
            :onpin "${EWW_CMD} update tray_pinned=${!tray_pinned}"
-    ;; waybar: modules = [custom/tray-handle, custom/ncspot, tray].
+    ;; :timeout because eww kills an onclick after 200ms by default, and the
+    ;; script's `connect` call alone takes longer than that.
     (eventbox :cursor "pointer"
       (button :class "mod" :tooltip "Open spotify_player"
+              :timeout "2s"
               :onclick "${EWW_CONFIG_DIR}/scripts/spotify"
         (label :class "spotify" :text "")))
     (tray)))

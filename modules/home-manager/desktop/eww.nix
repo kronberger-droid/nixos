@@ -163,6 +163,7 @@
     spotify =
       terminalVars
       // {
+        inherit utilLinux;
         spotifyPlayer = lib.getExe config.programs.spotify-player.package;
         spotifyDevice = config.programs.spotify-player.settings.device.name;
       };
