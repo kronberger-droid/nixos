@@ -75,8 +75,6 @@ in {
   # not have, so without this entry no password would ever unlock it.
   security.pam.services.veila = {};
 
-  virtualisation.spiceUSBRedirection.enable = true;
-
   programs = {
     niri.enable = true;
     niri.package = pkgs.niri-unstable;
