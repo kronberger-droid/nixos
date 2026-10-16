@@ -174,6 +174,46 @@
       nix.package = pkgs.lix;
     };
 
+    # Overlays every host with a user on it takes, droid included, so mkHost,
+    # the homeserver and droid cannot drift apart on them. The recovery ISO
+    # needs none of them.
+    commonOverlays = system: [
+      # Exposes `pkgs.rust-bin` so home-manager (useGlobalPkgs) can pull a
+      # toolchain from rust-overlay instead of nixpkgs' rustc, which lags Rust
+      # stable. See modules/home-manager/editors/dev-tools.nix, which the
+      # homeserver's Claude Code sandbox account imports too. Additive, so
+      # nothing else is rebuilt.
+      inputs.rust-overlay.overlays.default
+      # nushell from upstream main; see the overlay file. The homeserver needs
+      # it as much as the workstations: its home-manager and login shell both
+      # read `edit_mode = "helix"`, which nixpkgs' release nushell still
+      # rejects. Droid stayed on stock nixpkgs nushell for a while to avoid an
+      # on-device Rust build, but the homeserver (which builds this same
+      # overlay) is droid's remote builder/substituter, so it hands back the
+      # prebuilt output instead of compiling on the phone.
+      (import ./modules/shared/nushell-overlay.nix inputs)
+      (_: _: {
+        claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
+      })
+    ];
+
+    # The NixOS modules every nixosSystem host with a user on it shares:
+    # home-manager with the base16 scheme module, agenix, and Lix. Droid has
+    # its own builder and takes none of these from here.
+    commonModules = system: [
+      home-manager.nixosModules.home-manager
+      {
+        home-manager.sharedModules = [
+          inputs.base16.homeManagerModule
+        ];
+      }
+      agenix.nixosModules.default
+      {
+        environment.systemPackages = [agenix.packages.${system}.default];
+      }
+      lixModule
+    ];
+
     # Helper function to create host configurations
     mkHost = {
       hostname,
@@ -204,104 +244,90 @@
             ./hosts/${hostname}/configuration.nix
             inputs.niri.nixosModules.niri
             {
-              nixpkgs.overlays = [
-                inputs.niri.overlays.niri
-                # Exposes `pkgs.rust-bin` so home-manager (useGlobalPkgs) can
-                # pull a toolchain from rust-overlay instead of nixpkgs' rustc,
-                # which lags Rust stable. See modules/home-manager/editors/dev-tools.nix.
-                inputs.rust-overlay.overlays.default
-                (final: prev: {
-                  # libinput 1.31.3 keeps a stale palm flag on a touchpad slot
-                  # when the tool type changes while its fd is closed, e.g. a
-                  # palm lifting while the lid switch has the touchpad
-                  # suspended. Every touch in that slot is then dropped as a
-                  # palm, so every gesture needs one finger more (#1319).
-                  # Fixed in 1.31.901/1.32.0; the version gate drops the patch
-                  # once nixpkgs gets there. Scoped to niri because a global
-                  # override would rebuild qtbase and everything above it.
-                  niri-unstable = prev.niri-unstable.override {
-                    libinput = prev.libinput.overrideAttrs (old: {
-                      patches =
-                        (old.patches or [])
-                        ++ final.lib.optional (final.lib.versionOlder old.version "1.31.901") (final.fetchpatch {
-                          url = "https://gitlab.freedesktop.org/libinput/libinput/-/commit/d0e6d43a78ee81f077dbd0dda98827440a3b5fc2.patch";
-                          hash = "sha256-fAmBVqHNoOmIUAKbGw5QBW3VGfuP4vrs3+gK++evWpw=";
-                        });
-                    });
-                  };
-                  # Make pkgs.niri resolve to the same fork build — collapses
-                  # the closure so scripts using `pkgs.niri/bin/niri msg` don't
-                  # pull in a parallel nixpkgs niri build.
-                  niri = final.niri-unstable;
-                })
-                # nushell from upstream main. Shared with the homeserver and
-                # droid (both built outside mkHost) — see the overlay file.
-                (import ./modules/shared/nushell-overlay.nix inputs)
-                (_: _: {
-                  deploy-rs = inputs.deploy-rs.packages.${system}.default;
-                  claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
-                  # rio from upstream main, tests skipped — same policy as the
-                  # nushell overlay. Upstream keeps adding tests that assume a
-                  # real host and each one breaks the sandboxed checkPhase for
-                  # a new reason: first the pty SIGHUP (#1855, fixed), now the
-                  # URL tests spawning /bin/sleep, which the sandbox doesn't
-                  # have. Upstream CI already gates main, so running the suite
-                  # here only ever reproduces sandbox incompatibilities.
-                  #
-                  # The override changes the drv hash, so rioterm.cachix.org
-                  # can never hit again and every bump is a full local build
-                  # (~25 min). The substituter was dropped from nix-caches.nix
-                  # along with this; restore both together if checks ever go
-                  # back on.
-                  rio =
-                    inputs.rio-upstream.packages.${system}.default.overrideAttrs
-                    (_: {doCheck = false;});
-                  # bitwarden-desktop is stock again. Until 2026.8.0 it carried
-                  # a doCheck = false (a failing desktop_native cargo test) and
-                  # a wrapper hiding the GNOME token in XDG_CURRENT_DESKTOP so
-                  # it would not pick the RemoteDesktop clipboard portal, which
-                  # always failed under PR_SET_DUMPABLE(0). 2026.8.0 made X11
-                  # the default backend (bitwarden/clients#22062) and the
-                  # locked nixpkgs builds it clean, so the cached binary is
-                  # back. If the clipboard regresses, that wrapper is
-                  # `wrapProgram $out/bin/bitwarden --set XDG_CURRENT_DESKTOP niri`.
-                })
-                # Ladybird's desktop and D-Bus files launch it with
-                # --force-new-process, which upstream turned into an alias for
-                # --temporary-profile. Every launcher start got a throwaway
-                # profile in /tmp, so settings and logins never stuck.
-                # Rewritten in a symlinkJoin so the cached build is reused.
-                # --replace-fail breaks this once upstream drops the flag
-                # (LadybirdBrowser/ladybird#12576); delete it then.
-                (_: prev: {
-                  ladybird = prev.symlinkJoin {
-                    name = "ladybird-${prev.ladybird.version}";
-                    inherit (prev.ladybird) version meta;
-                    paths = [prev.ladybird];
-                    postBuild = ''
-                      for f in share/applications/org.ladybird.Ladybird.desktop share/dbus-1/services/org.ladybird.Ladybird.service; do
-                        rm "$out/$f"
-                        substitute "${prev.ladybird}/$f" "$out/$f" --replace-fail " --force-new-process" ""
-                      done
-                    '';
-                  };
-                })
-              ];
-            }
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.sharedModules = [
-                inputs.base16.homeManagerModule
-              ];
+              nixpkgs.overlays =
+                [
+                  inputs.niri.overlays.niri
+                ]
+                ++ commonOverlays system
+                ++ [
+                  (final: prev: {
+                    # libinput 1.31.3 keeps a stale palm flag on a touchpad slot
+                    # when the tool type changes while its fd is closed, e.g. a
+                    # palm lifting while the lid switch has the touchpad
+                    # suspended. Every touch in that slot is then dropped as a
+                    # palm, so every gesture needs one finger more (#1319).
+                    # Fixed in 1.31.901/1.32.0; the version gate drops the patch
+                    # once nixpkgs gets there. Scoped to niri because a global
+                    # override would rebuild qtbase and everything above it.
+                    niri-unstable = prev.niri-unstable.override {
+                      libinput = prev.libinput.overrideAttrs (old: {
+                        patches =
+                          (old.patches or [])
+                          ++ final.lib.optional (final.lib.versionOlder old.version "1.31.901") (final.fetchpatch {
+                            url = "https://gitlab.freedesktop.org/libinput/libinput/-/commit/d0e6d43a78ee81f077dbd0dda98827440a3b5fc2.patch";
+                            hash = "sha256-fAmBVqHNoOmIUAKbGw5QBW3VGfuP4vrs3+gK++evWpw=";
+                          });
+                      });
+                    };
+                    # Make pkgs.niri resolve to the same fork build — collapses
+                    # the closure so scripts using `pkgs.niri/bin/niri msg` don't
+                    # pull in a parallel nixpkgs niri build.
+                    niri = final.niri-unstable;
+                  })
+                  (_: _: {
+                    deploy-rs = inputs.deploy-rs.packages.${system}.default;
+                    # rio from upstream main, tests skipped — same policy as the
+                    # nushell overlay. Upstream keeps adding tests that assume a
+                    # real host and each one breaks the sandboxed checkPhase for
+                    # a new reason: first the pty SIGHUP (#1855, fixed), now the
+                    # URL tests spawning /bin/sleep, which the sandbox doesn't
+                    # have. Upstream CI already gates main, so running the suite
+                    # here only ever reproduces sandbox incompatibilities.
+                    #
+                    # The override changes the drv hash, so rioterm.cachix.org
+                    # can never hit again and every bump is a full local build
+                    # (~25 min). The substituter was dropped from nix-caches.nix
+                    # along with this; restore both together if checks ever go
+                    # back on.
+                    rio =
+                      inputs.rio-upstream.packages.${system}.default.overrideAttrs
+                      (_: {doCheck = false;});
+                    # bitwarden-desktop is stock again. Until 2026.8.0 it carried
+                    # a doCheck = false (a failing desktop_native cargo test) and
+                    # a wrapper hiding the GNOME token in XDG_CURRENT_DESKTOP so
+                    # it would not pick the RemoteDesktop clipboard portal, which
+                    # always failed under PR_SET_DUMPABLE(0). 2026.8.0 made X11
+                    # the default backend (bitwarden/clients#22062) and the
+                    # locked nixpkgs builds it clean, so the cached binary is
+                    # back. If the clipboard regresses, that wrapper is
+                    # `wrapProgram $out/bin/bitwarden --set XDG_CURRENT_DESKTOP niri`.
+                  })
+                  # Ladybird's desktop and D-Bus files launch it with
+                  # --force-new-process, which upstream turned into an alias for
+                  # --temporary-profile. Every launcher start got a throwaway
+                  # profile in /tmp, so settings and logins never stuck.
+                  # Rewritten in a symlinkJoin so the cached build is reused.
+                  # --replace-fail breaks this once upstream drops the flag
+                  # (LadybirdBrowser/ladybird#12576); delete it then.
+                  (_: prev: {
+                    ladybird = prev.symlinkJoin {
+                      name = "ladybird-${prev.ladybird.version}";
+                      inherit (prev.ladybird) version meta;
+                      paths = [prev.ladybird];
+                      postBuild = ''
+                        for f in share/applications/org.ladybird.Ladybird.desktop share/dbus-1/services/org.ladybird.Ladybird.service; do
+                          rm "$out/$f"
+                          substitute "${prev.ladybird}/$f" "$out/$f" --replace-fail " --force-new-process" ""
+                        done
+                      '';
+                    };
+                  })
+                ];
             }
             userModule
-            agenix.nixosModules.default
-            {
-              environment.systemPackages = [agenix.packages.${system}.default];
-            }
             inputs.oo7-nixos.nixosModules.default
-            lixModule
           ]
+          ++ commonModules system
           ++ extraModules;
       };
 
@@ -343,37 +369,15 @@
           username = "kronberger";
           inherit inputs;
         };
-        modules = [
-          ./hosts/homeserver/configuration.nix
-          # Same upstream-main nushell the mkHost hosts get. Needed because the
-          # server's home-manager (useGlobalPkgs) and login shell both read
-          # `edit_mode = "helix"`, which nixpkgs' release nushell still rejects.
-          {
-            nixpkgs.overlays = [
-              (import ./modules/shared/nushell-overlay.nix inputs)
-              # This host is built by nixosSystem directly rather than mkHost,
-              # so it misses mkHost's overlay — claude-code-bin has to be
-              # redefined here, same as the droid config does for aarch64.
-              (_: _: {
-                claude-code-bin = inputs.claude-code.packages.${x86System}.claude-code;
-              })
-              # `pkgs.rust-bin` for the Claude Code sandbox account, whose
-              # home imports editors/dev-tools.nix. Additive, so nothing
-              # else on the host is rebuilt.
-              inputs.rust-overlay.overlays.default
-            ];
-          }
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.sharedModules = [
-              inputs.base16.homeManagerModule
-            ];
-          }
-          ./modules/home-manager/users/kronberger-server.nix
-          agenix.nixosModules.default
-          {environment.systemPackages = [agenix.packages.${x86System}.default];}
-          lixModule
-        ];
+        # Built by nixosSystem directly rather than mkHost: no niri, no
+        # desktop overlays, and a lean user module of its own.
+        modules =
+          [
+            ./hosts/homeserver/configuration.nix
+            {nixpkgs.overlays = commonOverlays x86System;}
+            ./modules/home-manager/users/kronberger-server.nix
+          ]
+          ++ commonModules x86System;
       };
     };
 
@@ -383,19 +387,9 @@
       pkgs = import nixpkgs {
         system = armSystem;
         config.allowUnfree = true;
-        overlays = [
-          inputs.nix-on-droid.overlays.default
-          inputs.rust-overlay.overlays.default
-          # Same upstream-main nushell as every other host. Previously
-          # droid stayed on stock nixpkgs nushell to avoid an on-device Rust
-          # build, but the homeserver (which builds this same overlay) is
-          # already droid's remote builder/substituter, so it hands back the
-          # prebuilt output instead of compiling on the phone.
-          (import ./modules/shared/nushell-overlay.nix inputs)
-          (_: _: {
-            claude-code-bin = inputs.claude-code.packages.${armSystem}.claude-code;
-          })
-        ];
+        overlays =
+          [inputs.nix-on-droid.overlays.default]
+          ++ commonOverlays armSystem;
       };
       modules = [./hosts/droid/nix-on-droid.nix];
       extraSpecialArgs = {inherit inputs;};
