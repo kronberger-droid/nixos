@@ -451,6 +451,12 @@
             (builtins.unsafeDiscardStringContext c.config.system.build.toplevel.drvPath)))
         hosts
         // {
+          # The flake-autoupdate uid split, in a VM: the agent account must
+          # not reach the job's GitHub token or state.
+          flake-autoupdate = import ./tests/flake-autoupdate.nix {
+            inherit pkgs inputs;
+            overlays = commonOverlays system;
+          };
           format = pkgs.runCommand "alejandra-check" {} ''
             ${pkgs.alejandra}/bin/alejandra --check --quiet ${self} && touch $out
           '';
@@ -499,6 +505,22 @@
     # The `-- .` is not optional: Lix's `nix fmt` passes no path through, and
     # alejandra with no arguments reads stdin, so a bare `nix fmt` dies with
     # "unexpected end of file" instead of formatting anything.
+    # The environment of every unattended agent: modules/shared/agent-tools.nix
+    # on PATH and nothing else. `nix develop .#agent --ignore-environment`
+    # reproduces what the flake-autoupdate agent runs with, for trying a
+    # prompt by hand.
+    devShells = nixpkgs.lib.genAttrs [x86System] (system: let
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = commonOverlays system;
+        config.allowUnfree = true;
+      };
+    in {
+      agent = pkgs.mkShellNoCC {
+        packages = import ./modules/shared/agent-tools.nix pkgs;
+      };
+    });
+
     formatter = nixpkgs.lib.genAttrs [x86System armSystem] (
       system: nixpkgs.legacyPackages.${system}.alejandra
     );

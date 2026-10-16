@@ -6,6 +6,8 @@
   ...
 }: let
   user = "flake-update";
+  # The agent phases run as this account instead; see the uid split below.
+  agentUser = "flake-update-agent";
   branch = "auto/flake-update";
   owner = "kronberger-droid";
 
@@ -87,7 +89,7 @@
     `nix flake update` on one of Martin's NixOS flakes. The working
     directory is the checkout of the update branch: HEAD is the commit
     "chore: nix flake update", preceded by a fix commit if the job had to
-    make one (check `git log`). The run directory named below holds:
+    make one (check `git log`). The run directory named above holds:
 
     - update.log: which inputs moved and to what
     - status.md: build result per target, and what the fix phase did
@@ -118,47 +120,64 @@
     PR body.
   '';
 
-  # Everything for one repo, as its own process. A per-repo function inside
-  # the driver would run under `||` and lose errexit, so a fault mid-repo
-  # would sail on and push whatever state it left behind.
-  updateRepo = pkgs.writeShellApplication {
-    name = "flake-autoupdate-repo";
-    runtimeInputs = with pkgs; [
-      config.nix.package
-      git
-      gh
-      jq
-      vulnix
-      claude-code-bin
-      coreutils
-    ];
+  # ---- the uid split ---------------------------------------------------
+  #
+  # The job and the agent are two accounts, and every step is its own
+  # transient unit started by a root driver through `systemd-run`.
+  #
+  # `${user}` owns the checkout, the logs and the GitHub token: it updates,
+  # builds, pushes and opens the PR. `${agentUser}` holds only the Claude
+  # token and never sees the job's state directory. Before the split both ran
+  # as one uid, so `env -u` hid the credential path from the agent but not the
+  # file: its Read tool, or `builtins.readFile` under its `nix eval`, could
+  # still open the GitHub token.
+  #
+  # Data crosses only through pipes. The job tars the checkout and the run
+  # directory to the agent's stdin, and the agent answers on stdout with one
+  # JSON object, `{result, patch}`. The job applies the patch with
+  # `git apply`, which refuses paths outside the tree, and rebuilds to verify
+  # it. The driver only connects the pipes, so no file the agent wrote is
+  # ever opened by root or by the job, and a symlink it plants goes nowhere.
+
+  # The agent's PATH: the same list the flake exports as devShells.agent.
+  agentPath = lib.makeBinPath (import ../../shared/agent-tools.nix pkgs);
+  jobPath = lib.makeBinPath (with pkgs; [
+    config.nix.package
+    git
+    gh
+    jq
+    vulnix
+    coreutils
+    findutils
+    gnugrep
+    gnused
+    gnutar
+    diffutils
+  ]);
+
+  # The job's half: one script, one subcommand per step. Each step is its own
+  # process with errexit intact, and state between steps lives in the run
+  # directory rather than in shell variables.
+  jobStep = pkgs.writeShellApplication {
+    name = "flake-autoupdate-step";
+    # PATH comes from the unit (jobPath), so the steps see exactly that.
+    runtimeInputs = [];
     text = ''
-      # usage: flake-autoupdate-repo <name> [--build ATTR]... [--eval ATTR]...
-      name=$1
-      shift
-      build=()
-      evals=()
-      while [ $# -gt 0 ]; do
-        case $1 in
-          --build) build+=("$2"); shift 2 ;;
-          --eval) evals+=("$2"); shift 2 ;;
-          *) echo "unknown argument: $1" >&2; exit 64 ;;
-        esac
-      done
+      # usage: flake-autoupdate-step <step> <repo name> [args]
+      step=$1
+      name=$2
+      shift 2
 
       repo="${owner}/$name"
       src="$STATE_DIRECTORY/src/$name"
       run="$STATE_DIRECTORY/runs/$name"
       roots="$STATE_DIRECTORY/roots/$name"
-      rm -rf "$run"
-      mkdir -p "$src" "$run" "$roots"
 
       github_token=$(cat "$CREDENTIALS_DIRECTORY/github-token")
 
       # Git gets the token through a helper rather than in the URL, so it
-      # never lands in .git/config or in the journal. The credential path is
-      # baked in at this point rather than read at call time: the agent runs
-      # with CREDENTIALS_DIRECTORY unset and must still be able to `git log`.
+      # never lands in .git/config, in the journal, or in the tarball the
+      # agent receives.
       export GIT_CONFIG_COUNT=1
       export GIT_CONFIG_KEY_0=credential.helper
       export GIT_CONFIG_VALUE_0="!f() { echo username=x-access-token; echo \"password=\$(cat $CREDENTIALS_DIRECTORY/github-token)\"; }; f"
@@ -169,65 +188,8 @@
       export NIX_CONFIG="access-tokens = github.com=$github_token"
 
       gh_() { GH_TOKEN="$github_token" gh "$@"; }
-
-      # The agent must not see the tokens beyond the one it needs. NIX_CONFIG
-      # holds the GitHub token, CREDENTIALS_DIRECTORY points at both.
-      claude_() {
-        env -u NIX_CONFIG -u CREDENTIALS_DIRECTORY \
-          CLAUDE_CODE_OAUTH_TOKEN="$(cat "$CREDENTIALS_DIRECTORY/claude-token")" \
-          claude --print --output-format json --no-session-persistence \
-            --permission-mode dontAsk "$@"
-      }
-
       slug() { printf '%s' "$1" | tr -c 'A-Za-z0-9' '_'; }
 
-      # ---- checkout ------------------------------------------------------
-      if [ ! -d "$src/.git" ]; then
-        git clone --quiet "https://github.com/$repo.git" "$src"
-      fi
-      cd "$src"
-      git remote set-url origin "https://github.com/$repo.git"
-      git fetch --quiet --prune origin
-      # The branch is owned by this job and rebuilt from main every run, so
-      # whatever it held yesterday is discarded on purpose.
-      git checkout --quiet -B "${branch}" origin/main
-      git reset --quiet --hard origin/main
-      git clean -qfdx
-
-      # ---- old closures, for the diff ------------------------------------
-      # Only when nothing needs building: the previous run's out-links keep
-      # yesterday's closures rooted, so after the first day this is a store
-      # lookup, and a main that moved by hand is simply not diffed. A dry
-      # run that lists derivations to build means a rebuild, which on the
-      # desktop closures is hours, and the diff is not worth that.
-      declare -A old_out
-      for t in "''${build[@]}"; do
-        s=$(slug "$t")
-        old_out[$t]=""
-        if nix build --dry-run ".#$t" >/dev/null 2>"$run/$s.old-dry.log" \
-           && ! grep -q 'will be built' "$run/$s.old-dry.log"; then
-          old_out[$t]=$(nix build --no-link --print-out-paths ".#$t" 2>"$run/$s.old.log") \
-            || old_out[$t]=""
-        fi
-      done
-
-      # ---- update --------------------------------------------------------
-      nix flake update 2>"$run/update.log"
-      if git diff --quiet -- flake.lock; then
-        echo "$repo: inputs are current, nothing to do" >&2
-        # A PR left open from an earlier run is stale once main has caught
-        # up on its own; close it so the list of open PRs stays honest.
-        stale=$(gh_ pr list --repo "$repo" --head "${branch}" --state open --json number --jq '.[0].number // empty')
-        if [ -n "$stale" ]; then
-          gh_ pr close "$stale" --repo "$repo" --delete-branch \
-            --comment "main is up to date with every input, so this update is obsolete."
-        fi
-        exit 0
-      fi
-      git add flake.lock
-      git commit --quiet -m "chore: nix flake update"
-
-      # ---- build the new closures ----------------------------------------
       build_target() {
         local t=$1 s
         s=$(slug "$t")
@@ -238,14 +200,93 @@
         s=$(slug "$t")
         nix eval --raw ".#$t.drvPath" >"$run/$s.out" 2>"$run/$s.log"
       }
-      broken=()
-      for t in "''${build[@]}"; do build_target "$t" || broken+=("$t"); done
-      for t in "''${evals[@]}"; do eval_target "$t" || broken+=("$t"); done
+      # Rebuilds or re-evaluates, whichever the target is.
+      check_target() {
+        if grep -qxF "$1" "$run/build.txt"; then build_target "$1"; else eval_target "$1"; fi
+      }
+      # The checkout and the run directory, for the agent's stdin.
+      export_tree() {
+        tar -cf - -C "$STATE_DIRECTORY" "src/$name" "runs/$name"
+      }
 
-      # ---- fix phase -----------------------------------------------------
-      fix_note="no build broke, so the fix phase did not run"
-      still_broken=()
-      if [ "''${#broken[@]}" -gt 0 ]; then
+      case $step in
+      prepare)
+        rm -rf "$run"
+        mkdir -p "$src" "$run" "$roots"
+        : >"$run/build.txt"
+        : >"$run/eval.txt"
+        while [ $# -gt 0 ]; do
+          case $1 in
+            --build) echo "$2" >>"$run/build.txt"; shift 2 ;;
+            --eval) echo "$2" >>"$run/eval.txt"; shift 2 ;;
+            *) echo "unknown argument: $1" >&2; exit 64 ;;
+          esac
+        done
+        mapfile -t build <"$run/build.txt"
+        mapfile -t evals <"$run/eval.txt"
+
+        # ---- checkout ----------------------------------------------------
+        if [ ! -d "$src/.git" ]; then
+          git clone --quiet "https://github.com/$repo.git" "$src"
+        fi
+        cd "$src"
+        git remote set-url origin "https://github.com/$repo.git"
+        git fetch --quiet --prune origin
+        # The branch is owned by this job and rebuilt from main every run, so
+        # whatever it held yesterday is discarded on purpose.
+        git checkout --quiet -B "${branch}" origin/main
+        git reset --quiet --hard origin/main
+        git clean -qfdx
+
+        # ---- old closures, for the diff ----------------------------------
+        # Only when nothing needs building: the previous run's out-links keep
+        # yesterday's closures rooted, so after the first day this is a store
+        # lookup, and a main that moved by hand is simply not diffed. A dry
+        # run that lists derivations to build means a rebuild, which on the
+        # desktop closures is hours, and the diff is not worth that.
+        for t in "''${build[@]}"; do
+          s=$(slug "$t")
+          : >"$run/$s.old-out"
+          if nix build --dry-run ".#$t" >/dev/null 2>"$run/$s.old-dry.log" \
+             && ! grep -q 'will be built' "$run/$s.old-dry.log"; then
+            nix build --no-link --print-out-paths ".#$t" >"$run/$s.old-out" 2>"$run/$s.old.log" \
+              || : >"$run/$s.old-out"
+          fi
+        done
+
+        # ---- update ------------------------------------------------------
+        nix flake update 2>"$run/update.log"
+        if git diff --quiet -- flake.lock; then
+          echo "$repo: inputs are current, nothing to do" >&2
+          # A PR left open from an earlier run is stale once main has caught
+          # up on its own; close it so the list of open PRs stays honest.
+          stale=$(gh_ pr list --repo "$repo" --head "${branch}" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$stale" ]; then
+            gh_ pr close "$stale" --repo "$repo" --delete-branch \
+              --comment "main is up to date with every input, so this update is obsolete."
+          fi
+          # Distinct from failure: the driver skips the rest for this repo.
+          exit 10
+        fi
+        git add flake.lock
+        git commit --quiet -m "chore: nix flake update"
+
+        # ---- build the new closures --------------------------------------
+        : >"$run/broken.txt"
+        for t in "''${build[@]}"; do build_target "$t" || echo "$t" >>"$run/broken.txt"; done
+        for t in "''${evals[@]}"; do eval_target "$t" || echo "$t" >>"$run/broken.txt"; done
+        # Pessimistic until import-fix has rebuilt: if the fix phase dies
+        # before that, the PR still says what is broken.
+        cp "$run/broken.txt" "$run/still-broken.txt"
+        echo "no build broke, so the fix phase did not run" >"$run/fix-note.txt"
+        ;;
+
+      has-broken)
+        [ -s "$run/broken.txt" ]
+        ;;
+
+      export-fix)
+        mapfile -t broken <"$run/broken.txt"
         echo "$repo: ''${#broken[@]} target(s) broke, asking the agent" >&2
         {
           cat ${fixPrompt}
@@ -255,152 +296,314 @@
             s=$(slug "$t")
             echo
             echo "### $t"
-            echo "Full log: $run/$s.log. Last 80 lines:"
+            echo "Full log: $s.log in the run directory. Last 80 lines:"
             echo '```'
             tail -n 80 "$run/$s.log"
             echo '```'
           done
         } >"$run/fix-prompt.md"
+        export_tree
+        ;;
 
+      import-fix)
+        cd "$src"
+        answer=$(cat)
+        jq -r '.result // empty' <<<"$answer" >"$run/fix-result.md" 2>/dev/null || : >"$run/fix-result.md"
+        jq -r '.patch // empty' <<<"$answer" >"$run/fix.patch" 2>/dev/null || : >"$run/fix.patch"
+
+        if [ ! -s "$run/fix-result.md" ]; then
+          note="the agent did not answer"
+        elif [ "$(head -n 1 "$run/fix-result.md")" = "NOFIX" ]; then
+          note="the agent could not fix it: $(tail -n +2 "$run/fix-result.md")"
+        elif [ ! -s "$run/fix.patch" ]; then
+          note="the agent claimed a fix but changed no tracked file"
+        elif ! git apply --index "$run/fix.patch" 2>"$run/fix-apply.log"; then
+          note="the agent's patch did not apply (see fix-apply.log)"
+          git reset --quiet --hard
+        else
+          # The agent's word is not the verification; the rebuild is.
+          git commit --quiet -F "$run/fix-result.md"
+          note="the agent committed a fix ($(git rev-parse --short HEAD)); rebuilt to verify"
+        fi
+        echo "$note" >"$run/fix-note.txt"
+
+        mapfile -t broken <"$run/broken.txt"
+        : >"$run/still-broken.txt"
+        for t in "''${broken[@]}"; do
+          check_target "$t" || echo "$t" >>"$run/still-broken.txt"
+        done
+        ;;
+
+      report)
+        mapfile -t build <"$run/build.txt"
+        mapfile -t evals <"$run/eval.txt"
+
+        # ---- closure diff and CVE delta ----------------------------------
+        # vulnix is best effort: it needs the NVD feed, and a scanner that is
+        # down must not block the update it exists to annotate.
+        scan() {
+          local rc=0
+          vulnix --json "$1" >"$2" || rc=$?
+          # 2 is "vulnerabilities found", which is the interesting answer.
+          [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ] || { echo "vulnix failed on $1 (exit $rc)" >&2; echo '[]' >"$2"; }
+        }
+        : >"$run/cves-old.txt"
+        : >"$run/cves-new.txt"
+        for t in "''${build[@]}"; do
+          s=$(slug "$t")
+          old=$(cat "$run/$s.old-out" 2>/dev/null || true)
+          new=$(cat "$run/$s.out" 2>/dev/null || true)
+          [ -n "$new" ] || continue
+          scan "$new" "$run/vulnix-$s-new.json"
+          jq -r '.[] | .affected_by[]' "$run/vulnix-$s-new.json" >>"$run/cves-new.txt" || true
+          [ -n "$old" ] || continue
+          nix store diff-closures "$old" "$new" >"$run/$s.diff" 2>&1 || true
+          scan "$old" "$run/vulnix-$s-old.json"
+          jq -r '.[] | .affected_by[]' "$run/vulnix-$s-old.json" >>"$run/cves-old.txt" || true
+        done
+        sort -u -o "$run/cves-old.txt" "$run/cves-old.txt"
+        sort -u -o "$run/cves-new.txt" "$run/cves-new.txt"
+        comm -23 "$run/cves-old.txt" "$run/cves-new.txt" >"$run/cves-fixed.txt"
+        comm -13 "$run/cves-old.txt" "$run/cves-new.txt" >"$run/cves-introduced.txt"
+
+        # ---- status, for the PR agent and the fallback body --------------
+        {
+          echo "# $repo"
+          echo
+          echo "| target | result |"
+          echo "|---|---|"
+          for t in "''${build[@]}" "''${evals[@]}"; do
+            if grep -qxF "$t" "$run/still-broken.txt"; then r="still broken"
+            elif grep -qxF "$t" "$run/broken.txt"; then r="broke, fixed"
+            else r="ok"; fi
+            echo "| $t | $r |"
+          done
+          echo
+          echo "Fix phase: $(cat "$run/fix-note.txt")"
+        } >"$run/status.md"
+
+        {
+          cat ${prPrompt}
+          echo
+          echo "Repository: $repo."
+          echo
+          cat "$run/status.md"
+        } >"$run/pr-prompt.md"
+        ;;
+
+      export-pr)
+        export_tree
+        ;;
+
+      publish)
+        cd "$src"
+        jq -r '.result // empty' <<<"$(cat)" >"$run/body.md" 2>/dev/null || : >"$run/body.md"
+        if [ ! -s "$run/body.md" ]; then
+          # The update still goes out when the agent is unavailable; the body
+          # is just the raw material then.
+          {
+            echo "The PR agent did not answer, so this is the raw run output."
+            echo
+            echo '```'
+            cat "$run/update.log"
+            echo '```'
+            echo
+            tail -n +3 "$run/status.md"
+          } >"$run/body.md"
+        fi
+        {
+          echo
+          echo "---"
+          echo "Opened by flake-autoupdate on homeserver. Logs: \`journalctl -u flake-autoupdate\`, run files under \`$run\`."
+        } >>"$run/body.md"
+
+        git push --quiet --force-with-lease origin "${branch}"
+
+        broken_now=$(grep -c . "$run/still-broken.txt" || true)
+        title="chore: nix flake update ($(date +%F))"
+        draft_args=()
+        [ "$broken_now" -eq 0 ] || draft_args=(--draft)
+        existing=$(gh_ pr list --repo "$repo" --head "${branch}" --state open --json number,isDraft --jq '.[0] // empty')
+        if [ -z "$existing" ]; then
+          gh_ pr create --repo "$repo" --base main --head "${branch}" \
+            --title "$title" --body-file "$run/body.md" "''${draft_args[@]}"
+        else
+          num=$(jq -r .number <<<"$existing")
+          was_draft=$(jq -r .isDraft <<<"$existing")
+          gh_ pr edit "$num" --repo "$repo" --title "$title" --body-file "$run/body.md"
+          if [ "$broken_now" -eq 0 ] && [ "$was_draft" = true ]; then
+            gh_ pr ready "$num" --repo "$repo"
+          elif [ "$broken_now" -gt 0 ] && [ "$was_draft" = false ]; then
+            gh_ pr ready "$num" --repo "$repo" --undo
+          fi
+        fi
+
+        if [ "$broken_now" -gt 0 ]; then
+          echo "$repo: still broken after the fix phase, PR is a draft: $(tr '\n' ' ' <"$run/still-broken.txt")" >&2
+        fi
+        ;;
+
+      *)
+        echo "unknown step: $step" >&2
+        exit 64
+        ;;
+      esac
+    '';
+  };
+
+  # The agent's half. Reads the tarball on stdin into a fresh directory under
+  # its PrivateTmp, runs one phase, and answers with one JSON object on
+  # stdout. It always exits 0: a failed agent is an empty answer, which the
+  # job already knows how to report.
+  agentStep = pkgs.writeShellApplication {
+    name = "flake-autoupdate-agent";
+    runtimeInputs = [];
+    text = ''
+      # usage: flake-autoupdate-agent fix|pr <repo name>
+      mode=$1
+      name=$2
+
+      work=$(mktemp -d)
+      export HOME="$work/home"
+      mkdir -p "$HOME"
+      tar -xf - -C "$work"
+      cd "$work/src/$name"
+      run="$work/runs/$name"
+
+      token=$(cat "$CREDENTIALS_DIRECTORY/claude-token")
+      claude_() {
+        env -u CREDENTIALS_DIRECTORY CLAUDE_CODE_OAUTH_TOKEN="$token" \
+          claude --print --output-format json --no-session-persistence \
+            --permission-mode dontAsk "$@"
+      }
+
+      case $mode in
+      fix)
         # No web access here: a page the agent reads must not be able to
         # steer an edit. Bash is limited to what it needs to look and
         # verify; anything else is denied without a prompt.
-        claude_ \
-          --tools Read,Grep,Glob,Edit,Bash \
-          --allowedTools Read Grep Glob Edit \
-            'Bash(nix build:*)' 'Bash(nix eval:*)' 'Bash(nix log:*)' \
-            'Bash(git diff:*)' 'Bash(git log:*)' 'Bash(git status:*)' \
-          <"$run/fix-prompt.md" >"$run/fix-result.json" || true
-        jq -r '.result // empty' "$run/fix-result.json" >"$run/fix-result.md" 2>/dev/null || true
+        { echo "The run directory is $run."; echo; cat "$run/fix-prompt.md"; } \
+          | claude_ \
+            --tools Read,Grep,Glob,Edit,Bash \
+            --allowedTools Read Grep Glob Edit \
+              'Bash(nix build:*)' 'Bash(nix eval:*)' 'Bash(nix log:*)' \
+              'Bash(git diff:*)' 'Bash(git log:*)' 'Bash(git status:*)' \
+            --add-dir "$run" \
+          >"$work/answer.json" || true
+        # Tracked files only, as the job commits with `git add --update`
+        # semantics; anything the agent left untracked is dropped here.
+        git diff --binary >"$work/fix.patch" || : >"$work/fix.patch"
+        ;;
+      pr)
+        { echo "The run directory is $run."; echo; cat "$run/pr-prompt.md"; } \
+          | claude_ \
+            --tools Read,Grep,Glob,Bash,WebFetch \
+            --allowedTools Read Grep Glob WebFetch \
+              'Bash(git log:*)' 'Bash(git diff:*)' 'Bash(git show:*)' \
+            --add-dir "$run" \
+          >"$work/answer.json" || true
+        : >"$work/fix.patch"
+        ;;
+      *)
+        echo "unknown mode: $mode" >&2
+        : >"$work/answer.json"
+        : >"$work/fix.patch"
+        ;;
+      esac
 
-        if [ ! -s "$run/fix-result.md" ]; then
-          fix_note="the agent did not answer (see fix-result.json)"
-          git checkout --quiet -- .
-        elif [ "$(head -n 1 "$run/fix-result.md")" = "NOFIX" ]; then
-          fix_note="the agent could not fix it: $(tail -n +2 "$run/fix-result.md")"
-          git checkout --quiet -- .
-        elif [ -z "$(git status --porcelain --untracked-files=no)" ]; then
-          fix_note="the agent claimed a fix but changed no tracked file"
-        else
-          # The agent's word is not the verification; the rebuild is.
-          git add --update
-          git commit --quiet -F "$run/fix-result.md"
-          fix_note="the agent committed a fix ($(git rev-parse --short HEAD)); rebuilt to verify"
-        fi
+      result=$(jq -r '.result // empty' "$work/answer.json" 2>/dev/null || true)
+      jq -n --arg result "$result" --rawfile patch "$work/fix.patch" \
+        '{result: $result, patch: $patch}'
+    '';
+  };
 
-        for t in "''${broken[@]}"; do
-          if printf '%s\n' "''${build[@]}" | grep -qx "$t"; then
-            build_target "$t" || still_broken+=("$t")
-          else
-            eval_target "$t" || still_broken+=("$t")
-          fi
-        done
+  # Sandboxing shared by both halves. Each step is a transient unit, so the
+  # properties are spelled for `systemd-run -p`. The store is written through
+  # the daemon socket, which the kernel exempts from the read-only mount
+  # (connect() on a unix socket is not a write to the filesystem). Verify on
+  # the first manual run; if `nix build` fails with EROFS, add /nix/var/nix
+  # to ReadWritePaths.
+  commonProps = [
+    "ProtectSystem=strict"
+    "ProtectHome=yes"
+    "PrivateTmp=yes"
+    "NoNewPrivileges=yes"
+    "CapabilityBoundingSet="
+    "RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX"
+    # Evaluation is the only heavy work in the steps themselves (the builds
+    # run in the daemon); it should lose to everything the box serves.
+    "Nice=10"
+  ];
+  propArgs = props: lib.concatMapStringsSep " " (p: "-p ${lib.escapeShellArg p}") props;
+
+  jobProps =
+    commonProps
+    ++ [
+      # Checkouts, per-run logs, the out-links that root yesterday's closures,
+      # and nix's caches. 0700, so the agent account cannot list it either.
+      "StateDirectory=${user}"
+      "StateDirectoryMode=0700"
+      "LoadCredential=github-token:/run/secrets/flake-update-github-token"
+      "Environment=HOME=/var/lib/${user}"
+      "Environment=PATH=${jobPath}"
+    ];
+  agentProps =
+    commonProps
+    ++ [
+      "LoadCredential=claude-token:/run/secrets/flake-update-claude-token"
+      # Belt and braces next to the 0700 mode above.
+      "InaccessiblePaths=/var/lib/${user}"
+      "Environment=PATH=${agentPath}"
+    ];
+
+  # Runs a command as one of the two accounts, in that account's sandbox.
+  # The only place the uid switch happens; the per-repo script and the VM
+  # test (tests/flake-autoupdate.nix) both go through it. Root only, since
+  # it starts system units. On the homeserver it doubles as the way to poke
+  # at a step by hand: `flake-autoupdate-as agent claude --version`.
+  runAs = pkgs.writeShellApplication {
+    name = "flake-autoupdate-as";
+    runtimeInputs = [pkgs.systemd];
+    text = ''
+      # usage: flake-autoupdate-as job|agent <command> [args]...
+      who=$1
+      shift
+      case $who in
+        job) account=${user}; props=(${propArgs jobProps}) ;;
+        agent) account=${agentUser}; props=(${propArgs agentProps}) ;;
+        *) echo "usage: flake-autoupdate-as job|agent <command>..." >&2; exit 64 ;;
+      esac
+      exec systemd-run --quiet --wait --pipe --collect --service-type=exec \
+        --uid="$account" --gid="$account" "''${props[@]}" -- "$@"
+    '';
+  };
+
+  # Everything for one repo, as its own process. A per-repo function inside
+  # the driver would run under `||` and lose errexit, so a fault mid-repo
+  # would sail on and push whatever state it left behind.
+  updateRepo = pkgs.writeShellApplication {
+    name = "flake-autoupdate-repo";
+    runtimeInputs = [runAs];
+    text = ''
+      # usage: flake-autoupdate-repo <name> [--build ATTR]... [--eval ATTR]...
+      name=$1
+
+      job() { flake-autoupdate-as job ${jobStep}/bin/flake-autoupdate-step "$@"; }
+      agent() { flake-autoupdate-as agent ${agentStep}/bin/flake-autoupdate-agent "$@"; }
+
+      rc=0
+      job prepare "$@" || rc=$?
+      if [ "$rc" -eq 10 ]; then exit 0; fi
+      [ "$rc" -eq 0 ] || exit "$rc"
+
+      if job has-broken "$name"; then
+        # A fix phase that dies still leaves still-broken.txt pessimistic,
+        # so the PR goes out as a draft that says what is broken.
+        job export-fix "$name" | agent fix "$name" | job import-fix "$name" \
+          || echo "$name: fix phase failed, publishing what is there" >&2
       fi
-
-      # ---- closure diff and CVE delta ------------------------------------
-      # vulnix is best effort: it needs the NVD feed, and a scanner that is
-      # down must not block the update it exists to annotate.
-      scan() {
-        local rc=0
-        vulnix --json "$1" >"$2" || rc=$?
-        # 2 is "vulnerabilities found", which is the interesting answer.
-        [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ] || { echo "vulnix failed on $1 (exit $rc)" >&2; echo '[]' >"$2"; }
-      }
-      : >"$run/cves-old.txt"
-      : >"$run/cves-new.txt"
-      for t in "''${build[@]}"; do
-        s=$(slug "$t")
-        old=''${old_out[$t]}
-        new=$(cat "$run/$s.out" 2>/dev/null || true)
-        [ -n "$new" ] || continue
-        scan "$new" "$run/vulnix-$s-new.json"
-        jq -r '.[] | .affected_by[]' "$run/vulnix-$s-new.json" >>"$run/cves-new.txt" || true
-        [ -n "$old" ] || continue
-        nix store diff-closures "$old" "$new" >"$run/$s.diff" 2>&1 || true
-        scan "$old" "$run/vulnix-$s-old.json"
-        jq -r '.[] | .affected_by[]' "$run/vulnix-$s-old.json" >>"$run/cves-old.txt" || true
-      done
-      sort -u -o "$run/cves-old.txt" "$run/cves-old.txt"
-      sort -u -o "$run/cves-new.txt" "$run/cves-new.txt"
-      comm -23 "$run/cves-old.txt" "$run/cves-new.txt" >"$run/cves-fixed.txt"
-      comm -13 "$run/cves-old.txt" "$run/cves-new.txt" >"$run/cves-introduced.txt"
-
-      # ---- status, for the PR agent and the fallback body ----------------
-      {
-        echo "# $repo"
-        echo
-        echo "| target | result |"
-        echo "|---|---|"
-        for t in "''${build[@]}" "''${evals[@]}"; do
-          if printf '%s\n' "''${still_broken[@]}" | grep -qx "$t"; then r="still broken"
-          elif printf '%s\n' "''${broken[@]}" | grep -qx "$t"; then r="broke, fixed"
-          else r="ok"; fi
-          echo "| $t | $r |"
-        done
-        echo
-        echo "Fix phase: $fix_note"
-      } >"$run/status.md"
-
-      # ---- PR phase ------------------------------------------------------
-      {
-        cat ${prPrompt}
-        echo
-        echo "Repository: $repo. Run directory: $run"
-        echo
-        cat "$run/status.md"
-      } >"$run/pr-prompt.md"
-
-      claude_ \
-        --tools Read,Grep,Glob,Bash,WebFetch \
-        --allowedTools Read Grep Glob WebFetch \
-          'Bash(git log:*)' 'Bash(git diff:*)' 'Bash(git show:*)' \
-        --add-dir "$run" \
-        <"$run/pr-prompt.md" >"$run/pr-result.json" || true
-      jq -r '.result // empty' "$run/pr-result.json" >"$run/body.md" 2>/dev/null || true
-
-      if [ ! -s "$run/body.md" ]; then
-        # The update still goes out when the agent is unavailable; the body
-        # is just the raw material then.
-        {
-          echo "The PR agent did not answer, so this is the raw run output."
-          echo
-          echo '```'
-          cat "$run/update.log"
-          echo '```'
-          echo
-          tail -n +3 "$run/status.md"
-        } >"$run/body.md"
-      fi
-      {
-        echo
-        echo "---"
-        echo "Opened by flake-autoupdate on homeserver. Logs: \`journalctl -u flake-autoupdate\`, run files under \`$run\`."
-      } >>"$run/body.md"
-
-      # ---- push and PR ---------------------------------------------------
-      git push --quiet --force-with-lease origin "${branch}"
-
-      title="chore: nix flake update ($(date +%F))"
-      draft_args=()
-      [ "''${#still_broken[@]}" -eq 0 ] || draft_args=(--draft)
-      existing=$(gh_ pr list --repo "$repo" --head "${branch}" --state open --json number,isDraft --jq '.[0] // empty')
-      if [ -z "$existing" ]; then
-        gh_ pr create --repo "$repo" --base main --head "${branch}" \
-          --title "$title" --body-file "$run/body.md" "''${draft_args[@]}"
-      else
-        num=$(jq -r .number <<<"$existing")
-        was_draft=$(jq -r .isDraft <<<"$existing")
-        gh_ pr edit "$num" --repo "$repo" --title "$title" --body-file "$run/body.md"
-        if [ "''${#still_broken[@]}" -eq 0 ] && [ "$was_draft" = true ]; then
-          gh_ pr ready "$num" --repo "$repo"
-        elif [ "''${#still_broken[@]}" -gt 0 ] && [ "$was_draft" = false ]; then
-          gh_ pr ready "$num" --repo "$repo" --undo
-        fi
-      fi
-
-      if [ "''${#still_broken[@]}" -gt 0 ]; then
-        echo "$repo: still broken after the fix phase, PR is a draft: ''${still_broken[*]}" >&2
-      fi
+      job report "$name"
+      job export-pr "$name" | agent pr "$name" | job publish "$name"
     '';
   };
 
@@ -431,11 +634,12 @@ in {
   # merges and deploys by hand.
   #
   # Claude Code runs headless inside the job, in two phases with different
-  # reach. The fix phase may edit the checkout and run nix and git, but has
-  # no web access, so a page it reads cannot steer an edit. The PR phase may
+  # reach, both as their own account (see the uid split above). The fix
+  # phase may edit its copy of the checkout and run nix and git, but has no
+  # web access, so a page it reads cannot steer an edit. The PR phase may
   # fetch changelogs and advisories, but cannot edit anything, and its only
-  # output is the PR body. Neither phase commits or pushes; the script does,
-  # and it rebuilds after a fix rather than trusting the agent's claim.
+  # output is the PR body. Neither phase commits or pushes; the job does, and
+  # it rebuilds after a fix rather than trusting the agent's claim.
   #
   # It runs here rather than on euler (which serves Forgejo and eLabFTW;
   # desktop-closure builds would compete with them) or in Forgejo Actions
@@ -446,7 +650,7 @@ in {
   # that crashed before reaching GitHub is visible in `systemctl --failed`
   # and `journalctl -u flake-autoupdate`, nowhere else.
 
-  # A dedicated account, deliberately not the `claude` sandbox user from
+  # Dedicated accounts, deliberately not the `claude` sandbox user from
   # security/agent-sandbox.nix. That one carries a vault bind mount and a
   # contents-only PAT, and its model is "Martin pushes the agent's work
   # himself". This job pushes and opens PRs on its own, so it gets its own
@@ -455,18 +659,27 @@ in {
   users.users.${user} = {
     isSystemUser = true;
     group = user;
-    # StateDirectory creates and owns this; claude and nix keep their caches
-    # under it. Nothing else on the box is writable to the unit.
+    # StateDirectory creates and owns this; nix keeps its caches under it.
     home = "/var/lib/${user}";
     description = "nightly flake update job";
   };
-  # Allowed, not trusted: it may build, it may not add substituters or push
-  # unsigned paths.
-  nix.settings.allowed-users = [user];
+  users.groups.${agentUser} = {};
+  users.users.${agentUser} = {
+    isSystemUser = true;
+    group = agentUser;
+    # Never used: the agent's HOME is a fresh directory in its PrivateTmp.
+    home = "/var/empty";
+    description = "nightly flake update agent";
+  };
+  # Allowed, not trusted: both may build, neither may add substituters or
+  # push unsigned paths. The agent builds to verify its fix.
+  nix.settings.allowed-users = [user agentUser];
 
-  # Root-owned and handed to the unit through LoadCredential, the same way
+  environment.systemPackages = [runAs];
+
+  # Root-owned and handed to the steps through LoadCredential, the same way
   # cloudflared and harmonia get theirs: systemd reads them before dropping
-  # to the service user, so the files never need to be readable by it.
+  # to the step's user, so the files never need to be readable by it.
   age.secrets.flake-update-github-token = {
     file = "${inputs.self}/secrets/flake-update-github-token.age";
     path = "/run/secrets/flake-update-github-token";
@@ -487,34 +700,21 @@ in {
 
     serviceConfig = {
       Type = "oneshot";
-      User = user;
-      Group = user;
+      # Root, but only to start the steps under their own accounts: the
+      # driver reads no file and runs no step's code itself. It talks to
+      # PID 1 over D-Bus and to nothing else.
       ExecStart = "${driver}/bin/flake-autoupdate";
-      # Checkouts, per-run logs, the out-links that root yesterday's
-      # closures, and the agent's and nix's caches.
-      StateDirectory = user;
-      LoadCredential = [
-        "github-token:/run/secrets/flake-update-github-token"
-        "claude-token:/run/secrets/flake-update-claude-token"
-      ];
       # Four desktop closures plus evaluation on a cold cache is hours, not
       # minutes, and the agent phases sit on top.
       TimeoutStartSec = "8h";
-      # Evaluation is the only heavy work in this unit itself (the builds
-      # run in the daemon); it should lose to everything the box serves.
-      Nice = 10;
 
-      # Read-only system: the store is written through the daemon socket,
-      # which the kernel exempts from the read-only mount (connect() on a
-      # unix socket is not a write to the filesystem). Verify on the first
-      # manual run; if `nix build` fails with EROFS, add /nix/var/nix to
-      # ReadWritePaths.
       ProtectSystem = "strict";
       ProtectHome = true;
       PrivateTmp = true;
+      PrivateNetwork = true;
       NoNewPrivileges = true;
       CapabilityBoundingSet = "";
-      RestrictAddressFamilies = ["AF_INET" "AF_INET6" "AF_UNIX"];
+      RestrictAddressFamilies = ["AF_UNIX"];
     };
   };
 
