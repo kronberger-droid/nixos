@@ -6,7 +6,7 @@
   ...
 }: let
   # Helper scripts live as real files under ./eww/nu/ rather than inline Nix
-  # strings, exactly as waybar.nix does it: they stay syntax-highlighted and
+  # strings, exactly as waybar.nix did it: they stay syntax-highlighted and
   # lintable (`nu -n --ide-check 20 <file>`) and need no ''${} escaping. Store
   # paths arrive as replaceVars placeholders (@nu@, @eww@, …), a plain textual
   # substitution, and replaceVars fails the build both on an unfilled @var@ and
@@ -24,7 +24,7 @@
   # released tree-sitter-nu parses yet. Valid nushell, so it stays.
   #
   # Installed names carry no extension and consumers go through `scriptPath`,
-  # matching waybar's convention.
+  # matching the convention waybar's helpers had.
   #
   # The shebang runs nu through `env -S` because the kernel hands everything
   # after the interpreter to it as one argv entry, and nu rejects
@@ -60,7 +60,7 @@
 
   # Every *client* call goes through this wrapper. programs.eww.package is set
   # to it below, so it is also the `eww` on PATH, the one the scripts
-  # substitute as @eww@, and the one sway.nix's bar keybind resolves.
+  # substitute as @eww@.
   #
   # Without --no-daemonize an eww subcommand that cannot reach the server does
   # not fail: it forks itself into a second server, keeping the client's argv,
@@ -110,7 +110,7 @@
   utilLinux = pkgs.util-linux;
 
   # config.terminal.* drive the two zellij popups, the same three values
-  # waybar.nix passes to its scratchpad and spotify helpers.
+  # waybar.nix used to pass to its scratchpad and spotify helpers.
   terminalVars = {
     terminalBin = config.terminal.bin;
     terminalAppIdFlag = config.terminal.appIdFlag;
@@ -202,8 +202,8 @@ in {
       "eww/eww.yuck".source = file ./eww/eww.yuck;
       "eww/eww.scss".source = file ./eww/eww.scss;
 
-      # The shared palette, the direct equivalent of rofi/shared/colors.rasi.
-      # Generated so a scheme change repaints eww along with mako and waybar.
+      # The shared palette, after rofi's former shared/colors.rasi.
+      # Generated so a scheme change repaints eww along with mako and sieb.
       "eww/styles/_colors.scss".text = with config.scheme; ''
         // Generated from modules/home-manager/theming/base16-scheme.nix.
         // Edit the scheme, not this file.
@@ -221,9 +221,9 @@ in {
         $base0C: #${base0C}; // cyan
         $base0D: #${base0D}; // active / blue
         $base0E: #${base0E}; // magenta
-        $base0F: #${base0F}; // accent, and rofi's `selected`
+        $base0F: #${base0F}; // accent, as rofi's `selected` was
 
-        // rofi composites alpha into the hex (base00E6 = 90%). GTK CSS has no
+        // rofi composited alpha into the hex (base00E6 = 90%). GTK CSS has no
         // hex-with-alpha, so the translucent variants are spelled out.
         $panel-bg: rgba(30, 30, 30, 0.9);
         $alt-bg: rgba(44, 47, 51, 0.9);

@@ -18,7 +18,6 @@ in {
       pkgs.xdg-desktop-portal-gnome
     ];
     config = {
-      sway.default = ["wlr" "gtk"];
       niri = {
         default = ["gtk"];
         "org.freedesktop.impl.portal.FileChooser" = ["gtk"];

@@ -6,8 +6,7 @@
 # These went through an eww launcher and power menu for a while, then rofi,
 # then sieb. The eww launcher spawned Exec= through setsid and steam would not
 # start, and eww exposes no key events, so it could not do arrow-key
-# navigation. sieb's power menu knows sway's logout as well as niri's, and its
-# window mode says it needs niri rather than failing, so sway gets these too.
+# navigation.
 #
 # A script rather than a bare command in the yuck, because widget files are
 # copied verbatim and never see replaceVars, so a store path cannot be

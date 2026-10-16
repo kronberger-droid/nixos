@@ -90,7 +90,7 @@ lib.mkIf (config.terminal.emulator == "rio") {
         use-split = false;
       };
 
-      # Theme - using base16 scheme to match Kitty
+      # Theme - using the base16 scheme, like the rest of the desktop
       colors = {
         background = "#${config.scheme.base00}";
         foreground = "#${config.scheme.base05}";
@@ -98,7 +98,7 @@ lib.mkIf (config.terminal.emulator == "rio") {
         selection-background = "#${config.scheme.base02}";
         selection-foreground = "#${config.scheme.base05}";
 
-        # ANSI colors (sourced from config.ansi — shared with kitty + helix)
+        # ANSI colors (sourced from config.ansi, shared with helix)
         black = "#${config.ansi.black}";
         red = "#${config.ansi.red}";
         green = "#${config.ansi.green}";

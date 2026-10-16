@@ -1,10 +1,7 @@
 #!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 #
-# niri and swaymsg are called bare rather than by store path. waybar.nix has to
-# gate its niri interpolation on compositor.primary, because pulling the
-# source-built niri fork into a sway-only host's closure is expensive; calling
-# them bare sidesteps that, and the binary is on PATH inside its own session.
-# scratchpad-toggle.nu set this precedent.
+# niri is called bare rather than by store path: the binary is on PATH inside
+# its own session. scratchpad-toggle.nu set this precedent.
 
 # Workspace state for eww, as a `deflisten` source: one JSON line per change.
 #
@@ -13,18 +10,17 @@
 # WorkspaceActivated carries only an id, so an incremental version would have to
 # hold state and could drift out of sync. Workspace changes happen at human
 # speed and the query costs a few ms, so re-asking is both simpler and always
-# correct. Same reasoning as waybar.nix's niri-window-watcher, which signals
-# waybar to re-poll rather than passing any state along.
+# correct. Same reasoning as the niri-window-watcher the waybar config used to
+# carry, which signalled waybar to re-poll rather than passing any state along.
 #
-# The shape is normalised across compositors so the widget need not care which
-# one is running. Sorted by idx, because niri returns workspaces unordered:
+# Sorted by idx, because niri returns workspaces unordered:
 #
 #   [{idx, name, output, active, focused, urgent}, ...]
 #
-#   active  = visible on its output  (niri is_active,  sway visible)
-#   focused = holds keyboard focus   (niri is_focused, sway focused)
+#   active  = visible on its output  (niri is_active)
+#   focused = holds keyboard focus   (niri is_focused)
 #
-# waybar needed both too; its style.css says "Sway uses .focused, Niri uses
+# waybar needed both too; its style.css said "Sway uses .focused, Niri uses
 # .active".
 
 def niri-state []: nothing -> list {
@@ -41,22 +37,6 @@ def niri-state []: nothing -> list {
     }}
 }
 
-# UNTESTED: this machine runs niri, so the sway arm has never been exercised.
-# Field names are from `swaymsg -t get_workspaces`.
-def sway-state []: nothing -> list {
-  (^swaymsg -t get_workspaces --raw | complete).stdout
-  | from json
-  | sort-by num
-  | each {|w| {
-      idx: $w.num
-      name: $w.name
-      output: $w.output
-      active: $w.visible
-      focused: $w.focused
-      urgent: $w.urgent
-    }}
-}
-
 def emit [state: list] {
   $state | to json --raw | print
 }
@@ -65,16 +45,13 @@ def emit [state: list] {
 def "main focus" [idx: int] {
   if ($env.NIRI_SOCKET? | is-not-empty) {
     ^niri msg action focus-workspace $idx | complete | ignore
-  } else if ($env.SWAYSOCK? | is-not-empty) {
-    ^swaymsg workspace number $idx | complete | ignore
   }
 }
 
 def main [] {
   if ($env.NIRI_SOCKET? | is-not-empty) {
     # No initial emit here: niri sends WorkspacesChanged the moment the stream
-    # connects, so the loop below produces the first line on its own. sway's
-    # subscribe does not, hence the asymmetry further down.
+    # connects, so the loop below produces the first line on its own.
     #
     # Every workspace-relevant event name starts with "Workspace", which covers
     # WorkspacesChanged, WorkspaceActivated, WorkspaceActiveWindowChanged and
@@ -85,12 +62,6 @@ def main [] {
     | each {|line|
         if ($line | str starts-with '{"Workspace') { emit (niri-state) }
       }
-    | ignore
-  } else if ($env.SWAYSOCK? | is-not-empty) {
-    emit (sway-state)
-    ^swaymsg -t subscribe -m '["workspace"]'
-    | lines
-    | each {|_| emit (sway-state) }
     | ignore
   }
 }

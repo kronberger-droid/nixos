@@ -6,10 +6,10 @@
   s = config.scheme;
 in {
   # Single source of truth for the 16-slot ANSI terminal palette, derived
-  # from the base16 `scheme`. Consumed by the kitty + rio ANSI colors and by
+  # from the base16 `scheme`. Consumed by rio's ANSI colors and by
   # Helix's generated palette, so the base16→ANSI mapping policy (which base0X
   # fills which slot, including the orange base09 in slot 9) lives in exactly
-  # one place instead of being hand-copied across three files.
+  # one place instead of being hand-copied across files.
   #
   # Values are hex WITHOUT a leading '#', matching how `scheme.base0X` is used
   # elsewhere — each consumer prefixes '#'. Note the base16 convention that the

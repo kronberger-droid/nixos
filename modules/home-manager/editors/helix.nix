@@ -13,7 +13,7 @@
 
     [palette]
     # Generic names (used by base16_transparent's style rules). The ANSI-slot
-    # names are sourced from config.ansi (shared with kitty + rio); light-gray
+    # names are sourced from config.ansi (shared with rio); light-gray
     # is base04, a base16 ramp color with no ANSI slot. Note light-red is the
     # bright-red slot = base09 (orange), so base16_transparent's variable/
     # markup.list pick that up; errors are pinned back to red in the overlay.
