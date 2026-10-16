@@ -106,12 +106,22 @@
     exit 1
   '';
 
-  # setsid, for the scripts' detach helpers. Nushell has no `&`.
+  # setsid for lib.nu's `detach`, flock for audio.nu's scroll throttle.
   utilLinux = pkgs.util-linux;
 
-  # config.terminal.* drive the two zellij popups, the same three values
+  # The helpers several scripts share: `detach` and `spawn-terminal`. Built
+  # straight through replaceVars rather than `script`, which would hand it @nu@
+  # and @coreutils@ it has no use for, and never installed under scripts/: each
+  # consumer gets the store path as @ewwLib@ and `use`s that, so a script finds
+  # it however it was started. That `use` line is the one placeholder nushell
+  # resolves at parse time, so an --ide-check on the source tree reports the
+  # module as not found there. flake.nix's nu-parse check points it at a
+  # substituted copy instead.
+  #
+  # config.terminal.* drive the popups' terminals, the same three values
   # waybar.nix used to pass to its scratchpad and spotify helpers.
-  terminalVars = {
+  ewwLib = pkgs.replaceVars ./eww/nu/lib.nu {
+    inherit utilLinux;
     terminalBin = config.terminal.bin;
     terminalAppIdFlag = config.terminal.appIdFlag;
     terminalExecFlag = config.terminal.execFlag;
@@ -120,7 +130,7 @@
   scripts = {
     # sieb.commands are argv lists; one wrapper each so menu.nu gets a path.
     menu = {
-      inherit utilLinux;
+      inherit ewwLib;
       siebLauncher = pkgs.writeShellScript "sieb-launcher" "exec ${lib.escapeShellArgs config.sieb.commands.launcher}";
       siebPower = pkgs.writeShellScript "sieb-power" "exec ${lib.escapeShellArgs config.sieb.commands.power}";
     };
@@ -138,7 +148,7 @@
       inherit (pkgs) systemd libnotify tailscale;
     };
     audio = {
-      inherit eww utilLinux;
+      inherit eww ewwLib utilLinux;
       inherit (pkgs) wireplumber;
     };
     bluetooth = {
@@ -155,29 +165,28 @@
       inherit (pkgs) systemd;
     };
     screenrec = {
-      inherit eww utilLinux;
+      inherit eww ewwLib;
       inherit (pkgs) libnotify procps slurp;
       # sieb.commands.prompt is an argv list; screenrec.nu wants one path.
       siebPrompt = pkgs.writeShellScript "sieb-prompt" "exec ${lib.escapeShellArgs config.sieb.commands.prompt} \"$@\"";
       wlScreenrec = pkgs.wl-screenrec;
     };
-    scratchpad = terminalVars // {inherit (pkgs) zellij;};
-    spotify =
-      terminalVars
-      // {
-        inherit utilLinux;
-        spotifyPlayer = lib.getExe config.programs.spotify-player.package;
-        spotifyDevice = config.programs.spotify-player.settings.device.name;
-      };
-    tui =
-      terminalVars
-      // {
-        inherit utilLinux;
-        dropkitten = dropkittenPkg;
-        # dropkitten -t wants the emulator's name, not its path.
-        terminalEmulator = config.terminal.emulator;
-        inherit (pkgs) bash btop bluetuith calcurse networkmanager wiremix;
-      };
+    scratchpad = {
+      inherit ewwLib;
+      inherit (pkgs) zellij;
+    };
+    spotify = {
+      inherit ewwLib;
+      spotifyPlayer = lib.getExe config.programs.spotify-player.package;
+      spotifyDevice = config.programs.spotify-player.settings.device.name;
+    };
+    tui = {
+      inherit ewwLib;
+      dropkitten = dropkittenPkg;
+      # dropkitten -t wants the emulator's name, not its path.
+      terminalEmulator = config.terminal.emulator;
+      inherit (pkgs) bash btop bluetuith calcurse networkmanager wiremix;
+    };
   };
 
   widgets = ["bar" "modules" "clusters" "workspaces"];

@@ -15,8 +15,10 @@
 const EWW   = "@eww@/bin/eww"
 const WPCTL = "@wireplumber@/bin/wpctl"
 const FLOCK = "@utilLinux@/bin/flock"
-const SETSID = "@utilLinux@/bin/setsid"
 const NU    = "@nu@/bin/nu"
+
+# `detach`, for the slider's linger below.
+use "@ewwLib@" *
 
 # wpctl's own identifiers happen to look like replaceVars placeholders, and
 # replaceVars fails the build on any placeholder it was not given a value for.
@@ -234,8 +236,7 @@ def hold [run: string] {
 
   let cfg = ($env.FILE_PWD | path dirname)
   ^$EWW -c $cfg update audio_busy=true | complete | ignore
-  (^$SETSID -f $NU -n --no-std-lib $env.CURRENT_FILE linger $tok
-    out> /dev/null err> /dev/null)
+  detach ...[$NU "-n" "--no-std-lib" $env.CURRENT_FILE "linger" $tok]
 }
 
 def "main linger" [tok: string] {

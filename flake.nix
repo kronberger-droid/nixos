@@ -452,7 +452,10 @@
           # main: parsing with nixpkgs' release would check against a
           # language one version behind the shell that runs these. `source`
           # resolves at parse time, so every `source ~/...` target gets an
-          # empty stub; each sourced file is checked on its own anyway.
+          # empty stub; each sourced file is checked on its own anyway. `use`
+          # does too, and the eww scripts `use "@ewwLib@"`, so that one
+          # placeholder points at a substituted copy of the real lib.nu
+          # instead, which also checks that what they import exists.
           nu-parse =
             pkgs.runCommand "nu-parse-check" {
               nativeBuildInputs = [(lib.head (lib.attrValues hosts)).pkgs.nushell];
@@ -461,9 +464,12 @@
               for p in $(grep -rhoE '^\s*source ~/[^ ]+' ${self} --include='*.nu' | sed 's/.*source ~\///'); do
                 mkdir -p "$HOME/$(dirname "$p")" && touch "$HOME/$p"
               done
+              sed 's/@[A-Za-z_]*@/\/placeholder/g' \
+                ${self}/modules/home-manager/desktop/eww/nu/lib.nu > "$TMPDIR/eww-lib.nu"
               fail=0
               for f in $(cd ${self} && find . -name '*.nu'); do
-                sed 's/@[A-Za-z_]*@/\/placeholder/g' "${self}/$f" > "$TMPDIR/check.nu"
+                sed -e "s|@ewwLib@|$TMPDIR/eww-lib.nu|g" -e 's/@[A-Za-z_]*@/\/placeholder/g' \
+                  "${self}/$f" > "$TMPDIR/check.nu"
                 if ! nu --no-config-file -c "if not (nu-check '$TMPDIR/check.nu') { exit 1 }"; then
                   echo "nu-check: $f does not parse" >&2
                   fail=1
