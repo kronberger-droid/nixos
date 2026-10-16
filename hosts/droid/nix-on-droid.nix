@@ -15,10 +15,9 @@
     # the same pseudoterminal error. See file header.
     ./proot-pin.nix
 
-    # Temporarily disabled: rust-overlay toolchain builds locally on-device and
-    # is the prime suspect for the proot build-env pty/fd permission failure
-    # during `nix-on-droid switch`. Re-enable once the switch succeeds without it.
-    # ./rust.nix
+    # The rust-overlay toolchain is built on the homeserver (the remote
+    # builder in flake.nix), so it no longer runs into proot's build env.
+    ./rust.nix
   ];
 
   android-integration.termux-setup-storage.enable = true;
