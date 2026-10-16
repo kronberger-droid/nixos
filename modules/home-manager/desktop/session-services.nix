@@ -93,26 +93,11 @@ in {
     ./veila.nix
   ];
 
-  home.file.".config/swappy/config".text = ''
-    [Default]
-    save_dir=$HOME/Pictures/Screenshots
-    save_filename_format=swappy-%Y-%m-%d-%H-%M-%S.png
-    show_panel=false
-    line_size=5
-    text_size=15
-    text_font=monospace
-    paint_mode=rectangle
-    early_exit=true
-    fill_shape=false
-  '';
-
   home.packages = with pkgs; [
     # Shared wayland session packages (used by both sway and niri)
     wl-clipboard
     brightnessctl
-    grim
     slurp
-    swappy
     swaybg
     libnotify
     jq
@@ -132,10 +117,6 @@ in {
     # agnostic despite the name, so it lives here rather than in sway.nix,
     # which is gated on compositor.primary.
     swayimg
-    # `magick` backs the nushell color-picker helper (grim | magick). It used
-    # to ride along in terminals/kitty.nix, which is gated on the emulator
-    # now, so it lives with the other screen tools.
-    imagemagick
   ];
 
   # ── Mako ────────────────────────────────────────────────────────
