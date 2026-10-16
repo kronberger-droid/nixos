@@ -96,6 +96,13 @@
     - *.diff: `nix store diff-closures` from the old system to the new one
     - cves-fixed.txt and cves-introduced.txt: CVE delta from vulnix, and
       the vulnix-*.json files they came from
+    - versions.json: `flake-versions report` on the updated lock, taken
+      before anything was built. `pins` compares each package the flake
+      overrides with plain nixpkgs: "droppable" means nixpkgs caught up and
+      its build is cached, "keep" means nixpkgs is newer but would have to
+      compile. `uncached` lists what the update made the hosts compile.
+      `inputs` lists every input with its lock age; after the update only
+      inputs pinned to a rev can be behind.
     - *.log: the failing build logs, if anything is still broken
 
     Write the PR body in Markdown with these sections, dropping a section
@@ -108,6 +115,13 @@
                      notes or changelogs only to explain such a bump.
     ## Security      the CVE delta, both directions, with the package each
                      CVE belongs to
+    ## Pins          from versions.json: every "droppable" pin, named with
+                     the overlay or input that holds it, and every pinned
+                     input older than 30 days. Say nothing about "patched",
+                     "ahead" or "other project" rows.
+    ## Compiled      from versions.json `uncached`: packages that had to
+                     build locally, when one of them is large (a kernel,
+                     the nix daemon, a browser, a toolchain)
     ## Fixes         what the fix commit changed and why, if there is one
     ## Needs a human anything unresolved: targets still broken with a short
                      log excerpt, a fix you are not sure about, a bump that
@@ -153,6 +167,7 @@
     gnused
     gnutar
     diffutils
+    flake-versions
   ]);
 
   # The job's half: one script, one subcommand per step. Each step is its own
@@ -270,6 +285,15 @@
         fi
         git add flake.lock
         git commit --quiet -m "chore: nix flake update"
+
+        # ---- what the update brings, before anything builds -------------
+        # After the builds every path is local, so "uncached" would always be
+        # empty; this is the one point where it still says what will compile.
+        # Best effort, like vulnix: the PR goes out without it.
+        hosts=$(sed -n 's/^nixosConfigurations\.\([^.]*\)\..*/\1/p' "$run/build.txt" | paste -sd,)
+        flake-versions report --flake "$src" --hosts "$hosts" --json \
+          >"$run/versions.json" 2>"$run/versions.log" \
+          || echo '{}' >"$run/versions.json"
 
         # ---- build the new closures --------------------------------------
         : >"$run/broken.txt"
