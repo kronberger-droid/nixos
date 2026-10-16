@@ -30,6 +30,7 @@
     ;; waybar swapped them in for memory and temperature on notebooks, so the
     ;; two sets never met; here every module shows on every host, and the
     ;; group keeps the power readouts from reading as more cpu metrics.
+    (screenrec)
     (toggles-cluster)
     (sep)
     (bluetooth)

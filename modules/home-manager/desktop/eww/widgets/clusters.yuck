@@ -53,9 +53,10 @@
     (tray)))
 
 ;; ── Toggles cluster ──────────────────────────────────────────────
-;; waybar: modules = [custom/toggles-handle, custom/screenrec,
-;; idle_inhibitor, custom/dnd] (+ custom/rotation where there is an
-;; accelerometer, which this host has not).
+;; waybar: modules = [custom/toggles-handle, idle_inhibitor, custom/dnd]
+;; (+ custom/rotation where there is an accelerometer, which this host has
+;; not). The screen recording indicator used to sit here too; it is the
+;; `screenrec` widget in modules.yuck now, since a collapsed cluster hid it.
 ;;
 ;; Its own hover/pin pair: yuck cannot parameterize a defvar name, so
 ;; each cluster owns its state and passes the update commands in.
@@ -63,8 +64,6 @@
 (defvar toggles_pinned false)
 (defvar toggles_hover false)
 
-(defpoll screenrec_state :interval "30s"
-  :initial '{"text": "", "class": "idle"}' "scripts/screenrec")
 (defpoll idle_state :interval "30s"
   :initial '{"text": "", "tooltip": "", "class": ""}' "scripts/idle")
 (defpoll dnd_state :interval "30s"
@@ -77,13 +76,6 @@
            :onenter "${EWW_CMD} update toggles_hover=true"
            :onleave "${EWW_CMD} update toggles_hover=false"
            :onpin "${EWW_CMD} update toggles_pinned=${!toggles_pinned}"
-    ;; waybar hides custom/screenrec when not recording by emitting an
-    ;; empty string; :visible is the eww equivalent.
-    (eventbox :cursor "pointer"
-      (button :class {screenrec_state.class == "recording" ? "mod recording" : "mod"}
-              :visible {screenrec_state.text != ""}
-              :onclick "${EWW_CONFIG_DIR}/scripts/screenrec toggle"
-        (label :text {screenrec_state.text})))
     (eventbox :cursor "pointer"
       (button :class "mod" :tooltip {idle_state.tooltip}
               :onclick "${EWW_CONFIG_DIR}/scripts/idle toggle"
