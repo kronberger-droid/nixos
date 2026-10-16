@@ -2,12 +2,12 @@
 
 # waybar's custom/mpris, reimplemented on playerctl.
 #
-# waybar runs `waybar-mpris --order SYMBOL:PLAYER --separator '' --autofocus
+# waybar ran `waybar-mpris --order SYMBOL:PLAYER --separator '' --autofocus
 # --pause <glyph> --play <glyph>` piped through `sd` to rename chromium/chrome
 # to Brave. That binary is a singleton with an IPC socket (which is what its
 # `--send toggle` talks to), so a second instance produces nothing while waybar
-# holds the first. playerctl has no such constraint, which is what lets this be
-# developed and tested with waybar still running.
+# holds the first. playerctl has no such constraint, which is what let this be
+# developed and tested while waybar was still running.
 #
 # `--follow` blocks and waits even when no player exists, so this stays alive
 # and starts emitting when one appears; exactly what deflisten wants.
@@ -25,9 +25,9 @@ def render [line: string]: nothing -> string {
     return ({text: "", tooltip: "", class: "none"} | to json --raw)
   }
 
-  # waybar pipes through `sd '[Cc]hromium|chrome' 'Brave'`; nushell's own
-  # replace does it without the extra dependency, as the nu ports in
-  # waybar/nu/ already do elsewhere.
+  # waybar piped through `sd '[Cc]hromium|chrome' 'Brave'`; nushell's own
+  # replace does it without the extra dependency, as the other nu ports of
+  # waybar's helpers do.
   # spotify-player hardcodes its MPRIS bus name with no config option.
   let name = ($player
     | str replace --all --regex '[Cc]hromium|chrome' 'Brave'

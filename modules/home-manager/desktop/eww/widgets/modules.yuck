@@ -120,9 +120,9 @@
 ;; ── vpn ──────────────────────────────────────────────────────────
 ;; waybar: interval = 15, format = "{icon}{text}", and format-icons gives
 ;; connected and disconnected the same glyph, so only the text differs.
-;; The script is waybar/nu/vpn-status.nu copied across unchanged.
+;; The script is waybar's old vpn-status.nu, copied across unchanged.
 ;;
-;; waybar binds on-click to vpn-picker (rofi -dmenu over three fixed
+;; waybar bound on-click to vpn-picker (rofi -dmenu over three fixed
 ;; entries) and on-click-right to vpn-disconnect-all. The right-click
 ;; ports straight across; the picker is now the dropdown below instead,
 ;; since rofi is a lot of machinery for a three-item list.
