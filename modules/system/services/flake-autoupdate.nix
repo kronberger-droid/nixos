@@ -410,14 +410,14 @@
     text = ''
       failed=0
       ${lib.concatMapStringsSep "\n" (r: ''
-        if ! flake-autoupdate-repo ${r.name} ${
-          lib.concatMapStringsSep " " (t: "--build ${t}") r.build
-        } ${lib.concatMapStringsSep " " (t: "--eval ${t}") r.eval}; then
-          echo "${r.name}: run failed, see above" >&2
-          failed=1
-        fi
-      '')
-      repos}
+          if ! flake-autoupdate-repo ${r.name} ${
+            lib.concatMapStringsSep " " (t: "--build ${t}") r.build
+          } ${lib.concatMapStringsSep " " (t: "--eval ${t}") r.eval}; then
+            echo "${r.name}: run failed, see above" >&2
+            failed=1
+          fi
+        '')
+        repos}
       exit $failed
     '';
   };
