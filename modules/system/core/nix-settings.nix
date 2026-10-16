@@ -19,7 +19,7 @@ in {
       publicKey = (import ../../shared/host-keys.nix).homeserver;
     };
     # Last, so the Host block doesn't swallow global lines other modules
-    # append (libvirt's Include would otherwise apply to this host only).
+    # append (any such line would otherwise apply to this host only).
     extraConfig = lib.mkAfter ''
       Host ${homeserverIp}
         ConnectTimeout 5

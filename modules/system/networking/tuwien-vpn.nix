@@ -117,7 +117,7 @@ in {
       }
     ];
 
-    # Add polkit rule for GUI/waybar control
+    # Add polkit rule for GUI/eww bar control
     security.polkit.extraConfig = ''
       polkit.addRule(function(action, subject) {
           if ((action.id == "org.freedesktop.systemd1.manage-units" &&

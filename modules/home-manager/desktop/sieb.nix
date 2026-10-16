@@ -12,7 +12,7 @@
   # Nerd Font glyphs, spelled as escapes so the source says which they are.
   glyph = code: builtins.fromJSON ''"\u${code}"'';
 
-  # The colors rofi's colors.rasi derives from the base16 scheme, in the
+  # The colors rofi's colors.rasi derived from the base16 scheme, in the
   # same roles: background and background-alt at 90%, base0F the accent,
   # base0D and base09 the blue and red pills.
   s = config.scheme;

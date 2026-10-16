@@ -1,10 +1,10 @@
 // Shared dimensions. Every number here was measured off a grim capture of
-// waybar and rofi running side by side, so this file is the single place a
+// the old waybar and rofi setup running side by side, so this file is the single place a
 // value gets corrected when it turns out to be a pixel off.
 //
-// The mixins matter more than the variables: waybar groups #mode, #custom-menu,
+// The mixins matter more than the variables: waybar grouped #mode, #custom-menu,
 // #custom-power, #clock and #scratchpad under one comment ("Accent widgets —
-// brown background with white text") and styles them identically. `bar-pill`
+// brown background with white text") and styled them identically. `bar-pill`
 // is that group.
 
 // ── Bar ───────────────────────────────────────────────────────────
@@ -36,9 +36,9 @@ $ws-pill-width: 32px;   // content box; + 2 * 10px padding = the 52px measured
 }
 
 // ── Popups ────────────────────────────────────────────────────────
-// Only the VPN dropdown is left: the launcher and the power menu went back to
-// rofi, which handles the environment an application expects and the arrow-key
-// navigation eww has no events for.
+// Only the VPN dropdown is left: the launcher and the power menu went to rofi
+// and then sieb, which handle the environment an application expects and the
+// arrow-key navigation eww has no events for.
 $popup-radius: 8px;
 
 // A selectable row in a popup list. Parameterised because there used to be two
