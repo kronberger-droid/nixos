@@ -157,7 +157,8 @@
     screenrec = {
       inherit eww utilLinux;
       inherit (pkgs) libnotify procps slurp;
-      siebBin = "${config.sieb.package}/bin/sieb";
+      # sieb.commands.prompt is an argv list; screenrec.nu wants one path.
+      siebPrompt = pkgs.writeShellScript "sieb-prompt" "exec ${lib.escapeShellArgs config.sieb.commands.prompt} \"$@\"";
       wlScreenrec = pkgs.wl-screenrec;
     };
     scratchpad = terminalVars // {inherit (pkgs) zellij;};

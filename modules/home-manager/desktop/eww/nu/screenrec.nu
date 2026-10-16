@@ -4,8 +4,9 @@
 # screenrec-toggle.nu. The recording logic is unchanged.
 #
 # The mode picker (area/output) and the output picker are sieb in dmenu mode,
-# themed by the launcher's config.toml. Escape exits sieb with 1 and empty
-# stdout, which the match below already reads as "abort".
+# on the power menu's small card (sieb.commands.prompt) with --lines sized to
+# the entries. Escape exits sieb with 1 and empty stdout, which the match
+# below already reads as "abort".
 
 # Binaries by store path; see eww.nix for why these are consts and not
 # spelled inline at the call sites.
@@ -14,7 +15,7 @@ const NOTIFY_SEND  = "@libnotify@/bin/notify-send"
 const PGREP        = "@procps@/bin/pgrep"
 const PKILL        = "@procps@/bin/pkill"
 const SETSID       = "@utilLinux@/bin/setsid"
-const SIEB         = "@siebBin@"
+const PROMPT       = "@siebPrompt@"
 const SLURP        = "@slurp@/bin/slurp"
 const WL_SCREENREC = "@wlScreenrec@/bin/wl-screenrec"
 
@@ -59,7 +60,7 @@ def "main toggle" [] {
   }
 
   let mode = ("area\noutput"
-    | ^$SIEB -p "Record"
+    | ^$PROMPT -p "Record" --lines 2 --badge (char --unicode f03d)
     | complete
     | get stdout
     | str trim)
@@ -76,11 +77,10 @@ def "main toggle" [] {
       if $outputs.exit_code != 0 {
         null
       } else {
-        let picked = ($outputs.stdout
-          | from json
-          | columns
+        let names = ($outputs.stdout | from json | columns)
+        let picked = ($names
           | str join "\n"
-          | ^$SIEB -p "Output"
+          | ^$PROMPT -p "Output" --lines ($names | length) --badge (char --unicode f108)
           | complete
           | get stdout
           | str trim)
