@@ -35,6 +35,7 @@ in {
   # gets the upstream-main build via the shared overlay, so this goes in as-is.
   xdg.configFile."nushell/keybindings.nu".source = ./nushell/keybindings.nu;
   xdg.configFile."nushell/cl.nu".source = ./nushell/cl.nu;
+  xdg.configFile."nushell/fetch.nu".source = ./nushell/fetch.nu;
 
   # Generated so it can use centralised path variables
   xdg.configFile."nushell/utilities.nu".text = ''
@@ -581,6 +582,7 @@ in {
         # for an external command.
         ''
           source ~/.config/nushell/cl.nu
+          source ~/.config/nushell/fetch.nu
         ''
         + (lib.optionalString hasTerminal ''
           source ~/.config/nushell/development.nu
