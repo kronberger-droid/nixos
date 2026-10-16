@@ -173,13 +173,6 @@
     "${examples}/power/power.nu"
   ];
 in {
-  options.sieb.package = lib.mkOption {
-    type = lib.types.package;
-    readOnly = true;
-    default = sieb;
-    description = "The sieb package, for scripts that use it as a dmenu.";
-  };
-
   options.sieb.commands = {
     launcher = lib.mkOption {
       type = lib.types.listOf lib.types.str;
@@ -192,6 +185,14 @@ in {
       readOnly = true;
       default = power;
       description = "argv of the power menu, for compositor binds.";
+    };
+    prompt = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      readOnly = true;
+      # The power menu's compact card, for short dmenu prompts such as
+      # screenrec's. Callers pass --lines to fit their entries and --badge.
+      default = ["${sieb}/bin/sieb" "--config" "${powerTheme}"];
+      description = "argv of a small dmenu prompt, for scripts.";
     };
     rbw = lib.mkOption {
       type = lib.types.listOf lib.types.str;
