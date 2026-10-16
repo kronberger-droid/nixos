@@ -28,8 +28,6 @@ in {
   "tuwien-vpn-totp.age".publicKeys = [intelNuc spectre P14E];
   "spotify-password.age".publicKeys = [intelNuc spectre P14E];
   "sftp-password.age".publicKeys = [intelNuc spectre P14E];
-  "aerc-gmx-password.age".publicKeys = [intelNuc spectre P14E];
-  "aerc-uptudate-password.age".publicKeys = [intelNuc spectre P14E];
   # rbw's device_id, one per host: the UUID Bitwarden knows the device by.
   # Not a password, but with it and the master password the new-device
   # email check is skipped, thus not in plaintext. Only the named host
