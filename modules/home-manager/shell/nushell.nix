@@ -28,7 +28,6 @@
 in {
   home.packages = with pkgs; [
     gitui
-    navi
   ];
 
   # The helix_* keybinding modes need a nushell that knows them; every host

@@ -7,7 +7,7 @@
 # What this deliberately leaves out:
 #   - programs.ssh: no cluster aliases and no addKeysToAgent. The account's
 #     one key sits unencrypted in ~/.ssh and ssh finds it on its own.
-#   - helix and neovim: the agent edits through its own tools.
+#   - helix: the agent edits through its own tools.
 {
   config,
   lib,
@@ -28,7 +28,7 @@
       username = "claude";
       homeDirectory = "/home/claude";
       stateVersion = "26.11";
-      # ai.nix's set minus ollama and sox: claude itself, plus node for the
+      # ai.nix's set minus inpdf: claude itself, plus node for the
       # npx-launched MCP servers the enabled plugins bring along.
       packages = with pkgs; [
         claude-code-bin

@@ -13,9 +13,6 @@
     # Electron, and it builds with bun rather than the CVE-flagged pnpm.
     equibop
 
-    # AI
-    antigravity-cli
-
     # Documents
     obsidian
     onlyoffice-desktopeditors
@@ -30,7 +27,6 @@
     })
     ffmpeg
     vlc
-    obs-studio
     (pkgs.callPackage ../../shared/gwyddion3.nix {})
 
     # PDF
@@ -47,7 +43,6 @@
     # Networking
     localsend
     sshfs # mount remote SFTP/SSH dirs locally (see sftp-mount in nushell)
-    xcp # cp with progress and parallel copies, for the sshfs mounts
 
     # System
     ltunify
@@ -56,9 +51,6 @@
     # The eww clock's dropdown TUI. Listed here as well as in the script's
     # store-path reference so it is reachable from a plain shell.
     calcurse
-
-    # CAD
-    freecad-wayland
 
     # Math
     numbat
