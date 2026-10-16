@@ -218,9 +218,14 @@
         ];
       }
       agenix.nixosModules.default
-      {
-        environment.systemPackages = [agenix.packages.${system}.default];
-      }
+      ({config, ...}: {
+        # The CLI with the system's Lix instead of the CppNix it bundles,
+        # which warns "unknown setting 'deprecated-features'" on every run:
+        # that key is Lix's spelling (core/nix-settings.nix).
+        environment.systemPackages = [
+          (agenix.packages.${system}.default.override {nix = config.nix.package;})
+        ];
+      })
       lixModule
     ];
 
