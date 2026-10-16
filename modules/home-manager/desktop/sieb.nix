@@ -173,6 +173,13 @@
     "${examples}/power/power.nu"
   ];
 in {
+  options.sieb.package = lib.mkOption {
+    type = lib.types.package;
+    readOnly = true;
+    default = sieb;
+    description = "The sieb package, for scripts that use it as a dmenu.";
+  };
+
   options.sieb.commands = {
     launcher = lib.mkOption {
       type = lib.types.listOf lib.types.str;

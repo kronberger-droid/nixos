@@ -156,7 +156,8 @@
     };
     screenrec = {
       inherit eww utilLinux;
-      inherit (pkgs) libnotify procps rofi slurp;
+      inherit (pkgs) libnotify procps slurp;
+      siebBin = "${config.sieb.package}/bin/sieb";
       wlScreenrec = pkgs.wl-screenrec;
     };
     scratchpad = terminalVars // {inherit (pkgs) zellij;};

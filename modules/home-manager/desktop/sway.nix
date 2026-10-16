@@ -189,7 +189,7 @@ in
 
         focus.mouseWarping = "container";
 
-        menu = "${pkgs.rofi}/bin/rofi -show drun";
+        menu = lib.escapeShellArgs config.sieb.commands.launcher;
 
         defaultWorkspace = "workspace ${ws1}";
 
@@ -203,11 +203,11 @@ in
           # reload sway
           "${modifier}+Shift+c" = "exec swaymsg reload";
           # open powermenu
-          "${modifier}+Shift+e" = "exec ${config.xdg.configHome}/rofi/powermenu/powermenu.sh";
+          "${modifier}+Shift+e" = "exec ${lib.escapeShellArgs config.sieb.commands.power}";
           # open local send app
           "${modifier}+Shift+z" = "exec ${pkgs.localsend}/bin/localsend_app";
-          # open rbw-rofi for password selection
-          "${modifier}+Shift+w" = "exec ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw";
+          # open the sieb rbw picker for password selection
+          "${modifier}+Shift+w" = "exec ${lib.escapeShellArgs config.sieb.commands.rbw}";
           # open bitwarden GUI
           "${modifier}+Shift+p" = "exec ${pkgs.bitwarden-desktop}/bin/bitwarden";
           # open floating btop shell
