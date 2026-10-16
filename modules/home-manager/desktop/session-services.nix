@@ -72,16 +72,14 @@
   '';
 
   # Second line of defence behind `hasAccelerometer`, which already keeps this
-  # whole block off hosts without the sensor. Kept because it still carries
-  # the waybar opt-out toggle, and because a host can claim the sensor while
+  # whole block off hosts without the sensor. Kept because a host can claim
+  # the sensor while
   # firmware declines to enumerate it, which is the case rot8 handles worst:
   # it exits 1 with "Unknown Accelerometer Device" immediately, and
   # Restart=on-failure turns that into an endless respawn loop. A non-zero
   # ExecCondition marks the unit skipped rather than failed, so Restart never
   # applies and the loop becomes a single clean skip.
   rot8Condition = pkgs.writeShellScript "rot8-condition" ''
-    # Explicit opt-out via the waybar rotation toggle.
-    [ -f "$HOME/.cache/rotation-state" ] && exit 1
     for f in /sys/bus/iio/devices/iio:device*/in_accel_*_raw; do
       [ -e "$f" ] && exit 0
     done
