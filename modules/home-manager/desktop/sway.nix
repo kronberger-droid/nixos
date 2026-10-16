@@ -199,7 +199,7 @@ in
           # dismiss notifications
           "${modifier}+Shift+d" = "exec ${pkgs.mako}/bin/makoctl dismiss -a";
           # take a screenshot
-          "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot save area - | ${pkgs.swappy}/bin/swappy -f - $$ [[ $(${pkgs.wl-clipboard}/bin/wl-paste -l) == 'image/png' ]]";
+          "${modifier}+Shift+a" = "exec ${pkgs.sway-contrib.grimshot}/bin/grimshot copy area";
           # reload sway
           "${modifier}+Shift+c" = "exec swaymsg reload";
           # open powermenu
