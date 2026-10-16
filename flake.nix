@@ -3,12 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # zotero 10.0.2 copies nixpkgs' firefox-esr-153 and its build script
-    # patches ActorManagerParent.sys.mjs, which no longer matches on 153.4
-    # (NixOS/nixpkgs#568692). Pin to the last rev on 153.3, where zotero is
-    # cached. The fix (zotero 10.0.4, #567192) is on master; drop this input
-    # and the overlay entry once the locked nixpkgs carries it.
-    nixpkgs-zotero.url = "github:NixOS/nixpkgs/7a0f122f5090cf4c2ade2a13a0e229d4e19ba71f";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -271,9 +265,6 @@
                   # locked nixpkgs builds it clean, so the cached binary is
                   # back. If the clipboard regresses, that wrapper is
                   # `wrapProgram $out/bin/bitwarden --set XDG_CURRENT_DESKTOP niri`.
-                  # zotero 10.0.2 fails on unstable's firefox-esr 153.4. See
-                  # the nixpkgs-zotero input above.
-                  zotero = (import inputs.nixpkgs-zotero {inherit system;}).zotero;
                 })
                 # Ladybird's desktop and D-Bus files launch it with
                 # --force-new-process, which upstream turned into an alias for
