@@ -118,7 +118,7 @@
     ## Pins          from versions.json: every "droppable" pin, named with
                      the overlay or input that holds it, and every pinned
                      input older than 30 days. Say nothing about "patched",
-                     "ahead" or "other project" rows.
+                     "ahead", "custom" or "other" rows.
     ## Compiled      from versions.json `uncached`: packages that had to
                      build locally, when one of them is large (a kernel,
                      the nix daemon, a browser, a toolchain)
