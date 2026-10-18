@@ -97,13 +97,13 @@ in {
       opener = {
         "detached-pdf" = [
           {
-            run = ''setsid ${pkgs.zathura}/bin/zathura "$@"'';
+            run = ''setsid ${pkgs.zathura}/bin/zathura %s'';
             orphan = true;
           }
         ];
         "detached-image" = [
           {
-            run = ''setsid ${pkgs.swayimg}/bin/swayimg "$@"'';
+            run = ''setsid ${pkgs.swayimg}/bin/swayimg %s'';
             orphan = true;
           }
         ];
