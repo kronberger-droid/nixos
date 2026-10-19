@@ -1,5 +1,7 @@
 {lib, ...}: {
-  time.timeZone = "Europe/Vienna";
+  # mkDefault so automatic-timezoned can null it on the workstations. The
+  # homeserver keeps the fixed zone.
+  time.timeZone = lib.mkDefault "Europe/Vienna";
 
   i18n = {
     defaultLocale = "en_US.UTF-8";
