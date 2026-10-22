@@ -52,6 +52,8 @@
   cfg = config.security.agentSandbox;
   user = "claude";
   home = "/home/${user}";
+  # The longest Remote Control window `claude-sandbox-open` grants.
+  maxWindow = "12h";
 
   # The primary user's vault, from the account definition rather than a
   # rebuilt string, so it tracks any users.users.<name>.home override. The
@@ -80,14 +82,7 @@ in {
 
     # For a host nobody sits at, and only while asked for: see the
     # claude-remote-control unit below.
-    remoteControl = {
-      enable = lib.mkEnableOption "an on-demand `claude remote-control` server in the sandbox account, opened with `claude-sandbox-open`";
-      maxDuration = lib.mkOption {
-        type = lib.types.str;
-        default = "12h";
-        description = "Longest window `claude-sandbox-open` accepts, as a systemd time span.";
-      };
-    };
+    remoteControl.enable = lib.mkEnableOption "an on-demand `claude remote-control` server in the sandbox account, opened with `claude-sandbox-open`";
 
     egressRules = lib.mkOption {
       type = lib.types.lines;
@@ -319,7 +314,9 @@ in {
     # root, and the copy in the RuntimeDirectory is where interactive shells
     # (extra_env.nu) and the spawned sessions find it. systemd removes that
     # directory when the unit stops, so the token is gone with the window.
-    # Stopping the unit also ends every session in its cgroup.
+    # Stopping the unit also ends every session in its cgroup. A sandbox
+    # shell opened over ssh during the window lives outside it and keeps the
+    # GH_TOKEN it read at login until it exits.
     (lib.mkIf (cfg.enable && cfg.remoteControl.enable) {
       systemd.services.claude-remote-control = {
         description = "Claude Code Remote Control server (on demand)";
@@ -347,46 +344,58 @@ in {
             fi
             exec ${lib.getExe' pkgs.claude-code-bin "claude"} remote-control
           '');
+          # Backing off: before that first login a long window would
+          # otherwise relaunch it every 30s for hours.
           Restart = "always";
           RestartSec = 30;
+          RestartSteps = 5;
+          RestartMaxDelaySec = "10min";
         };
       };
 
       environment.systemPackages = [
-        (pkgs.writeShellScriptBin "claude-sandbox-open" ''
-          set -eu
-          if [ "$(id -u)" -ne 0 ]; then exec /run/wrappers/bin/sudo "$0" "$@"; fi
-          span="''${1:-2h}"
-          secs() { ${pkgs.systemd}/bin/systemd-analyze timespan "$1" | ${pkgs.gawk}/bin/awk '/μs:/ { print int($2 / 1000000) }'; }
-          # Empty on a parse error: the pipeline's status is awk's, not
-          # systemd-analyze's.
-          want=$(secs "$span" 2>/dev/null)
-          if [ -z "$want" ] || [ "$want" -le 0 ]; then
-            echo "claude-sandbox-open: not a time span: $span" >&2
-            exit 2
-          fi
-          max=$(secs ${lib.escapeShellArg cfg.remoteControl.maxDuration})
-          if [ "$want" -gt "$max" ]; then
-            echo "claude-sandbox-open: capped at ${cfg.remoteControl.maxDuration}" >&2
-            want=$max
-          fi
-          # Replace any earlier close timer, so reopening sets a fresh end; a
-          # failed leftover would block reusing the transient unit's name.
-          ${pkgs.systemd}/bin/systemctl stop claude-sandbox-close.timer 2>/dev/null || true
-          ${pkgs.systemd}/bin/systemctl reset-failed claude-sandbox-close.timer claude-sandbox-close.service 2>/dev/null || true
-          ${pkgs.systemd}/bin/systemctl start claude-remote-control.service
-          ${pkgs.systemd}/bin/systemd-run --quiet --unit=claude-sandbox-close \
-            --on-active="''${want}s" --timer-property=AccuracySec=1s \
-            ${pkgs.systemd}/bin/systemctl stop claude-remote-control.service
-          echo "Sandbox open until $(date -d "+''${want} seconds" '+%H:%M'). Close early: claude-sandbox-close"
-        '')
-        (pkgs.writeShellScriptBin "claude-sandbox-close" ''
-          set -eu
-          if [ "$(id -u)" -ne 0 ]; then exec /run/wrappers/bin/sudo "$0" "$@"; fi
-          ${pkgs.systemd}/bin/systemctl stop claude-sandbox-close.timer 2>/dev/null || true
-          ${pkgs.systemd}/bin/systemctl stop claude-remote-control.service
-          echo "Sandbox closed."
-        '')
+        (pkgs.writeShellApplication {
+          name = "claude-sandbox-open";
+          runtimeInputs = [pkgs.systemd pkgs.gawk pkgs.coreutils];
+          text = ''
+            if [ "$(id -u)" -ne 0 ]; then exec /run/wrappers/bin/sudo "$0" "$@"; fi
+            # C locale, so the microseconds line reads "us:" whatever the
+            # caller's LANG is.
+            secs() { LC_ALL=C systemd-analyze timespan "$1" | awk '$1 == "us:" { print int($2 / 1000000) }'; }
+            span="''${1:-2h}"
+            want=$(secs "$span" 2>/dev/null) || want=""
+            if [ -z "$want" ] || [ "$want" -le 0 ]; then
+              echo "claude-sandbox-open: not a time span: $span" >&2
+              exit 2
+            fi
+            max=$(secs ${maxWindow})
+            if [ "$want" -gt "$max" ]; then
+              echo "claude-sandbox-open: capped at ${maxWindow}" >&2
+              want=$max
+            fi
+            # Replace any earlier close timer, so reopening sets a fresh end;
+            # a failed leftover would block reusing the transient unit's name.
+            systemctl stop claude-sandbox-close.timer 2>/dev/null || true
+            systemctl reset-failed claude-sandbox-close.timer claude-sandbox-close.service 2>/dev/null || true
+            systemctl start claude-remote-control.service
+            # An absolute path: the timer's service runs in PID 1's
+            # environment, not this one.
+            systemd-run --quiet --unit=claude-sandbox-close \
+              --on-active="''${want}s" --timer-property=AccuracySec=1s \
+              ${pkgs.systemd}/bin/systemctl stop claude-remote-control.service
+            echo "Sandbox open until $(date -d "+''${want} seconds" '+%H:%M'). Close early: claude-sandbox-close"
+          '';
+        })
+        (pkgs.writeShellApplication {
+          name = "claude-sandbox-close";
+          runtimeInputs = [pkgs.systemd];
+          text = ''
+            if [ "$(id -u)" -ne 0 ]; then exec /run/wrappers/bin/sudo "$0" "$@"; fi
+            systemctl stop claude-sandbox-close.timer 2>/dev/null || true
+            systemctl stop claude-remote-control.service
+            echo "Sandbox closed."
+          '';
+        })
       ];
     })
   ];
