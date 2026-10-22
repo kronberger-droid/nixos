@@ -9,13 +9,9 @@
 {pkgs, ...}: {
   imports = [../system/boot/secureboot-tpm.nix];
 
-  programs.steam = {
-    enable = true;
-    gamescopeSession.enable = true;
-    extraPackages = [pkgs.sdl3];
-    package = pkgs.steam.override {
-      extraArgs = "-system-composer";
-    };
+  # The rest of Steam is in system/desktop/desktop.nix.
+  programs.steam.package = pkgs.steam.override {
+    extraArgs = "-system-composer";
   };
 
   services = {
@@ -48,11 +44,10 @@
       # Allows safe emergency reboot (REISUB) without exposing full sysrq
       "kernel.sysrq" = 176;
     };
-    # List option: hosts append their own (P14E's resume_offset, secretmem).
+    # List option: hosts append their own (P14E's resume_offset).
     kernelParams = [
       "snd_intel_dspcfg.dsp_driver=1"
       "intel_iommu=on"
-      "console=tty1"
     ];
     blacklistedKernelModules = [
       "iTCO_wdt"
@@ -67,8 +62,6 @@
     }
   ];
 
-  environment.systemPackages = with pkgs; [
-    brightnessctl
-    dmidecode
-  ];
+  # brightnessctl comes from power-management.nix with the other laptop tools.
+  environment.systemPackages = [pkgs.dmidecode];
 }

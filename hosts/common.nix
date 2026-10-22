@@ -3,9 +3,10 @@ _: {
     ../modules/system
   ];
 
-  # Suppress KERN_WARNING and below from the kernel console.
-  # Hosts use `console=tty1`, which otherwise lets runtime printks
-  # (USB hotplug, suspend/resume, ACPI) bleed into tuigreet.
+  # The console lives on tty1, where tuigreet runs. Suppress KERN_WARNING and
+  # below there, or runtime printks (USB hotplug, suspend/resume, ACPI) bleed
+  # into the greeter.
+  boot.kernelParams = ["console=tty1"];
   boot.consoleLogLevel = 3;
 
   # Every generated hardware-configuration.nix ties CPU microcode updates to

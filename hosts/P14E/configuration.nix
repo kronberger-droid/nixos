@@ -33,15 +33,9 @@ _: {
     # NB: hibernation is only *available* when no process holds secret memory;
     # Electron/Chromium apps do, which disables it kernel-wide while they run.
     resumeDevice = "/dev/mapper/nixos-root";
-    kernelParams = [
-      "resume_offset=68904960"
-      # Disable memfd_secret kernel-wide. Any process holding secret memory
-      # (Electron/Chromium apps like Bitwarden do) makes the kernel refuse
-      # hibernation, since secretmem pages must never hit disk but a hibernate
-      # image writes all of RAM. LUKS-encrypted swap already protects the image
-      # at rest, so the trade-off is negligible here.
-      "secretmem.enable=0"
-    ];
+    # secretmem.enable=0 comes from power-management.nix, which adds it on
+    # every host that can hibernate.
+    kernelParams = ["resume_offset=68904960"];
   };
 
   # Steam runs as an X11 client through xwayland-satellite, which hands it no
