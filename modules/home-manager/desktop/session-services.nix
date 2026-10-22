@@ -80,10 +80,9 @@ in {
     jq
     lsof
     libinput
-    xdg-user-dirs
 
-    # Session services
-    swayidle
+    # Session services (swayidle and xdg-user-dirs come with their own
+    # modules: services.swayidle, xdg.userDirs)
     wayland-pipewire-idle-inhibit
     wlsunset
 
