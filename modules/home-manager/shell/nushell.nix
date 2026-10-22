@@ -195,7 +195,9 @@ in {
           let has_direnv = ('.envrc' | path exists)
           let has_flake = ('flake.nix' | path exists)
           let dev_shell = if $has_flake and not $has_direnv {
-              if (^nix eval --json .#devShells.x86_64-linux.dev | complete).exit_code == 0 {
+              # hasAttr, so the probe names the shell without instantiating it.
+              let probe = (^nix eval .#devShells.x86_64-linux --apply 'builtins.hasAttr "dev"' | complete)
+              if $probe.exit_code == 0 and ($probe.stdout | str trim) == "true" {
                   ".#dev"
               } else {
                   ".#default"
