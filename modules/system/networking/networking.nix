@@ -55,7 +55,7 @@
     enable = true;
     settings.Resolve = {
       MulticastDNS = "no";
-      DNS = ["192.168.2.54" "1.1.1.1#cloudflare-dns.com" "9.9.9.9#dns.quad9.net"];
+      DNS = [(import ../../shared/homeserver.nix).lan4 "1.1.1.1#cloudflare-dns.com" "9.9.9.9#dns.quad9.net"];
       DNSOverTLS = "opportunistic";
       FallbackDNS = "1.1.1.1#cloudflare-dns.com 1.0.0.1#cloudflare-dns.com 9.9.9.9#dns.quad9.net";
     };

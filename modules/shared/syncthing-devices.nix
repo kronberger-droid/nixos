@@ -1,10 +1,12 @@
 # Shared syncthing device definitions used by both system and Home Manager modules.
 # Get device IDs with: syncthing -device-id (or from the web UI)
-{
+let
+  homeserver = import ./homeserver.nix;
+in {
   devices = {
     homeserver = {
       id = "TFHHQZC-OZCHJDU-SVETB4J-2LNTROX-FYJZFT5-BG2LG2X-CIRCEEZ-LLRVFAR";
-      addresses = ["tcp://192.168.2.54:22000" "tcp://100.92.46.97:22000" "dynamic"];
+      addresses = ["tcp://${homeserver.lan4}:22000" "tcp://${homeserver.tailnet4}:22000" "dynamic"];
     };
     spectre = {
       id = "TYV4VO6-CXEJIBC-VSC5V6K-BKC2MZS-B6UI74J-VVTG7KH-SN65JSX-TNBDWAQ";

@@ -5,7 +5,7 @@
   ...
 }: let
   isHomeserver = config.networking.hostName == "homeserver";
-  homeserverIp = "100.92.46.97";
+  homeserverIp = (import ../../shared/homeserver.nix).tailnet4;
 in {
   imports = [./nix-caches.nix];
 

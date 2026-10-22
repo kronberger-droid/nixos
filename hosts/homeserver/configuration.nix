@@ -7,12 +7,13 @@
   ...
 }: let
   hostKeys = import ../../modules/shared/host-keys.nix;
+  addrs = import ../../modules/shared/homeserver.nix;
   # Keys that only ever talk to the store get no shell: the protocol command
   # is forced, as nix.sshServe does it. The personal keys stay unrestricted,
   # since `flake --remote` runs `nix build` over a plain ssh session.
   # from= keeps them to the tailnet (v4 CGNAT range and v6 ULA) and the LAN,
   # where every one of those clients lives.
-  storeOnly = command: key: ''restrict,from="100.64.0.0/10,fd7a:115c:a1e0::/48,192.168.2.0/24",command="${config.nix.package.out}/bin/${command}" ${key}'';
+  storeOnly = command: key: ''restrict,from="100.64.0.0/10,fd7a:115c:a1e0::/48,${addrs.lanSubnet}",command="${config.nix.package.out}/bin/${command}" ${key}'';
 in {
   imports = [
     ./hardware-configuration.nix
@@ -109,7 +110,7 @@ in {
     useDHCP = false;
     interfaces.enp86s0.ipv4.addresses = [
       {
-        address = "192.168.2.54";
+        address = addrs.lan4;
         prefixLength = 24;
       }
     ];
@@ -370,7 +371,7 @@ in {
     # `tailscale set` rather than `tailscale up`, since extraUpFlags only
     # applies when a node authenticates from an authKeyFile and this one is
     # already enrolled. `set` reconfigures a running node in place.
-    extraSetFlags = ["--advertise-routes=192.168.2.0/24"];
+    extraSetFlags = ["--advertise-routes=${addrs.lanSubnet}"];
   };
 
   # Binary cache — serves /nix/store to other machines on the network. Same
@@ -441,8 +442,8 @@ in {
       # hang on a dropped SYN. A client without Tailscale cannot reach these
       # services either way.
       customDNS.mapping = {
-        "rss.home.lan" = "100.92.46.97";
-        "photos.home.lan" = "100.92.46.97";
+        "rss.home.lan" = addrs.tailnet4;
+        "photos.home.lan" = addrs.tailnet4;
       };
 
       blocking = {
