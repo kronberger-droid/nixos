@@ -169,13 +169,9 @@ in {
   # Then the power-efficiency parameters, laptops only.
   boot.kernelParams =
     lib.optional canHibernate "secretmem.enable=0"
-    ++ (
-      if isNotebook
-      then [
-        "intel_pstate=active"
-        "i915.enable_fbc=1"
-        "i915.enable_psr=1"
-      ]
-      else []
-    );
+    ++ lib.optionals isNotebook [
+      "intel_pstate=active"
+      "i915.enable_fbc=1"
+      "i915.enable_psr=1"
+    ];
 }
