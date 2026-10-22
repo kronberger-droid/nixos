@@ -46,6 +46,11 @@ load-secret /run/secrets/github-token GITHUB_PERSONAL_ACCESS_TOKEN
 load-secret /run/secrets/gh-dash-token GH_TOKEN
 
 # The sandbox account holds one fine-grained token for both jobs; only it can
-# read this file, so on the primary user's side both lines are no-ops.
+# read these files, so on the primary user's side the lines are no-ops. The
+# workstations keep it in /run/secrets. The homeserver hands it out only
+# while a Remote Control window is open (claude-sandbox-open), at the second
+# path, which is gone again when the window closes.
 load-secret /run/secrets/claude-github-token GITHUB_PERSONAL_ACCESS_TOKEN
 load-secret /run/secrets/claude-github-token GH_TOKEN
+load-secret /run/claude-sandbox/github-token GITHUB_PERSONAL_ACCESS_TOKEN
+load-secret /run/claude-sandbox/github-token GH_TOKEN
