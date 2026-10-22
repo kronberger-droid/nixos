@@ -198,11 +198,15 @@ in {
         push.autoSetupRemote = true;
         # The Claude Code sandbox account (system/security/agent-sandbox.nix)
         # keeps its checkouts under /home/claude/src, and this user fetches
-        # from them as a local remote. git refuses to touch a repository owned
-        # by another uid ("dubious ownership") unless it is listed here; the
-        # trailing /* covers every checkout under that directory. Harmless on
-        # the sandbox side, which imports this file too and owns them anyway.
-        safe.directory = ["/home/claude/src/*"];
+        # from them as a local remote. git refuses a repository owned by
+        # another uid ("dubious ownership") unless safe.directory lists it,
+        # and a global `/home/claude/src/*` entry would make every git
+        # command run inside one of those checkouts honour the agent's
+        # .git/config (core.fsmonitor, hooks, core.pager): code execution as
+        # this user from a plain `git status`. So the trust is per command:
+        # `git fetch-sandbox <remote-or-path> [refspec...]` names only the
+        # repository being fetched, and fetching runs none of that config.
+        alias.fetch-sandbox = ''!f() { url=$(git remote get-url "$1" 2>/dev/null || printf %s "$1"); git -c safe.directory="$url" fetch "$@"; }; f'';
       };
     };
   };

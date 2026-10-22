@@ -38,8 +38,9 @@
 #     `machinectl shell` behind a polkit rule scoped to exactly that pair.
 #
 # Code comes back out the way a contributor's fork would: Martin adds
-# /home/claude/src/<repo> as a remote and fetches from it (safe.directory in
-# home-manager/shell/git.nix), reviews, and pushes with his own key. Nothing
+# /home/claude/src/<repo> as a remote and fetches from it with
+# `git fetch-sandbox` (home-manager/shell/git.nix; deliberately no global
+# safe.directory), reviews, and pushes with his own key. Nothing
 # gives the agent a path into the primary home in return.
 {
   config,
@@ -219,8 +220,8 @@ in {
       # also drops the default ACL, so files created inside later stay
       # closed. The vault root's own default still applies to a freshly made
       # `.obsidian`, which the next run (every boot, every change to this
-      # unit) strips again. Write access on the directory itself is what
-      # renaming or emptying it needs, so it cannot be swapped out either.
+      # unit) strips again; the read-only mount above keeps it from being
+      # swapped out in between.
       # Mode bits still apply, so the agent keeps whatever read access the
       # files give everyone.
       systemd.services.claude-sandbox-vault-acl = {
