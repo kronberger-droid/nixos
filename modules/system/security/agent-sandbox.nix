@@ -199,10 +199,16 @@ in {
       # /home/<primary> above it, so the 700 there stays intact while the
       # vault inside is reachable. nofail: on a host where syncthing has not
       # delivered the vault yet the boot must not wait on it.
+      # slave, not the default: `/` is a shared mount, so a plain bind joins
+      # the source's peer group and every mount made under it propagates
+      # back. The read-only `.obsidian` below then landed on the primary
+      # user's own `.obsidian` too, which left Obsidian unable to save and
+      # failed the ACL strip with EROFS. A slave still receives mounts from
+      # the source but sends none back.
       fileSystems.${vaultDst} = {
         device = vaultSrc;
         fsType = "none";
-        options = ["bind" "nofail"];
+        options = ["bind" "slave" "nofail"];
       };
       # `.obsidian` read-only in this view, on top of the ACL strip below.
       # The ACLs alone leave a gap: the agent has write on the vault root,
