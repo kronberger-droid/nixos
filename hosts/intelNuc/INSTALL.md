@@ -109,4 +109,7 @@ The order below matters: the TPM seals against PCR 7, the Secure Boot state.
 ## If the host key was lost
 
 - [ ] Put the new `/etc/ssh/ssh_host_ed25519_key.pub` into `secrets/secrets.nix`
-      and run `agenix -r` on spectre or P14E, which hold escrow for every secret
+      and run `agenix -r` on spectre or P14E. They can open every workstation
+      secret, but not the server-only ones (encrypted to homeserver + intelNuc
+      only, see `secrets.nix`): those re-key as root on the homeserver with its
+      host key (`agenix -r -i /etc/ssh/ssh_host_ed25519_key`)
