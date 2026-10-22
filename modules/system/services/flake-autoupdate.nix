@@ -719,7 +719,10 @@ in {
 
   systemd.services.flake-autoupdate = {
     description = "Update every flake's inputs, build, and open a PR per repo";
-    after = ["network-online.target" "nix-daemon.service"];
+    # nix-optimise runs at 03:00 here (nix-settings.nix), ahead of this
+    # timer's 03:30-04:00 window. If it overruns, the update waits for it
+    # instead of building into a store that is being rehashed underneath it.
+    after = ["network-online.target" "nix-daemon.service" "nix-optimise.service"];
     wants = ["network-online.target"];
 
     serviceConfig = {
