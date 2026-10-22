@@ -316,7 +316,8 @@ in {
       }
 
       # NixOS flake management (uses nh for nice diffs and colored output)
-      # Also supports: flake init <template> to scaffold a new project from ~/.config/nix-templates
+      # Also supports: flake init <template> to scaffold a new project from this
+      # flake's `templates` output (sources under ${dirs.templates})
       def flake [
           action: string = "switch"                          # switch, boot, test, build, dry, update, rollback, init
           template?: string                                  # template name for init (e.g. rust-cli, rust-gui)
@@ -338,7 +339,9 @@ in {
                   ls $templates_dir | where type == dir | get name | each { |d| print $"  - ($d | path basename)" }
                   return
               }
-              nix flake init --template $"path:($templates_dir)#($template)"
+              # The templates are outputs of the root flake; templates/ itself
+              # has no flake.nix, so it is only listed, never referenced.
+              nix flake init --template $"("${dirs.nixosConfig}" | path expand)#($template)"
               print $"(ansi green)Initialized flake from template '($template)'.(ansi reset)"
               return
           }
