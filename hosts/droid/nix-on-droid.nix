@@ -2,7 +2,9 @@
   pkgs,
   inputs,
   ...
-}: {
+}: let
+  homeserver = import ../../modules/shared/homeserver.nix;
+in {
   imports = [
     # Replaces upstream's installPackages activation (nix-env --install) with
     # a build-free `nix-env --set` — proot on this device cannot allocate the
@@ -82,7 +84,7 @@
     # nix skips an unreachable builder and tries the next. Trade-off:
     # switching needs the homeserver reachable — acceptable, since local
     # builds cannot work at all.
-    builders = ssh://nix-remote@100.92.46.97 aarch64-linux ; ssh://nix-remote@192.168.2.54 aarch64-linux
+    builders = ssh://nix-remote@${homeserver.tailnet4} aarch64-linux ; ssh://nix-remote@${homeserver.lan4} aarch64-linux
     builders-use-substitutes = true
     max-jobs = 0
   '';

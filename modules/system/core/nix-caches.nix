@@ -1,4 +1,6 @@
-{config, ...}: {
+{config, ...}: let
+  inherit (import ../../shared/homeserver.nix) tailnet4;
+in {
   nix.settings = {
     substituters = [
       "https://cache.nixos.org/"
@@ -8,7 +10,7 @@
     ];
     extra-substituters =
       if config.networking.hostName != "homeserver"
-      then ["http://100.92.46.97:5001"]
+      then ["http://${tailnet4}:5001"]
       else [];
     connect-timeout = 5;
     fallback = true;
