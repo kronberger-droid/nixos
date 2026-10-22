@@ -23,6 +23,14 @@ _: {
     "hp_wmi"
   ];
 
+  # This machine's NVMe crashed with APST and ASPM on (2f12b06). Spectre
+  # only: P14E never had the problem, and on it these would keep the SoC out
+  # of its deep idle states and make TLP's PCIE_ASPM_ON_BAT a no-op.
+  boot.kernelParams = [
+    "nvme_core.default_ps_max_latency_us=0"
+    "pcie_aspm=off"
+  ];
+
   # Limit build parallelism to keep the system responsive
   nix.settings = {
     cores = 8; # Leave 4 threads free for desktop responsiveness
