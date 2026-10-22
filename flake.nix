@@ -6,9 +6,12 @@
     # zotero copies nixpkgs' firefox-esr-153 and its build script patches
     # ActorManagerParent.sys.mjs, which no longer matches on 153.4
     # (NixOS/nixpkgs#568692). Pin to the last rev on 153.3, where zotero is
-    # cached. zotero 10.0.4 (#567192) did not fix it; #572466 does, by
-    # building against a revived Firefox 140 ESR. Drop this input and the
-    # overlay entry once the locked nixos-unstable contains that merge.
+    # cached. #572466 is in unstable, but it "fixes" this by building against
+    # a revived Firefox 140 ESR that is EOL (2026-10-13, knownVulnerabilities),
+    # unfree and never cached, so taking it would mean permittedInsecurePackages
+    # and a local Firefox build to trade a weeks-old 153.3 for an unpatched
+    # 140. Keep the pin until unstable's zotero builds on a supported ESR
+    # again; then drop this input and the overlay entry.
     nixpkgs-zotero.url = "github:NixOS/nixpkgs/7a0f122f5090cf4c2ade2a13a0e229d4e19ba71f";
     # ladybird 2026-10-14 fails on rustc 1.99, which deprecated the
     # `fetch_update` its AK crate calls, under its own -Dwarnings. Pin to the
@@ -512,15 +515,6 @@
         }
     );
 
-    # `nix fmt -- .` — alejandra, the same formatter helix runs on save (see
-    # modules/home-manager/editors/helix.nix). Declaring it here is what keeps
-    # the tree consistent: on-save formatting only ever reaches files that
-    # happen to be opened in helix, which is how 27 files had drifted before
-    # the sweep. Both systems, so it also works from the phone.
-    #
-    # The `-- .` is not optional: Lix's `nix fmt` passes no path through, and
-    # alejandra with no arguments reads stdin, so a bare `nix fmt` dies with
-    # "unexpected end of file" instead of formatting anything.
     # The environment of every unattended agent: modules/shared/agent-tools.nix
     # on PATH and nothing else. `nix develop .#agent --ignore-environment`
     # reproduces what the flake-autoupdate agent runs with, for trying a
@@ -537,6 +531,15 @@
       };
     });
 
+    # `nix fmt -- .` — alejandra, the same formatter helix runs on save (see
+    # modules/home-manager/editors/helix.nix). Declaring it here is what keeps
+    # the tree consistent: on-save formatting only ever reaches files that
+    # happen to be opened in helix, which is how 27 files had drifted before
+    # the sweep. Both systems, so it also works from the phone.
+    #
+    # The `-- .` is not optional: Lix's `nix fmt` passes no path through, and
+    # alejandra with no arguments reads stdin, so a bare `nix fmt` dies with
+    # "unexpected end of file" instead of formatting anything.
     formatter = nixpkgs.lib.genAttrs [x86System armSystem] (
       system: nixpkgs.legacyPackages.${system}.alejandra
     );
