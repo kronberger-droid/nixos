@@ -190,6 +190,18 @@ in {
         fsType = "none";
         options = ["bind" "nofail"];
       };
+      # `.obsidian` read-only in this view, on top of the ACL strip below.
+      # The ACLs alone leave a gap: the agent has write on the vault root,
+      # and renaming a directory within the same parent needs write on the
+      # parent only, so `mv .obsidian x; mkdir .obsidian` would hand it a
+      # fresh plugin directory (the root's default ACL) until the next strip.
+      # A mountpoint cannot be renamed (EBUSY) and this one is not writable.
+      # The primary user reaches the vault through its own path, unaffected.
+      fileSystems."${vaultDst}/.obsidian" = {
+        device = "${vaultSrc}/.obsidian";
+        fsType = "none";
+        options = ["bind" "ro" "nofail"];
+      };
 
       # Write access through POSIX ACLs rather than a shared group and
       # umask. A default ACL on every directory means a note created by
