@@ -122,7 +122,8 @@ in {
       # Nothing depends on the exact instant, and jitter keeps this from landing
       # on the same second as every other timer after a reboot.
       RandomizedDelaySec = "30s";
-      Persistent = true;
+      # No Persistent: systemd.timer(5) only applies it to OnCalendar, and
+      # the monotonic OnBootSec above already covers a reboot.
     };
   };
 }
