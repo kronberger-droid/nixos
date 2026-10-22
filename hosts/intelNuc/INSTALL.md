@@ -86,11 +86,14 @@ parts are spelled out here.
 
 ## Secure Boot + TPM2 (lanzaboote)
 
+Set `boot.lanzaboote.autoGenerateKeys.enable = true` in the host file for
+the install (it was removed afterwards, since it implies `allowUnsigned`).
 The install goes through unsigned and the first boot asks for the passphrase;
 `generate-sb-keys.service` creates the keys in `/var/lib/sbctl` on that boot.
 The order below matters: the TPM seals against PCR 7, the Secure Boot state.
-- [ ] Rebuild once (`nixos-rebuild switch`), so lanzaboote signs with the new
-      keys; `sbctl verify` should list everything as signed
+- [ ] Drop `autoGenerateKeys` again, rebuild once (`nixos-rebuild switch`),
+      so lanzaboote signs with the new keys; `sbctl verify` should list
+      everything as signed
 - [ ] Reboot into firmware setup, put Secure Boot into Setup Mode
 - [ ] `sudo sbctl enroll-keys -m`
 - [ ] Reboot into firmware setup, enable Secure Boot; `sbctl status` after
