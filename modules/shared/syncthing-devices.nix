@@ -8,7 +8,7 @@
     };
     spectre = {
       id = "TYV4VO6-CXEJIBC-VSC5V6K-BKC2MZS-B6UI74J-VVTG7KH-SN65JSX-TNBDWAQ";
-      addresses = ["tcp://100.83.89.128:22000" "dynamic"];
+      addresses = ["tcp://100.116.232.46:22000" "dynamic"];
     };
     intelNuc = {
       id = "UKYT4BM-RHAHSKP-3EW3QRN-USWUMRL-MC56REB-AM4JDPZ-GLY3QW5-XRKW4QI";
