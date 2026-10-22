@@ -444,6 +444,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-ladybird": {
+      "locked": {
+        "lastModified": 1791734076,
+        "narHash": "sha256-i5qk1kLiit98rRbh1AXmWBNT9QXC/y4l5Wk/u5EdpDQ=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "7fd4004d0511991fff3a0524856a9be09e28c5f0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "7fd4004d0511991fff3a0524856a9be09e28c5f0",
+        "type": "github"
+      }
+    },
     "nixpkgs-lib": {
       "locked": {
         "lastModified": 1785031560,
@@ -662,6 +678,7 @@
         "nix-on-droid": "nix-on-droid",
         "nix-pia-vpn": "nix-pia-vpn",
         "nixpkgs": "nixpkgs_2",
+        "nixpkgs-ladybird": "nixpkgs-ladybird",
         "nixpkgs-zotero": "nixpkgs-zotero",
         "nushell-src": "nushell-src",
         "oo7-nixos": "oo7-nixos",
