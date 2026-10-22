@@ -1,6 +1,5 @@
 {
   pkgs,
-  lib,
   isNotebook ? false,
   ...
 }: {
@@ -99,6 +98,9 @@
   };
   systemd.oomd.enable = false;
 
-  # Improved file system mount options (mkDefault so hardware-configuration.nix can override)
-  fileSystems."/".options = lib.mkDefault ["noatime"];
+  # Not mkDefault: list definitions only merge at the highest priority
+  # present, and nixpkgs adds "x-initrd.mount" to "/" at normal priority, so
+  # a mkDefault here was dropped on every host. At normal priority it is
+  # concatenated with that and with disko's "defaults".
+  fileSystems."/".options = ["noatime"];
 }
