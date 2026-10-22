@@ -195,10 +195,9 @@ in {
           let has_direnv = ('.envrc' | path exists)
           let has_flake = ('flake.nix' | path exists)
           let dev_shell = if $has_flake and not $has_direnv {
-              try {
-                  ^nix eval --json .#devShells.x86_64-linux.dev err> /dev/null
+              if (^nix eval --json .#devShells.x86_64-linux.dev | complete).exit_code == 0 {
                   ".#dev"
-              } catch {
+              } else {
                   ".#default"
               }
           } else {
