@@ -1,10 +1,10 @@
-[manager]
+# Section and key names follow yazi 26.x (checked against its
+# yazi-config/preset/theme-dark.toml). Older names are not aliased: an unknown
+# section lands in the theme's catch-all `custom` map and is ignored without a
+# word, so [manager], [select] and [completion] here had been doing nothing
+# since the renames to [mgr], [pick] and [cmp].
+[mgr]
 cwd = { fg = "#9e4e85" }
-
-# tab
-tab_active   = { fg = "#202020", bg = "#e5b566", bold = true }
-tab_inactive = { fg = "#505050", bg = "#202020" }
-tab_width    = 1
 
 # find
 find_keyword  = { fg = "#6c99ba", bold = true, italic = true, underline = true }
@@ -24,6 +24,11 @@ count_selected = { fg = "#202020", bg = "#e5b566" }
 # border
 border_symbol = " "
 
+# Was tab_active/tab_inactive under [manager]. tab_width has no successor.
+[tabs]
+active   = { fg = "#202020", bg = "#e5b566", bold = true }
+inactive = { fg = "#505050", bg = "#202020" }
+
 [mode]
 normal_main  = { fg = "#202020", bg = "#e5b566", bold = true }
 normal_alt   = { fg = "#6c99ba", bg = "#505050", bold = true }
@@ -35,9 +40,10 @@ unset_main   = { fg = "#202020", bg = "#ac4142", bold = true }
 unset_alt    = { fg = "#202020", bg = "#ac4142", bold = true }
 
 [status]
-separator_open  = ""
-separator_close = ""
-separator_style = { bg = "#505050", fg = "#e5b566" }
+# Was separator_open/separator_close. separator_style has no successor; the
+# separators take their color from the segment they sit next to.
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
 
 progress_label  = { fg = "#202020", bold = true }
 progress_normal = { fg = "#e5b566", bg = "#202020" }
@@ -49,7 +55,7 @@ perm_exec  = { fg = "#7e8d50" }
 perm_read  = { fg = "#6c99ba" }
 perm_sep   = { fg = "#505050" }
 
-[select]
+[pick]
 border   = { fg = "#e5b566" }
 active   = { fg = "#ac4142", bold = true }
 inactive = { fg = "#505050", bg = "#202020" }
@@ -58,7 +64,7 @@ inactive = { fg = "#505050", bg = "#202020" }
 border = { fg = "#e5b566" }
 value  = { fg = "#505050" }
 
-[completion]
+[cmp]
 border = { fg = "#e5b566", bg = "#202020" }
 
 [tasks]
@@ -75,30 +81,33 @@ desc            = { fg = "#505050" }
 separator       = " ⯈ "
 separator_style = { fg = "#505050" }
 
+# on/run became chord/action. footer has no successor.
 [help]
-on     = { fg = "#e5b566" }
-run    = { fg = "#7e8d50" }
-footer = { fg = "#202020", bg = "#505050" }
+chord  = { fg = "#e5b566" }
+action = { fg = "#7e8d50" }
 
 [notify]
 title_info  = { fg = "#7e8d50" }
 title_warn  = { fg = "#e5b566" }
 title_error = { fg = "#ac4142" }
 
+# `name` became `url`, and a rule with neither `url` nor `mime` fails to
+# parse. Mime patterns get the `**/` prefix the preset uses, so they still
+# match when yazi prefixes the mime type (vfs/..., for one).
 [filetype]
 rules = [
-  { name = "*/",                        fg = "#9e4e85" },
-  { name = "*",    is = "exec",         fg = "#7e8d50" },
-  { mime = "image/*",                   fg = "#e5b566" },
-  { mime = "{audio,video}/*",           fg = "#7e8d50" },
-  { mime = "application/{,g}zip",       fg = "#ac4142" },
-  { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", fg = "#ac4142" },
-  { mime = "application/{pdf,doc,rtf,vnd.*}", fg = "#6c99ba" },
-  { mime = "application/{x-shellscript,x-python,x-ruby,x-javascript}", fg = "#e5b566" },
-  { mime = "text/x-{c,c++}",            fg = "#6c99ba" },
-  { name = "*.json",                    fg = "#e5b566" },
-  { name = "*.yml",                     fg = "#6c99ba" },
-  { name = "*.toml",                    fg = "#9e4e85" },
-  { name = "*",    is = "orphan",       bg = "#202020" },
-  { name = "*",    is = "dummy",        bg = "#202020" },
+  { url = "*/",                        fg = "#9e4e85" },
+  { url = "*",    is = "exec",         fg = "#7e8d50" },
+  { mime = "**/image/*",                   fg = "#e5b566" },
+  { mime = "**/{audio,video}/*",           fg = "#7e8d50" },
+  { mime = "**/application/{,g}zip",       fg = "#ac4142" },
+  { mime = "**/application/x-{tar,bzip*,7z-compressed,xz,rar}", fg = "#ac4142" },
+  { mime = "**/application/{pdf,doc,rtf,vnd.*}", fg = "#6c99ba" },
+  { mime = "**/application/{x-shellscript,x-python,x-ruby,x-javascript}", fg = "#e5b566" },
+  { mime = "**/text/x-{c,c++}",            fg = "#6c99ba" },
+  { url = "*.json",                    fg = "#e5b566" },
+  { url = "*.yml",                     fg = "#6c99ba" },
+  { url = "*.toml",                    fg = "#9e4e85" },
+  { url = "*",    is = "orphan",       bg = "#202020" },
+  { url = "*",    is = "dummy",        bg = "#202020" },
 ]
