@@ -23,8 +23,12 @@
 # waybar needed both too; its style.css said "Sway uses .focused, Niri uses
 # .active".
 
+# A failed query (niri restarting, say) yields an empty list instead of an
+# error, which would end the deflisten for good.
 def niri-state []: nothing -> list {
-  (^niri msg --json workspaces | complete).stdout
+  let r = (^niri msg --json workspaces | complete)
+  if $r.exit_code != 0 { return [] }
+  $r.stdout
   | from json
   | sort-by idx
   | each {|w| {
