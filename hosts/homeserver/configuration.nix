@@ -63,16 +63,16 @@ in {
   };
 
   # The Claude Code sandbox's GitHub token, this host's own (see
-  # secrets/secrets.nix). Same path as the workstations' token, so
-  # extra_env.nu and the remote-control wrapper in users/claude.nix read it
-  # without knowing which host they are on. Gated on the file like the
-  # workstation one in agenix.nix, so the config evaluates before the token
-  # is minted.
+  # secrets/secrets.nix). Root-only: the claude-remote-control unit gets it
+  # through LoadCredential and exposes it under /run/claude-sandbox only
+  # while a `claude-sandbox-open` window lasts (agent-sandbox.nix). Gated on
+  # the file like the workstation one in agenix.nix, so the config evaluates
+  # before the token is minted.
   age.secrets.claude-github-token = lib.mkIf (builtins.pathExists "${inputs.self}/secrets/claude-github-token-homeserver.age") {
     file = "${inputs.self}/secrets/claude-github-token-homeserver.age";
     path = "/run/secrets/claude-github-token";
     mode = "0400";
-    owner = "claude";
+    owner = "root";
   };
 
   # ZOTERO_DAV_USER / ZOTERO_DAV_PASSWORD, in systemd EnvironmentFile form.
@@ -330,9 +330,13 @@ in {
   # The Claude Code sandbox, the same account the workstations have. It is
   # deliberately not in AllowUsers above: the way in is `ssh -t homeserver
   # claude-sandbox`, or a session spawned from claude.ai through Remote
-  # Control. Its network reach matches intelNuc's sandbox (LAN and tailnet,
-  # no egress filter), plus an admin login on the EdgeRouter that is set up
-  # by hand on the router.
+  # Control, which runs only inside a window opened from any machine with
+  # `ssh homeserver claude-sandbox-open 3h` (default 2h, at most 12h) and
+  # ended early with `claude-sandbox-close`. The GitHub token exists for the
+  # account only inside that window, for its interactive shells too. Its
+  # network reach matches intelNuc's sandbox (LAN and tailnet, no egress
+  # filter), plus an admin login on the EdgeRouter that is set up by hand
+  # on the router.
   security.agentSandbox = {
     enable = true;
     remoteControl.enable = true;

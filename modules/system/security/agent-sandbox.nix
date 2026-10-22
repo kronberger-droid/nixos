@@ -78,10 +78,16 @@ in {
   options.security.agentSandbox = {
     enable = lib.mkEnableOption "a dedicated unix account for Claude Code";
 
-    # For a host nobody sits at. The service itself lives in
-    # home-manager/users/claude.nix; this half only keeps the account's user
-    # manager running without a login, so the service is up from boot.
-    remoteControl.enable = lib.mkEnableOption "an always-on `claude remote-control` server in the sandbox account";
+    # For a host nobody sits at, and only while asked for: see the
+    # claude-remote-control unit below.
+    remoteControl = {
+      enable = lib.mkEnableOption "an on-demand `claude remote-control` server in the sandbox account, opened with `claude-sandbox-open`";
+      maxDuration = lib.mkOption {
+        type = lib.types.str;
+        default = "12h";
+        description = "Longest window `claude-sandbox-open` accepts, as a systemd time span.";
+      };
+    };
   };
 
   config = lib.mkMerge [
@@ -265,8 +271,88 @@ in {
       };
     })
 
+    # Remote Control as a window rather than a fixture. Sessions started from
+    # claude.ai/code or the mobile app spawn as this account, with no ssh in
+    # between, so while the server runs anyone holding the claude.ai login
+    # has a shell here. It runs only between `claude-sandbox-open` and its
+    # timer (or `claude-sandbox-close`); nothing starts it at boot, so a
+    # reboot closes it too.
+    #
+    # A system unit with User=, not a user unit: LoadCredential in a user
+    # unit is read by the user manager, i.e. as this account, so the secret
+    # would have to be readable by it at all times. Here systemd reads it as
+    # root, and the copy in the RuntimeDirectory is where interactive shells
+    # (extra_env.nu) and the spawned sessions find it. systemd removes that
+    # directory when the unit stops, so the token is gone with the window.
+    # Stopping the unit also ends every session in its cgroup.
     (lib.mkIf (cfg.enable && cfg.remoteControl.enable) {
-      users.users.${user}.linger = true;
+      systemd.services.claude-remote-control = {
+        description = "Claude Code Remote Control server (on demand)";
+        after = ["network-online.target"];
+        wants = ["network-online.target"];
+        # Retry for as long as the window lasts: before the account's first
+        # claude.ai login (`claude-sandbox`, then `claude`) it just exits.
+        startLimitIntervalSec = 0;
+        # The spawned sessions need the tools a login shell has: this
+        # account's profile, then the system's. Forced, since the unit's
+        # default PATH is NixOS's short service path.
+        environment.PATH = lib.mkForce "/etc/profiles/per-user/${user}/bin:/run/wrappers/bin:/run/current-system/sw/bin";
+        serviceConfig = {
+          User = user;
+          Group = user;
+          WorkingDirectory = "${home}/src";
+          LoadCredential = lib.optional (config.age.secrets ? claude-github-token) "github-token:${config.age.secrets.claude-github-token.path}";
+          RuntimeDirectory = "claude-sandbox";
+          RuntimeDirectoryMode = "0700";
+          ExecStart = lib.getExe (pkgs.writeShellScriptBin "claude-remote-control" ''
+            if [ -r "''${CREDENTIALS_DIRECTORY:-/nonexistent}/github-token" ]; then
+              install -m 0400 "$CREDENTIALS_DIRECTORY/github-token" "$RUNTIME_DIRECTORY/github-token"
+              GH_TOKEN="$(< "$RUNTIME_DIRECTORY/github-token")"
+              export GH_TOKEN GITHUB_PERSONAL_ACCESS_TOKEN="$GH_TOKEN"
+            fi
+            exec ${lib.getExe' pkgs.claude-code-bin "claude"} remote-control
+          '');
+          Restart = "always";
+          RestartSec = 30;
+        };
+      };
+
+      environment.systemPackages = [
+        (pkgs.writeShellScriptBin "claude-sandbox-open" ''
+          set -eu
+          if [ "$(id -u)" -ne 0 ]; then exec /run/wrappers/bin/sudo "$0" "$@"; fi
+          span="''${1:-2h}"
+          secs() { ${pkgs.systemd}/bin/systemd-analyze timespan "$1" | ${pkgs.gawk}/bin/awk '/μs:/ { print int($2 / 1000000) }'; }
+          # Empty on a parse error: the pipeline's status is awk's, not
+          # systemd-analyze's.
+          want=$(secs "$span" 2>/dev/null)
+          if [ -z "$want" ] || [ "$want" -le 0 ]; then
+            echo "claude-sandbox-open: not a time span: $span" >&2
+            exit 2
+          fi
+          max=$(secs ${lib.escapeShellArg cfg.remoteControl.maxDuration})
+          if [ "$want" -gt "$max" ]; then
+            echo "claude-sandbox-open: capped at ${cfg.remoteControl.maxDuration}" >&2
+            want=$max
+          fi
+          # Replace any earlier close timer, so reopening sets a fresh end; a
+          # failed leftover would block reusing the transient unit's name.
+          ${pkgs.systemd}/bin/systemctl stop claude-sandbox-close.timer 2>/dev/null || true
+          ${pkgs.systemd}/bin/systemctl reset-failed claude-sandbox-close.timer claude-sandbox-close.service 2>/dev/null || true
+          ${pkgs.systemd}/bin/systemctl start claude-remote-control.service
+          ${pkgs.systemd}/bin/systemd-run --quiet --unit=claude-sandbox-close \
+            --on-active="''${want}s" --timer-property=AccuracySec=1s \
+            ${pkgs.systemd}/bin/systemctl stop claude-remote-control.service
+          echo "Sandbox open until $(date -d "+''${want} seconds" '+%H:%M'). Close early: claude-sandbox-close"
+        '')
+        (pkgs.writeShellScriptBin "claude-sandbox-close" ''
+          set -eu
+          if [ "$(id -u)" -ne 0 ]; then exec /run/wrappers/bin/sudo "$0" "$@"; fi
+          ${pkgs.systemd}/bin/systemctl stop claude-sandbox-close.timer 2>/dev/null || true
+          ${pkgs.systemd}/bin/systemctl stop claude-remote-control.service
+          echo "Sandbox closed."
+        '')
+      ];
     })
   ];
 }
