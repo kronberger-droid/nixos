@@ -307,6 +307,14 @@ in {
       # directory, so zellij opens in $HOME rather than wherever the daemon
       # happened to be started from.
       WorkingDirectory = config.home.homeDirectory;
+      # Everything the bar launches (sieb's drun, the scratchpad terminal)
+      # inherits this unit's environment, which is systemd's, not niri's:
+      # without these it has no DISPLAY for X11 apps and the plain
+      # XDG_CURRENT_DESKTOP that leaves Electron on the basic keyring.
+      # Taken from niri's own block so the two cannot drift.
+      Environment =
+        lib.mapAttrsToList (n: v: "${n}=${v}")
+        (lib.filterAttrs (_: v: v != null) config.programs.niri.settings.environment);
       Restart = "on-failure";
     };
     Install.WantedBy = ["graphical-session.target"];
