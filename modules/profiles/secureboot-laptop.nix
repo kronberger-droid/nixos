@@ -19,11 +19,6 @@
   };
 
   services = {
-    # SSH on these hosts is only reachable over tailscale0 (see
-    # security.nix), so fail2ban has no public-facing port to protect and
-    # would just continuously tail the journal for nothing.
-    fail2ban.enable = false;
-
     printing = {
       enable = true;
       drivers = [pkgs.gutenprint];
