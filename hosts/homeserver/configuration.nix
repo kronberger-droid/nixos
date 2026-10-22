@@ -182,9 +182,14 @@ in {
         ip46tables -A claude-sandbox-out -o docker0 -j REJECT
         ip46tables -A claude-sandbox-out -o br-+ -j REJECT
         # Per family, since ip46tables only returns the v6 half's status.
+        # The nixbld jump closes the route around the uid match: the agent
+        # is an allowed nix user, and a fixed-output derivation it asks for
+        # runs as nixbld* with the host's network. No fetch needs a bridge.
         for ipt in iptables ip6tables; do
-          $ipt -w -C OUTPUT -m owner --uid-owner claude -j claude-sandbox-out 2>/dev/null \
-            || $ipt -w -A OUTPUT -m owner --uid-owner claude -j claude-sandbox-out
+          for match in "--uid-owner claude" "--gid-owner nixbld"; do
+            $ipt -w -C OUTPUT -m owner $match -j claude-sandbox-out 2>/dev/null \
+              || $ipt -w -A OUTPUT -m owner $match -j claude-sandbox-out
+          done
         done
       '';
       extraStopCommands = ''
