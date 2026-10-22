@@ -292,13 +292,18 @@
         "Anything that leaves this machine or becomes visible to someone else: pushing commits, branches or tags; opening, updating, merging or commenting on pull requests and issues; deploying to another host; publishing a package or release; sending mail. Confirm each one on its own, however the command is written. Permission granted for one such action does not carry to the next, and a task that plainly ends in one of these still needs that step confirmed when it arrives."
       ];
 
-      # Defaults to true, which makes Claude Code append "End git commit
-      # messages with: Co-Authored-By: ..." to its own system prompt. That
-      # sits above CLAUDE.md in the prompt hierarchy, so the disclosure rule
-      # in claude-md.md (trailer on request only) loses to it every time and
-      # the trailer shows up however plainly it was waved off. Turning the
-      # injection off is what lets the rule decide.
-      includeCoAuthoredBy = false;
+      # Unset, Claude Code appends "End git commit messages with:
+      # Co-Authored-By: ..." to its own system prompt, and the "Generated
+      # with Claude Code" line for PR bodies. That sits above CLAUDE.md in the
+      # prompt hierarchy, so the disclosure rule in claude-md.md (trailer on
+      # request only) loses to it every time and the trailer shows up however
+      # plainly it was waved off. Empty strings turn the injection off, which
+      # is what lets the rule decide.
+      #
+      # These replace `includeCoAuthoredBy = false`, which the settings
+      # reference now lists as deprecated in favour of `attribution`.
+      attribution.commit = "";
+      attribution.pr = "";
       # Same mechanism, newer trailer. Sessions started from claude.ai or
       # attached over Remote Control inject "End git commit messages with:
       # Claude-Session: https://claude.ai/code/session_..." plus the matching
