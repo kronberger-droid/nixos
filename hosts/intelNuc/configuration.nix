@@ -24,12 +24,9 @@
 
   boot = {
     binfmt.emulatedSystems = ["aarch64-linux"];
-    # nixos-install runs on a disk with no Secure Boot keys yet, and lanzaboote
-    # refuses to install unsigned by default. This lets that first install
-    # through and creates the keys on first boot; the next rebuild signs.
-    # Only here, not in secureboot-tpm.nix: the laptops have their keys, and
-    # there it would only loosen allowUnsigned on an enrolled machine.
-    lanzaboote.autoGenerateKeys.enable = true;
+    # The install used lanzaboote.autoGenerateKeys to get past the missing
+    # keys; it also implies allowUnsigned, so it went once the keys existed.
+    # A reinstall needs it back for that first nixos-install only.
     kernelParams = [
       "console=tty1"
       # Disable memfd_secret kernel-wide. Any process holding secret memory
