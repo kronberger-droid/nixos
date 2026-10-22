@@ -117,7 +117,9 @@ in {
       }
     ];
 
-    # Add polkit rule for GUI/eww bar control
+    # Polkit, for the `tuwien-vpn` wrapper above: it calls systemctl
+    # directly, which asks polkit. The eww bar goes through the sudo rules
+    # instead (eww/nu/vpn.nu), as it does for PIA.
     security.polkit.extraConfig = ''
       polkit.addRule(function(action, subject) {
           if ((action.id == "org.freedesktop.systemd1.manage-units" &&

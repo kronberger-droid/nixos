@@ -477,10 +477,12 @@ in {
 
     # Activation script to merge settings (statusline + plugins) into ~/.claude/settings.json
     #
-    # Unconditional now. The guard used to name each option that contributed a
-    # key, which meant a host with the statusline off and no plugins silently
-    # got none of the permission or attribution settings either. Those go in
-    # for every host, so there is nothing left to guard on.
+    # No guard of its own beyond the module's hasAnyConfig. It used to name
+    # each option that contributed a key, which meant a host with the
+    # statusline off and no plugins silently got none of the permission or
+    # attribution settings either. Those go in for every host that configures
+    # Claude at all, so per-key guards had nothing left to decide. A host with
+    # every claude.* option unset still gets nothing, settings.json included.
     #
     # The merge document is a store file read via --slurpfile, not a JSON
     # blob pasted into a single-quoted shell string: one apostrophe in any
@@ -522,8 +524,9 @@ in {
     '';
 
     # Activation script to merge MCP servers and UI defaults into ~/.claude.json
-    # (user scope). Unconditional for the same reason as claudeSettings above:
-    # the agents-view default applies to every host, MCP servers or not.
+    # (user scope). No guard past hasAnyConfig, for the same reason as
+    # claudeSettings above: the agents-view default applies to every host,
+    # MCP servers or not.
     home.activation.claudeGlobalConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
       CLAUDE_JSON="$HOME/.claude.json"
       MANAGED="$HOME/.claude/.nix-managed-global-config-paths.json"

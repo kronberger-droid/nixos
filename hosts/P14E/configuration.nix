@@ -12,9 +12,7 @@ _: {
 
   # ThinkPad P14E specifics on top of the shared laptop profile. Started as
   # a copy of spectre before the hardware arrived; the hardware config, LUKS
-  # layout and SSH key are real now. Still open from that phase:
-  # nix.settings.cores below assumes a 4-core/8-thread CPU, check `nproc`
-  # and adjust.
+  # layout and SSH key are real now.
   # The webcam is not IPU6. It is a USB UVC module (Foxlink 05c8:03e9) on
   # uvcvideo, hence uvc-camera.nix rather than spectre's ipu6-camera.nix.
   # Deliberately NOT carried over from spectre: vbt.nix (a firmware blob
@@ -45,9 +43,8 @@ _: {
   # on the 2.0 panel Steam comes out a bit small.
   environment.sessionVariables.STEAM_FORCE_DESKTOPUI_SCALING = "1.5";
 
-  # Limit build parallelism to keep the system responsive.
-  # Assumes a 4-core/8-thread CPU (the common case for this Compute Element
-  # range) — check `nproc` once installed and adjust.
+  # Limit build parallelism to keep the system responsive. The i7-1185G7 is
+  # 4 cores / 8 threads (`nproc` = 8), so one build gets half the threads.
   nix.settings = {
     cores = 4;
     max-jobs = 2; # Max parallel derivation builds

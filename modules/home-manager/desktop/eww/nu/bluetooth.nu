@@ -6,9 +6,9 @@
 #   format-connected            "<bt-connected> {device_alias}"
 #   format-connected-battery    "<bt-connected> {device_alias} {battery}%"
 #
-# Power state comes from D-Bus, not `bluetoothctl show`. waybar.nix carries the
-# same note: BlueZ 5.86 changed `show`'s output so the old grep never matched
-# and the toggle only ever powered on. `bluetoothctl` is still fine for reading
+# Power state comes from D-Bus, not `bluetoothctl show`, carried over from the
+# old waybar.nix: BlueZ 5.86 changed `show`'s output so the old grep never
+# matched and the toggle only ever powered on. `bluetoothctl` is still fine for reading
 # the device list and battery level, which have not moved.
 
 # Binaries by store path; see eww.nix for why these are consts and not
