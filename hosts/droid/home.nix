@@ -61,10 +61,6 @@ in {
     initExtra = nuHandoff;
   };
 
-  # HM master tracks 26.11 while nixpkgs unstable is still 26.05; both follow
-  # unstable here, so this is a false positive (same as the desktop config).
-  home.enableNixpkgsReleaseCheck = false;
-
   imports = [
     # base16 module provides the `scheme` option that helix.nix consumes;
     # ansi.nix derives config.ansi from it (also consumed by helix.nix)
