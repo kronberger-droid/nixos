@@ -27,7 +27,11 @@ def default-iface []: nothing -> any {
 
 # /proc/net/wireless only lists wireless interfaces, so its presence is the
 # test for "is this wifi", and its link column is the quality out of 70.
+# The file itself comes from the kernel's wireless-extensions compat layer, not
+# from any wifi hardware; a kernel built without it has no file, and `open`
+# failing there would take the ethernet branch down with it.
 def wifi-quality [iface: string]: nothing -> any {
+  if not ("/proc/net/wireless" | path exists) { return null }
   let rows = (open --raw /proc/net/wireless | decode utf-8 | lines | skip 2)
   let hit = ($rows | where {|l| ($l | str trim | str starts-with $"($iface):") } | get 0?)
   if $hit == null { return null }
