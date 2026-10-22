@@ -1,16 +1,8 @@
 {
   lib,
   pkgs,
-  host,
   ...
-}: let
-  outputNames = {
-    intelNuc = "HDMI-A-1";
-    spectre = "eDP-1";
-    P14E = "eDP-1";
-  };
-  outputName = outputNames.${host} or (throw "Unknown hostname: ${host}");
-in {
+}: {
   xdg.portal = {
     enable = true;
     extraPortals = [
@@ -32,17 +24,8 @@ in {
         "org.freedesktop.impl.portal.Clipboard" = ["gnome"];
       };
     };
-    wlr = {
-      enable = true;
-      settings = {
-        screencast = {
-          output_name = outputName;
-          max_fps = 60;
-          chooser_type = "simple";
-          chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -or";
-        };
-      };
-    };
+    # No xdg-desktop-portal-wlr: the niri table above names gtk or gnome for
+    # every interface, so wlr was installed and configured but never chosen.
   };
 
   # nixpkgs wraps every Electron/Chromium app so that this variable, and only
@@ -76,7 +59,6 @@ in {
       enable = true;
       powerOnBoot = lib.mkDefault false;
     };
-    firmware = [pkgs.linux-firmware];
     graphics = {
       enable = true;
       enable32Bit = true;
