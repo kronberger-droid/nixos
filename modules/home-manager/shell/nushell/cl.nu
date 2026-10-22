@@ -12,21 +12,27 @@
 # `claude` group. It reads each checkout's .git/config as a plain file
 # rather than running git inside the tree: these repositories are not
 # trusted (no safe.directory, see git.nix), and their config is the agent's
-# to write. Only the launch crosses over. `nu -l` there, since machinectl starts from an
-# empty environment and only a login shell sources extra_env.nu, which is
-# where the sandbox's GH_TOKEN comes from.
+# to write. Only the launch crosses over. `nu -l` there, since machinectl
+# starts from an empty environment and only a login shell sources
+# extra_env.nu, which is where the sandbox's GH_TOKEN comes from.
 
 const CL_SANDBOX_SRC = "/home/claude/src"
 
 # owner/repo for every network remote of the checkout at `dir`. Local-path
 # remotes are dropped: they name a directory, not a repo.
-def cl-remotes [dir: path]: nothing -> list<string> {
-    # --file reads that one file and discovers no repository, so nothing in
-    # it is acted on. A linked worktree (.git as a file) has no such config
-    # and is skipped.
-    let config = ($dir | path join ".git" "config")
-    if not ($config | path exists) { return [] }
-    let out = (^git config --file $config --get-regexp '^remote\..*\.url$' | complete)
+#
+# --untrusted for the sandbox's checkouts: `git config --file` reads that one
+# file and discovers no repository, so nothing in it is acted on. A linked
+# worktree there (.git as a file) has no such config and is skipped. The
+# primary user's own checkout goes through git as usual, worktrees included.
+def cl-remotes [dir: path, --untrusted]: nothing -> list<string> {
+    let out = if $untrusted {
+        let config = ($dir | path join ".git" "config")
+        if not ($config | path exists) { return [] }
+        ^git config --file $config --get-regexp '^remote\..*\.url$' | complete
+    } else {
+        ^git -C $dir config --get-regexp '^remote\..*\.url$' | complete
+    }
     if $out.exit_code != 0 { return [] }
     $out.stdout
     | lines
@@ -62,7 +68,7 @@ def cl-matches []: nothing -> list<string> {
     ls $CL_SANDBOX_SRC
     | where type == dir
     | get name
-    | where {|dir| cl-remotes $dir | any {|r| $r in $mine } }
+    | where {|dir| cl-remotes --untrusted $dir | any {|r| $r in $mine } }
 }
 
 # Open Claude Code in the sandbox's checkout of this repo, else here.
