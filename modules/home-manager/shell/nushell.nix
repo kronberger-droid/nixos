@@ -208,8 +208,8 @@ in {
 
       # Open the terminal in a directory and run a command there. Honours
       # terminal.cwdViaExec the same way desktop/niri.nix's termSpawn does:
-      # rio's --working-dir is broken, so on rio the cd happens inside a
-      # bash -c wrapper instead of via the flag.
+      # a terminal whose working-dir flag is broken gets the cd inside a
+      # bash -c wrapper instead.
       ${
         if config.terminal.cwdViaExec
         then ''

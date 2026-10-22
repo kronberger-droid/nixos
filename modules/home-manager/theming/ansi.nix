@@ -8,7 +8,7 @@ in {
   # Single source of truth for the 16-slot ANSI terminal palette, derived
   # from the base16 `scheme`. Consumed by rio's ANSI colors and by
   # Helix's generated palette, so the base16→ANSI mapping policy (which base0X
-  # fills which slot, including the orange base09 in slot 9) lives in exactly
+  # fills which slot, including base09 in slot 9) lives in exactly
   # one place instead of being hand-copied across files.
   #
   # Values are hex WITHOUT a leading '#', matching how `scheme.base0X` is used
@@ -32,7 +32,7 @@ in {
     cyan = s.base0C; # 6
     white = s.base05; # 7
     bright-black = s.base03; # 8
-    bright-red = s.base09; # 9  (orange in base16)
+    bright-red = s.base09; # 9  (orange in stock base16; red here, see base16-scheme.nix)
     bright-green = s.base0B; # 10
     bright-yellow = s.base0A; # 11
     bright-blue = s.base0D; # 12

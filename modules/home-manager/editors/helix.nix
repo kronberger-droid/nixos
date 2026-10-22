@@ -15,8 +15,10 @@
     # Generic names (used by base16_transparent's style rules). The ANSI-slot
     # names are sourced from config.ansi (shared with rio); light-gray
     # is base04, a base16 ramp color with no ANSI slot. Note light-red is the
-    # bright-red slot = base09 (orange), so base16_transparent's variable/
-    # markup.list pick that up; errors are pinned back to red in the overlay.
+    # bright-red slot = base09, orange in stock base16 but set to the same red
+    # as base08 in base16-scheme.nix, so base16_transparent's variable/
+    # markup.list pick that up; errors are pinned back to red in the overlay
+    # all the same, in case base09 is ever made orange again.
     black = "#${ansi.black}"
     red = "#${ansi.red}"
     green = "#${ansi.green}"
@@ -393,8 +395,9 @@ in {
                 harper-ls = {
                   userDictPath = "~/.config/harper/dictionary.txt";
                   # Render findings as subtle hints, not loud warnings — the
-                  # main "quiet" knob. With end-of-line-diagnostics = "hint"
-                  # these only surface at the cursor line.
+                  # main "quiet" knob. end-of-line-diagnostics and the
+                  # cursor-line inline diagnostics are both "warning" above,
+                  # so these get no text anywhere, only the faint underline.
                   diagnosticSeverity = "hint";
                   # Keep spell checking; silence the prose-style nags (which
                   # also fire on rust comments). Drop this block for grammar.

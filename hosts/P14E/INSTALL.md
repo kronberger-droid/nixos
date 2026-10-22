@@ -40,9 +40,9 @@ here.
       password prompt every boot
 
 ## Hardware quirks to verify (don't assume — check and adjust)
-- [ ] Camera: `v4l2-ctl --list-devices` + `dmesg | grep -i ipu6` — confirm
-      sensor is actually `hi556`/`ov2740` (in
-      `modules/system/hardware/ipu6-camera.nix`); swap module names if not
+- [x] Camera: not IPU6. `lsusb` shows a USB UVC module (Foxlink 05c8:03e9)
+      on uvcvideo, so the host imports `modules/system/hardware/uvc-camera.nix`
+      instead of spectre's `ipu6-camera.nix`
 - [ ] Display: `dmesg | grep -i vbt` — only if you see duplicate-eDP/VBT
       warnings is spectre's `modules/system/hardware/firmware/vbt.nix`
       pattern relevant, and even then you'd need a fresh VBT dump for *this*

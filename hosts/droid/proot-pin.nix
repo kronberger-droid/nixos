@@ -1,5 +1,6 @@
 # Vendored & patched copy of nix-on-droid's modules/environment/login
-# (rev 55b6449b, the flake.lock pin), swapped in via disabledModules below.
+# (checked against rev df611d53, the flake.lock pin: only the marked
+# deviations differ), swapped in via disabledModules below.
 # login.nix / login-inner.nix are reused from the input unchanged; only this
 # default.nix is replicated, to change which proot-static gets installed.
 #
@@ -21,6 +22,7 @@
 #
 # Drop this file (and its import in nix-on-droid.nix) if a future
 # nix-on-droid pin ships a proot that handles build ptys on this device.
+# df611d53 ships unstable-2026-02-20, untested here: the next candidate.
 {
   config,
   lib,

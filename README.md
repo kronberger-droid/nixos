@@ -15,18 +15,23 @@ to turn.
 | `homeserver` | x86_64 | Server: DNS, RSS, photos, CalDAV, binary cache, website |
 | `droid` | aarch64 | Phone, via nix-on-droid |
 | `recovery` | x86_64 | Rescue ISO, `nix build .#recovery` |
+| `edgerouter` | mips | EdgeOS router; config snapshot only, not built by Nix |
 
 ## Structure
 
 ```
 .
-├── flake.nix              # Flake inputs, host definitions, dev shell, templates
+├── flake.nix              # Inputs, hosts, overlays, checks, dev shell, templates
 ├── hosts/                 # Per-host hardware and system config
 ├── modules/
 │   ├── home-manager/      # User-level config (programs, dotfiles, theming)
-│   └── system/            # System-level config (agenix, greetd, VPN, etc.)
+│   ├── system/            # System-level config (boot, desktop, networking, services)
+│   ├── profiles/          # Bundles hosts opt into (secureboot-laptop, vpn-workstation)
+│   └── shared/            # Plain values and packages used by more than one builder
+├── pkgs/                  # Local packages (flake-versions)
+├── tests/                 # NixOS VM tests, run by `nix flake check`
 ├── secrets/               # agenix-encrypted secrets
-└── templates/             # Nix flake templates (Rust)
+└── templates/             # `nix flake init` templates (Rust, C/C++, Python, Typst)
 ```
 
 ## Secrets

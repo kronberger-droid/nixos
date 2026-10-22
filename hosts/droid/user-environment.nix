@@ -1,5 +1,6 @@
 # Vendored & patched copy of nix-on-droid's modules/environment/path.nix
-# (rev 55b6449b, the flake.lock pin), swapped in via disabledModules below.
+# (checked against rev df611d53, the flake.lock pin: only the marked
+# deviations differ), swapped in via disabledModules below.
 #
 # Why: upstream's installPackages activation runs `nix-env --install`, which
 # instantiates and BUILDS a fresh user-environment derivation on-device at
