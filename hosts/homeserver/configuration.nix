@@ -310,8 +310,8 @@ in {
   # claude-sandbox`, or a session spawned from claude.ai through Remote
   # Control, which runs only inside a window opened from any machine with
   # `ssh homeserver claude-sandbox-open 3h` (default 2h, at most 12h) and
-  # ended early with `claude-sandbox-close`. The GitHub token exists for the
-  # account only inside that window, for its interactive shells too. Its
+  # ended early with `claude-sandbox-close`. Only shells started inside a
+  # window get the GitHub token. Its
   # network reach matches intelNuc's sandbox (LAN and tailnet, no egress
   # filter), plus an admin login on the EdgeRouter that is set up by hand
   # on the router.
