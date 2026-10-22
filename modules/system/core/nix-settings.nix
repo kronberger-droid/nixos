@@ -117,7 +117,12 @@ in {
     };
     optimise = {
       automatic = true;
-      dates = lib.mkDefault ["03:45"];
+      # 03:00 plus the default half-hour spread ends before the homeserver's
+      # flake-autoupdate timer (03:30 plus up to 30 min) can fire. The old
+      # 03:45 slot landed inside that window, so the two could fight over
+      # the disk; flake-autoupdate.nix orders itself after this for a run
+      # that overruns.
+      dates = lib.mkDefault ["03:00"];
     };
   };
 
