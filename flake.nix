@@ -10,6 +10,12 @@
     # building against a revived Firefox 140 ESR. Drop this input and the
     # overlay entry once the locked nixos-unstable contains that merge.
     nixpkgs-zotero.url = "github:NixOS/nixpkgs/7a0f122f5090cf4c2ade2a13a0e229d4e19ba71f";
+    # ladybird 2026-10-14 fails on rustc 1.99, which deprecated the
+    # `fetch_update` its AK crate calls, under its own -Dwarnings. Pin to the
+    # rev before, where the 2026-10-06 build is cached. NixOS/nixpkgs#576716
+    # fixes it; drop this input and the overlay entry once the locked
+    # nixos-unstable contains that merge.
+    nixpkgs-ladybird.url = "github:NixOS/nixpkgs/7fd4004d0511991fff3a0524856a9be09e28c5f0";
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -319,6 +325,8 @@
                     # zotero fails on unstable's firefox-esr 153.4. See the
                     # nixpkgs-zotero input above.
                     zotero = (import inputs.nixpkgs-zotero {inherit system;}).zotero;
+                    # See the nixpkgs-ladybird input above.
+                    ladybird = (import inputs.nixpkgs-ladybird {inherit system;}).ladybird;
                   })
                   # Ladybird's desktop and D-Bus files launch it with
                   # --force-new-process, which upstream turned into an alias for
