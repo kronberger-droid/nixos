@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   inputs,
@@ -6,6 +7,12 @@
   ...
 }: let
   hostKeys = import ../../modules/shared/host-keys.nix;
+  # Keys that only ever talk to the store get no shell: the protocol command
+  # is forced, as nix.sshServe does it. The personal keys stay unrestricted,
+  # since `flake --remote` runs `nix build` over a plain ssh session.
+  # from= keeps them to the tailnet (v4 CGNAT range and v6 ULA) and the LAN,
+  # where every one of those clients lives.
+  storeOnly = command: key: ''restrict,from="100.64.0.0/10,fd7a:115c:a1e0::/48,192.168.2.0/24",command="${config.nix.package.out}/bin/${command}" ${key}'';
 in {
   imports = [
     ./hardware-configuration.nix
@@ -235,14 +242,17 @@ in {
       builtins.attrValues (import ../../modules/shared/ssh-keys.nix)
       ++ [
         # The workstations' host keys, for the buildMachines entry: their
-        # nix-daemon connects as root with /etc/ssh/ssh_host_ed25519_key.
-        hostKeys.intelNuc
-        hostKeys.spectre
-        hostKeys.P14E
+        # nix-daemon connects as root with /etc/ssh/ssh_host_ed25519_key,
+        # over ssh-ng, i.e. `nix-daemon --stdio` on this side.
+        (storeOnly "nix-daemon --stdio" hostKeys.intelNuc)
+        (storeOnly "nix-daemon --stdio" hostKeys.spectre)
+        (storeOnly "nix-daemon --stdio" hostKeys.P14E)
         # Nothing Phone (Termux). Only ever needs the store, so it is not in
         # the shared key set any more; key was generated on the homeserver,
         # hence the comment.
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGNMj1J9Y7Qc6oVzZQsAizZUJIP/F4bNn4hZmc4pCGeA kronberger@homeserver"
+        # Its `builders` use the legacy ssh:// store, which runs
+        # `nix-store --serve --write` here.
+        (storeOnly "nix-store --serve --write" "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGNMj1J9Y7Qc6oVzZQsAizZUJIP/F4bNn4hZmc4pCGeA kronberger@homeserver")
       ];
   };
   # Trusted users are always allowed to connect to the daemon, whatever
