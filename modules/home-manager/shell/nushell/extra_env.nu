@@ -27,10 +27,10 @@ $env.PATH = ($env.PATH | prepend ($env.HOME | path join ".local" "bin"))
 # since /run/agenix is world-traversable and only the owner can open what is
 # inside, and this file is shared with the sandbox user (agent-sandbox.nix),
 # whose shell would otherwise die on the primary user's 0400 files at startup.
-def --env load-secret [file: string, var: string] {
+def --env load-secret [file: string, ...vars: string] {
     let value = try { open $file | str trim } catch { null }
     if $value != null {
-        load-env { $var: $value }
+        load-env ($vars | each {|var| { $var: $value } } | into record)
     }
 }
 
@@ -50,7 +50,5 @@ load-secret /run/secrets/gh-dash-token GH_TOKEN
 # workstations keep it in /run/secrets. The homeserver hands it out only
 # while a Remote Control window is open (claude-sandbox-open), at the second
 # path, which is gone again when the window closes.
-load-secret /run/secrets/claude-github-token GITHUB_PERSONAL_ACCESS_TOKEN
-load-secret /run/secrets/claude-github-token GH_TOKEN
-load-secret /run/claude-sandbox/github-token GITHUB_PERSONAL_ACCESS_TOKEN
-load-secret /run/claude-sandbox/github-token GH_TOKEN
+load-secret /run/secrets/claude-github-token GITHUB_PERSONAL_ACCESS_TOKEN GH_TOKEN
+load-secret /run/claude-sandbox/github-token GITHUB_PERSONAL_ACCESS_TOKEN GH_TOKEN
