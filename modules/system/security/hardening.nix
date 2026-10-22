@@ -86,22 +86,6 @@
         PubkeyAcceptedAlgorithms = "ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-256,rsa-sha2-512";
       };
     };
-
-    # Configure log rotation for audit logs
-    logrotate = {
-      enable = true;
-      settings = {
-        "/var/log/audit/audit.log" = {
-          frequency = "weekly";
-          rotate = 4;
-          compress = true;
-          delaycompress = true;
-          missingok = true;
-          notifempty = true;
-          postrotate = "systemctl kill -s USR1 auditd.service || true";
-        };
-      };
-    };
   };
 
   # Kernel security hardening (mkDefault so host-specific configs can override)
@@ -159,7 +143,21 @@
 
   security = {
     # Audit system
-    auditd.enable = true;
+    # auditd rotates its own log. This used to be a weekly logrotate rule
+    # that renamed audit.log and sent USR1 to make auditd reopen it, but
+    # auditd treats USR1 as "rotate now" and skips that with num_logs < 2,
+    # which is its built-in default ("Log rotation disabled (num_logs < 2),
+    # skipping" every week in P14E's journal), so it kept writing to the
+    # renamed file.
+    # Size-based instead: five 8 MiB files, oldest dropped.
+    auditd = {
+      enable = true;
+      settings = {
+        max_log_file = 8;
+        max_log_file_action = "rotate";
+        num_logs = 5;
+      };
+    };
     audit = {
       enable = true;
       # systemd loads enough BPF programs before auditd attaches to overflow
@@ -171,9 +169,11 @@
         "-w /etc/group -p wa -k identity"
         "-w /etc/shadow -p wa -k identity"
         "-w /etc/sudoers -p wa -k identity"
-        "-w /var/log/faillog -p wa -k logins"
-        "-w /var/log/lastlog -p wa -k logins"
-        "-w /var/log/tallylog -p wa -k logins"
+        # No faillog/lastlog/tallylog watches: nothing writes those files.
+        # The PAM stacks load pam_faillock (tallies in /run/faillock) and
+        # util-linux's pam_lastlog2 (/var/lib/lastlog/lastlog2.db). P14E
+        # has no faillog or tallylog at all and an empty lastlog untouched
+        # since install.
         # utmp/wtmp/btmp watches removed: those files are touched on every
         # login, logout, and `who`, generating constant audit records that
         # duplicate systemd-logind's own session journal.
