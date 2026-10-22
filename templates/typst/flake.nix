@@ -1,36 +1,22 @@
 {
-  description = "Environment with named dev environments and inherited shell specs.";
+  description = "Typst document dev shell";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
-  outputs = {nixpkgs}: let
+  outputs = {nixpkgs, ...}: let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
   in {
-    devShells = {
-      ${system} = {
-        default = pkgs.mkShell {
-          buildInputs = [
-            pkgs.zathura
-          ];
-          shellHook = ''
-            # Start zathura
-            zathura main.pdf > zathura.log 2>&1 &
-            ZATHURA_PID=$!
-
-            # Start typst watch in a new rio window
-            rio -e typst watch main.typ main.pdf &
-            WATCH_PID=$!
-
-            # Clean up on shell exit
-            trap 'kill "$ZATHURA_PID" "$WATCH_PID"' EXIT
-
-            hx main.typ
-          '';
-        };
-      };
+    # Tools only. The editor/viewer/watch layout comes from `dev`, which runs
+    # each pane through `nix develop -c`, so a shellHook here would fire once
+    # per pane.
+    devShells.${system}.default = pkgs.mkShell {
+      packages = [
+        pkgs.typst
+        pkgs.zathura
+      ];
     };
   };
 }
