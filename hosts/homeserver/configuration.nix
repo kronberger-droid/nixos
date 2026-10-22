@@ -538,6 +538,9 @@ in {
   # The always-on box with the only copy of the photo library and the DNS
   # resolver had none of it.
   services.fstrim.enable = true;
+  # As performance.nix does for the workstations: no atime writes on every
+  # read of the photo library.
+  fileSystems."/".options = ["noatime"];
   # SMART self-monitoring on the single NVMe. Default notifications go to the
   # journal and wall; there is no MTA here, so nothing more to wire up yet.
   services.smartd.enable = true;
