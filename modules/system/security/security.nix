@@ -4,6 +4,10 @@
 {...}: {
   imports = [./hardening.nix];
 
+  # SSH is only reachable over tailscale0 (below), so fail2ban has no
+  # public-facing port to protect and would just tail the journal.
+  services.fail2ban.enable = false;
+
   networking.firewall = {
     enable = true;
     allowPing = false;

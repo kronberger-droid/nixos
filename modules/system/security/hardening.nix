@@ -12,9 +12,10 @@
   ...
 }: {
   services = {
-    # Fail2ban for SSH protection.
-    # mkDefault so hosts where SSH isn't reachable from the public internet
-    # (e.g. spectre — SSH is only opened on tailscale0) can disable it.
+    # Fail2ban for SSH protection, through nixpkgs' own `sshd` jail: it
+    # follows openssh.ports, reads the journal, and takes maxretry/bantime
+    # from here. mkDefault so security.nix can turn it off on the
+    # workstations, where SSH is only reachable over tailscale0.
     fail2ban = {
       enable = lib.mkDefault true;
       maxretry = 3;
@@ -23,20 +24,6 @@
         enable = true;
         maxtime = "168h"; # 1 week
         factor = "4";
-      };
-
-      jails = {
-        ssh = {
-          settings = {
-            enabled = true;
-            port = "ssh";
-            filter = "sshd";
-            backend = "systemd";
-            maxretry = 3;
-            findtime = "10m";
-            bantime = "1h";
-          };
-        };
       };
     };
 
