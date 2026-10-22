@@ -170,32 +170,9 @@ in {
         ip46tables -A DOCKER-USER -i docker0 -j RETURN
         ip46tables -A DOCKER-USER -i br-+ -j RETURN
         ip46tables -A DOCKER-USER -j DROP
-
-        # The Claude Code sandbox account stays off the docker bridges.
-        # DOCKER-USER above only sees forwarded traffic, so a process on this
-        # host reaches every container directly, and wiesinger's (a redis
-        # with no password among them) are not the agent's business. By
-        # interface rather than subnet, so a new compose network is covered
-        # too. Own chain, flushed on reload, with the OUTPUT jump added once:
-        # nixos-fw never flushes OUTPUT, so a plain -A there would stack.
-        ip46tables -N claude-sandbox-out 2>/dev/null || true
-        ip46tables -F claude-sandbox-out
-        ip46tables -A claude-sandbox-out -o docker0 -j REJECT
-        ip46tables -A claude-sandbox-out -o br-+ -j REJECT
-        # Per family, since ip46tables only returns the v6 half's status.
-        # The nixbld jump closes the route around the uid match: the agent
-        # is an allowed nix user, and a fixed-output derivation it asks for
-        # runs as nixbld* with the host's network. No fetch needs a bridge.
-        for ipt in iptables ip6tables; do
-          for match in "--uid-owner claude" "--gid-owner nixbld"; do
-            $ipt -w -C OUTPUT -m owner $match -j claude-sandbox-out 2>/dev/null \
-              || $ipt -w -A OUTPUT -m owner $match -j claude-sandbox-out
-          done
-        done
       '';
       extraStopCommands = ''
         ip46tables -F DOCKER-USER 2>/dev/null || true
-        ip46tables -F claude-sandbox-out 2>/dev/null || true
       '';
     };
   };
@@ -341,6 +318,15 @@ in {
   security.agentSandbox = {
     enable = true;
     remoteControl.enable = true;
+    # Off the docker bridges. DOCKER-USER above only sees forwarded traffic,
+    # so a process on this host reaches every container directly, and
+    # wiesinger's (a redis with no password among them) are not the agent's
+    # business. By interface rather than subnet, so a new compose network
+    # is covered too.
+    egressRules = ''
+      ip46tables -A claude-sandbox-out -o docker0 -j REJECT
+      ip46tables -A claude-sandbox-out -o br-+ -j REJECT
+    '';
   };
 
   # Subnet router for the LAN. Advertising 192.168.2.0/24 lets every tailnet
