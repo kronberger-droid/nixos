@@ -44,6 +44,13 @@ _: {
     ];
   };
 
+  # Steam runs as an X11 client through xwayland-satellite, which hands it no
+  # output scale, and its own "Scale text and icons" setting skips popups,
+  # menus and dialogs. This forces the scale on every Steam window. 1.5
+  # matches the AOC, which every shikane profile on this host drives at 1.5;
+  # on the 2.0 panel Steam comes out a bit small.
+  environment.sessionVariables.STEAM_FORCE_DESKTOPUI_SCALING = "1.5";
+
   # Limit build parallelism to keep the system responsive.
   # Assumes a 4-core/8-thread CPU (the common case for this Compute Element
   # range) — check `nproc` once installed and adjust.
