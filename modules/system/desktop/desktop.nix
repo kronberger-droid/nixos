@@ -24,8 +24,6 @@
         "org.freedesktop.impl.portal.Clipboard" = ["gnome"];
       };
     };
-    # No xdg-desktop-portal-wlr: the niri table above names gtk or gnome for
-    # every interface, so wlr was installed and configured but never chosen.
   };
 
   # nixpkgs wraps every Electron/Chromium app so that this variable, and only

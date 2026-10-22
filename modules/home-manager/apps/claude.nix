@@ -300,8 +300,6 @@
       # plainly it was waved off. Empty strings turn the injection off, which
       # is what lets the rule decide.
       #
-      # These replace `includeCoAuthoredBy = false`, which the settings
-      # reference now lists as deprecated in favour of `attribution`.
       attribution.commit = "";
       attribution.pr = "";
       # Same mechanism, newer trailer. Sessions started from claude.ai or

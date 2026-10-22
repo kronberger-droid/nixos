@@ -8,8 +8,8 @@
 #
 # Power state comes from D-Bus, not `bluetoothctl show`, carried over from the
 # old waybar.nix: BlueZ 5.86 changed `show`'s output so the old grep never
-# matched and the toggle only ever powered on. `bluetoothctl` is still fine for reading
-# the device list and battery level, which have not moved.
+# matched and the toggle only ever powered on. `bluetoothctl` is still fine
+# for reading the device list and battery level, which have not moved.
 
 # Binaries by store path; see eww.nix for why these are consts and not
 # spelled inline at the call sites.

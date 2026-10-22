@@ -46,8 +46,10 @@
   # So a global server list on top of the link's: blocky first, Cloudflare
   # and Quad9 over DoT (TCP/853 is not blocked) behind it. resolved asks the
   # servers of one scope in turn and moves on only when the current one
-  # fails, so blocky still answers everything while it is up and its
-  # blocking stays in force. Opportunistic, not strict: it applies to every
+  # fails, then stays on the new one until it fails too. The link scope
+  # keeps asking blocky in parallel, and blocky answers blocked names at
+  # once, so blocking mostly holds even after a switch; it is a fallback,
+  # not a guarantee. Opportunistic, not strict: it applies to every
   # server, blocky speaks no DoT, and opportunistic falls back to plain DNS
   # for that one. Tailscale's MagicDNS already falls through to Cloudflare
   # while tailscaled runs; this covers the times it does not.
