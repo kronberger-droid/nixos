@@ -468,9 +468,19 @@ in {
   # The radicale module sets no Restart=, unlike every other service on this
   # box, so one crash took contacts and calendar sync offline until someone
   # noticed DAVx5 failing on the phone.
-  systemd.services.radicale.serviceConfig = {
-    Restart = "on-failure";
-    RestartSec = 5;
+  systemd.services.radicale = {
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = 5;
+    };
+    # radicale reads its htpasswd as the radicale user, so it needs the
+    # secret's ownership in place. At boot sysinit.target orders that, but a
+    # switch that changes agenix restarts both side by side, and radicale
+    # read the fresh 0400 root file before agenix-chown handed it over: one
+    # Permission denied, enough for switch-to-configuration to report a
+    # failed unit and deploy-rs to roll back. The only service here that
+    # reads a secret as its own user; the rest read theirs as root.
+    after = ["agenix-chown.service"];
   };
 
   # Pinned, not left to system.stateVersion. The module picks the major from
