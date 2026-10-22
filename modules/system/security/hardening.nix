@@ -143,13 +143,9 @@
 
   security = {
     # Audit system
-    # auditd rotates its own log. This used to be a weekly logrotate rule
-    # that renamed audit.log and sent USR1 to make auditd reopen it, but
-    # auditd treats USR1 as "rotate now" and skips that with num_logs < 2,
-    # which is its built-in default ("Log rotation disabled (num_logs < 2),
-    # skipping" every week in P14E's journal), so it kept writing to the
-    # renamed file.
-    # Size-based instead: five 8 MiB files, oldest dropped.
+    # auditd rotates its own log, by size: five 8 MiB files, oldest dropped.
+    # Not logrotate: auditd takes its USR1 as "rotate now" and skips that
+    # with the default num_logs < 2, so it kept writing to the renamed file.
     auditd = {
       enable = true;
       settings = {

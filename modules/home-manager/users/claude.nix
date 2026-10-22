@@ -47,10 +47,6 @@
     # section, on how to work from inside the sandbox.
     claude.claudeMd = lib.mkAfter (builtins.readFile ../apps/claude-md-sandbox.md);
 
-    # Remote Control is a system unit now, opened on demand
-    # (system/security/agent-sandbox.nix), so the GitHub token can stay
-    # root-only between windows.
-
     programs.home-manager.enable = true;
   };
 }

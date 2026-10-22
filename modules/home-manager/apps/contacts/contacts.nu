@@ -56,9 +56,9 @@ def rows []: nothing -> list<string> {
 # goes stale, an edit on top of it diverges and wins.
 #
 # Syncing here makes the local copy current, so whatever is written next is a
-# fast-forward on the remote rather than a divergence, and nothing is lost. Pushing it back is then
-# only latency, and vdirsyncer.timer already does that every 5 minutes — which
-# is why there is no sync on the way out.
+# fast-forward on the remote rather than a divergence, and nothing is lost.
+# Pushing it back is then only latency, and vdirsyncer.timer already does
+# that every 5 minutes, thus no sync on the way out.
 def sync-now [] {
   print -n "syncing… "
   let r = (^@vdirsyncer@/bin/vdirsyncer sync | complete)
