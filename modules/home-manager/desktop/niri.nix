@@ -57,6 +57,11 @@ in {
   home.sessionVariables.XDG_CURRENT_DESKTOP = "niri";
 
   programs.niri.settings = {
+    # niri's built-in integration is on by default but finds no binary
+    # (path is null), so it never ran; the xwayland-satellite unit in
+    # session-services.nix owns :11. Off, so that is the only route.
+    xwayland-satellite.enable = false;
+
     environment = {
       DISPLAY = ":11";
 
