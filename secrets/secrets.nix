@@ -49,13 +49,14 @@ in {
   # rbw's device_id, one per host: the UUID Bitwarden knows the device by.
   # Not a password, but with it and the master password the new-device
   # email check is skipped, thus not in plaintext. Only the named host
-  # installs its file (security/agenix.nix); all three can re-key.
+  # installs its file (security/agenix.nix); it and `editor` can re-key.
   "rbw-device-id-intelNuc.age".publicKeys = for [intelNuc];
   "rbw-device-id-spectre.age".publicKeys = for [spectre];
   "rbw-device-id-P14E.age".publicKeys = for [P14E];
-  # Escrow: the three workstation host keys can decrypt the server-only
-  # secrets too, so a dead homeserver disk does not take the cache signing
-  # key or the tunnel credentials with it, and any of them can re-key. After
+  # Server-only. The escrow is `editor` alone: a dead homeserver disk does
+  # not take the cache signing key or the tunnel credentials with it as long
+  # as intelNuc's host key survives (4811a66 escrowed these to all three
+  # workstations; 17d1aec narrowed them to the readers plus editor). After
   # editing this list the .age files must be re-encrypted (`agenix -r`)
   # where a current recipient's private key lives.
   "miniflux-credentials.age".publicKeys = for [homeserver];
