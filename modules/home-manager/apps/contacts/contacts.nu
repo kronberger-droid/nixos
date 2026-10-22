@@ -27,13 +27,15 @@ def rows []: nothing -> list<string> {
     let uid = ($f | get 0? | default "")
     let name = ($f | get 1? | default "")
     # Pull every '...' out of the dict repr, drop the type keys (home, cell,
-    # work), keep the values: anything with an @ or a leading +.
+    # work), keep the values: anything with an @ or a digit. Not a leading +:
+    # about a sixth of the numbers here are stored national-format
+    # (0xxx-xxx-xxxx), and the type keys never contain a digit.
     let vals = {|s|
       $s
       | default ""
       | parse --regex "'(?<v>[^']+)'"
       | get v
-      | where {|v| ($v | str contains "@") or ($v | str starts-with "+")}
+      | where {|v| ($v | str contains "@") or ($v =~ '\d')}
       | str join ", "
     }
     let mails = (do $vals ($f | get 2?))
@@ -47,14 +49,14 @@ def rows []: nothing -> list<string> {
 
 # Sync once, before anything is read.
 #
-# This is the whole conflict story. vdirsyncer cannot resolve a card that both
-# sides changed since the last sync, and `conflict_resolution` is unset here,
-# so such a card errors and stops syncing until it is fixed by hand. Editing a
-# *stale* copy is what creates that case: the phone (DAVx5 -> the same
-# Radicale) writes, this copy goes stale, an edit on top of it diverges.
+# A card both sides changed since the last sync is a conflict. contacts.nix
+# sets `conflict_resolution = "a wins"`, so it no longer errors, but the
+# phone's side of it is dropped silently. Editing a *stale* copy is what
+# creates that case: the phone (DAVx5 -> the same Radicale) writes, this copy
+# goes stale, an edit on top of it diverges and wins.
 #
 # Syncing here makes the local copy current, so whatever is written next is a
-# fast-forward on the remote rather than a divergence. Pushing it back is then
+# fast-forward on the remote rather than a divergence, and nothing is lost. Pushing it back is then
 # only latency, and vdirsyncer.timer already does that every 5 minutes — which
 # is why there is no sync on the way out.
 def sync-now [] {
