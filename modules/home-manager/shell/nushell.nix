@@ -70,7 +70,7 @@ in {
         if $picked == null { return }
         let rgb = ($picked.rgb | each {|c| $c * 255 | math round | into int })
         let hex = ($rgb
-            | each {|c| $c | fmt | get lowerhex | str substring 2.. | fill --alignment right --width 2 --character '0' }
+            | each {|c| $c | format number | get lowerhex | str substring 2.. | fill --alignment right --width 2 --character '0' }
             | str join
             | $"#($in)")
         $hex | wl-copy
