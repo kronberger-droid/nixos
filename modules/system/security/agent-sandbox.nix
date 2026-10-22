@@ -88,6 +88,18 @@ in {
         description = "Longest window `claude-sandbox-open` accepts, as a systemd time span.";
       };
     };
+
+    egressRules = lib.mkOption {
+      type = lib.types.lines;
+      default = "";
+      example = "ip46tables -A claude-sandbox-out -o docker0 -j REJECT";
+      description = ''
+        iptables commands that fill the `claude-sandbox-out` chain, which
+        every packet the sandbox account or a nix build user sends passes
+        through. The module creates, flushes and jumps to the chain; hosts
+        only say what it rejects. Empty means no chain.
+      '';
+    };
   };
 
   config = lib.mkMerge [
@@ -269,6 +281,29 @@ in {
             -C "${user}@${config.networking.hostName}" -f ${home}/.ssh/id_ed25519
         '';
       };
+    })
+
+    # The egress chain. Own chain, flushed on reload, with the OUTPUT jumps
+    # added once, since nixos-fw never flushes OUTPUT and a plain -A there
+    # would stack. Per family, as ip46tables only returns the v6 half's
+    # status. nixbld as well as this account: the agent is an allowed nix
+    # user, and a fixed-output build it asks for runs as nixbld* with the
+    # host's network, around a uid match.
+    (lib.mkIf (cfg.enable && cfg.egressRules != "") {
+      networking.firewall.extraCommands = ''
+        ip46tables -N claude-sandbox-out 2>/dev/null || true
+        ip46tables -F claude-sandbox-out
+        ${cfg.egressRules}
+        for ipt in iptables ip6tables; do
+          for match in "--uid-owner ${user}" "--gid-owner nixbld"; do
+            $ipt -w -C OUTPUT -m owner $match -j claude-sandbox-out 2>/dev/null \
+              || $ipt -w -A OUTPUT -m owner $match -j claude-sandbox-out
+          done
+        done
+      '';
+      networking.firewall.extraStopCommands = ''
+        ip46tables -F claude-sandbox-out 2>/dev/null || true
+      '';
     })
 
     # Remote Control as a window rather than a fixture. Sessions started from
