@@ -57,6 +57,13 @@ in {
   security.pam.services.veila = {};
 
   programs = {
+    # Every workstation runs Steam; each host only sets its own client flags
+    # through programs.steam.package (intelNuc, profiles/secureboot-laptop).
+    steam = {
+      enable = true;
+      gamescopeSession.enable = true;
+      extraPackages = [pkgs.sdl3];
+    };
     niri.enable = true;
     niri.package = pkgs.niri-unstable;
     xwayland.enable = true;

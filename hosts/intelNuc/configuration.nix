@@ -27,24 +27,11 @@
     # The install used lanzaboote.autoGenerateKeys to get past the missing
     # keys; it also implies allowUnsigned, so it went once the keys existed.
     # A reinstall needs it back for that first nixos-install only.
-    kernelParams = [
-      "console=tty1"
-      # Disable memfd_secret kernel-wide. Any process holding secret memory
-      # (Electron apps like Bitwarden do) makes the kernel refuse hibernation,
-      # since secretmem pages must never hit disk but a hibernate image writes
-      # all of RAM. LUKS-encrypted swap already protects the image at rest,
-      # so the trade-off is negligible here.
-      "secretmem.enable=0"
-    ];
   };
 
-  programs.steam = {
-    enable = true;
-    extraPackages = [pkgs.sdl3];
-    gamescopeSession.enable = true;
-    package = pkgs.steam.override {
-      extraArgs = "-cef-disable-gpu";
-    };
+  # The rest of Steam is in system/desktop/desktop.nix.
+  programs.steam.package = pkgs.steam.override {
+    extraArgs = "-cef-disable-gpu";
   };
 
   programs.gamemode = {
