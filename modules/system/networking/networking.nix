@@ -37,11 +37,27 @@
   # for WireGuard interface management. NM handles wifi/ethernet, networkd
   # handles PIA's pia0 interface. The coexistence is fine.
 
+  # A way to resolve names when the homeserver's blocky is down. The link
+  # DNS from DHCP is that box alone, and resolved's FallbackDNS only applies
+  # while no server is configured at all, so it never kicked in; plain
+  # 1.1.1.1 would not have answered anyway, since the ISP drops outbound
+  # UDP/53 (hosts/edgerouter/README.md).
+  #
+  # So a global server list on top of the link's: blocky first, Cloudflare
+  # and Quad9 over DoT (TCP/853 is not blocked) behind it. resolved asks the
+  # servers of one scope in turn and moves on only when the current one
+  # fails, so blocky still answers everything while it is up and its
+  # blocking stays in force. Opportunistic, not strict: it applies to every
+  # server, blocky speaks no DoT, and opportunistic falls back to plain DNS
+  # for that one. Tailscale's MagicDNS already falls through to Cloudflare
+  # while tailscaled runs; this covers the times it does not.
   services.resolved = {
     enable = true;
     settings.Resolve = {
       MulticastDNS = "no";
-      FallbackDNS = "1.1.1.1 1.0.0.1 8.8.8.8";
+      DNS = ["192.168.2.54" "1.1.1.1#cloudflare-dns.com" "9.9.9.9#dns.quad9.net"];
+      DNSOverTLS = "opportunistic";
+      FallbackDNS = "1.1.1.1#cloudflare-dns.com 1.0.0.1#cloudflare-dns.com 9.9.9.9#dns.quad9.net";
     };
   };
   # Every host accepts the subnet routes homeserver advertises, so the LAN is
