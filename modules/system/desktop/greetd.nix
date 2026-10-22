@@ -51,8 +51,6 @@ in {
       };
     };
   };
-
-  environment.etc."greetd/environments".text = ''
-    ${sessionBin}
-  '';
+  # No /etc/greetd/environments: only gtkgreet reads it, and tuigreet takes
+  # its session list from --sessions above.
 }
