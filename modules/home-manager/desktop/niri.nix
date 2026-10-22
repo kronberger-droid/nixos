@@ -142,7 +142,14 @@ in {
     # NOTE: hide-on-key-press caused issues with OnlyOffice before, so it's
     # left off here — only the inactivity timeout is enabled. Bump/remove the
     # timeout if it feels off.
+    #
+    # theme/size from home.pointerCursor: niri exports XCURSOR_THEME and
+    # XCURSOR_SIZE to everything it spawns from these, and left at the
+    # defaults ("default", 24) that overrode the 22 theming/theme.nix sets for
+    # every child, xwayland apps included.
     cursor = {
+      theme = config.home.pointerCursor.name;
+      size = config.home.pointerCursor.size;
       hide-after-inactive-ms = 5000;
     };
 
