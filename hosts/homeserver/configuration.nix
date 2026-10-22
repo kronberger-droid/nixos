@@ -299,6 +299,12 @@ in {
       # a week.
       flags = ["--filter" "until=168h"];
     };
+    # Published ports are reached through DNAT instead of a root-owned
+    # docker-proxy. With the proxy, the sandbox's connections to
+    # 127.0.0.1:<port> leave through lo and docker-proxy relays them, so the
+    # claude-sandbox-out REJECT on docker0/br-+ never sees them. Through
+    # DNAT the packet is rerouted out the bridge before filter OUTPUT.
+    daemon.settings.userland-proxy = false;
   };
 
   # Services
