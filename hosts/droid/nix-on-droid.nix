@@ -25,8 +25,11 @@
   # System-level packages. Shells, editor, git and CLI tools are managed by
   # home-manager (see ./home.nix), so only the bits that must exist outside
   # the HM profile live here.
+  #
+  # No bash here: user-environment.nix already puts bashInteractive in the
+  # base set, and pkgs.bash is that same store path nowadays, so a second
+  # entry was only a duplicate.
   environment.packages = with pkgs; [
-    bash
     # coreutils comes from user-environment.nix, where uutils replaced GNU.
     # The `uu-`-prefixed build that sat here is redundant now.
     openssh
@@ -53,9 +56,11 @@
   # app on open. Bash logs in cleanly and hands off to nushell only once there's
   # a real interactive TTY (see programs.bash.initExtra in home.nix), so nu
   # inherits the terminal and starts fine. The interactive shell is still nu.
-  # bashInteractive, not pkgs.bash: nixpkgs' plain bash is the minimal build
-  # without readline — as a login shell it gives a degraded, editing-less
-  # prompt. bashInteractive is the full build (and what nix-on-droid ships).
+  # bashInteractive spelled out, although pkgs.bash evaluates to the same
+  # bash-interactive build on current nixpkgs (the readline-less one is
+  # bashNonInteractive now). It used to be the minimal build, which as a login
+  # shell gave a degraded, editing-less prompt; the explicit name keeps that
+  # from coming back if the alias ever moves. It is also what nix-on-droid ships.
   user.shell = "${pkgs.bashInteractive}/bin/bash";
 
   # Read the changelog before changing this value
