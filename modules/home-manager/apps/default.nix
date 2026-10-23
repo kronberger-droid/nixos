@@ -15,5 +15,6 @@
     ./obsidian.nix
     ./steam.nix
     ./signal.nix
+    ./equibop.nix
   ];
 }
