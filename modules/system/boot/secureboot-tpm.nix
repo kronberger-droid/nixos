@@ -32,12 +32,25 @@
     # With TPM auto-unlock, an editable cmdline (init=/bin/sh) is root on the
     # decrypted disk, which is the one thing Secure Boot exists to stop.
     loader.systemd-boot.editor = false;
+    # Same story for boot-systemd.nix's timeout = 1: without it these hosts
+    # sat on the menu for the default 5s on every boot.
+    loader.timeout = 1;
     lanzaboote = {
       enable = true;
       pkiBundle = "/var/lib/sbctl";
       configurationLimit = 20;
     };
-    initrd.luks.devices."nixos-root".crypttabExtraOpts = ["tpm2-device=auto"];
+    initrd.luks.devices."nixos-root" = {
+      crypttabExtraOpts = ["tpm2-device=auto"];
+      # disk-layout.nix sets this through disko, but the laptops predate it
+      # and take their LUKS entry from the generated hardware file. Without
+      # it the weekly fstrim stopped at dm-crypt and their SSDs never saw a
+      # TRIM.
+      allowDiscards = true;
+      # Skip dm-crypt's kcryptd queues and encrypt inline. Those queues exist
+      # for slow rotational disks; on NVMe they only add latency.
+      bypassWorkqueues = true;
+    };
     initrd.systemd.tpm2.enable = true;
   };
 
