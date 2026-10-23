@@ -94,7 +94,7 @@
       else if host == "P14E"
       then [
         # Lid open: internal HiDPI panel + AOC U3277WB side by side.
-        # HDMI on the left (logical 2560 wide at scale 1.5), panel to its right.
+        # HDMI on the left (logical 2194 wide at scale 1.75), panel to its right.
         {
           name = "lid-open";
           output = [
@@ -103,20 +103,20 @@
               enable = true;
               mode = "3840x2160";
               position = "0,0";
-              scale = 1.5;
+              scale = 1.75;
             }
             {
               search = "n=eDP-1";
               enable = true;
               mode = "3000x2000";
-              position = "2560,0";
+              position = "2194,0";
               scale = 2.0;
             }
           ];
         }
-        # Lid closed, AOC + Apple LED Cinema. AOC left (logical 2560x1440 at
-        # scale 1.5), Apple right at native 1920x1200, bottom edges aligned:
-        # 1440 - 1200 = 240 vertical offset.
+        # Lid closed, AOC + Apple LED Cinema. AOC left (logical 2194x1234 at
+        # scale 1.75), Apple right at native 1920x1200, bottom edges aligned:
+        # 1234 - 1200 = 34 vertical offset.
         {
           name = "lid-closed-aoc-apple";
           output = [
@@ -129,13 +129,13 @@
               enable = true;
               mode = "3840x2160";
               position = "0,0";
-              scale = 1.5;
+              scale = 1.75;
             }
             {
               search = "m%LED Cinema";
               enable = true;
               mode = "1920x1200";
-              position = "2560,240";
+              position = "2194,34";
               scale = 1.0;
             }
           ];
@@ -154,7 +154,7 @@
               enable = true;
               mode = "3840x2160";
               position = "0,0";
-              scale = 1.5;
+              scale = 1.75;
             }
           ];
         }
