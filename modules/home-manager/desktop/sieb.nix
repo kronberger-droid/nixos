@@ -134,7 +134,7 @@
     export PATH=${lib.makeBinPath [
       config.programs.rbw.package
       pkgs.wtype
-      pkgs.wl-clipboard
+      pkgs.wl-clipboard-rs
       pkgs.libnotify
     ]}:$PATH
     # Bound to a key, so a failed unlock says why rather than nothing.

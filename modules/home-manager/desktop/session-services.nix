@@ -72,19 +72,19 @@ in {
 
   home.packages = with pkgs; [
     # Shared wayland session packages
-    wl-clipboard
+    # Rust drop-in for wl-copy/wl-paste, flags included (sieb's rbw picker
+    # relies on --sensitive, --clear and wl-paste -n).
+    wl-clipboard-rs
     brightnessctl
     slurp
-    swaybg
     libnotify
-    jq
     lsof
     libinput
 
-    # Session services (swayidle and xdg-user-dirs come with their own
-    # modules: services.swayidle, xdg.userDirs)
+    # Session services (swayidle, wpaperd and xdg-user-dirs come with their
+    # own modules: services.swayidle, services.wpaperd, xdg.userDirs)
     wayland-pipewire-idle-inhibit
-    wlsunset
+    sunsetr
 
     # Screen recording
     wl-screenrec
@@ -223,16 +223,41 @@ in {
     };
   };
 
-  # ── Wlsunset ───────────────────────────────────────────────────
-  systemd.user.services.wlsunset = {
+  # ── Wallpaper ──────────────────────────────────────────────────
+  # wpaperd's `center` is swaybg's `fill`: scale to cover, crop the edges.
+  services.wpaperd = {
+    enable = true;
+    settings.default = {
+      path = "${./deathpaper.jpg}";
+      mode = "center";
+    };
+  };
+
+  # ── Sunsetr ────────────────────────────────────────────────────
+  # Temperatures are wlsunset's defaults, which is what ran here before, and
+  # gamma stays at 100 since wlsunset never touched it. The file is a
+  # read-only store link, so `sunsetr set` and `sunsetr geo` cannot write
+  # to it; change the values here instead.
+  xdg.configFile."sunsetr/sunsetr.toml".source = (pkgs.formats.toml {}).generate "sunsetr.toml" {
+    backend = "wayland";
+    transition_mode = "geo";
+    night_temp = 4000;
+    day_temp = 6500;
+    night_gamma = 100;
+    day_gamma = 100;
+    latitude = 48.2;
+    longitude = 16.4;
+  };
+
+  systemd.user.services.sunsetr = {
     Unit = {
-      Description = "Day/night gamma adjustments";
+      Description = "Day/night color temperature";
       After = ["graphical-session.target"];
       PartOf = ["graphical-session.target"];
     };
 
     Service = {
-      ExecStart = "${pkgs.wlsunset}/bin/wlsunset -l 48.2 -L 16.4";
+      ExecStart = "${pkgs.sunsetr}/bin/sunsetr";
       Restart = "on-failure";
       RestartSec = 5;
     };
