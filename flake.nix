@@ -192,22 +192,15 @@
 
     # Overlays every host with a user on it takes, droid included, so mkHost,
     # the homeserver and droid cannot drift apart on them. The recovery ISO
-    # needs none of them.
-    commonOverlays = system: [
+    # needs none of them. commonOverlays below adds upstream-main nushell on
+    # top; droid takes only these.
+    baseOverlays = system: [
       # Exposes `pkgs.rust-bin` so home-manager (useGlobalPkgs) can pull a
       # toolchain from rust-overlay instead of nixpkgs' rustc, which lags Rust
       # stable. See modules/home-manager/editors/dev-tools.nix, which the
       # homeserver's Claude Code sandbox account imports too. Additive, so
       # nothing else is rebuilt.
       inputs.rust-overlay.overlays.default
-      # nushell from upstream main; see the overlay file. The homeserver needs
-      # it as much as the workstations: its home-manager and login shell both
-      # read `edit_mode = "helix"`, which nixpkgs' release nushell still
-      # rejects. Droid stayed on stock nixpkgs nushell for a while to avoid an
-      # on-device Rust build, but the homeserver (which builds this same
-      # overlay) is droid's remote builder/substituter, so it hands back the
-      # prebuilt output instead of compiling on the phone.
-      (import ./modules/shared/nushell-overlay.nix inputs)
       (final: _: {
         claude-code-bin = inputs.claude-code.packages.${system}.claude-code;
         # What an update would change beyond the closure diff; used by hand
@@ -215,6 +208,16 @@
         flake-versions = final.callPackage ./pkgs/flake-versions {};
       })
     ];
+
+    # nushell from upstream main; see the overlay file. Droid stays on
+    # nixpkgs' release nushell instead: its aarch64 build of main is not in
+    # any cache, so every bump compiled under qemu on the homeserver for
+    # hours, while the release build comes straight from cache.nixos.org.
+    # The release (0.116.1 at the time of writing) accepts `edit_mode =
+    # "helix"`, the setting the overlay was first brought in for.
+    commonOverlays = system:
+      baseOverlays system
+      ++ [(import ./modules/shared/nushell-overlay.nix inputs)];
 
     # The NixOS modules every nixosSystem host with a user on it shares:
     # home-manager with the base16 scheme module, agenix, and Lix. Droid has
@@ -418,7 +421,7 @@
         config.allowUnfree = true;
         overlays =
           [inputs.nix-on-droid.overlays.default]
-          ++ commonOverlays armSystem;
+          ++ baseOverlays armSystem;
       };
       modules = [./hosts/droid/nix-on-droid.nix];
       extraSpecialArgs = {inherit inputs;};
