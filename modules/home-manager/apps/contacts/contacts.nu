@@ -1,6 +1,6 @@
 #!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 
-# Fuzzy picker over the khard address book, in the style of eww/nu/*.nu:
+# Fuzzy picker over the khard address book, in the style of ironbar/nu/*.nu:
 # a real .nu file, store paths substituted by replaceVars, no bare names.
 #
 # The pipeline this sits on top of is in contacts.nix: Radicale (homeserver,
@@ -92,7 +92,7 @@ def main [...search: string] {
     #
     # Flags as one list rather than spread across lines: nushell ends an
     # external command at the newline, so a continuation line inside a block
-    # parses as a new expression. Same reason eww/nu/tui.nu builds its
+    # parses as a new expression. Same reason ironbar/nu/tui.nu builds its
     # dropkitten args this way.
     let flags = [
       "--delimiter" "\t"

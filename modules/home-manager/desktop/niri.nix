@@ -46,8 +46,9 @@
   wsSpawn = cmd: ["${spawnOnWs}"] ++ cmd;
 
   # Was waybar/scratchpad-toggle.sh, which never existed: waybar installs its
-  # helpers without an extension, so this bind has been dead. Now the eww copy.
-  scratchpadToggle = "${config.xdg.configHome}/eww/scripts/scratchpad";
+  # helpers without an extension, so this bind has been dead. Now the bar's
+  # copy (ironbar.nix).
+  scratchpadToggle = "${config.xdg.configHome}/ironbar/scripts/scratchpad";
 in {
   # fuzzel used to be installed here and was never bound (sieb is the
   # launcher).
@@ -281,7 +282,7 @@ in {
       # Column sizing
       "${modifier}+R".action.switch-preset-column-width = [];
       # Same story as the scratchpad bind above: the .sh path never existed.
-      "${modifier}+Shift+R".action.spawn = ["${config.xdg.configHome}/eww/scripts/screenrec" "toggle"];
+      "${modifier}+Shift+R".action.spawn = ["${config.xdg.configHome}/ironbar/scripts/screenrec" "toggle"];
       "${modifier}+Shift+V".action.switch-preset-window-height = [];
       "${modifier}+Ctrl+R".action.reset-window-height = [];
       "${modifier}+F".action.maximize-column = [];
@@ -462,7 +463,7 @@ in {
       # Matched by app-id (set via the terminal's --app-id/--class flag at
       # launch) because btop's terminal title arrives via OSC after the
       # window is already sized. Both the Mod+Shift+T keybind and the
-      # eww bar's cpu module launch with this app-id.
+      # bar's cpu module launch with this app-id.
       {
         matches = [{app-id = "^btop_monitor$";}];
         open-floating = true;

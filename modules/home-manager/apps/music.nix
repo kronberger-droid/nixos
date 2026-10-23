@@ -20,7 +20,7 @@
       # The TUI would otherwise notify on the same track changes as well.
       notify_streaming_only = true;
       # Every host's daemon would otherwise register as `spotify-player`, and
-      # the popup's `connect --name` (eww/nu/spotify.nu) takes the first match.
+      # the popup's `connect --name` (ironbar/nu/spotify.nu) takes the first match.
       device.name = "spotify-player-${osConfig.networking.hostName or "local"}";
       copy_command = {
         command = "${pkgs.wl-clipboard-rs}/bin/wl-copy";
