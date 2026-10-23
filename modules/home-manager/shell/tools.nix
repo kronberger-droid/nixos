@@ -24,7 +24,6 @@
     # path, so they have to sit in the same layer as bat itself.
     bat-extras.core
     translate-shell
-    wiki-tui
     lynx
     file
   ];
