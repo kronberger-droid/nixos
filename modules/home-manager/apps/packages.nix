@@ -7,7 +7,7 @@
     # Messaging
     aerion
     zapzap
-    signal-desktop
+    # signal-desktop: sandboxed, see signal.nix
     # Replaces vesktop, which could not render incoming webcams on P14E.
     # Same venmic screenshare lineage (Equibop forks vesktop) on a newer
     # Electron, and it builds with bun rather than the CVE-flagged pnpm.
