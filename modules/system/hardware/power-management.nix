@@ -110,14 +110,29 @@ in {
         # rate: Numerical result out of range" at every wake). The battery
         # exposes no ACPI trip-point alarm either. The night of 2026-09-26
         # the machine woke twice, re-suspended twice, and reached 2%, at
-        # which point UPower forced a hybrid-sleep. 3h at 1.1%/h costs about
-        # 3% before the 44s image write, still clears a lunch break, and
-        # hibernation actually happens.
-        HibernateDelaySec = "3h";
+        # which point UPower forced a hybrid-sleep. 1h at 1.1%/h costs about
+        # 1% before the 44s image write; anything longer than a short break
+        # pays the slower resume.
+        HibernateDelaySec = "1h";
+        # On AC the countdown is held and only starts once the charger is
+        # pulled, so a lid closed on AC (see HandleLidSwitchExternalPower)
+        # resumes instantly while plugged in but cannot drain to empty after
+        # an unplug. systemd only checks AC at its RTC wakes, so a plugged-in
+        # sleep wakes briefly every HibernateDelaySec, and hibernation lands
+        # within one delay of the unplug.
+        HibernateOnACPower = "no";
         # HybridSleepState/HybridSleepMode were removed in systemd 261 and
         # only produced warnings on every sleep transition.
       }
       else {};
+
+    # The discharge-rate sample above still runs at every timed wake
+    # (systemd 262 has no switch for it) and still rounds to 0: 1% over a
+    # bit more than 1h floors to 0%/h. With a fixed delay the rate is never
+    # used, so the warning it logs is noise. Drop just that line.
+    services.systemd-suspend-then-hibernate = lib.mkIf canHibernate {
+      serviceConfig.LogFilterPatterns = "~Failed to update battery discharge rate";
+    };
   };
 
   # Laptop logind settings
@@ -125,16 +140,21 @@ in {
     if isNotebook
     then {
       settings.Login = {
-        # On battery, closing the lid should not be able to drain the
-        # machine to death: suspend first, hibernate when the battery gets
-        # low (see sleep.settings above). On external power there is nothing
-        # to protect against, so plain suspend keeps resume instant.
+        # Closing the lid should not be able to drain the machine to death:
+        # suspend first, hibernate after the delay (see sleep.settings
+        # above). On AC too, since logind picks the action once at lid close
+        # and the charger may be pulled while the machine sleeps; the
+        # 2026-10-20 night went from AC to 7% that way. HibernateOnACPower
+        # keeps the plugged-in case a plain suspend until then.
         HandleLidSwitch =
           if canHibernate
           then "suspend-then-hibernate"
           else "suspend";
         HandleLidSwitchDocked = "ignore";
-        HandleLidSwitchExternalPower = "suspend";
+        HandleLidSwitchExternalPower =
+          if canHibernate
+          then "suspend-then-hibernate"
+          else "suspend";
         HandlePowerKey = "suspend";
         # Same guard as the lid switch. Without a resume device (spectre)
         # "suspend-then-hibernate" still hibernates after the delay and the
