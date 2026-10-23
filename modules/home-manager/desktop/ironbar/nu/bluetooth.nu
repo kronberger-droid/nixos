@@ -11,11 +11,11 @@
 # matched and the toggle only ever powered on. `bluetoothctl` is still fine
 # for reading the device list and battery level, which have not moved.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
 const BLUETOOTHCTL = "@bluez@/bin/bluetoothctl"
 const BUSCTL       = "@systemd@/bin/busctl"
-const EWW          = "@eww@/bin/eww"
+const BRIDGE       = "@bridge@"
 
 # The adapter's object path, looked up on every call instead of assumed to be
 # hci0. When the controller resets (firmware reload, USB re-enumeration) the
@@ -65,8 +65,7 @@ def battery [mac: string]: nothing -> any {
 # this waits for the value to actually change rather than reading it back
 # immediately and pushing the old one.
 def refresh [] {
-  let dir = ($env.FILE_PWD | path dirname)
-  ^$EWW -c $dir update $"bt_state=(status-json)" | complete | ignore
+  ^$BRIDGE push bluetooth (status-json)
 }
 
 def status-json []: nothing -> string {
@@ -114,3 +113,6 @@ def "main toggle" [] {
   }
   refresh
 }
+
+# The bar polls through this; toggles push the same way after they act.
+def "main push" [] { refresh }

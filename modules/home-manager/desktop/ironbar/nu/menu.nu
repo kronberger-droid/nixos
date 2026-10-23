@@ -19,14 +19,14 @@
 # buttons were dead that way. The match arm below turns the same mistake into an
 # error rather than a silence.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
 const LAUNCHER = "@siebLauncher@"
 const POWER    = "@siebPower@"
 
-# Detached, since eww kills an onclick handler that outlives its :timeout and a
-# menu session easily does. lib.nu has the details.
-use "@ewwLib@" *
+# Detached, so a menu session does not hang off the bar's click handler.
+# lib.nu has the details.
+use "@barLib@" *
 
 def main [what: string] {
   match $what {

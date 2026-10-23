@@ -1,8 +1,8 @@
 # Process helpers shared by the scripts here, which `use` this file by its store
-# path. Not a script itself: no shebang and no `main`, and eww.nix builds it on
-# its own rather than installing it under scripts/.
+# path. Not a script itself: no shebang and no `main`, and ironbar.nix builds it
+# on its own rather than installing it under scripts/.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
 const SETSID          = "@utilLinux@/bin/setsid"
 const TERMINAL        = "@terminalBin@"
@@ -13,9 +13,10 @@ const TERM_EXEC_FLAG  = "@terminalExecFlag@"
 # and its `job spawn` runs in a thread of *this* process, so anything started
 # that way would die when the script exits.
 #
-# eww kills an onclick handler that outlives the widget's :timeout, 200ms by
-# default, which is what the "command ... timed out" lines in the journal are;
-# anything that waits on a menu session has to leave the process tree first.
+# A bar's click handler is no place for a long-lived child: eww killed any that
+# outlived the widget's 200ms :timeout (the "command ... timed out" lines in
+# old journals), and anything that waits on a menu session should leave the
+# bar's process tree first regardless.
 #
 # The redirects, not `| complete | ignore`, are what does the leaving. `complete`
 # waits for EOF on the pipe rather than for the process, and the detached

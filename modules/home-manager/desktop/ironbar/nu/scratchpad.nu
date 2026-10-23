@@ -12,11 +12,11 @@
 # niri is called bare rather than by store path, as the originals do: this only
 # ever runs inside the niri session.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
 const ZELLIJ = "@zellij@/bin/zellij"
 
-use "@ewwLib@" *
+use "@barLib@" *
 
 def niri-windows []: nothing -> list {
   let r = (^niri msg -j windows | complete)

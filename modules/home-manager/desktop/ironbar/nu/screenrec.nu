@@ -8,9 +8,9 @@
 # the entries. Escape exits sieb with 1 and empty stdout, which the match
 # below already reads as "abort".
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
-const EWW          = "@eww@/bin/eww"
+const BRIDGE       = "@bridge@"
 const NOTIFY_SEND  = "@libnotify@/bin/notify-send"
 const PGREP        = "@procps@/bin/pgrep"
 const PKILL        = "@procps@/bin/pkill"
@@ -19,7 +19,7 @@ const SLURP        = "@slurp@/bin/slurp"
 const WL_SCREENREC = "@wlScreenrec@/bin/wl-screenrec"
 
 # `detach`, which a recording needs to outlive this script.
-use "@ewwLib@" *
+use "@barLib@" *
 
 def status-json []: nothing -> string {
   if (recording?) {
@@ -42,8 +42,7 @@ def notify [body: string] {
 }
 
 def refresh [] {
-  let dir = ($env.FILE_PWD | path dirname)
-  ^$EWW -c $dir update $"screenrec_state=(status-json)" | complete | ignore
+  ^$BRIDGE push screenrec (status-json)
 }
 
 def "main toggle" [] {
@@ -99,3 +98,6 @@ def "main toggle" [] {
   notify $"Recording started: ($filename | path basename)"
   refresh
 }
+
+# The bar polls through this; toggles push the same way after they act.
+def "main push" [] { refresh }

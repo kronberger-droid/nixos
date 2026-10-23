@@ -5,17 +5,20 @@
 # vpn-disconnect-all.nu.
 #
 # The picker was rofi -dmenu over three fixed entries, which is a lot of
-# machinery for a three-item list. It is now an eww dropdown that reads
-# `vpn list` and calls `vpn toggle`, so the whole interaction stays in the
-# widget layer and matches the bar's styling for free.
+# machinery for a three-item list. It is now a bar popup whose rows call
+# `vpn toggle` and read the dots `refresh` pushes, so the whole interaction
+# stays in the widget layer and matches the bar's styling for free.
 #
 # One row per VPN rather than the bash version's two index-synced arrays, so
 # filtering cannot misalign a label from its tooltip. The leading space in
 # `text` is load-bearing for the bar's spacing.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
-const EWW         = "@eww@/bin/eww"
+const BRIDGE      = "@bridge@"
+const IRONBAR     = "@ironbar@/bin/ironbar"
+const ON          = "@on@"
+const OFF         = "@off@"
 const NOTIFY_SEND = "@libnotify@/bin/notify-send"
 const SYSTEMCTL   = "@systemd@/bin/systemctl"
 const TAILSCALE   = "@tailscale@/bin/tailscale"
@@ -48,15 +51,16 @@ def entries []: nothing -> list {
 
 # waybar refreshes on SIGRTMIN+8. eww has no signal mechanism, so the new state
 # is pushed straight into the poll variable rather than waiting up to 15s.
+# The popup's rows are a fixed tree in ironbar's config, so each row's state
+# dot is an ironvar of its own, `vpn_dot_<n>` in `entries` order: Pango
+# markup, filled and green while up, hollow and dim otherwise, as eww's
+# `.drop-row.on .dot`.
 def refresh [] {
-  let dir = ($env.FILE_PWD | path dirname)
-  ^$EWW -c $dir update $"vpn_state=(status-json)" | complete | ignore
-  ^$EWW -c $dir update $"vpn_list=(entries | to json --raw)" | complete | ignore
-}
-
-def close-menu [] {
-  let dir = ($env.FILE_PWD | path dirname)
-  ^$EWW -c $dir close vpn-menu | complete | ignore
+  ^$BRIDGE push vpn (status-json)
+  entries | enumerate | each {|e|
+    let dot = if $e.item.on { $"<span foreground=\"($ON)\">●</span>" } else { $"<span foreground=\"($OFF)\">○</span>" }
+    ^$IRONBAR var set $"vpn_dot_($e.index)" $dot | complete | ignore
+  } | ignore
 }
 
 def status-json []: nothing -> string {
@@ -102,8 +106,6 @@ def "main toggle" [name: string] {
   let e = (entries | where name == $name | get 0?)
   if $e == null { return }
 
-  close-menu
-
   if $e.unit == "" {
     if $e.on {
       ^$TAILSCALE down | complete | ignore
@@ -120,7 +122,6 @@ def "main toggle" [name: string] {
 }
 
 def "main disconnect-all" [] {
-  close-menu
   mut any = false
 
   for e in (entries | where on) {
@@ -140,3 +141,6 @@ def "main disconnect-all" [] {
 
   refresh
 }
+
+# The bar polls through this; toggles push the same way after they act.
+def "main push" [] { refresh }

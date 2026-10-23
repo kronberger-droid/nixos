@@ -15,6 +15,7 @@
 # a battery gets the module without a rebuild.
 
 # Empty to full, waybar's format-icons in order.
+const BRIDGE = "@bridge@"
 const ICONS = ["󱃍" "󰁺" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"]
 const CHARGING = "󰂄"
 
@@ -109,3 +110,10 @@ def state-json []: nothing -> string {
 def main [] {
   print (state-json)
 }
+
+def refresh [] {
+  ^$BRIDGE push battery (state-json)
+}
+
+# The bar polls through this; toggles push the same way after they act.
+def "main push" [] { refresh }

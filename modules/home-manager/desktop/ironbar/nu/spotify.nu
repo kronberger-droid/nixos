@@ -9,12 +9,12 @@
 # spotify-player daemon in music.nix now does that. The TUI here is a remote
 # for it, so closing the window just closes the UI.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
 const SPOTIFY_PLAYER  = "@spotifyPlayer@"
 const SPOTIFY_DEVICE  = "@spotifyDevice@"
 
-use "@ewwLib@" *
+use "@barLib@" *
 
 def niri-windows [] {
   let r = (^niri msg -j windows | complete)
