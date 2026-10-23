@@ -1,7 +1,6 @@
 {...}: {
   imports = [
     ./niri.nix
-    ./eww.nix
     ./ironbar.nix
     ./sieb.nix
     ./shikane.nix

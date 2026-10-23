@@ -46,7 +46,7 @@
 
       conn = open_dbus_connection(bus="SESSION")
       conn.send_and_get_reply(
-          new_method_call(SCREENSAVER, "Inhibit", "ss", ("eww", "idle toggle"))
+          new_method_call(SCREENSAVER, "Inhibit", "ss", ("ironbar", "idle toggle"))
       )
       # Hold the connection open; closing it releases the inhibit.
       signal.pause()
@@ -173,7 +173,7 @@ in {
   };
 
   # ── Manual idle inhibit ─────────────────────────────────────────
-  # Backs the eww bar's idle toggle (eww/nu/idle.nu). Holding an inhibit
+  # Backs the bar's idle toggle (ironbar/nu/idle.nu). Holding an inhibit
   # pauses every swayidle timeout but leaves swayidle itself alone:
   # before-sleep still fires on a lid close, so an inhibited session still
   # locks when logind suspends it. The toggle used to stop swayidle.service

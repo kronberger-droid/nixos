@@ -4,7 +4,7 @@
   ...
 }: let
   # `contacts`: a skim picker over khard, because `khard edit <name>` needs you
-  # to remember the name and there are 400 of them. Built the way eww.nix builds
+  # to remember the name and there are 400 of them. Built the way ironbar.nix builds
   # its helpers — a real .nu file with @var@ placeholders, so the script stays
   # lintable (`nu -n --ide-check 30 <file>`) and replaceVars fails the build on
   # an unfilled or unused var.

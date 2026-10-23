@@ -496,7 +496,7 @@
           format = pkgs.runCommand "alejandra-check" {} ''
             ${pkgs.alejandra}/bin/alejandra --check --quiet ${self} && touch $out
           '';
-          # The .nu files are templates: `@nu@`, `@eww@` and friends are
+          # The .nu files are templates: `@nu@`, `@bridge@` and friends are
           # substituted at build time, so each placeholder becomes a dummy
           # path before parsing. nu-check is false on a parse error.
           #
@@ -505,7 +505,7 @@
           # language one version behind the shell that runs these. `source`
           # resolves at parse time, so every `source ~/...` target gets an
           # empty stub; each sourced file is checked on its own anyway. `use`
-          # does too, and the eww scripts `use "@ewwLib@"`, so that one
+          # does too, and the bar's scripts `use "@barLib@"`, so that one
           # placeholder points at a substituted copy of the real lib.nu
           # instead, which also checks that what they import exists.
           nu-parse =
@@ -517,10 +517,10 @@
                 mkdir -p "$HOME/$(dirname "$p")" && touch "$HOME/$p"
               done
               sed 's/@[A-Za-z_]*@/\/placeholder/g' \
-                ${self}/modules/home-manager/desktop/eww/nu/lib.nu > "$TMPDIR/eww-lib.nu"
+                ${self}/modules/home-manager/desktop/ironbar/nu/lib.nu > "$TMPDIR/bar-lib.nu"
               fail=0
               for f in $(cd ${self} && find . -name '*.nu'); do
-                sed -e "s|@ewwLib@|$TMPDIR/eww-lib.nu|g" -e 's/@[A-Za-z_]*@/\/placeholder/g' \
+                sed -e "s|@barLib@|$TMPDIR/bar-lib.nu|g" -e 's/@[A-Za-z_]*@/\/placeholder/g' \
                   "${self}/$f" > "$TMPDIR/check.nu"
                 if ! nu --no-config-file -c "if not (nu-check '$TMPDIR/check.nu') { exit 1 }"; then
                   echo "nu-check: $f does not parse" >&2

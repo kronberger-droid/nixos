@@ -33,7 +33,7 @@ in {
       description = ''
         The terminal emulator to use system-wide.
         This setting affects the terminal keybindings in niri,
-        the eww bar's commands, and nushell aliases.
+        the bar's commands, and nushell aliases.
       '';
     };
 

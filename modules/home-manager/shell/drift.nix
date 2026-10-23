@@ -177,7 +177,7 @@ in {
     context     = "#${s.base05}"
     header      = "#${s.base0D}"
     line-number = "#${s.base03}"
-    # base0F is the UI accent everywhere else (sieb's selection, the eww bar), so the
+    # base0F is the UI accent everywhere else (sieb's selection, the bar), so the
     # logo badge picks it up too; secondary stays blue like the rest of the
     # chrome. `background` is not the app background, it is the text drawn on
     # top of those accent badges, hence base00.
