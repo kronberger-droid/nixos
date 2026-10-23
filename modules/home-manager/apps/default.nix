@@ -16,5 +16,8 @@
     ./steam.nix
     ./signal.nix
     ./equibop.nix
+    ./zapzap.nix
+    ./aerion.nix
+    ./localsend.nix
   ];
 }
