@@ -20,7 +20,9 @@
     # Media
     drawio
     inkscape
-    gthumb
+    # Photo browsing. Not the image/* default: that stays swayimg (xdg.nix),
+    # which is also yazi's opener.
+    loupe
     (pkgs.gimp-with-plugins.override {
       plugins = [pkgs.gimpPlugins.resynthesizer];
     })
