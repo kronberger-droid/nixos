@@ -4,7 +4,7 @@
 # a real .nu file, store paths substituted by replaceVars, no bare names.
 #
 # The pipeline this sits on top of is in contacts.nix: Radicale (homeserver,
-# over the tailnet) <-> vdirsyncer <-> ~/.local/share/contacts <-> khard.
+# over the tailnet) <-> pimsync <-> ~/.local/share/contacts <-> khard.
 # This script adds nothing to it, it just makes khard usable across 400
 # contacts where `khard edit <name>` needs you to remember the name.
 #
@@ -50,18 +50,18 @@ def rows []: nothing -> list<string> {
 # Sync once, before anything is read.
 #
 # A card both sides changed since the last sync is a conflict. contacts.nix
-# sets `conflict_resolution = "a wins"`, so it no longer errors, but the
+# sets `conflict_resolution keep a`, so it no longer stalls, but the
 # phone's side of it is dropped silently. Editing a *stale* copy is what
 # creates that case: the phone (DAVx5 -> the same Radicale) writes, this copy
 # goes stale, an edit on top of it diverges and wins.
 #
 # Syncing here makes the local copy current, so whatever is written next is a
 # fast-forward on the remote rather than a divergence, and nothing is lost.
-# Pushing it back is then only latency, and vdirsyncer.timer already does
+# Pushing it back is then only latency, and pimsync.timer already does
 # that every 5 minutes, thus no sync on the way out.
 def sync-now [] {
   print -n "syncing… "
-  let r = (^@vdirsyncer@/bin/vdirsyncer sync | complete)
+  let r = (^@pimsync@/bin/pimsync sync | complete)
   if $r.exit_code == 0 {
     print "ok"
   } else {
@@ -83,7 +83,7 @@ def main [...search: string] {
   loop {
     let rows = (rows)
     if ($rows | is-empty) {
-      print "no contacts — is vdirsyncer.timer running?"
+      print "no contacts — is pimsync.timer running?"
       return
     }
 

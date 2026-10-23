@@ -14,16 +14,15 @@
         nu = pkgs.nushell;
         inherit (pkgs) coreutils;
         khard = config.programs.khard.package;
-        inherit (pkgs) skim vdirsyncer;
+        inherit (pkgs) skim;
+        pimsync = config.programs.pimsync.package;
       }
     } $out/bin/contacts
   '';
 in {
-  # services.vdirsyncer only wires the systemd timer; expose the CLI too for the
-  # one-time `vdirsyncer discover` and manual syncs. (khard comes via programs.khard.)
-  home.packages = [pkgs.vdirsyncer contactsScript];
+  home.packages = [contactsScript];
 
-  # Contacts pipeline: Radicale (homeserver, over tailnet) <-> vdirsyncer <->
+  # Contacts pipeline: Radicale (homeserver, over tailnet) <-> pimsync <->
   # local vCard dir <-> khard.
   # The phone syncs the same Radicale via DAVx5 into its stock Contacts app.
   accounts.contact = {
@@ -46,39 +45,81 @@ in {
 
   programs.khard.enable = true;
 
-  # This home-manager version has no vdirsyncer config renderer (accounts.contact
-  # only generates khard.conf), so write the config by hand. The collection is
-  # named `homeserver` to match the khard addressbook path generated above
-  # (~/.local/share/contacts/homeserver). `vdirsyncer discover` creates the
-  # collection on Radicale on first run; the timer then syncs non-interactively.
-  xdg.configFile."vdirsyncer/config".text = ''
-    [general]
-    status_path = "~/.local/share/vdirsyncer/status/"
+  # Written by hand rather than through the account's `pimsync.enable`: that
+  # generator points the local storage at the account dir
+  # (~/.local/share/contacts/homeserver), but a vdir storage is a directory
+  # *of* collections, so the address book khard reads would turn into the
+  # storage root. Pointing at basePath with `homeserver` as the collection
+  # keeps the on-disk layout vdirsyncer left behind.
+  programs.pimsync = {
+    enable = true;
+    settings = let
+      d = name: params: {inherit name params;};
+    in [
+      (d "status_path" ["${config.xdg.dataHome}/pimsync/status"])
+      {
+        name = "pair";
+        params = ["homeserver"];
+        children = [
+          (d "storage_a" ["homeserver_local"])
+          (d "storage_b" ["homeserver_remote"])
+          (d "collection" ["homeserver"])
+          # Without this, a card changed on both sides since the last sync is
+          # left in conflict, which shows up as contacts quietly going stale.
+          # `a` is the local storage, so an edit made here beats one made on
+          # the phone. That is the right direction for how the two are used:
+          # the phone is where the email addresses are missing. The cost: a
+          # DAVx5 edit landing in the same window is dropped silently.
+          (d "conflict_resolution" ["keep" "a"])
+        ];
+      }
+      {
+        name = "storage";
+        params = ["homeserver_local"];
+        children = [
+          (d "type" ["vdir/vcard"])
+          (d "path" ["${config.accounts.contact.basePath}/"])
+          (d "fileext" ["vcf"])
+        ];
+      }
+      {
+        name = "storage";
+        params = ["homeserver_remote"];
+        children = [
+          (d "type" ["carddav"])
+          (d "url" ["http://homeserver:5232/"])
+          (d "username" ["kronberger"])
+          {
+            name = "password";
+            children = [(d "cmd" ["${pkgs.coreutils}/bin/cat" "/run/secrets/radicale-password"])];
+          }
+        ];
+      }
+    ];
+  };
 
-    [pair homeserver]
-    a = "homeserver_local"
-    b = "homeserver_remote"
-    collections = ["homeserver"]
-    # Without this, a card changed on both sides since the last sync errors and
-    # stops the collection syncing until it is fixed by hand — which shows up as
-    # contacts quietly going stale. `a` is the local storage, so an edit made
-    # here beats one made on the phone. That is the right direction for how the
-    # two are used: the phone is where the email addresses are missing.
-    # The cost: a DAVx5 edit landing in the same window is dropped silently.
-    conflict_resolution = "a wins"
+  # A timer running one-shot syncs, not services.pimsync's long-running
+  # `daemon`: the picker in contacts.nu syncs on its own before every edit
+  # session, and a daemon would have that run against the status database
+  # it holds open. Every 5 minutes, as vdirsyncer.timer did.
+  systemd.user.services.pimsync = {
+    Unit.Description = "Sync contacts with Radicale";
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${config.programs.pimsync.package}/bin/pimsync sync";
+    };
+  };
+  systemd.user.timers.pimsync = {
+    Unit.Description = "Periodic pimsync";
+    Timer = {
+      OnCalendar = "*:0/5";
+      Persistent = true;
+    };
+    Install.WantedBy = ["timers.target"];
+  };
 
-    [storage homeserver_local]
-    type = "filesystem"
-    path = "~/.local/share/contacts/"
-    fileext = ".vcf"
-
-    [storage homeserver_remote]
-    type = "carddav"
-    url = "http://homeserver:5232/"
-    username = "kronberger"
-    password.fetch = ["command", "cat", "/run/secrets/radicale-password"]
-  '';
-
-  # Periodic `vdirsyncer sync` via a systemd user timer.
-  services.vdirsyncer.enable = true;
+  # pimsync creates the `homeserver` collection on first sync but not the
+  # storage root it lives in. On a host where vdirsyncer was never
+  # `discover`ed (intelNuc), nothing else creates it.
+  systemd.user.tmpfiles.rules = ["d ${config.accounts.contact.basePath} 0700 - - -"];
 }
