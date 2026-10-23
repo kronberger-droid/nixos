@@ -38,6 +38,13 @@
     # Use `.default`. `.rio-nightly` is not a fresher channel — it's the same
     # main source built with a Rust nightly toolchain.
     rio-upstream.url = "github:raphamorim/rio";
+    # Helix from master; the last release (25.07.1) trails it by over a year.
+    # Unfollowed on purpose: helix.cachix.org (nix-caches.nix) holds builds
+    # against helix's own nixpkgs lock, and following ours would change the
+    # drv hash and miss it. The cache carries x86_64 only, so the overlay
+    # applies to the workstations; droid keeps nixpkgs' helix rather than
+    # compiling it on the phone.
+    helix.url = "github:helix-editor/helix";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -308,6 +315,8 @@
                   })
                   (_: _: {
                     deploy-rs = inputs.deploy-rs.packages.${system}.default;
+                    # Unmodified, so helix.cachix.org hits; see the helix input.
+                    helix = inputs.helix.packages.${system}.default;
                     # rio from upstream main, tests skipped — same policy as the
                     # nushell overlay. Upstream keeps adding tests that assume a
                     # real host and each one breaks the sandboxed checkPhase for
