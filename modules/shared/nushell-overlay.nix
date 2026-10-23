@@ -2,8 +2,8 @@
 # tracks releases, which lag main by a lot: the Helix edit mode was usable on
 # main for months before it shipped. Bumping is `nix flake update nushell-src`
 # and nothing else. Factored out here so every host gets the same build from a
-# single source of truth — mkHost hosts, the homeserver and droid (both built
-# outside mkHost) all import this.
+# single source of truth: mkHost hosts and the homeserver (built outside
+# mkHost) import this. Droid does not; flake.nix's commonOverlays has why.
 #
 # The build is upstream's own package expression rather than a hand-rolled
 # overrideAttrs on nixpkgs' derivation. It reads the version out of Cargo.toml,
