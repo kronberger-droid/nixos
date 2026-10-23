@@ -339,7 +339,7 @@ in {
       # graphical-session.target, and systemd breaks that cycle by dropping
       # whichever job it likes, usually this one. Naming the target
       # explicitly replaces the implicit reverse ordering and the cycle goes
-      # away. Every other unit here (swayidle, shikane, wlsunset) is shaped
+      # away. Every other unit here (swayidle, shikane, sunsetr) is shaped
       # the same way for the same reason.
       #
       # With eww.service's ExecStartPost gate, this ordering now carries

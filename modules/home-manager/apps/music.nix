@@ -23,7 +23,7 @@
       # the popup's `connect --name` (eww/nu/spotify.nu) takes the first match.
       device.name = "spotify-player-${osConfig.networking.hostName or "local"}";
       copy_command = {
-        command = "${pkgs.wl-clipboard}/bin/wl-copy";
+        command = "${pkgs.wl-clipboard-rs}/bin/wl-copy";
         args = [];
       };
     };

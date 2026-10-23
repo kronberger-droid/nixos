@@ -157,7 +157,6 @@ in {
 
     # Startup commands
     spawn-at-startup = [
-      {command = ["${pkgs.swaybg}/bin/swaybg" "-m" "fill" "-i" "${./deathpaper.jpg}"];}
       # Warm the page cache by reading Helium's binary + resources into RAM.
       # No process stays running; just primes the kernel disk cache so the
       # first real launch skips cold I/O from /nix/store. Helium is a
