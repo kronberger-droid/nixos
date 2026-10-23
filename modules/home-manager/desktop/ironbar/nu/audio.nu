@@ -10,15 +10,16 @@
 # expose through wpctl. The node name does though: a bluetooth sink is
 # bluez_output.*, which is what "headphones" means in practice on this machine.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
-const EWW   = "@eww@/bin/eww"
+const BRIDGE = "@bridge@"
+const DRAWER = "@drawer@"
 const WPCTL = "@wireplumber@/bin/wpctl"
 const FLOCK = "@utilLinux@/bin/flock"
 const NU    = "@nu@/bin/nu"
 
 # `detach`, for the slider's linger below.
-use "@ewwLib@" *
+use "@barLib@" *
 
 # wpctl's own identifiers happen to look like replaceVars placeholders, and
 # replaceVars fails the build on any placeholder it was not given a value for.
@@ -100,16 +101,18 @@ def main [] {
 def "main toggle-mute" [] {
   ^$WPCTL set-mute $SINK toggle | complete | ignore
   # Push rather than wait for the 2s poll, as the other toggles do.
-  let dir = ($env.FILE_PWD | path dirname)
-  ^$EWW -c $dir update $"audio_state=(state-json)" | complete | ignore
+  ^$BRIDGE push audio (state-json)
 }
 
-# The bar's scroll handler, waybar's scroll-to-change-volume. `dir` is what
-# eww substituted into {}: "up" or "down", nothing else. `name` and
-# `src_muted` are the widget's current audio_state handed back, neither of
-# which a scroll changes.
+# The bar polls through this.
+def "main push" [] { ^$BRIDGE push audio (state-json) }
+
+# The bar's scroll handler, waybar's scroll-to-change-volume. `dir` is "up"
+# or "down", nothing else. `name` and `src_muted` are the current state
+# handed back, neither of which a scroll changes; eww passed them, ironbar
+# cannot, and without them settle queries the full state instead.
 #
-# eww runs one handler per GTK scroll event and passes only the sign, never
+# The bar runs one handler per GTK scroll event and passes only the sign, never
 # the amount. A hi-res wheel sends a notch as a burst of small events (the
 # M705 here: 8, about 8ms apart, so ~70ms a notch) and a touchpad sends a
 # stream, so stepping once per event made a notch 8%. Without the amount,
@@ -122,15 +125,15 @@ def "main toggle-mute" [] {
 # back, and overlapping calls collapsed into one step.
 const THROTTLE = 100ms
 
-def "main scroll" [dir: string, name: string, src_muted: bool] {
-  # eww only ever sends those two. Anything else is not ours to interpret,
+def "main scroll" [dir: string, name: string = "", src_muted: bool = false] {
+  # The bar only ever sends those two. Anything else is not ours to interpret,
   # and a bar handler has no stderr anyone would read, so bail silently.
   let step = match $dir {
     "up" => "2%+"
     "down" => "2%-"
     _ => { return }
   }
-  let lock = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "eww-audio-scroll.lock")
+  let lock = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "bar-audio-scroll.lock")
   # -n fails at once rather than queueing; that failure is the drop.
   (^$FLOCK -n $lock $NU -n --no-std-lib $env.CURRENT_FILE scroll-locked $step $name
     ($src_muted | into string)) | complete | ignore
@@ -163,15 +166,14 @@ def settle [name: string, src_muted: bool] {
     $sink | update muted false
   } else { $sink }
 
-  # Push rather than wait for the 2s poll, as toggle-mute does.
-  let cfg = ($env.FILE_PWD | path dirname)
-  let state = (render $name $sink $src_muted)
-  ^$EWW -c $cfg update $"audio_state=($state)" | complete | ignore
+  # Push rather than wait for the 2s poll, as toggle-mute does. Without the
+  # handed-back name there is nothing to render from, so gather it all.
+  let state = if ($name | is-empty) { state-json } else { render $name $sink $src_muted }
+  ^$BRIDGE push audio $state
 }
 
-# The hover slider's onchange. `value` is the slider position eww substituted
-# into {}, an absolute percentage; `name` and `src_muted` ride along as they
-# do for scroll.
+# The hover slider's on_change. `value` is the slider position, an absolute
+# percentage; `name` and `src_muted` are optional as they are for scroll.
 #
 # A drag fires once per whole percent it crosses, so this sees the same kind
 # of burst scroll does, but scroll's drop-the-losers throttle is wrong here.
@@ -185,22 +187,22 @@ def settle [name: string, src_muted: bool] {
 #
 # The write is a rename so a holder never reads a half-written file, or
 # unlinks one that is still being written and loses the value with it.
-def "main set" [value: float, name: string, src_muted: bool] {
+def "main set" [value: float, name: string = "", src_muted: bool = false] {
   let run = ($env.XDG_RUNTIME_DIR? | default "/tmp")
   hold $run
 
-  let target = ($run | path join "eww-audio-set.target")
+  let target = ($run | path join "bar-audio-set.target")
   let tmp = $"($target).($nu.pid)"
   $value | math round | into string | save -f $tmp
   mv -f $tmp $target
   # Blocking, unlike scroll's -n: queueing is the point.
-  (^$FLOCK ($run | path join "eww-audio-set.lock")
+  (^$FLOCK ($run | path join "bar-audio-set.lock")
     $NU -n --no-std-lib $env.CURRENT_FILE set-locked $name ($src_muted | into string))
   | complete | ignore
 }
 
 def "main set-locked" [name: string, src_muted: bool] {
-  let target = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "eww-audio-set.target")
+  let target = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "bar-audio-set.target")
   if not ($target | path exists) { return }
   let pct = (try { open --raw $target | into string | str trim | into int } catch { null })
   rm -f $target
@@ -211,11 +213,10 @@ def "main set-locked" [name: string, src_muted: bool] {
 }
 
 # Keeps the slider out while it is being dragged. Dragging off the bar is a
-# hover-lost like any other, and eww hands onhoverlost neither the button
-# state nor the crossing mode, nor gives the scale a press or release event.
-# A recent slider change is the only sign of a drag left, so every set holds
-# audio_busy up for LINGER past itself, which the widget ORs with
-# audio_hover. Holding the pointer still off the bar for longer than that
+# hover-lost like any other, and the bar's leave hook carries neither the
+# button state nor the crossing mode. A recent slider change is the only sign
+# of a drag left, so every set holds the audio drawer's busy flag up for
+# LINGER past itself, which drawer.nu ORs into `audio_open`. Holding the pointer still off the bar for longer than that
 # still collapses it.
 #
 # Each set writes its own token to STAMP and leaves a detached linger behind
@@ -228,22 +229,20 @@ def "main set-locked" [name: string, src_muted: bool] {
 const LINGER = 800ms
 
 def hold [run: string] {
-  let stamp = ($run | path join "eww-audio-set.stamp")
+  let stamp = ($run | path join "bar-audio-set.stamp")
   let tok = (date now | into int | into string)
   let tmp = $"($stamp).($nu.pid)"
   $tok | save -f $tmp
   mv -f $tmp $stamp
 
-  let cfg = ($env.FILE_PWD | path dirname)
-  ^$EWW -c $cfg update audio_busy=true | complete | ignore
+  ^$DRAWER busy audio true
   detach ...[$NU "-n" "--no-std-lib" $env.CURRENT_FILE "linger" $tok]
 }
 
 def "main linger" [tok: string] {
   sleep $LINGER
-  let stamp = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "eww-audio-set.stamp")
+  let stamp = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "bar-audio-set.stamp")
   let now = (try { open --raw $stamp | into string | str trim } catch { "" })
   if $now != $tok { return }
-  let cfg = ($env.FILE_PWD | path dirname)
-  ^$EWW -c $cfg update audio_busy=false | complete | ignore
+  ^$DRAWER busy audio false
 }

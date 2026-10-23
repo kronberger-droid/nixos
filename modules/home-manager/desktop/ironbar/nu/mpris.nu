@@ -12,7 +12,7 @@
 # `--follow` blocks and waits even when no player exists, so this stays alive
 # and starts emitting when one appears; exactly what deflisten wants.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
 const PLAYERCTL = "@playerctl@/bin/playerctl"
 

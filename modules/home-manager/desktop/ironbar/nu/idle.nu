@@ -10,9 +10,9 @@
 # closes. Note that wayland-pipewire-idle-inhibit.service still runs too, so
 # audio playback keeps inhibiting idle independently of this toggle.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
-const EWW       = "@eww@/bin/eww"
+const BRIDGE    = "@bridge@"
 const SYSTEMCTL = "@systemd@/bin/systemctl"
 
 def inhibited? []: nothing -> bool {
@@ -28,8 +28,7 @@ def status-json []: nothing -> string {
 }
 
 def refresh [] {
-  let dir = ($env.FILE_PWD | path dirname)
-  ^$EWW -c $dir update $"idle_state=(status-json)" | complete | ignore
+  ^$BRIDGE push idle (status-json)
 }
 
 def main [] { print (status-json) }
@@ -42,3 +41,6 @@ def "main toggle" [] {
   }
   refresh
 }
+
+# The bar polls through this; toggles push the same way after they act.
+def "main push" [] { refresh }

@@ -22,6 +22,10 @@
       # and is already in the store.
       gpu.provider = lib.mkForce "nixos";
 
+      # Binds the host's /etc/localtime. Without it there is none in the
+      # sandbox and every timestamp shows in UTC.
+      timeZone.enable = true;
+
       dbus.policies = {
         # Signal encrypts its database key with safeStorage, pinned to
         # gnome_libsecret in config.json. That talks to the Secret Service

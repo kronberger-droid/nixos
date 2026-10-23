@@ -10,9 +10,9 @@
 # yuck files see no build-time flags, so absence is detected here instead and
 # the widget hides itself.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
-const EWW = "@eww@/bin/eww"
+const BRIDGE = "@bridge@"
 const BRIGHTNESSCTL = "@brightnessctl@/bin/brightnessctl"
 
 # Dim to bright, waybar's format-icons in order.
@@ -49,8 +49,7 @@ def main [] {
   print (state-json)
 }
 
-# The bar's scroll handler. `dir` is what eww substituted into {}: "up" or
-# "down", nothing else.
+# The bar's scroll handler. `dir` is "up" or "down", nothing else.
 def "main scroll" [dir: string] {
   # 5%, not waybar's literal `set +50`. That 50 is raw units, and this panel
   # reports a max of 96000, so a notch moved the backlight by 0.05% and read
@@ -59,14 +58,19 @@ def "main scroll" [dir: string] {
   let step = match $dir {
     "up" => "+5%"
     "down" => "5%-"
-    # eww only ever sends those two. Anything else is not ours to interpret,
+    # The bar only ever sends those two. Anything else is not ours to interpret,
     # and a bar handler has no stderr anyone would read, so bail silently.
     _ => { return }
   }
   ^$BRIGHTNESSCTL -c backlight set $step | complete | ignore
 
   # Push rather than wait for the poll, as the audio scroll handler does.
-  # `cfg`, not `dir`: that name is the scroll direction here.
-  let cfg = ($env.FILE_PWD | path dirname)
-  ^$EWW -c $cfg update $"bl_state=(state-json)" | complete | ignore
+  refresh
 }
+
+def refresh [] {
+  ^$BRIDGE push backlight (state-json)
+}
+
+# The bar polls through this; toggles push the same way after they act.
+def "main push" [] { refresh }

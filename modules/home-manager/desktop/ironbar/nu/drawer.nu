@@ -13,6 +13,7 @@
 # the other side: there GTK dropped the leave, here it arrives too early.
 #
 #   drawer (enter | leave | pin) <name>
+#   drawer busy <name> (true | false)
 
 const IRONBAR = "@ironbar@/bin/ironbar"
 
@@ -26,7 +27,7 @@ def set-var [key: string, value: string] {
 }
 
 def refresh [name: string] {
-  let open = ((get-var $"($name)_hover") == "true") or ((get-var $"($name)_pinned") == "true")
+  let open = ([hover pinned busy] | any {|k| (get-var $"($name)_($k)") == "true" })
   set-var $"($name)_open" ($open | into string)
 }
 
@@ -54,6 +55,13 @@ def "main pin" [name: string] {
   refresh $name
 }
 
+# Held up from outside the hover: audio.nu raises it through a slider drag,
+# which can leave the bar without collapsing the slider under the pointer.
+def "main busy" [name: string, on: string] {
+  set-var $"($name)_busy" $on
+  refresh $name
+}
+
 def main [] {
-  print "usage: drawer (enter | leave | pin) <name>"
+  print "usage: drawer (enter | leave | pin) <name>, drawer busy <name> <on>"
 }

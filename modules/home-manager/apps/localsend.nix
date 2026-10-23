@@ -22,6 +22,10 @@
       # and is already in the store.
       gpu.provider = lib.mkForce "nixos";
 
+      # Binds the host's /etc/localtime. Without it there is none in the
+      # sandbox and every timestamp shows in UTC.
+      timeZone.enable = true;
+
       dbus.policies = {
         "org.freedesktop.Notifications" = "talk";
         "org.kde.StatusNotifierWatcher" = "talk";

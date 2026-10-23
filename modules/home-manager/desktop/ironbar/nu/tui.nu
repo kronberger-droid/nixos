@@ -7,7 +7,7 @@
 # waybar.nix that was a Nix function applied five times; here it is one script
 # with a subcommand, so the widgets just call `scripts/tui wifi`.
 #
-# The TUIs go by store path, like every other script here: the eww daemon's
+# The TUIs go by store path, like every other script here: the bar's
 # PATH is whatever the compositor handed systemd, and a bare name that is not
 # on it fails inside the freshly spawned terminal, where nothing shows the
 # error but the terminal's own splash.
@@ -16,12 +16,12 @@
 # btop needs at least 80x24 and dropkitten's fractional sizing came up short,
 # so niri's btop_monitor window rule sizes it instead.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
 const BTOP            = "@btop@/bin/btop"
 const DROPKITTEN      = "@dropkitten@/bin/dropkitten"
 
-use "@ewwLib@" *
+use "@barLib@" *
 
 const NMTUI_COLORS = "root=white,black:window=white,black:border=blue,black:listbox=white,black:actlistbox=black,blue:label=white,black:title=brightblue,black:button=white,black:actbutton=black,blue:compactbutton=white,black:checkbox=white,black:actcheckbox=black,blue:entry=white,black:textbox=white,black"
 

@@ -11,8 +11,9 @@
 # tailscale0 up simultaneously, and only the routing table says which one the
 # traffic is on.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
+const BRIDGE = "@bridge@"
 const IP = "@iproute2@/bin/ip"
 
 def default-iface []: nothing -> any {
@@ -49,15 +50,11 @@ def ipaddr [iface: string]: nothing -> string {
 
 const ICONS = ["󰤯" "󰤟" "󰤢" "󰤥" "󰤨"]
 
-def main [] {
-  # `print`, not a bare pipeline: nushell only surfaces the *last* expression
-  # of a block, so a value built before an early `return` is discarded. Two of
-  # these three branches showed nothing at all until this was explicit.
+def status-json []: nothing -> string {
   let iface = (default-iface)
 
   if $iface == null {
-    print ({text: "󰖪", tooltip: "Disconnected", class: "disconnected"} | to json --raw)
-    return
+    return ({text: "󰖪", tooltip: "Disconnected", class: "disconnected"} | to json --raw)
   }
 
   let q = (wifi-quality $iface)
@@ -65,11 +62,20 @@ def main [] {
 
   if $q == null {
     # Ethernet: waybar shows the interface name next to the glyph.
-    print ({text: $"($iface) ", tooltip: $"($iface): ($ip)", class: "ethernet"} | to json --raw)
+    ({text: $"($iface) ", tooltip: $"($iface): ($ip)", class: "ethernet"} | to json --raw)
   } else {
     # waybar maps signal onto its icon list by proportion; five icons means
     # one per 20 points, clamped so 100 does not fall off the end.
     let idx = ([(($q * 5) // 100), 4] | math min)
-    print ({text: ($ICONS | get $idx), tooltip: $"($iface): ($ip) \(($q)%\)", class: "wifi"} | to json --raw)
+    ({text: ($ICONS | get $idx), tooltip: $"($iface): ($ip) \(($q)%\)", class: "wifi"} | to json --raw)
   }
 }
+
+def main [] { print (status-json) }
+
+def refresh [] {
+  ^$BRIDGE push network (status-json)
+}
+
+# The bar polls through this; toggles push the same way after they act.
+def "main push" [] { refresh }

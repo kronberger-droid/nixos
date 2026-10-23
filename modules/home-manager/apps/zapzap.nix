@@ -20,6 +20,10 @@
       # and is already in the store.
       gpu.provider = lib.mkForce "nixos";
 
+      # Binds the host's /etc/localtime. Without it there is none in the
+      # sandbox and every timestamp shows in UTC.
+      timeZone.enable = true;
+
       dbus.policies = {
         # It notifies over both this and the portal, depending on settings.
         "org.freedesktop.Notifications" = "talk";

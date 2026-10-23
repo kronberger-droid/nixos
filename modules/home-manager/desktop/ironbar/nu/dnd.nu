@@ -3,9 +3,9 @@
 # Do Not Disturb, merged from waybar/nu/dnd-status.nu and dnd-toggle.nu.
 # Logic unchanged; only the refresh differs, since eww has no signal mechanism.
 
-# Binaries by store path; see eww.nix for why these are consts and not
+# Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
-const EWW         = "@eww@/bin/eww"
+const BRIDGE      = "@bridge@"
 const MAKOCTL     = "@mako@/bin/makoctl"
 const NOTIFY_SEND = "@libnotify@/bin/notify-send"
 
@@ -16,8 +16,7 @@ def on? []: nothing -> bool {
 }
 
 def refresh [] {
-  let dir = ($env.FILE_PWD | path dirname)
-  ^$EWW -c $dir update $"dnd_state=(status-json)" | complete | ignore
+  ^$BRIDGE push dnd (status-json)
 }
 
 def status-json []: nothing -> string {
@@ -41,3 +40,6 @@ def "main toggle" [] {
   }
   refresh
 }
+
+# The bar polls through this; toggles push the same way after they act.
+def "main push" [] { refresh }
