@@ -38,8 +38,8 @@
 
   # Spawn on current workspace using niri's one-shot spawn rules
   spawnOnWs = pkgs.writeShellScript "spawn-on-ws" ''
-    WS_IDX=$(niri msg -j workspaces | ${pkgs.jq}/bin/jq -r '[.[] | select(.is_focused)][0].idx')
-    exec niri msg action spawn --rule "open-on-workspace \"$WS_IDX\"" -- "$@"
+    WS_ID=$(niri msg -j workspaces | ${pkgs.jq}/bin/jq -r '[.[] | select(.is_focused)][0].id')
+    exec niri msg action spawn --rule "open-on-workspace-id $WS_ID" -- "$@"
   '';
 
   # Wrap a spawn command list to pin the window to the current workspace
