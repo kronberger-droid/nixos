@@ -14,5 +14,6 @@
     ./syncthing.nix
     ./obsidian.nix
     ./steam.nix
+    ./signal.nix
   ];
 }

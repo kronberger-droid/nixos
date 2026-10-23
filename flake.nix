@@ -90,6 +90,11 @@
     base16 = {
       url = "github:SenchoPens/base16.nix";
     };
+    # Declarative bubblewrap sandboxes for GUI apps (home-manager/apps/signal.nix).
+    nixpak = {
+      url = "github:nixpak/nixpak";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     niri-src = {
       url = "github:kronberger-droid/niri";
       flake = false;
