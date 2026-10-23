@@ -228,10 +228,10 @@ in {
       # ssh-ng, i.e. `nix-daemon --stdio` on this side.
       ++ map (storeOnly "nix-daemon --stdio") [hostKeys.intelNuc hostKeys.spectre hostKeys.P14E]
       # Nothing Phone (Termux). Only ever needs the store, so it is not in the
-      # shared key set any more; key was generated on the homeserver, hence
-      # the comment. Its `builders` use the legacy ssh:// store, which runs
-      # `nix-store --serve --write` here.
-      ++ [(storeOnly "nix-store --serve --write" "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGNMj1J9Y7Qc6oVzZQsAizZUJIP/F4bNn4hZmc4pCGeA kronberger@homeserver")];
+      # shared key set any more. Generated on the phone 2026-10-23, lives in
+      # ~/.ssh/id_ed25519 there. Its `builders` use the legacy ssh:// store,
+      # which runs `nix-store --serve --write` here.
+      ++ [(storeOnly "nix-store --serve --write" "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ0CUHZDE++aHyF/eKKYPTxABX1h6KxImbwMf+Qrlg0K kronberger-droid")];
   };
   # Trusted users are always allowed to connect to the daemon, whatever
   # allowed-users says, so this one line is the whole grant.
