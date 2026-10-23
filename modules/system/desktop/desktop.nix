@@ -22,6 +22,10 @@
         # X11 clipboard backend is unavailable.
         "org.freedesktop.impl.portal.RemoteDesktop" = ["gnome"];
         "org.freedesktop.impl.portal.Clipboard" = ["gnome"];
+        # This file replaces the niri-portals.conf niri ships, so its Secret
+        # line has to be restated. Without it oo7-portal runs but is never
+        # routed to (its .portal says UseIn=gnome, ignored once a conf exists).
+        "org.freedesktop.impl.portal.Secret" = ["oo7-portal"];
       };
     };
   };
