@@ -48,9 +48,9 @@
         sockets.pipewire = true;
         # Chromium only tries libsecret when this names GNOME, and falls
         # back to basic_text otherwise, which cannot open the database
-        # (safeStorageBackend is pinned to gnome_libsecret). niri hands its
-        # children "niri:GNOME" (desktop/niri.nix), but a shell can carry
-        # the plain "niri" from home.sessionVariables, so pin it here.
+        # (safeStorageBackend is pinned to gnome_libsecret). The session
+        # sets "niri:GNOME" (desktop/niri.nix); pinned here as well so Signal
+        # does not depend on how it was launched.
         env.XDG_CURRENT_DESKTOP = "niri:GNOME";
       };
     };

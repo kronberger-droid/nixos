@@ -53,8 +53,10 @@ in {
   # launcher).
 
   # niri sets its own XDG_CURRENT_DESKTOP for everything it spawns (see
-  # `environment` below); this covers shells started outside it.
-  home.sessionVariables.XDG_CURRENT_DESKTOP = "niri";
+  # `environment` below); this covers shells started outside it. Same value,
+  # since a Chromium/Electron app launched from a shell otherwise misses the
+  # GNOME token and falls back to the plaintext password store.
+  home.sessionVariables.XDG_CURRENT_DESKTOP = config.programs.niri.settings.environment.XDG_CURRENT_DESKTOP;
 
   programs.niri.settings = {
     # niri's built-in integration is on by default but finds no binary
