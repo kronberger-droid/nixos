@@ -5,8 +5,7 @@
     ladybird
 
     # Messaging
-    aerion
-    zapzap
+    # aerion, zapzap: sandboxed, see aerion.nix and zapzap.nix
     # signal-desktop: sandboxed, see signal.nix
     # equibop: sandboxed, see equibop.nix. It replaces vesktop, which could
     # not render incoming webcams on P14E. Same venmic screenshare lineage
@@ -41,7 +40,7 @@
     openssl
 
     # Networking
-    localsend
+    # localsend: sandboxed, see localsend.nix
     sshfs # mount remote SFTP/SSH dirs locally (see sftp-mount in nushell)
 
     # System
