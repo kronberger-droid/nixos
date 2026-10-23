@@ -3,14 +3,13 @@
   isNotebook ? false,
   ...
 }: {
-  # Zram configuration for better memory management
+  # Zram configuration for better memory management. 50% everywhere: with
+  # the high swappiness below, a small zram fills early and the rest spills
+  # to the disk swap behind it (intelNuc's 20G LV, the laptops' swapfile).
   zramSwap = {
     enable = true;
     algorithm = "zstd";
-    memoryPercent =
-      if isNotebook
-      then 50
-      else 25;
+    memoryPercent = 50;
     priority = 10;
   };
 
@@ -19,8 +18,11 @@
 
   # Kernel parameters for better performance
   boot.kernel.sysctl = {
-    # Reduce swappiness to prefer RAM over swap
-    "vm.swappiness" = 10;
+    # High on purpose. The first swap is zram, where swapping out a page
+    # means compressing it in RAM. That is cheaper than dropping page cache
+    # and reading it back through LUKS, so the kernel should prefer it. The
+    # old value of 10 was the disk-swap advice and did the opposite.
+    "vm.swappiness" = 180;
 
     # Improve responsiveness under memory pressure
     "vm.vfs_cache_pressure" = 50;
