@@ -81,9 +81,11 @@
     ];
   };
 
-  # Limit build parallelism to keep the system responsive
+  # Limit build parallelism to keep the system responsive. 16 threads; two
+  # jobs at 6 cores each leave 4 free. cores is per job, so the old 12 let
+  # two builds take 24.
   nix.settings = {
-    cores = 12; # Leave 4 threads free for desktop responsiveness
+    cores = 6;
     max-jobs = 2; # Max parallel derivation builds
   };
 
