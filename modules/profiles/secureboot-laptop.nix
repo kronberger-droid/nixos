@@ -6,13 +6,15 @@
 # already started to drift (one had the boot editor fixed, one did not).
 # Per-host: the resume device and offset, camera module, cores, and any
 # vendor-specific quirks (spectre's hp_wmi and SD-reader rule).
-{pkgs, ...}: {
+{
+  pkgs,
+  username,
+  ...
+}: {
   imports = [../system/boot/secureboot-tpm.nix];
 
-  # The rest of Steam is in system/desktop/desktop.nix.
-  programs.steam.package = pkgs.steam.override {
-    extraArgs = "-system-composer";
-  };
+  # The rest of Steam is in home-manager/apps/steam.nix.
+  home-manager.users.${username}.steamFlatpak.extraArgs = ["-system-composer"];
 
   services = {
     printing = {

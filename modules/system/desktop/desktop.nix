@@ -42,13 +42,6 @@
   security.pam.services.veila = {};
 
   programs = {
-    # Every workstation runs Steam; each host only sets its own client flags
-    # through programs.steam.package (intelNuc, profiles/secureboot-laptop).
-    steam = {
-      enable = true;
-      gamescopeSession.enable = true;
-      extraPackages = [pkgs.sdl3];
-    };
     niri.enable = true;
     niri.package = pkgs.niri-unstable;
     xwayland.enable = true;
@@ -78,6 +71,12 @@
     # For the Flathub apps in home-manager/apps/flatpak.nix.
     flatpak.enable = true;
   };
+
+  # Steam is the Flathub build. programs.steam used to bring the udev rules
+  # for controllers and the Steam Deck; the Flatpak cannot install them.
+  # Hosts set their client flags through steamFlatpak.extraArgs
+  # (home-manager/apps/steam.nix).
+  hardware.steam-hardware.enable = true;
 
   systemd.services.rfkill-unblock-bluetooth = {
     wantedBy = ["multi-user.target"];
