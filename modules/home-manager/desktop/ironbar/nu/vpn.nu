@@ -40,27 +40,26 @@ def tailscale-on? []: nothing -> bool {
   (^$TAILSCALE status | complete).exit_code == 0
 }
 
-# Tailscale has no systemd unit and no connect delay, so it carries an empty
-# unit and is special-cased in `toggle`.
+# The VPNs come from ironbar.nix, which builds one popup row per entry from
+# the same list. Tailscale has no systemd unit and no connect delay, so it
+# carries an empty unit and is special-cased in `toggle`.
 def entries []: nothing -> list {
-  [
-    {name: "Tailscale",   label: "TAIL", unit: "",                            tooltip: "Tailscale: Connected",  on: (tailscale-on?)}
-    {name: "PIA VPN",     label: "PIA",  unit: "pia-vpn.service",             tooltip: "PIA VPN: Connected",    on: (active? "pia-vpn.service")}
-    {name: "TU Wien VPN", label: "TU",   unit: "openconnect-tuwien.service",  tooltip: "TU Wien VPN: Connected", on: (active? "openconnect-tuwien.service")}
-  ]
+  '@vpns@' | from json | each {|v|
+    $v
+    | insert on (if ($v.unit | is-empty) { tailscale-on? } else { active? $v.unit })
+    | insert tooltip $"($v.name): Connected"
+  }
 }
 
 # Pushed after every toggle rather than waiting up to 15s for the poll.
-# The popup's rows are a fixed tree in ironbar's config, so `entries` fills
-# them through ironvars by position: `vpn_name_<n>` for the label, and
-# `vpn_dot_<n>` for the state dot as Pango markup, filled and green while up,
-# hollow and dim otherwise. `entries` probes every VPN, so it runs once here.
+# Each popup row's state dot is the ironvar `vpn_dot_<n>`, in `entries`
+# order: Pango markup, filled and green while up, hollow and dim otherwise.
+# `entries` probes every VPN, so it runs once here.
 def refresh [] {
   let es = (entries)
   ^$BRIDGE push vpn (status-json $es)
   $es | enumerate | each {|e|
     let dot = if $e.item.on { $"<span foreground=\"($ON)\">●</span>" } else { $"<span foreground=\"($OFF)\">○</span>" }
-    set-var $"vpn_name_($e.index)" $e.item.name
     set-var $"vpn_dot_($e.index)" $dot
   } | ignore
 }
@@ -121,12 +120,6 @@ def "main toggle" [name: string] {
   }
 
   refresh
-}
-
-# A popup row's click: rows know their position, not their name.
-def "main toggle-row" [row: int] {
-  let e = (entries | get -o $row)
-  if $e != null { main toggle $e.name }
 }
 
 def "main disconnect-all" [] {

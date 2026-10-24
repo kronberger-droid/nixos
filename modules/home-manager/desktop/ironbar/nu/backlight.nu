@@ -37,7 +37,6 @@ def state-json []: nothing -> string {
   {
     present: true
     pct: $p
-    # Separate fields, so the widget can pad the number; see audio.nu.
     suffix: $"% ($ICONS | get ([($p * ($ICONS | length) / 100 | math floor) (($ICONS | length) - 1)] | math min))"
     tooltip: $"Backlight: ($p)%"
     class: ""

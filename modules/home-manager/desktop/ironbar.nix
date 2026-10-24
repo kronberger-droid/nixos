@@ -72,6 +72,7 @@
     };
     # Reads /sys/class/power_supply itself.
     battery = {};
+    temp = {};
     backlight = {
       inherit bridge;
       inherit (pkgs) brightnessctl;
@@ -79,6 +80,7 @@
     network = {inherit (pkgs) iproute2;};
     vpn = {
       inherit bridge barLib;
+      vpns = builtins.toJSON vpns;
       inherit (pkgs) systemd libnotify tailscale;
       on = "#${config.scheme.base0B}";
       off = "#${config.scheme.base03}";
@@ -224,14 +226,27 @@
       }
     ];
   };
-  # vpn.nu's `entries` are the VPNs; it fills each row's name and dot by
-  # position, and a row without a name stays hidden. Only the count is here.
-  vpnRows = 3;
-  vpnRow = i: let
-    n = toString i;
-  in
-    dropRow "drop-row" "#vpn_dot_${n}" "#vpn_name_${n}" (run "vpn" "toggle-row ${n}")
-    // {show_if = "#vpn_name_${n}";};
+  # The VPN popup's entries, in the order its rows appear. vpn.nu gets the
+  # same list and pushes each row's state dot as `vpn_dot_<n>`. An empty unit
+  # is Tailscale, which vpn.nu drives through its own CLI.
+  vpns = [
+    {
+      name = "Tailscale";
+      label = "TAIL";
+      unit = "";
+    }
+    {
+      name = "PIA VPN";
+      label = "PIA";
+      unit = "pia-vpn.service";
+    }
+    {
+      name = "TU Wien VPN";
+      label = "TU";
+      unit = "openconnect-tuwien.service";
+    }
+  ];
+  vpnRow = i: v: dropRow "drop-row" "#vpn_dot_${toString i}" v.name (run "vpn" "toggle '${v.name}'");
 
   wpctl = "${pkgs.wireplumber}/bin/wpctl";
 
@@ -275,6 +290,8 @@
         # hovering the readout and held out through a drag by audio.nu.
         (member "audio" {
           type = "custom";
+          # The readout's name, so the bridge's `muted` class lands here too.
+          name = "audio";
           class = "volume";
           bar = [
             {
@@ -323,7 +340,7 @@
               orientation = "v";
               class = "dropdown";
               widgets =
-                map vpnRow (lib.range 0 (vpnRows - 1))
+                lib.imap0 vpnRow vpns
                 ++ [(dropRow "drop-row danger" "✕" "disconnect all" (run "vpn" "disconnect-all"))];
             }
           ];
@@ -343,9 +360,10 @@
       ++ [
         {
           type = "sys_info";
-          format = ["{cpu_percent:1}% " "{memory_percent:1.0}% " "{temp_c:1.0}°C "];
+          format = ["{cpu_percent:1}% " "{memory_percent:1.0}% "];
           on_click_left = run "tui" "monitor";
         }
+        (status "temp" 5000 {})
         sep
 
         # Tray drawer: spotify button and the tray behind the handle.
@@ -477,6 +495,9 @@
     .tray .item:last-child { margin-right: 0; }
 
     .critical, .critical label { color: @base08; }
+    /* Separated from sys_info's last label as sys_info spaces its own: 22px
+       between texts, where a .mod would otherwise sit 15px off. */
+    #temp { margin-left: 12px; }
     .warning, .warning label { color: @base0A; }
     .spotify-btn label { color: @base0B; }
 
@@ -507,6 +528,7 @@
       border-radius: 2px;
       background-color: @base05;
     }
+    .volume.muted highlight, .volume.muted slider { background-color: @base03; }
     .volume slider {
       min-width: 12px;
       min-height: 12px;
