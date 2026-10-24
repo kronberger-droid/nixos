@@ -14,7 +14,7 @@
 
     # Documents
     obsidian
-    onlyoffice-desktopeditors
+    # onlyoffice-desktopeditors: from Flathub, see flatpak.nix
     zotero
 
     # Media
