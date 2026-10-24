@@ -7,7 +7,7 @@
   cfg = config.networking.iwdSwap;
   standalone = cfg.stage == "standalone";
 
-  # DRAFT, off on every host. Staged so each step can be tried with
+  # Off unless a host opts in. Staged so each step can be tried with
   # `nixos-rebuild test` (not the boot default, so a reboot undoes it):
   #
   #   "off"         NetworkManager as today.
@@ -97,7 +97,7 @@ in {
     })
 
     (lib.mkIf standalone {
-      networking.networkmanager.enable = lib.mkForce false;
+      networking.networkmanager.enable = false;
       # With NetworkManager gone NixOS falls back to dhcpcd on every
       # interface, which would fight iwd and networkd over the same links;
       # nixpkgs warns that this "can lead to loss of networking".
