@@ -1,6 +1,7 @@
 {
   dropkittenPkg,
   config,
+  osConfig ? null,
   pkgs,
   lib,
   ...
@@ -121,7 +122,16 @@
       dropkitten = dropkittenPkg;
       # dropkitten -t wants the emulator's name, not its path.
       terminalEmulator = config.terminal.emulator;
-      inherit (pkgs) bash bottom bluetui calcurse networkmanager wiremix;
+      inherit (pkgs) bottom bluetui calcurse wiremix;
+      # impala needs iwd without NetworkManager on top; see the system's
+      # networking/iwd.nix. nmtui keeps the colours it always had.
+      wifiTui =
+        if (osConfig.networking.iwdSwap.stage or "off") == "standalone"
+        then "${pkgs.impala}/bin/impala"
+        else
+          pkgs.writeShellScript "nmtui-connect" ''
+            NEWT_COLORS='root=white,black:window=white,black:border=blue,black:listbox=white,black:actlistbox=black,blue:label=white,black:title=brightblue,black:button=white,black:actbutton=black,blue:compactbutton=white,black:checkbox=white,black:actcheckbox=black,blue:entry=white,black:textbox=white,black' exec ${pkgs.networkmanager}/bin/nmtui connect
+          '';
     };
   };
 

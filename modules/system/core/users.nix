@@ -53,7 +53,9 @@ in {
     isNormalUser = true;
     hashedPasswordFile = passwordFile;
     description = "Kronberger";
-    extraGroups = ["networkmanager" "wheel" "audio" "video" "dialout"];
+    extraGroups =
+      lib.optional config.networking.networkmanager.enable "networkmanager"
+      ++ ["wheel" "audio" "video" "dialout"];
     shell = pkgs.nushell;
     openssh.authorizedKeys.keys = builtins.attrValues (import ../../shared/ssh-keys.nix);
   };
