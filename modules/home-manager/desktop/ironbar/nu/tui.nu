@@ -2,7 +2,7 @@
 
 # Port of waybar.nix's former `tui` attrset and `dropkittenCmd`, in one script.
 #
-# Five modules open a TUI in a dropdown terminal: network -> nmtui, pulseaudio
+# Five modules open a TUI in a dropdown terminal: network -> nmtui or impala, pulseaudio
 # -> wiremix, bluetooth -> bluetui, clock -> calcurse, cpu -> bottom. In
 # waybar.nix that was a Nix function applied five times; here it is one script
 # with a subcommand, so the widgets just call `scripts/tui wifi`.

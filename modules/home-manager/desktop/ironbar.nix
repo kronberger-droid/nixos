@@ -2,6 +2,7 @@
   dropkittenPkg,
   config,
   osConfig ? null,
+  isNotebook,
   pkgs,
   lib,
   ...
@@ -53,13 +54,14 @@
   # substituted copy instead.
   barLib = pkgs.replaceVars ./ironbar/nu/lib.nu {
     inherit utilLinux;
+    inherit (pkgs) ironbar;
     terminalBin = config.terminal.bin;
     terminalAppIdFlag = config.terminal.appIdFlag;
     terminalExecFlag = config.terminal.execFlag;
   };
 
-  bridge = script "bridge" {inherit (pkgs) ironbar;};
-  drawer = script "drawer" {inherit (pkgs) ironbar;};
+  bridge = script "bridge" {inherit barLib;};
+  drawer = script "drawer" {inherit barLib;};
 
   scripts = {
     # sieb.commands are argv lists; one wrapper each so menu.nu gets a path.
@@ -69,18 +71,15 @@
       siebPower = pkgs.writeShellScript "sieb-power" "exec ${lib.escapeShellArgs config.sieb.commands.power}";
     };
     # Reads /sys/class/power_supply itself.
-    battery = {inherit bridge;};
+    battery = {};
     backlight = {
       inherit bridge;
       inherit (pkgs) brightnessctl;
     };
-    network = {
-      inherit bridge;
-      inherit (pkgs) iproute2;
-    };
+    network = {inherit (pkgs) iproute2;};
     vpn = {
-      inherit bridge;
-      inherit (pkgs) systemd libnotify tailscale ironbar;
+      inherit bridge barLib;
+      inherit (pkgs) systemd libnotify tailscale;
       on = "#${config.scheme.base0B}";
       off = "#${config.scheme.base03}";
     };
@@ -148,7 +147,7 @@
       type = "label";
       inherit name;
       class = "mod";
-      label = "#${name}_text{{${toString ms}:${run name "push"}}}";
+      label = "#${name}_text{{${toString ms}:${bridge} poll ${name} ${scriptPath name}}}";
       tooltip = "#${name}_tip";
     }
     // extra;
@@ -163,8 +162,7 @@
     on_mouse_exit = "${drawer} leave ${d}";
   };
   # A drawer child: shown while the drawer is open, sliding out leftward from
-  # the handle as eww's `slideleft` revealer did. 100ms rather than eww's
-  # 300ms, which read as lag rather than motion.
+  # the handle. 100ms: eww's 300ms read as lag rather than motion.
   member = d: m:
     m
     // hover d
@@ -188,11 +186,9 @@
     class = "sep";
     label = "|";
   };
-  # The power group's trailing separator hides with the group: on a desktop
-  # both modules are absent and the two separators would collapse into an
-  # empty "| |".
-  powerGroup = ''for f in /sys/class/power_supply/BAT* /sys/class/backlight/*; do [ -e "$f" ] && exit 0; done; exit 1'';
 
+  # Rounded pills (menu, power, clock, scratchpad, the recording badge) carry
+  # `pill`, which is where the stylesheet's vertical centring lives.
   button = class: glyph: cmd: {
     type = "custom";
     inherit class;
@@ -205,8 +201,7 @@
     ];
   };
 
-  # One row of the VPN popup: a state dot and the name, left-aligned in a
-  # box the way eww's vpn-menu-panel lays them out.
+  # One row of the VPN popup: a state dot and the name, left-aligned.
   dropRow = class: dot: text: cmd: {
     type = "button";
     inherit class;
@@ -229,13 +224,16 @@
       }
     ];
   };
-  # In vpn.nu's `entries` order, which is what numbers the dot ironvars.
-  vpns = ["Tailscale" "PIA VPN" "TU Wien VPN"];
-  vpnRow = i: name: dropRow "drop-row" "#vpn_dot_${toString i}" name (run "vpn" "toggle '${name}'");
+  # vpn.nu's `entries` are the VPNs; it fills each row's name and dot by
+  # position, and a row without a name stays hidden. Only the count is here.
+  vpnRows = 3;
+  vpnRow = i: let
+    n = toString i;
+  in
+    dropRow "drop-row" "#vpn_dot_${n}" "#vpn_name_${n}" (run "vpn" "toggle-row ${n}")
+    // {show_if = "#vpn_name_${n}";};
 
   wpctl = "${pkgs.wireplumber}/bin/wpctl";
-
-  statusNames = ["scratchpad" "screenrec" "idle" "dnd" "bluetooth" "audio" "mpris" "network" "vpn" "battery" "backlight"];
 
   bar = {
     position = "top";
@@ -243,138 +241,158 @@
     anchor_to_edges = true;
 
     start = [
-      (button "menu" "" (run "menu" "launcher"))
+      (button "menu pill" "" (run "menu" "launcher"))
       {
         type = "workspaces";
         sort = "index";
       }
-      (streamed "scratchpad" {on_click_left = run "scratchpad" "toggle";})
+      (streamed "scratchpad" {
+        class = "mod pill";
+        on_click_left = run "scratchpad" "toggle";
+      })
     ];
 
-    end = [
-      (status "screenrec" 30000 {
-        show_if = "#screenrec_shown";
-        on_click_left = run "screenrec" "toggle";
-      })
+    end =
+      [
+        (status "screenrec" 30000 {
+          class = "mod pill";
+          show_if = "#screenrec_shown";
+          on_click_left = run "screenrec" "toggle";
+        })
 
-      # Toggles drawer: idle inhibit and DND behind the handle.
-      (member "toggles" (status "idle" 30000 {on_click_left = run "idle" "toggle";}))
-      (member "toggles" (status "dnd" 30000 {on_click_left = run "dnd" "toggle";}))
-      (handle "toggles" "")
-      sep
+        # Toggles drawer: idle inhibit and DND behind the handle.
+        (member "toggles" (status "idle" 30000 {on_click_left = run "idle" "toggle";}))
+        (member "toggles" (status "dnd" 30000 {on_click_left = run "dnd" "toggle";}))
+        (handle "toggles" "")
+        sep
 
-      (status "bluetooth" 5000 {
-        on_click_left = run "tui" "bluetooth";
-        on_click_right = run "bluetooth" "toggle";
-      })
+        (status "bluetooth" 5000 {
+          on_click_left = run "tui" "bluetooth";
+          on_click_right = run "bluetooth" "toggle";
+        })
 
-      # Volume: the slider is the audio drawer's only member, revealed by
-      # hovering the readout and held out through a drag by audio.nu.
-      (member "audio" {
-        type = "custom";
-        class = "volume";
-        bar = [
-          {
-            type = "slider";
-            length = 100;
-            max = 100;
-            show_label = false;
-            value = "2000:${wpctl} get-volume @DEFAULT_AUDIO_SINK@ | ${pkgs.gawk}/bin/awk '{print int($2 * 100)}'";
-            on_change = "!${run "audio" "set"} $0";
+        # Volume: the slider is the audio drawer's only member, revealed by
+        # hovering the readout and held out through a drag by audio.nu.
+        (member "audio" {
+          type = "custom";
+          class = "volume";
+          bar = [
+            {
+              type = "slider";
+              length = 100;
+              max = 100;
+              show_label = false;
+              value = "2000:${wpctl} get-volume @DEFAULT_AUDIO_SINK@ | ${pkgs.gawk}/bin/awk '{print int($2 * 100)}'";
+              on_change = "!${run "audio" "set"} $0";
+            }
+          ];
+        })
+        (status "audio" 2000 ({
+            on_click_left = run "tui" "audio";
+            on_click_right = run "audio" "toggle-mute";
+            on_scroll_up = run "audio" "scroll up";
+            on_scroll_down = run "audio" "scroll down";
           }
-        ];
-      })
-      (status "audio" 2000 ({
-          on_click_left = run "tui" "audio";
-          on_click_right = run "audio" "toggle-mute";
-          on_scroll_up = run "audio" "scroll up";
-          on_scroll_down = run "audio" "scroll down";
+          // hover "audio"))
+
+        (streamed "mpris" {
+          show_if = "#mpris_shown";
+          on_click_left = run "mpris" "toggle";
+          on_click_right = run "mpris" "next";
+        })
+        sep
+        (status "network" 5000 {on_click_left = run "tui" "wifi";})
+
+        # VPN: the toggles live in a popup.
+        {
+          type = "custom";
+          name = "vpn";
+          class = "mod";
+          tooltip = "#vpn_tip";
+          on_click_right = run "vpn" "disconnect-all";
+          bar = [
+            {
+              type = "button";
+              label = "󰖂#vpn_text{{15000:${run "vpn" "push"}}}";
+              on_click = "popup:toggle";
+            }
+          ];
+          popup = [
+            {
+              type = "box";
+              orientation = "v";
+              class = "dropdown";
+              widgets =
+                map vpnRow (lib.range 0 (vpnRows - 1))
+                ++ [(dropRow "drop-row danger" "✕" "disconnect all" (run "vpn" "disconnect-all"))];
+            }
+          ];
         }
-        // hover "audio"))
+        sep
 
-      (streamed "mpris" {
-        show_if = "#mpris_shown";
-        on_click_left = run "mpris" "toggle";
-        on_click_right = run "mpris" "next";
-      })
-      sep
-      (status "network" 5000 {on_click_left = run "tui" "wifi";})
+        (status "battery" 30000 {show_if = "#battery_shown";})
+        (status "backlight" 5000 {
+          show_if = "#backlight_shown";
+          on_scroll_up = run "backlight" "scroll up";
+          on_scroll_down = run "backlight" "scroll down";
+        })
+        # The battery group's trailing separator, on the hosts that have one:
+        # on a desktop both modules hide and two separators would meet as "| |".
+      ]
+      ++ lib.optional isNotebook sep
+      ++ [
+        {
+          type = "sys_info";
+          format = ["{cpu_percent:1}% " "{memory_percent:1.0}% " "{temp_c:1.0}°C "];
+          on_click_left = run "tui" "monitor";
+        }
+        sep
 
-      # VPN: a popup in place of eww's vpn-menu window.
-      {
-        type = "custom";
-        name = "vpn";
-        class = "mod";
-        tooltip = "#vpn_tip";
-        on_click_right = run "vpn" "disconnect-all";
-        bar = [
-          {
-            type = "button";
-            label = "󰖂#vpn_text{{15000:${run "vpn" "push"}}}";
-            on_click = "popup:toggle";
-          }
-        ];
-        popup = [
-          {
-            type = "box";
-            orientation = "v";
-            class = "dropdown";
-            widgets =
-              lib.imap0 vpnRow vpns
-              ++ [(dropRow "drop-row danger" "✕" "disconnect all" (run "vpn" "disconnect-all"))];
-          }
-        ];
-      }
-      sep
+        # Tray drawer: spotify button and the tray behind the handle.
+        (member "tray" (button "mod spotify-btn" "" (scriptPath "spotify")))
+        (member "tray" {
+          type = "tray";
+          icon_size = 14;
+        })
+        (handle "tray" "")
 
-      (status "battery" 30000 {show_if = "#battery_shown";})
-      (status "backlight" 5000 {
-        show_if = "#backlight_shown";
-        on_scroll_up = run "backlight" "scroll up";
-        on_scroll_down = run "backlight" "scroll down";
-      })
-      (sep // {show_if = powerGroup;})
-      {
-        type = "sys_info";
-        format = ["{cpu_percent:1}% " "{memory_percent:1.0}% " "{temp_c:1.0}°C "];
-        on_click_left = run "tui" "monitor";
-      }
-      sep
-
-      # Tray drawer: spotify button and the tray behind the handle.
-      (member "tray" (button "mod spotify-btn" "" (scriptPath "spotify")))
-      # eww's systray: icon-size 14, spacing 10.
-      (member "tray" {
-        type = "tray";
-        icon_size = 14;
-      })
-      (handle "tray" "")
-
-      {
-        type = "clock";
-        format = "%e %b %Y %H:%M";
-        disable_popup = true;
-        on_click_left = run "tui" "calendar";
-      }
-      (button "power" "" (run "menu" "power"))
-    ];
+        {
+          type = "clock";
+          class = "pill";
+          format = "%e %b %Y %H:%M";
+          disable_popup = true;
+          on_click_left = run "tui" "calendar";
+        }
+        (button "power pill" "" (run "menu" "power"))
+      ];
   };
+
+  # Every ironvar the config reads gets a default, so nothing renders as a
+  # literal `#name` before its first push. Read off the generated config
+  # rather than listed, so a module added above cannot be missed.
+  strings = v:
+    if builtins.isString v
+    then [v]
+    else if builtins.isList v
+    then lib.concatMap strings v
+    else if builtins.isAttrs v
+    then lib.concatMap strings (builtins.attrValues v)
+    else [];
+  ironvarNames =
+    map builtins.head (builtins.filter builtins.isList
+      (lib.concatMap (builtins.split "#([a-z0-9_-]+)") (strings bar)));
 
   configFile =
     {
-      # Every ironvar the config reads, so nothing renders as a literal
-      # `#name` before its first push.
-      ironvar_defaults =
-        lib.genAttrs (lib.concatMap (d: map (k: "${d}_${k}") ["open" "hover" "pinned" "busy"]) ["toggles" "tray" "audio"]) (_: "false")
-        // lib.genAttrs (lib.concatMap (n: ["${n}_text" "${n}_tip" "${n}_class"]) statusNames) (_: "")
-        // lib.genAttrs (map (n: "${n}_shown") statusNames) (_: "false")
-        // lib.genAttrs (lib.imap0 (i: _: "vpn_dot_${toString i}") vpns) (_: "");
+      ironvar_defaults = lib.genAttrs (lib.unique ironvarNames) (n:
+        if lib.hasSuffix "_open" n || lib.hasSuffix "_shown" n
+        then "false"
+        else "");
     }
     // bar;
 
-  # A port of eww's bar.scss, _metrics.scss and workspaces.scss, values
-  # copied rather than re-derived so the two bars can be compared side by
-  # side. The translucent backgrounds are eww.nix's spelled-out rgba ones.
+  # Metrics carried over from the eww bar this replaced: 30px bar, 26px
+  # pills, 24px workspace buttons.
   style = with config.scheme; ''
     /* Generated from modules/home-manager/theming/base16-scheme.nix. */
     @define-color base00 #${base00};
@@ -385,12 +403,11 @@
     @define-color base0A #${base0A};
     @define-color base0B #${base0B};
     @define-color base0F #${base0F};
-    @define-color panel_bg rgba(30, 30, 30, 0.9);
-    @define-color accent_bg rgba(138, 129, 119, 0.9);
-    @define-color urgent_bg rgba(172, 65, 66, 0.9);
+    @define-color panel_bg alpha(@base00, 0.9);
+    @define-color accent_bg alpha(@base0F, 0.9);
+    @define-color urgent_bg alpha(@base08, 0.9);
 
-    /* Symbols first, as eww's bar.scss has it, so glyphs present in both
-       come from the symbols font. */
+    /* Symbols first, so glyphs present in both come from the symbols font. */
     * {
       all: unset;
       font-family: "Symbols Nerd Font Mono", "JetBrains Mono Nerd Font";
@@ -405,28 +422,29 @@
       padding: 0 2px;
     }
 
-    /* bar-pill: menu, clock, power. eww centres a 26px pill in the 30px
-       bar; ironbar stretches every module to the bar's height and GTK CSS
-       has no valign, so the 2px above and below is margin. */
-    .menu, .clock, .power {
-      background-color: @accent_bg;
-      border-radius: 15px;
-      padding: 0 10px;
-      margin: 2px 5px;
-      min-height: 26px;
-    }
-
-    /* bar-module: flat, no background. */
+    /* Flat modules, no background. */
     .mod, .tray, .battery, .handle {
       padding: 0 5px;
       margin: 0 5px;
       min-height: 26px;
     }
 
-    /* GTK4 places glyphs at fractional advances where eww's GTK3 rounds
-       them to whole pixels, so the same string sets slightly wider. Only the
-       clock is long enough for it to show: ~6px over its 17 characters. The
-       fix proper is the gtk-hint-font-metrics setting, which GTK4 has no CSS
+    /* Rounded pills: a 26px pill centred in the 30px bar. ironbar stretches
+       every module to the bar's height and GTK CSS has no valign, so the 2px
+       above and below is margin. After .mod, which scratchpad and the
+       recording badge carry as well. */
+    .pill {
+      border-radius: 15px;
+      padding: 0 10px;
+      margin: 2px 5px;
+      min-height: 26px;
+    }
+    .menu, .clock, .power { background-color: @accent_bg; }
+
+    /* GTK4 places glyphs at fractional advances where GTK3 rounded them to
+       whole pixels, so the same string sets slightly wider. Only the clock
+       is long enough for it to show: ~6px over its 17 characters. The fix
+       proper is the gtk-hint-font-metrics setting, which GTK4 has no CSS
        property for and would change every GTK4 app. */
     .clock label { letter-spacing: -0.4px; }
 
@@ -435,7 +453,7 @@
     }
 
     /* No margin: sys_info's labels already sit ~12px apart, which with the
-       padding comes to the 22px eww's separate cpu/memory/temp modules have. */
+       padding comes to the 22px between the other modules. */
     .sysinfo .item {
       padding: 0 5px;
       min-height: 26px;
@@ -450,19 +468,7 @@
     .handle { color: @base03; }
     .handle:hover, .handle.pinned { color: @base05; }
 
-    #screenrec.recording {
-      background-color: @urgent_bg;
-      border-radius: 15px;
-      padding: 0 10px;
-      margin: 2px 5px;
-    }
-
-    #scratchpad {
-      border-radius: 15px;
-      padding: 0 10px;
-      margin: 2px 5px;
-      min-height: 26px;
-    }
+    #screenrec.recording { background-color: @urgent_bg; }
     #scratchpad.open { background-color: @accent_bg; }
     #scratchpad.closed { background-color: @panel_bg; }
 
@@ -474,7 +480,7 @@
     .warning, .warning label { color: @base0A; }
     .spotify-btn label { color: @base0B; }
 
-    /* 3px: eww's group shrinks to its 24px buttons and centres. */
+    /* 3px: the group is centred around its 24px buttons, like the pills. */
     .workspaces {
       background-color: @panel_bg;
       border-radius: 15px;
@@ -515,8 +521,8 @@
       padding: 4px 8px;
     }
 
-    /* eww's dropdown.scss. Popups are not bar text, so they keep _base.scss's
-       13px JetBrains Mono rather than the bar's symbols-first 14px. */
+    /* Popups are not bar text, so they set 13px JetBrains Mono rather than
+       the bar's symbols-first 14px. */
     .popup {
       background-color: @base00;
       border-radius: 8px;

@@ -13,7 +13,6 @@
 
 # Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
-const BRIDGE = "@bridge@"
 const IP = "@iproute2@/bin/ip"
 
 def default-iface []: nothing -> any {
@@ -72,10 +71,3 @@ def status-json []: nothing -> string {
 }
 
 def main [] { print (status-json) }
-
-def refresh [] {
-  ^$BRIDGE push network (status-json)
-}
-
-# The bar polls through this; toggles push the same way after they act.
-def "main push" [] { refresh }

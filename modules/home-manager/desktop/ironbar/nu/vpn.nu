@@ -16,12 +16,13 @@
 # Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
 const BRIDGE      = "@bridge@"
-const IRONBAR     = "@ironbar@/bin/ironbar"
 const ON          = "@on@"
 const OFF         = "@off@"
 const NOTIFY_SEND = "@libnotify@/bin/notify-send"
 const SYSTEMCTL   = "@systemd@/bin/systemctl"
 const TAILSCALE   = "@tailscale@/bin/tailscale"
+
+use "@barLib@" *
 
 def active? [unit: string] {
   (^$SYSTEMCTL is-active $unit | complete).exit_code == 0
@@ -49,22 +50,23 @@ def entries []: nothing -> list {
   ]
 }
 
-# waybar refreshes on SIGRTMIN+8. eww has no signal mechanism, so the new state
-# is pushed straight into the poll variable rather than waiting up to 15s.
-# The popup's rows are a fixed tree in ironbar's config, so each row's state
-# dot is an ironvar of its own, `vpn_dot_<n>` in `entries` order: Pango
-# markup, filled and green while up, hollow and dim otherwise, as eww's
-# `.drop-row.on .dot`.
+# Pushed after every toggle rather than waiting up to 15s for the poll.
+# The popup's rows are a fixed tree in ironbar's config, so `entries` fills
+# them through ironvars by position: `vpn_name_<n>` for the label, and
+# `vpn_dot_<n>` for the state dot as Pango markup, filled and green while up,
+# hollow and dim otherwise. `entries` probes every VPN, so it runs once here.
 def refresh [] {
-  ^$BRIDGE push vpn (status-json)
-  entries | enumerate | each {|e|
+  let es = (entries)
+  ^$BRIDGE push vpn (status-json $es)
+  $es | enumerate | each {|e|
     let dot = if $e.item.on { $"<span foreground=\"($ON)\">●</span>" } else { $"<span foreground=\"($OFF)\">○</span>" }
-    ^$IRONBAR var set $"vpn_dot_($e.index)" $dot | complete | ignore
+    set-var $"vpn_name_($e.index)" $e.item.name
+    set-var $"vpn_dot_($e.index)" $dot
   } | ignore
 }
 
-def status-json []: nothing -> string {
-  let up = (entries | where on)
+def status-json [es: list]: nothing -> string {
+  let up = ($es | where on)
   if ($up | is-empty) {
     {text: " off", alt: "disconnected", tooltip: "No VPN active", class: "disconnected"}
   } else {
@@ -78,7 +80,7 @@ def status-json []: nothing -> string {
 }
 
 def main [] {
-  print (status-json)
+  print (status-json (entries))
 }
 
 # Menu contents for the dropdown.
@@ -121,6 +123,12 @@ def "main toggle" [name: string] {
   refresh
 }
 
+# A popup row's click: rows know their position, not their name.
+def "main toggle-row" [row: int] {
+  let e = (entries | get -o $row)
+  if $e != null { main toggle $e.name }
+}
+
 def "main disconnect-all" [] {
   mut any = false
 
@@ -142,5 +150,6 @@ def "main disconnect-all" [] {
   refresh
 }
 
-# The bar polls through this; toggles push the same way after they act.
+# The bar polls through this rather than `bridge poll`, since a refresh
+# carries the popup rows along with the record.
 def "main push" [] { refresh }

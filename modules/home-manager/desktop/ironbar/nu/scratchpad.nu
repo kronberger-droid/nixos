@@ -3,10 +3,10 @@
 # Zellij scratchpad, merged from waybar/nu/scratchpad-status.nu and
 # scratchpad-toggle.nu. The toggle logic is unchanged.
 #
-# The status half is now a deflisten rather than a polled script. waybar needed
+# The status half is a stream rather than a polled script. waybar needed
 # a separate systemd unit for this — niri-window-watcher.service in waybar.nix
 # tails `niri msg event-stream` and sends SIGRTMIN+12 to waybar on any window
-# event, because waybar has no way to consume a stream directly. eww does, so
+# event, because waybar has no way to consume a stream directly. The bar does, so
 # the watcher folds into this script and the unit is not needed.
 #
 # niri is called bare rather than by store path, as the originals do: this only
@@ -36,7 +36,7 @@ def status-json []: nothing -> string {
   } | to json --raw
 }
 
-# deflisten source: emit once, then on every window event.
+# The bar's stream (`bridge listen`): emit once, then on every window event.
 def main [] {
   print (status-json)
   ^niri msg --json event-stream
@@ -94,5 +94,5 @@ def "main toggle" [] {
     await-state $app_id "open"
   }
 
-  # No refresh call: the deflisten above sees the window event itself.
+  # No refresh call: the stream above sees the window event itself.
 }

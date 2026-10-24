@@ -41,6 +41,3 @@ def "main toggle" [] {
   }
   refresh
 }
-
-# The bar polls through this; toggles push the same way after they act.
-def "main push" [] { refresh }

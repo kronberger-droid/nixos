@@ -1,40 +1,35 @@
 #!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 
-# Hover-peek, click-pin drawers, the eww clusters' behaviour on ironvars.
+# Hover-peek, click-pin drawers on ironvars.
 #
 # `show_if` takes a single `#var` and no expression, so `hover || pinned`
-# cannot be written in the config. This owns the three inputs and writes the
+# cannot be written in the config. This owns the inputs and writes the
 # result to `<name>_open`, which is what the drawer's children show on.
 #
 # Leaving is debounced. The handle and every child carry enter/leave hooks,
 # and moving from one to the next fires the old one's leave before the new
 # one's enter. Each enter stamps `<name>_tok`; a leave waits, and only clears
-# hover if no enter has stamped since. The same race eww's clusters hit, from
-# the other side: there GTK dropped the leave, here it arrives too early.
+# hover if no enter has stamped since.
 #
 #   drawer (enter | leave | pin) <name>
 #   drawer busy <name> (true | false)
 
-const IRONBAR = "@ironbar@/bin/ironbar"
+use "@barLib@" *
 
-def get-var [key: string]: nothing -> string {
-  let r = (^$IRONBAR var get $key | complete)
-  if $r.exit_code == 0 { $r.stdout | str trim } else { "" }
-}
-
-def set-var [key: string, value: string] {
-  ^$IRONBAR var set $key $value | complete | ignore
-}
-
-def refresh [name: string] {
-  let open = ([hover pinned busy] | any {|k| (get-var $"($name)_($k)") == "true" })
+# `known` holds the inputs this call has just written, so only the others are
+# read back from the bar.
+def refresh [name: string, known: record] {
+  let open = ([hover pinned busy] | any {|k|
+    if $k in $known { $known | get $k } else { (get-var $"($name)_($k)") == "true" }
+  })
   set-var $"($name)_open" ($open | into string)
 }
 
 def "main enter" [name: string] {
   set-var $"($name)_tok" (date now | format date "%s%f")
   set-var $"($name)_hover" "true"
-  refresh $name
+  # Hovered is open, whatever the other inputs say.
+  set-var $"($name)_open" "true"
 }
 
 def "main leave" [name: string] {
@@ -42,24 +37,23 @@ def "main leave" [name: string] {
   sleep 50ms
   if (get-var $"($name)_tok") == $tok {
     set-var $"($name)_hover" "false"
-    refresh $name
+    refresh $name {hover: false}
   }
 }
 
 def "main pin" [name: string] {
-  let pinned = (get-var $"($name)_pinned") == "true"
-  set-var $"($name)_pinned" (not $pinned | into string)
-  # The handle lights up while pinned, as eww's `.cluster.pinned .handle`.
-  let op = if $pinned { "remove-class" } else { "add-class" }
-  ^$IRONBAR style $op $"($name)-handle" pinned | complete | ignore
-  refresh $name
+  let pinned = not ((get-var $"($name)_pinned") == "true")
+  set-var $"($name)_pinned" ($pinned | into string)
+  # The handle lights up while pinned.
+  style (if $pinned { "add-class" } else { "remove-class" }) $"($name)-handle" pinned
+  refresh $name {pinned: $pinned}
 }
 
 # Held up from outside the hover: audio.nu raises it through a slider drag,
 # which can leave the bar without collapsing the slider under the pointer.
-def "main busy" [name: string, on: string] {
-  set-var $"($name)_busy" $on
-  refresh $name
+def "main busy" [name: string, on: bool] {
+  set-var $"($name)_busy" ($on | into string)
+  refresh $name {busy: $on}
 }
 
 def main [] {

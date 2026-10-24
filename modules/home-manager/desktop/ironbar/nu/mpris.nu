@@ -10,7 +10,7 @@
 # developed and tested while waybar was still running.
 #
 # `--follow` blocks and waits even when no player exists, so this stays alive
-# and starts emitting when one appears; exactly what deflisten wants.
+# and starts emitting when one appears; exactly what `bridge listen` wants.
 
 # Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
