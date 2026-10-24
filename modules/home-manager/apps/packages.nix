@@ -13,7 +13,7 @@
     # rather than the CVE-flagged pnpm.
 
     # Documents
-    obsidian
+    # obsidian: sandboxed, see obsidian.nix
     # onlyoffice-desktopeditors: from Flathub, see flatpak.nix
     zotero
 
