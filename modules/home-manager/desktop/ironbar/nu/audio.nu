@@ -68,8 +68,8 @@ def sink-icon [name: string, v: int]: nothing -> string {
 def render [name: string, sink: record, src_muted: bool]: nothing -> string {
   let src_icon = if $src_muted { "" } else { "" }
 
-  # vol and the glyph tail are separate fields: the widget pads the number
-  # with dim dashes, which it cannot do to a pre-formatted string.
+  # vol and the glyph tail are separate fields, so the bridge can drop the
+  # number while muted and keep the glyphs.
   {
     vol: $sink.vol
     muted: $sink.muted
@@ -205,8 +205,8 @@ def "main set-locked" [] {
 # hover-lost like any other, and the bar's leave hook carries neither the
 # button state nor the crossing mode. A recent slider change is the only sign
 # of a drag left, so every set holds the audio drawer's busy flag up for
-# LINGER past itself, which drawer.nu ORs into `audio_open`. Holding the pointer still off the bar for longer than that
-# still collapses it.
+# LINGER past itself, which drawer.nu ORs into `audio_open`. Holding the
+# pointer still off the bar for longer than that still collapses it.
 #
 # Each set writes its own token to STAMP and leaves a detached linger behind
 # it; a linger clears the flag only if STAMP still holds its token when it

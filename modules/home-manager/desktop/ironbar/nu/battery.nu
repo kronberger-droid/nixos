@@ -9,8 +9,9 @@
 #   format-icons     ten glyphs, empty to full
 #
 # waybar kept this module off desktops with an `isNotebook` conditional in
-# nix. `present` replaces that, and the module hides itself when it is false. One config for every host, and a machine that grows
-# a battery gets the module without a rebuild.
+# nix. `present` replaces that, and the module hides itself when it is
+# false. One config for every host, and a machine that grows a battery gets
+# the module without a rebuild.
 
 # Empty to full, waybar's format-icons in order.
 const ICONS = ["󱃍" "󰁺" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"]
@@ -89,8 +90,6 @@ def state-json []: nothing -> string {
   let charging = ($cs | any {|c| $c.status == "Charging" })
   let first = ($cs | first)
 
-  # pct and the glyph tail stay separate fields: the widget pads the number
-  # with dim dashes, which it cannot do to a pre-formatted string.
   {
     present: true
     pct: $pct

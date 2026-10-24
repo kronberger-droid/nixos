@@ -2,8 +2,9 @@
 
 # Port of waybar.nix's former `tui` attrset and `dropkittenCmd`, in one script.
 #
-# Five modules open a TUI in a dropdown terminal: network -> nmtui or impala, pulseaudio
-# -> wiremix, bluetooth -> bluetui, clock -> calcurse, cpu -> bottom. In
+# Five modules open a TUI in a dropdown terminal: network -> nmtui or impala,
+# pulseaudio -> wiremix, bluetooth -> bluetui, clock -> calcurse, cpu ->
+# bottom. In
 # waybar.nix that was a Nix function applied five times; here it is one script
 # with a subcommand, so the widgets just call `scripts/tui wifi`.
 #
@@ -19,7 +20,10 @@
 
 # Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
+const BLUETUI         = "@bluetui@/bin/bluetui"
 const BOTTOM          = "@bottom@/bin/btm"
+const CALCURSE        = "@calcurse@/bin/calcurse"
+const WIREMIX         = "@wiremix@/bin/wiremix"
 const DROPKITTEN      = "@dropkitten@/bin/dropkitten"
 # nmtui with the bar's colours, or impala once iwd replaces NetworkManager;
 # ironbar.nix picks.
@@ -42,9 +46,9 @@ def main [what: string] {
     "wifi" => {
       drop $WIFI_TUI
     }
-    "audio" => { drop "@wiremix@/bin/wiremix" }
-    "bluetooth" => { drop "@bluetui@/bin/bluetui" }
-    "calendar" => { drop "@calcurse@/bin/calcurse" }
+    "audio" => { drop $WIREMIX }
+    "bluetooth" => { drop $BLUETUI }
+    "calendar" => { drop $CALCURSE }
     "monitor" => {
       # Straight to the terminal with the app-id niri's window rule matches.
       # app-id, not title: a TUI's title arrives via OSC after the window
