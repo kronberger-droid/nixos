@@ -93,6 +93,10 @@
   # bluetooth keyboard reconnects on its own (default is false for laptops).
   hardware.bluetooth.powerOnBoot = true;
 
+  # Off NetworkManager: iwd does wifi, networkd ethernet. See
+  # modules/system/networking/iwd.nix for the stages.
+  networking.iwdSwap.stage = "standalone";
+
   users.users.${username}.extraGroups = ["gamemode"];
 
   system.stateVersion = "26.11";
