@@ -29,10 +29,8 @@
     # A reinstall needs it back for that first nixos-install only.
   };
 
-  # The rest of Steam is in system/desktop/desktop.nix.
-  programs.steam.package = pkgs.steam.override {
-    extraArgs = "-cef-disable-gpu";
-  };
+  # The rest of Steam is in home-manager/apps/steam.nix.
+  home-manager.users.${username}.steamFlatpak.extraArgs = ["-cef-disable-gpu"];
 
   programs.gamemode = {
     enable = true;
