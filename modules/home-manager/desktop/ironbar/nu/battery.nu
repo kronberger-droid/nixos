@@ -9,13 +9,10 @@
 #   format-icons     ten glyphs, empty to full
 #
 # waybar kept this module off desktops with an `isNotebook` conditional in
-# nix. The eww port cannot reuse that: the yuck files are copied verbatim, so
-# no build-time flag reaches them. `present` replaces it, and the widget hides
-# itself when it is false. One config for every host, and a machine that grows
+# nix. `present` replaces that, and the module hides itself when it is false. One config for every host, and a machine that grows
 # a battery gets the module without a rebuild.
 
 # Empty to full, waybar's format-icons in order.
-const BRIDGE = "@bridge@"
 const ICONS = ["󱃍" "󰁺" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"]
 const CHARGING = "󰂄"
 
@@ -110,10 +107,3 @@ def state-json []: nothing -> string {
 def main [] {
   print (state-json)
 }
-
-def refresh [] {
-  ^$BRIDGE push battery (state-json)
-}
-
-# The bar polls through this; toggles push the same way after they act.
-def "main push" [] { refresh }

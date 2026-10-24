@@ -6,9 +6,8 @@
 #   on-scroll-up   brightnessctl set +50
 #   on-scroll-down brightnessctl set 50-
 #
-# Same story as battery.nu: waybar gated this on `isNotebook` in nix, and the
-# yuck files see no build-time flags, so absence is detected here instead and
-# the widget hides itself.
+# Same story as battery.nu: waybar gated this on `isNotebook` in nix; absence
+# is detected here instead and the module hides itself.
 
 # Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
@@ -71,6 +70,3 @@ def "main scroll" [dir: string] {
 def refresh [] {
   ^$BRIDGE push backlight (state-json)
 }
-
-# The bar polls through this; toggles push the same way after they act.
-def "main push" [] { refresh }

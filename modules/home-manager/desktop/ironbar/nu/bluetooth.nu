@@ -57,8 +57,8 @@ def battery [mac: string]: nothing -> any {
   if $m == null { null } else { $m.pct | into int }
 }
 
-# waybar refreshed on a signal; eww has none, so the new state is pushed
-# straight into the poll variable. Without this the 5s interval makes a
+# waybar refreshed on a signal; the bar has none, so the new state is pushed
+# straight to it. Without this the 5s interval makes a
 # right-click look like it did nothing, which is what it looked like.
 #
 # BlueZ settles the Powered property a moment after bluetoothctl returns, so
@@ -113,6 +113,3 @@ def "main toggle" [] {
   }
   refresh
 }
-
-# The bar polls through this; toggles push the same way after they act.
-def "main push" [] { refresh }

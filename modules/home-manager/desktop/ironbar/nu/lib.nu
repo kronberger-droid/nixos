@@ -1,4 +1,4 @@
-# Process helpers shared by the scripts here, which `use` this file by its store
+# Helpers shared by the scripts here, which `use` this file by its store
 # path. Not a script itself: no shebang and no `main`, and ironbar.nix builds it
 # on its own rather than installing it under scripts/.
 
@@ -8,6 +8,7 @@ const SETSID          = "@utilLinux@/bin/setsid"
 const TERMINAL        = "@terminalBin@"
 const TERM_APPID_FLAG = "@terminalAppIdFlag@"
 const TERM_EXEC_FLAG  = "@terminalExecFlag@"
+const IRONBAR         = "@ironbar@/bin/ironbar"
 
 # Runs `cmd` in a session of its own and returns at once. Nushell has no `&`,
 # and its `job spawn` runs in a thread of *this* process, so anything started
@@ -36,4 +37,20 @@ export def detach [...cmd: string] {
 # match on.
 export def spawn-terminal [app_id: string, ...cmd: string] {
   detach $TERMINAL $TERM_APPID_FLAG $app_id $TERM_EXEC_FLAG ...$cmd
+}
+
+# Ironbar's runtime variables, one IPC call each. An unset or unreachable
+# variable reads as "", which every caller treats as false or empty.
+export def get-var [key: string]: nothing -> string {
+  let r = (^$IRONBAR var get $key | complete)
+  if $r.exit_code == 0 { $r.stdout | str trim } else { "" }
+}
+
+export def set-var [key: string, value: string] {
+  ^$IRONBAR var set $key $value | complete | ignore
+}
+
+# `ironbar style add-class`/`remove-class` on the module called `module`.
+export def style [op: string, module: string, class: string] {
+  ^$IRONBAR style $op $module $class | complete | ignore
 }

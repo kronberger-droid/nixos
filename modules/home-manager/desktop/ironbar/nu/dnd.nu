@@ -1,7 +1,7 @@
 #!@coreutils@/bin/env -S @nu@/bin/nu -n --no-std-lib
 
 # Do Not Disturb, merged from waybar/nu/dnd-status.nu and dnd-toggle.nu.
-# Logic unchanged; only the refresh differs, since eww has no signal mechanism.
+# A toggle pushes its new state to the bar rather than waiting for the poll.
 
 # Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
@@ -40,6 +40,3 @@ def "main toggle" [] {
   }
   refresh
 }
-
-# The bar polls through this; toggles push the same way after they act.
-def "main push" [] { refresh }

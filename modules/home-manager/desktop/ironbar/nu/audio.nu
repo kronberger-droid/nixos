@@ -65,9 +65,6 @@ def sink-icon [name: string, v: int]: nothing -> string {
   }
 }
 
-# Pure, so the scroll handler can rebuild the state without gathering all of
-# it again. `name` and `src_muted` ride along in the JSON for that reason: the
-# widget hands them back as scroll arguments.
 def render [name: string, sink: record, src_muted: bool]: nothing -> string {
   let src_icon = if $src_muted { "" } else { "" }
 
@@ -83,8 +80,6 @@ def render [name: string, sink: record, src_muted: bool]: nothing -> string {
     })
     tooltip: $"($name): ($sink.vol)%"
     class: (if $sink.muted { "muted" } else { "on" })
-    name: $name
-    src_muted: $src_muted
   } | to json --raw
 }
 
@@ -101,16 +96,15 @@ def main [] {
 def "main toggle-mute" [] {
   ^$WPCTL set-mute $SINK toggle | complete | ignore
   # Push rather than wait for the 2s poll, as the other toggles do.
+  refresh
+}
+
+def refresh [] {
   ^$BRIDGE push audio (state-json)
 }
 
-# The bar polls through this.
-def "main push" [] { ^$BRIDGE push audio (state-json) }
-
 # The bar's scroll handler, waybar's scroll-to-change-volume. `dir` is "up"
-# or "down", nothing else. `name` and `src_muted` are the current state
-# handed back, neither of which a scroll changes; eww passed them, ironbar
-# cannot, and without them settle queries the full state instead.
+# or "down", nothing else.
 #
 # The bar runs one handler per GTK scroll event and passes only the sign, never
 # the amount. A hi-res wheel sends a notch as a burst of small events (the
@@ -125,7 +119,7 @@ def "main push" [] { ^$BRIDGE push audio (state-json) }
 # back, and overlapping calls collapsed into one step.
 const THROTTLE = 100ms
 
-def "main scroll" [dir: string, name: string = "", src_muted: bool = false] {
+def "main scroll" [dir: string] {
   # The bar only ever sends those two. Anything else is not ours to interpret,
   # and a bar handler has no stderr anyone would read, so bail silently.
   let step = match $dir {
@@ -135,20 +129,19 @@ def "main scroll" [dir: string, name: string = "", src_muted: bool = false] {
   }
   let lock = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "bar-audio-scroll.lock")
   # -n fails at once rather than queueing; that failure is the drop.
-  (^$FLOCK -n $lock $NU -n --no-std-lib $env.CURRENT_FILE scroll-locked $step $name
-    ($src_muted | into string)) | complete | ignore
+  ^$FLOCK -n $lock $NU -n --no-std-lib $env.CURRENT_FILE scroll-locked $step | complete | ignore
 }
 
-# The body `main scroll` runs under the lock. Kept to two wpctl calls on an
-# ordinary tick: every wpctl call opens its own PipeWire connection, and the
-# full state-json here took a step to 100-130ms, more than THROTTLE itself.
-def "main scroll-locked" [step: string, name: string, src_muted: bool] {
+# The body `main scroll` runs under the lock. Every wpctl call opens its own
+# PipeWire connection, and settle's full refresh can run a step past THROTTLE;
+# the lock still keeps steps from overlapping, only the rate drops.
+def "main scroll-locked" [step: string] {
   let start = (date now)
 
   # wpctl's relative form is VOL%[-/+]. -l takes a fraction, 1.0 being 100%,
   # and caps the result rather than the step, so it only bites on the way up.
   ^$WPCTL set-volume -l 1.0 $SINK $step | complete | ignore
-  settle $name $src_muted
+  settle
 
   # Hold the lock out to THROTTLE; the rest of this burst lands on it.
   let left = ($THROTTLE - ((date now) - $start))
@@ -156,24 +149,20 @@ def "main scroll-locked" [step: string, name: string, src_muted: bool] {
 }
 
 # The tail every volume change shares, after the new volume is written.
-def settle [name: string, src_muted: bool] {
+def settle [] {
   # Unmute in both directions: changing a muted sink and hearing nothing is
   # the papercut this avoids. Only when the read says muted, which spares a
   # call on every ordinary tick.
-  let sink = (vol-of $SINK)
-  let sink = if $sink.muted {
+  if (vol-of $SINK).muted {
     ^$WPCTL set-mute $SINK 0 | complete | ignore
-    $sink | update muted false
-  } else { $sink }
+  }
 
-  # Push rather than wait for the 2s poll, as toggle-mute does. Without the
-  # handed-back name there is nothing to render from, so gather it all.
-  let state = if ($name | is-empty) { state-json } else { render $name $sink $src_muted }
-  ^$BRIDGE push audio $state
+  # Push rather than wait for the 2s poll, as toggle-mute does.
+  refresh
 }
 
 # The hover slider's on_change. `value` is the slider position, an absolute
-# percentage; `name` and `src_muted` are optional as they are for scroll.
+# percentage.
 #
 # A drag fires once per whole percent it crosses, so this sees the same kind
 # of burst scroll does, but scroll's drop-the-losers throttle is wrong here.
@@ -187,7 +176,7 @@ def settle [name: string, src_muted: bool] {
 #
 # The write is a rename so a holder never reads a half-written file, or
 # unlinks one that is still being written and loses the value with it.
-def "main set" [value: float, name: string = "", src_muted: bool = false] {
+def "main set" [value: float] {
   let run = ($env.XDG_RUNTIME_DIR? | default "/tmp")
   hold $run
 
@@ -197,11 +186,11 @@ def "main set" [value: float, name: string = "", src_muted: bool = false] {
   mv -f $tmp $target
   # Blocking, unlike scroll's -n: queueing is the point.
   (^$FLOCK ($run | path join "bar-audio-set.lock")
-    $NU -n --no-std-lib $env.CURRENT_FILE set-locked $name ($src_muted | into string))
+    $NU -n --no-std-lib $env.CURRENT_FILE set-locked)
   | complete | ignore
 }
 
-def "main set-locked" [name: string, src_muted: bool] {
+def "main set-locked" [] {
   let target = ($env.XDG_RUNTIME_DIR? | default "/tmp" | path join "bar-audio-set.target")
   if not ($target | path exists) { return }
   let pct = (try { open --raw $target | into string | str trim | into int } catch { null })
@@ -209,7 +198,7 @@ def "main set-locked" [name: string, src_muted: bool] {
   if $pct == null { return }
 
   ^$WPCTL set-volume $SINK $"($pct)%" | complete | ignore
-  settle $name $src_muted
+  settle
 }
 
 # Keeps the slider out while it is being dragged. Dragging off the bar is a

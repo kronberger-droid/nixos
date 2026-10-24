@@ -25,7 +25,7 @@ def status-json []: nothing -> string {
   if (recording?) {
     {text: "REC", class: "recording"} | to json --raw
   } else {
-    # waybar hides the module on empty output; eww needs a shape it can parse.
+    # waybar hid the module on empty output; the bridge needs a record to parse.
     {text: "", class: "idle"} | to json --raw
   }
 }
@@ -98,6 +98,3 @@ def "main toggle" [] {
   notify $"Recording started: ($filename | path basename)"
   refresh
 }
-
-# The bar polls through this; toggles push the same way after they act.
-def "main push" [] { refresh }

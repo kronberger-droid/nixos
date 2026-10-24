@@ -2,41 +2,31 @@
 
 # Feeds the status scripts' JSON records into ironbar.
 #
-# The scripts print `{text, tooltip, class}` records, as they did for eww.
-# Ironbar has no JSON input: CSS classes are fixed in the config, and only
-# ironvars and `ironbar style` change at runtime. So a record is split:
+# The scripts print `{text, tooltip, class}` records. Ironbar has no JSON
+# input: CSS classes are fixed in the config, and only ironvars and `ironbar
+# style` change at runtime. So a record is split:
 #
 #   text     the `<name>_text` ironvar, which the module's label reads
 #   tooltip  the `<name>_tip` ironvar, which its tooltip reads
-#   class    swapped on the module named <name>, remembered in `<name>_class`
+#   class    swapped on the module named <name>
 #
 # plus `<name>_shown`, for `show_if` on modules that vanish when idle or
 # absent (screenrec, mpris, battery, backlight).
 #
-#   bridge push <name> <json>                 one record, from a script's
-#                                             `push` or a toggle's refresh
+#   bridge poll <name> <script> [args...]     run a status script once and
+#                                             push what it prints; the bar's
+#                                             `{{ms:…}}` polls are this
 #   bridge listen <name> <script> [args...]   a script streaming records
+#   bridge push <name> <json>                 one record, from a toggle's
+#                                             refresh
 #
-# `listen` runs as a `{{watch:…}}` label script and prints an empty line per
-# record, so the label shows only its ironvar.
+# `poll` prints nothing and `listen` an empty line per record, so the labels
+# running them show only their ironvars.
 
-# Binaries by store path; see ironbar.nix for why these are consts and not
-# spelled inline at the call sites.
-const IRONBAR = "@ironbar@/bin/ironbar"
-
-def set-var [key: string, value: string] {
-  ^$IRONBAR var set $key $value | complete | ignore
-}
-
-def get-var [key: string]: nothing -> string {
-  let r = (^$IRONBAR var get $key | complete)
-  if $r.exit_code == 0 { $r.stdout | str trim } else { "" }
-}
+use "@barLib@" *
 
 # audio, backlight and battery carry the number and its glyph tail as
-# separate fields (`vol`/`pct` and `suffix`), as eww's widgets padded the
-# number themselves. Unpadded here: eww labels unindent by default, so that
-# padding never reached the screen either. Audio hides the number while
+# separate fields (`vol`/`pct` and `suffix`). Audio hides the number while
 # muted, as waybar's format-muted did.
 def text-of [r: record]: nothing -> string {
   let n = ($r.vol? | default $r.pct?)
@@ -45,23 +35,50 @@ def text-of [r: record]: nothing -> string {
   $"($num)($r.suffix? | default "")"
 }
 
+def runtime []: nothing -> string { $env.XDG_RUNTIME_DIR? | default "/tmp" }
+
+# What ironbar was last told about <name>, so an unchanged record costs one
+# IPC call instead of seven. Only trusted when written after ironbar's IPC
+# socket was: a restarted bar starts again from its ironvar defaults, and
+# then everything is pushed in full.
+def cached [name: string]: nothing -> any {
+  let file = (runtime | path join $"bar-($name).json")
+  let sock = (runtime | path join "ironbar-ipc.sock")
+  if not ($file | path exists) or not ($sock | path exists) { return null }
+  if (ls $file | get 0.modified) <= (ls $sock | get 0.modified) { return null }
+  try { open $file } catch { null }
+}
+
 def "main push" [name: string, json: string] {
   let r = (try { $json | from json } catch { null })
   if $r == null { return }
 
   let text = (text-of $r)
-  set-var $"($name)_text" $text
-  set-var $"($name)_tip" ($r.tooltip? | default "")
-  set-var $"($name)_shown" (($text | is-not-empty) and ($r.present? | default true) | into string)
+  let next = {
+    text: $text
+    tip: ($r.tooltip? | default "")
+    shown: (($text | is-not-empty) and ($r.present? | default true) | into string)
+    class: ($r.class? | default "")
+  }
+  let prev = (cached $name | default {text: null, tip: null, shown: null, class: ""})
 
-  # Unconditional, never skipped when the class is unchanged: ironvars
-  # outlive `ironbar reload` but the rebuilt widgets come up classless, so
-  # the stored class is only a record of what to remove.
-  let cls = ($r.class? | default "")
-  let prev = (get-var $"($name)_class")
-  if ($prev | is-not-empty) { ^$IRONBAR style remove-class $name $prev | complete | ignore }
-  if ($cls | is-not-empty) { ^$IRONBAR style add-class $name $cls | complete | ignore }
-  set-var $"($name)_class" $cls
+  for k in [text tip shown] {
+    let v = ($next | get $k)
+    if ($prev | get $k) != $v { set-var $"($name)_($k)" $v }
+  }
+  if ($prev.class | is-not-empty) and $prev.class != $next.class {
+    style remove-class $name $prev.class
+  }
+  # Every time, changed or not: ironvars outlive `ironbar reload` but the
+  # rebuilt widgets come up classless.
+  if ($next.class | is-not-empty) { style add-class $name $next.class }
+
+  $next | to json --raw | save -f (runtime | path join $"bar-($name).json")
+}
+
+def "main poll" [name: string, script: string, ...args: string] {
+  let out = (^$script ...$args | complete)
+  if $out.exit_code == 0 { main push $name ($out.stdout | str trim) }
 }
 
 def "main listen" [name: string, script: string, ...args: string] {
@@ -72,5 +89,5 @@ def "main listen" [name: string, script: string, ...args: string] {
 }
 
 def main [] {
-  print "usage: bridge (push <name> <json> | listen <name> <script> [args...])"
+  print "usage: bridge (poll | listen) <name> <script> [args...], bridge push <name> <json>"
 }
