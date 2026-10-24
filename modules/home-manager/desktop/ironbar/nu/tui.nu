@@ -3,7 +3,7 @@
 # Port of waybar.nix's former `tui` attrset and `dropkittenCmd`, in one script.
 #
 # Five modules open a TUI in a dropdown terminal: network -> nmtui, pulseaudio
-# -> wiremix, bluetooth -> bluetuith, clock -> calcurse, cpu -> btop. In
+# -> wiremix, bluetooth -> bluetui, clock -> calcurse, cpu -> bottom. In
 # waybar.nix that was a Nix function applied five times; here it is one script
 # with a subcommand, so the widgets just call `scripts/tui wifi`.
 #
@@ -12,13 +12,14 @@
 # on it fails inside the freshly spawned terminal, where nothing shows the
 # error but the terminal's own splash.
 #
-# btop is deliberately not routed through dropkitten: waybar.nix noted that
-# btop needs at least 80x24 and dropkitten's fractional sizing came up short,
-# so niri's btop_monitor window rule sizes it instead.
+# The system monitor is deliberately not routed through dropkitten: btop,
+# which it was until bottom replaced it, needed at least 80x24, and
+# dropkitten's fractional sizing came up short, so niri's sysmonitor window
+# rule sizes it instead.
 
 # Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
-const BTOP            = "@btop@/bin/btop"
+const BOTTOM          = "@bottom@/bin/btm"
 const DROPKITTEN      = "@dropkitten@/bin/dropkitten"
 
 use "@barLib@" *
@@ -41,14 +42,14 @@ def main [what: string] {
       drop "@bash@/bin/bash" "-c" $"NEWT_COLORS=\"($NMTUI_COLORS)\" @networkmanager@/bin/nmtui connect"
     }
     "audio" => { drop "@wiremix@/bin/wiremix" }
-    "bluetooth" => { drop "@bluetuith@/bin/bluetuith" }
+    "bluetooth" => { drop "@bluetui@/bin/bluetui" }
     "calendar" => { drop "@calcurse@/bin/calcurse" }
     "monitor" => {
       # Straight to the terminal with the app-id niri's window rule matches.
-      # app-id, not title: btop's title arrives via OSC after the window maps,
-      # too late for the rule, which is why niri.nix's Mod+Shift+T does the
-      # same.
-      spawn-terminal btop_monitor $BTOP
+      # app-id, not title: a TUI's title arrives via OSC after the window
+      # maps, too late for the rule, which is why niri.nix's Mod+Shift+T does
+      # the same.
+      spawn-terminal sysmonitor $BOTTOM
     }
     _ => { error make {msg: $"unknown tui: ($what)"} }
   }

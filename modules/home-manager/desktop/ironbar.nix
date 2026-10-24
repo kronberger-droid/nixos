@@ -121,7 +121,7 @@
       dropkitten = dropkittenPkg;
       # dropkitten -t wants the emulator's name, not its path.
       terminalEmulator = config.terminal.emulator;
-      inherit (pkgs) bash btop bluetuith calcurse networkmanager wiremix;
+      inherit (pkgs) bash bottom bluetui calcurse networkmanager wiremix;
     };
   };
 

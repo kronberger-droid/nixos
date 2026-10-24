@@ -201,7 +201,7 @@ in {
         floating = true;
         cwdArg = true;
       };
-      "${modifier}+Shift+T".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} btop_monitor ${config.terminal.execFlag} ${pkgs.btop}/bin/btop"];
+      "${modifier}+Shift+T".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} sysmonitor ${config.terminal.execFlag} ${pkgs.bottom}/bin/btm"];
       "${modifier}+Shift+X".action.spawn = termSpawn {
         floating = true;
         exec = "${pkgs.yazi}/bin/yazi $(${cwd})";
@@ -459,13 +459,13 @@ in {
         default-window-height = {proportion = 0.6;};
       }
 
-      # btop — must fit at least 80x24 cells for the configured layout.
-      # Matched by app-id (set via the terminal's --app-id/--class flag at
-      # launch) because btop's terminal title arrives via OSC after the
-      # window is already sized. Both the Mod+Shift+T keybind and the
+      # The system monitor (bottom), sized for its default layout. Matched by
+      # app-id (set via the terminal's --app-id/--class flag at launch)
+      # because a TUI's terminal title arrives via OSC after the window is
+      # already sized. Both the Mod+Shift+T keybind and the
       # bar's cpu module launch with this app-id.
       {
-        matches = [{app-id = "^btop_monitor$";}];
+        matches = [{app-id = "^sysmonitor$";}];
         open-floating = true;
         default-column-width = {fixed = 1200;};
         default-window-height = {fixed = 750;};

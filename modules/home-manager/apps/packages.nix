@@ -47,7 +47,7 @@
 
     # System
     ltunify
-    bluetuith
+    bluetui
     wiremix
     # The bar clock's dropdown TUI. Listed here as well as in the script's
     # store-path reference so it is reachable from a plain shell.
