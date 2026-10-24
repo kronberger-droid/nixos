@@ -101,7 +101,7 @@ in {
       # With NetworkManager gone NixOS falls back to dhcpcd on every
       # interface, which would fight iwd and networkd over the same links;
       # nixpkgs warns that this "can lead to loss of networking".
-      networking.useDHCP = lib.mkForce false;
+      networking.useDHCP = false;
       # iwd's own DHCP for wifi; ethernet goes to networkd below.
       networking.wireless.iwd.settings.General.EnableNetworkConfiguration = true;
 
