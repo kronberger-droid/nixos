@@ -9,12 +9,9 @@
       enable = true;
       enableNushellIntegration = true;
     };
-    btop = {
-      enable = true;
-      settings = {
-        color_theme = "TTY";
-      };
-    };
+    # Rust in place of btop. Its default palette is the terminal's ANSI
+    # colours, which is what btop's "TTY" theme was set for.
+    bottom.enable = true;
   };
 
   home.packages = with pkgs; [
