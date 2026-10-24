@@ -19,7 +19,7 @@ in {
     powertop.enable = false;
 
     # Resume commands to ensure services restart properly
-    resumeCommands = ''
+    resumeCommands = lib.optionalString config.networking.networkmanager.enable ''
       systemctl restart NetworkManager || true
     '';
   };

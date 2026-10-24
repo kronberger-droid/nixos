@@ -21,10 +21,11 @@
 # spelled inline at the call sites.
 const BOTTOM          = "@bottom@/bin/btm"
 const DROPKITTEN      = "@dropkitten@/bin/dropkitten"
+# nmtui with the bar's colours, or impala once iwd replaces NetworkManager;
+# ironbar.nix picks.
+const WIFI_TUI        = "@wifiTui@"
 
 use "@barLib@" *
-
-const NMTUI_COLORS = "root=white,black:window=white,black:border=blue,black:listbox=white,black:actlistbox=black,blue:label=white,black:title=brightblue,black:button=white,black:actbutton=black,blue:compactbutton=white,black:checkbox=white,black:actcheckbox=black,blue:entry=white,black:textbox=white,black"
 
 def drop [...cmd: string] {
   # dropkitten -W/-H are fractions of the screen.
@@ -39,7 +40,7 @@ def drop [...cmd: string] {
 def main [what: string] {
   match $what {
     "wifi" => {
-      drop "@bash@/bin/bash" "-c" $"NEWT_COLORS=\"($NMTUI_COLORS)\" @networkmanager@/bin/nmtui connect"
+      drop $WIFI_TUI
     }
     "audio" => { drop "@wiremix@/bin/wiremix" }
     "bluetooth" => { drop "@bluetui@/bin/bluetui" }
