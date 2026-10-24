@@ -19,5 +19,6 @@
     ./zapzap.nix
     ./aerion.nix
     ./localsend.nix
+    ./flatpak.nix
   ];
 }

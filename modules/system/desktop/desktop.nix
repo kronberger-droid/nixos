@@ -75,6 +75,8 @@
     gvfs.enable = true;
     udisks2.enable = true;
     upower.enable = true;
+    # For the Flathub apps in home-manager/apps/flatpak.nix.
+    flatpak.enable = true;
   };
 
   systemd.services.rfkill-unblock-bluetooth = {

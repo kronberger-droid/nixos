@@ -102,6 +102,9 @@
       url = "github:nixpak/nixpak";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Declarative Flathub apps (home-manager/apps/flatpak.nix). `latest`
+    # tracks the newest release tag rather than main.
+    nix-flatpak.url = "github:gmodena/nix-flatpak/?ref=latest";
     niri-src = {
       url = "github:kronberger-droid/niri";
       flake = false;
@@ -239,6 +242,8 @@
       {
         home-manager.sharedModules = [
           inputs.base16.homeManagerModule
+          # Inert unless the host enables services.flatpak.
+          inputs.nix-flatpak.homeManagerModules.nix-flatpak
         ];
       }
       agenix.nixosModules.default
