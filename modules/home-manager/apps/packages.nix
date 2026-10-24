@@ -15,7 +15,7 @@
     # Documents
     # obsidian: sandboxed, see obsidian.nix
     # onlyoffice-desktopeditors: from Flathub, see flatpak.nix
-    zotero
+    # zotero: sandboxed, see zotero.nix
 
     # Media
     drawio
