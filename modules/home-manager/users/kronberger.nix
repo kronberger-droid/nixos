@@ -58,7 +58,8 @@ in {
           # (shared/ssh-admin-keys.nix) every login there, deploy-rs and
           # nix-remote included, signs with that key from disk and never asks
           # the agent. The control master makes a deploy's several connections
-          # cost one passphrase.
+          # cost one passphrase. While it lingers, any local process can ride
+          # it without one, so it lingers only as long as a deploy needs.
           // lib.optionalAttrs (builtins.hasAttr host (import ../../shared/ssh-admin-keys.nix)) {
             homeserver = {
               IdentityFile = "~/.ssh/id_ed25519_admin";
@@ -67,7 +68,7 @@ in {
               AddKeysToAgent = "no";
               ControlMaster = "auto";
               ControlPath = "~/.ssh/cm-%C";
-              ControlPersist = "10m";
+              ControlPersist = "2m";
             };
           };
       };
