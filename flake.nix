@@ -13,6 +13,12 @@
     # 140. Keep the pin until unstable's zotero builds on a supported ESR
     # again; then drop this input and the overlay entry.
     nixpkgs-zotero.url = "github:NixOS/nixpkgs/7a0f122f5090cf4c2ade2a13a0e229d4e19ba71f";
+    # nixpkgs 3ec6363 moved the python `mcp` SDK to 2.x, which fastmcp 3.4.7
+    # does not support yet, so fastmcp-slim is marked broken there
+    # (`broken = versionAtLeast mcp.version "2"`) and with it zotero-mcp.
+    # Pin zotero-mcp's python set to the last rev on mcp 1.x. Drop this input
+    # and the overlay entry once unstable's fastmcp evaluates again.
+    nixpkgs-mcp.url = "github:NixOS/nixpkgs/02c087f3fe673c9e317f206a627cb6b910336dbe";
     # ladybird 2026-10-14 fails on rustc 1.99, which deprecated the
     # `fetch_update` its AK crate calls, under its own -Dwarnings. Pin to the
     # rev before, where the 2026-10-06 build is cached. NixOS/nixpkgs#576716
