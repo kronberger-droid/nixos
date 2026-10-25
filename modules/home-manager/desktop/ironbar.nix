@@ -61,7 +61,19 @@
   };
 
   bridge = script "bridge" {inherit barLib;};
-  drawer = script "drawer" {inherit barLib;};
+  # Every bar shares this name, so drawer.nu can open popups over IPC
+  # without knowing which output's bar it is; with several outputs, each
+  # bar's volume popup opens together.
+  barName = "main";
+  drawer = script "drawer" {
+    inherit barLib barName;
+    inherit (pkgs) ironbar;
+    # Drawers that open their module's popup rather than revealing members.
+    popups = builtins.toJSON ["audio"];
+    # Drawers whose members open menus that must not collapse them.
+    menuDrawers = builtins.toJSON ["tray"];
+    barHeight = toString bar.height;
+  };
 
   scripts = {
     # sieb.commands are argv lists; one wrapper each so menu.nu gets a path.
@@ -159,15 +171,17 @@
     // {label = "#${name}_text{{watch:${bridge} listen ${name} ${scriptPath name}}}";};
 
   # Hooks every member of a drawer carries; see drawer.nu for the debounce.
-  hover = d: {
-    on_mouse_enter = "${drawer} enter ${d}";
-    on_mouse_exit = "${drawer} leave ${d}";
+  # `id` tells the members apart, which is what keeps a quick pass over one
+  # of them from reading as a move into a sibling.
+  hover = d: id: {
+    on_mouse_enter = "${drawer} enter ${d} ${id}";
+    on_mouse_exit = "${drawer} leave ${d} ${id}";
   };
   # A drawer child: shown while the drawer is open, sliding out leftward from
   # the handle. 100ms: eww's 300ms read as lag rather than motion.
   member = d: m:
     m
-    // hover d
+    // hover d (m.name or m.type)
     // {
       show_if = "#${d}_open";
       transition_type = "slide_start";
@@ -181,7 +195,7 @@
       label = glyph;
       on_click_left = "${drawer} pin ${d}";
     }
-    // hover d;
+    // hover d "handle";
 
   sep = {
     type = "label";
@@ -251,12 +265,13 @@
   wpctl = "${pkgs.wireplumber}/bin/wpctl";
 
   bar = {
+    name = barName;
     position = "top";
     height = 30;
     anchor_to_edges = true;
 
     start = [
-      (button "menu pill" "" (run "menu" "launcher"))
+      (button "launcher pill" "" (run "menu" "launcher"))
       {
         type = "workspaces";
         sort = "index";
@@ -286,31 +301,47 @@
           on_click_right = run "bluetooth" "toggle";
         })
 
-        # Volume: the slider is the audio drawer's only member, revealed by
-        # hovering the readout and held out through a drag by audio.nu.
-        (member "audio" {
-          type = "custom";
-          # The readout's name, so the bridge's `muted` class lands here too.
-          name = "audio";
-          class = "volume";
-          bar = [
-            {
-              type = "slider";
-              length = 100;
-              max = 100;
-              show_label = false;
-              value = "2000:${wpctl} get-volume @DEFAULT_AUDIO_SINK@ | ${pkgs.gawk}/bin/awk '{print int($2 * 100)}'";
-              on_change = "!${run "audio" "set"} $0";
-            }
-          ];
-        })
-        (status "audio" 2000 ({
-            on_click_left = run "tui" "audio";
+        # Volume: hovering the readout opens a slider in a popup under the
+        # bar, the audio drawer, which a drag holds open through audio.nu.
+        # A custom module because popups hang off a button; the bridge's
+        # `muted` class reaches the popup too, as `name` covers both.
+        ({
+            type = "custom";
+            name = "audio";
+            class = "mod";
+            # No tooltip: it would cover the slider popup opening below.
             on_click_right = run "audio" "toggle-mute";
             on_scroll_up = run "audio" "scroll up";
             on_scroll_down = run "audio" "scroll down";
+            bar = [
+              {
+                type = "button";
+                label = "#audio_text{{2000:${bridge} poll audio ${scriptPath "audio"}}}";
+                on_click = "!${run "tui" "audio"}";
+              }
+            ];
+            # The hooks sit on a box that fills the whole panel, so the
+            # pointer on the panel's edge still counts as on the popup.
+            popup = [
+              ({
+                  type = "box";
+                  class = "volume-box";
+                  widgets = [
+                    {
+                      type = "slider";
+                      class = "volume";
+                      length = 160;
+                      max = 100;
+                      show_label = false;
+                      value = "2000:${wpctl} get-volume @DEFAULT_AUDIO_SINK@ | ${pkgs.gawk}/bin/awk '{print int($2 * 100)}'";
+                      on_change = "!${run "audio" "set"} $0";
+                    }
+                  ];
+                }
+                // hover "audio" "popup")
+            ];
           }
-          // hover "audio"))
+          // hover "audio" "readout")
 
         (streamed "mpris" {
           show_if = "#mpris_shown";
@@ -364,10 +395,13 @@
           on_click_left = run "tui" "monitor";
         }
         (status "temp" 5000 {})
-        sep
+        # The tray drawer's neighbours mark that the pointer left it
+        # sideways; see drawer.nu `leave`.
+        (sep // {on_mouse_enter = "${drawer} out tray";})
 
         # Tray drawer: spotify button and the tray behind the handle.
         (member "tray" (button "mod spotify-btn" "" (scriptPath "spotify")))
+        # Its menus hold the drawer open; see drawer.nu `leave`.
         (member "tray" {
           type = "tray";
           icon_size = 14;
@@ -377,6 +411,7 @@
         {
           type = "clock";
           class = "pill";
+          on_mouse_enter = "${drawer} out tray";
           format = "%e %b %Y %H:%M";
           disable_popup = true;
           on_click_left = run "tui" "calendar";
@@ -457,7 +492,10 @@
       margin: 2px 5px;
       min-height: 26px;
     }
-    .menu, .clock, .power { background-color: @accent_bg; }
+    /* `launcher`, not `menu`: GTK4 gives every popover menu the class
+       `.menu`, so a launcher named that painted the tray's menus as pills
+       and greyed every item at once on hover. */
+    .launcher, .clock, .power { background-color: @accent_bg; }
 
     /* GTK4 places glyphs at fractional advances where GTK3 rounded them to
        whole pixels, so the same string sets slightly wider. Only the clock
@@ -466,7 +504,7 @@
        property for and would change every GTK4 app. */
     .clock label { letter-spacing: -0.4px; }
 
-    .mod:hover, .menu:hover label, .power:hover label, .clock:hover label {
+    .mod:hover, .launcher:hover label, .power:hover label, .clock:hover label {
       color: @base03;
     }
 
@@ -517,7 +555,7 @@
     .workspaces .item.focused { background-color: @accent_bg; }
     .workspaces .item.urgent { color: @base08; }
 
-    .volume { margin: 0 0 0 5px; }
+    .volume { margin: 4px 0; }
     .volume trough {
       min-width: 100px;
       min-height: 4px;
@@ -528,7 +566,13 @@
       border-radius: 2px;
       background-color: @base05;
     }
-    .volume.muted highlight, .volume.muted slider { background-color: @base03; }
+    .muted .volume highlight, .muted .volume slider { background-color: @base03; }
+    /* In the popup the trough sits on base00, where the bar's panel_bg
+       would vanish. */
+    .popup .volume trough { background-color: @base02; }
+    /* The volume popup's padding lives on its hover box instead. */
+    #popup-audio { padding: 0; }
+    .volume-box { padding: 8px; }
     .volume slider {
       min-width: 12px;
       min-height: 12px;
@@ -564,6 +608,32 @@
     .drop-row:hover { background-color: @base02; }
     .drop-row .dot { margin-right: 10px; }
     .drop-row.danger label { color: @base08; }
+
+    /* The tray's menus are GTK4 PopoverMenus, left bare by `all: unset`;
+       styled as the VPN popup. Each item is a modelbutton, so hover lights
+       one row rather than the whole menu. */
+    popover.menu > contents {
+      background-color: @base00;
+      border-radius: 8px;
+      padding: 8px;
+      min-width: 180px;
+    }
+    popover.menu modelbutton {
+      border-radius: 6px;
+      padding: 8px;
+    }
+    popover.menu modelbutton:hover { background-color: @base02; }
+    popover.menu label {
+      font-family: "JetBrains Mono Nerd Font";
+      font-size: 13px;
+      color: @base05;
+    }
+    popover.menu modelbutton:disabled label { color: @base03; }
+    popover.menu separator {
+      min-height: 1px;
+      margin: 4px 8px;
+      background-color: @base02;
+    }
   '';
 in {
   home.packages = [
