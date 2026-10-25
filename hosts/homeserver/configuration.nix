@@ -9,11 +9,15 @@
   hostKeys = import ../../modules/shared/host-keys.nix;
   addrs = import ../../modules/shared/homeserver.nix;
   # Keys for the two root-capable accounts below. The admin keys are the ones
-  # never served by an agent (shared/ssh-admin-keys.nix). While a machine is
-  # moving over, its everyday key stays accepted too.
-  rootKeys =
-    builtins.attrValues (import ../../modules/shared/ssh-admin-keys.nix)
-    ++ builtins.attrValues (import ../../modules/shared/ssh-keys.nix);
+  # never served by an agent (shared/ssh-admin-keys.nix); a machine that has
+  # one is let in only with it, so the key its agent serves stops working
+  # here. Machines without one yet keep their everyday key.
+  rootKeys = let
+    adminKeys = import ../../modules/shared/ssh-admin-keys.nix;
+    userKeys = import ../../modules/shared/ssh-keys.nix;
+  in
+    builtins.attrValues adminKeys
+    ++ builtins.attrValues (builtins.removeAttrs userKeys (builtins.attrNames adminKeys));
   # Keys that only ever talk to the store get no shell: the protocol command
   # is forced, as nix.sshServe does it. The personal keys stay unrestricted,
   # since `flake --remote` runs `nix build` over a plain ssh session.
