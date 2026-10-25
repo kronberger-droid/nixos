@@ -5,30 +5,24 @@
 # `show_if` takes a single `#var` and no expression, so `hover || pinned`
 # cannot be written in the config. This owns the inputs and writes the
 # result to `<name>_open`, which is what the drawer's children show on.
-# A drawer named in POPUPS opens the module's popup under the bar instead.
 #
 # Leaving is debounced. The handle and every child carry enter/leave hooks,
 # and moving from one to the next fires a leave and an enter in either
-# order: a popup is a surface of its own, so its enter can land just before
-# the bar's leave. Each enter stamps `<name>_tok` with the time and the
-# member's id; a leave waits DEBOUNCE, and clears hover unless an enter came
-# after it, or within REVERSED before it from a different member. The id is
+# order. Each enter stamps `<name>_tok` with the time and the member's id;
+# a leave waits DEBOUNCE, and clears hover unless an enter came after it,
+# or within REVERSED before it from a different member. The id is
 # what keeps a quick pass over one member (the narrow handle, say) from
 # reading as a move into a sibling.
 #
 #   drawer (enter | leave) <name> <member>
 #   drawer (pin | out) <name>
-#   drawer busy <name> (true | false)
 
 use "@barLib@" *
 
-const IRONBAR = "@ironbar@/bin/ironbar"
-const BAR = "@barName@"
-const POPUPS = '@popups@'
 const MENUS = '@menuDrawers@'
 const BAR_HEIGHT = "@barHeight@"
 
-# Long enough to cross from the bar into a popup below it, short enough that
+# Long enough to cross the gap between two members, short enough that
 # leaving reads as immediate.
 const DEBOUNCE = 150ms
 # How far before a leave an enter may land and still count as crossing into
@@ -42,46 +36,26 @@ const WATCH_EVERY = 150ms
 const WATCH_FOR = 2min
 const MENU_REACH = {x: 220, y: 350}
 
-def popup? [name: string]: nothing -> bool {
-  $name in ($POPUPS | from json)
-}
-
 # niri is called bare, as scratchpad.nu does: this only runs inside its
 # session. Logical pixels, as the bar is laid out in.
 def cursor []: nothing -> any {
   try { ^niri msg -j cursor-position | from json | select x y } catch { null }
 }
 
-# Opening a popup re-creates it, so it is only touched when the state flips,
-# which costs a popup drawer one read of the state it is leaving.
-def set-open [name: string, open: bool] {
-  if (popup? $name) {
-    let was = (get-var $"($name)_open") == "true"
-    if $was != $open {
-      if $open {
-        ^$IRONBAR bar $BAR show-popup $name | complete | ignore
-      } else {
-        ^$IRONBAR bar $BAR hide-popup | complete | ignore
-      }
-    }
-  }
-  set-var $"($name)_open" ($open | into string)
-}
-
 # `known` holds the inputs this call has just written, so only the others are
 # read back from the bar.
 def refresh [name: string, known: record] {
-  let open = ([hover pinned busy] | any {|k|
+  let open = ([hover pinned] | any {|k|
     if $k in $known { $known | get $k } else { (get-var $"($name)_($k)") == "true" }
   })
-  set-open $name $open
+  set-var $"($name)_open" ($open | into string)
 }
 
 def "main enter" [name: string, member: string] {
   set-var $"($name)_tok" $"(date now | into int) ($member)"
   set-var $"($name)_hover" "true"
   # Hovered is open, whatever the other inputs say.
-  set-open $name true
+  set-var $"($name)_open" "true"
 }
 
 # Whether the pointer is back in the drawer since a leave from `member` at
@@ -146,13 +120,6 @@ def "main out" [name: string] {
   set-var $"($name)_out" (date now | into int | into string)
 }
 
-# Held up from outside the hover: audio.nu raises it through a slider drag,
-# which can leave the bar without collapsing the slider under the pointer.
-def "main busy" [name: string, on: bool] {
-  set-var $"($name)_busy" ($on | into string)
-  refresh $name {busy: $on}
-}
-
 def main [] {
-  print "usage: drawer (enter | leave) <name> <member>, drawer (pin | out) <name>, drawer busy <name> <on>"
+  print "usage: drawer (enter | leave) <name> <member>, drawer (pin | out) <name>"
 }
