@@ -10,8 +10,8 @@
 #   tooltip  the `<name>_tip` ironvar, which its tooltip reads
 #   class    swapped on the module named <name>
 #
-# plus `<name>_shown`, for `show_if` on modules that vanish when idle
-# (screenrec, mpris).
+# plus `<name>_shown`, for `show_if` on modules that vanish when idle or
+# absent (screenrec, mpris, battery, backlight).
 #
 #   bridge poll <name> <script> [args...]     run a status script once and
 #                                             push what it prints; the bar's
@@ -24,6 +24,16 @@
 # running them show only their ironvars.
 
 use "@barLib@" *
+
+# audio, backlight and battery carry the number and its glyph tail as
+# separate fields (`vol`/`pct` and `suffix`). Audio hides the number while
+# muted, as waybar's format-muted did.
+def text-of [r: record]: nothing -> string {
+  let n = ($r.vol? | default $r.pct?)
+  if $n == null { return ($r.text? | default "") }
+  let num = if ($r.muted? | default false) { "" } else { $n | into string }
+  $"($num)($r.suffix? | default "")"
+}
 
 def runtime []: nothing -> string { $env.XDG_RUNTIME_DIR? | default "/tmp" }
 
@@ -43,11 +53,11 @@ def "main push" [name: string, json: string] {
   let r = (try { $json | from json } catch { null })
   if $r == null { return }
 
-  let text = ($r.text? | default "")
+  let text = (text-of $r)
   let next = {
     text: $text
     tip: ($r.tooltip? | default "")
-    shown: ($text | is-not-empty | into string)
+    shown: (($text | is-not-empty) and ($r.present? | default true) | into string)
     class: ($r.class? | default "")
   }
   let prev = (cached $name | default {text: null, tip: null, shown: null, class: ""})

@@ -41,7 +41,7 @@
   # Installed names carry no extension. niri's binds reach two of them here.
   scriptPath = name: "${config.xdg.configHome}/ironbar/scripts/${name}";
 
-  # setsid for lib.nu's `detach`, flock for the volume scroll's lock.
+  # setsid for lib.nu's `detach`, flock for audio.nu's throttles.
   utilLinux = pkgs.util-linux;
 
   # The helpers several scripts share: `detach` and `spawn-terminal`. Built
@@ -61,8 +61,15 @@
   };
 
   bridge = script "bridge" {inherit barLib;};
+  # Every bar shares this name, so drawer.nu can open popups over IPC
+  # without knowing which output's bar it is; with several outputs, each
+  # bar's volume popup opens together.
+  barName = "main";
   drawer = script "drawer" {
-    inherit barLib;
+    inherit barLib barName;
+    inherit (pkgs) ironbar;
+    # Drawers that open their module's popup rather than revealing members.
+    popups = builtins.toJSON ["audio"];
     # Drawers whose members open menus that must not collapse them.
     menuDrawers = builtins.toJSON ["tray"];
     barHeight = toString bar.height;
@@ -75,7 +82,13 @@
       siebLauncher = pkgs.writeShellScript "sieb-launcher" "exec ${lib.escapeShellArgs config.sieb.commands.launcher}";
       siebPower = pkgs.writeShellScript "sieb-power" "exec ${lib.escapeShellArgs config.sieb.commands.power}";
     };
+    # Reads /sys/class/power_supply itself.
+    battery = {};
     temp = {};
+    backlight = {
+      inherit bridge;
+      inherit (pkgs) brightnessctl;
+    };
     network = {inherit (pkgs) iproute2;};
     vpn = {
       inherit bridge barLib;
@@ -83,6 +96,14 @@
       inherit (pkgs) systemd libnotify tailscale;
       on = "#${config.scheme.base0B}";
       off = "#${config.scheme.base03}";
+    };
+    audio = {
+      inherit bridge drawer barLib utilLinux;
+      inherit (pkgs) wireplumber;
+    };
+    bluetooth = {
+      inherit bridge;
+      inherit (pkgs) systemd bluez;
     };
     mpris = {inherit (pkgs) playerctl;};
     dnd = {
@@ -243,60 +264,8 @@
 
   wpctl = "${pkgs.wireplumber}/bin/wpctl";
 
-  # The volume module has no scroll of its own, so the common on_scroll
-  # runs wpctl. A hi-res wheel reaches GTK as smooth deltas of 1/8 notch,
-  # and ironbar runs on_scroll only once those add up to 10, so at the
-  # default speed of 1 a step took ten notches; at 10 a notch is one step.
-  # flock -n keeps two steps from overlapping, since `2%+` reads the volume
-  # and writes it back, and drops what lands on a held lock rather than
-  # queueing it, which also paces a touchpad's far denser deltas. Unmuting
-  # on scroll spares turning the volume up and hearing nothing.
-  volumeStep = dir: "${utilLinux}/bin/flock -n \"$XDG_RUNTIME_DIR/bar-volume-scroll.lock\" sh -c '${wpctl} set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 2%${dir} && ${wpctl} set-mute @DEFAULT_AUDIO_SINK@ 0'";
-
-  # waybar's battery glyphs, empty to full, spread evenly: 0-9% the first,
-  # 90% and up the last. Profiles match the lowest `when` at or above the
-  # charge and tag the module `profile-<name>` (not the docs'
-  # `.battery.<threshold>`), so the warning (30%) and critical (15%) bands
-  # get profiles of their own. Every discharge profile says `charging =
-  # false`, or charging at 10% would match the 15% profile before the
-  # charging one.
-  batteryGlyphs = ["󱃍" "󰁺" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
-  batteryBands =
-    [
-      {
-        name = "critical-0";
-        at = 9;
-        glyph = 0;
-      }
-      {
-        name = "critical-1";
-        at = 15;
-        glyph = 1;
-      }
-      {
-        name = "warning-1";
-        at = 19;
-        glyph = 1;
-      }
-      {
-        name = "warning-2";
-        at = 29;
-        glyph = 2;
-      }
-      {
-        name = "warning-3";
-        at = 30;
-        glyph = 3;
-      }
-    ]
-    ++ map (g: {
-      name = "level-${toString g}";
-      at = g * 10 + 9;
-      glyph = g;
-    }) (lib.range 3 8);
-  batteryClasses = kind: map (b: ".battery.profile-${b.name}") (lib.filter (b: lib.hasPrefix kind b.name) batteryBands);
-
   bar = {
+    name = barName;
     position = "top";
     height = 30;
     anchor_to_edges = true;
@@ -327,55 +296,52 @@
         (handle "toggles" "")
         sep
 
-        # Built-in: a click opens its device popup, with the power switch.
-        {
-          type = "bluetooth";
-          class = "mod";
-          format = {
-            not_found = "";
-            disabled = "󰂲 off";
-            enabled = "󰂯 on";
-            connected = "󰂱 {device_alias}";
-            connected_battery = "󰂱 {device_alias} {device_battery_percent}%";
-          };
-          on_click_middle = run "tui" "bluetooth";
-        }
+        (status "bluetooth" 5000 {
+          on_click_left = run "tui" "bluetooth";
+          on_click_right = run "bluetooth" "toggle";
+        })
 
-        # Built-in: a click opens the mixer (output, mute, mic, per-app). Its
-        # one format serves the sink and the source label alike, so the mic
-        # would read as a second percentage; it lives in the popup instead.
-        {
-          type = "volume";
-          class = "mod";
-          format = "{percentage}% {icon}";
-          mute_format = "{icon}";
-          show_sources = false;
-          popup_orientation = "vertical";
-          sink_slider_orientation = "horizontal";
-          source_slider_orientation = "horizontal";
-          use_default_profiles = false;
-          icons = {
-            volume = "";
-            muted = "󰝟";
-            mic_volume = "";
-            mic_muted = "";
-          };
-          profiles = {
-            low = {
-              when = 33;
-              icons.volume = "";
-            };
-            medium = {
-              when = 66;
-              icons.volume = "";
-            };
-          };
-          on_click_right = "${wpctl} set-mute @DEFAULT_AUDIO_SINK@ toggle";
-          on_click_middle = run "tui" "audio";
-          on_scroll_up = volumeStep "+";
-          on_scroll_down = volumeStep "-";
-          smooth_scroll_speed = 10;
-        }
+        # Volume: hovering the readout opens a slider in a popup under the
+        # bar, the audio drawer, which a drag holds open through audio.nu.
+        # A custom module because popups hang off a button; the bridge's
+        # `muted` class reaches the popup too, as `name` covers both.
+        ({
+            type = "custom";
+            name = "audio";
+            class = "mod";
+            # No tooltip: it would cover the slider popup opening below.
+            on_click_right = run "audio" "toggle-mute";
+            on_scroll_up = run "audio" "scroll up";
+            on_scroll_down = run "audio" "scroll down";
+            bar = [
+              {
+                type = "button";
+                label = "#audio_text{{2000:${bridge} poll audio ${scriptPath "audio"}}}";
+                on_click = "!${run "tui" "audio"}";
+              }
+            ];
+            # The hooks sit on a box that fills the whole panel, so the
+            # pointer on the panel's edge still counts as on the popup.
+            popup = [
+              ({
+                  type = "box";
+                  class = "volume-box";
+                  widgets = [
+                    {
+                      type = "slider";
+                      class = "volume";
+                      length = 160;
+                      max = 100;
+                      show_label = false;
+                      value = "2000:${wpctl} get-volume @DEFAULT_AUDIO_SINK@ | ${pkgs.gawk}/bin/awk '{print int($2 * 100)}'";
+                      on_change = "!${run "audio" "set"} $0";
+                    }
+                  ];
+                }
+                // hover "audio" "popup")
+            ];
+          }
+          // hover "audio" "readout")
 
         (streamed "mpris" {
           show_if = "#mpris_shown";
@@ -411,56 +377,17 @@
           ];
         }
         sep
+
+        (status "battery" 30000 {show_if = "#battery_shown";})
+        (status "backlight" 5000 {
+          show_if = "#backlight_shown";
+          on_scroll_up = run "backlight" "scroll up";
+          on_scroll_down = run "backlight" "scroll down";
+        })
+        # The battery group's trailing separator, on the hosts that have one:
+        # on a desktop both modules hide and two separators would meet as "| |".
       ]
-      # Battery and backlight, on the hosts that have them; their trailing
-      # separator with them, or a desktop would show "| |".
-      ++ lib.optionals isNotebook [
-        {
-          type = "battery";
-          class = "mod";
-          show_icon = false;
-          use_default_profiles = false;
-          format = "{percentage}% ${lib.last batteryGlyphs}";
-          profiles =
-            lib.listToAttrs (map (b:
-              lib.nameValuePair b.name {
-                when = {
-                  percent = b.at;
-                  charging = false;
-                };
-                format = "{percentage}% ${builtins.elemAt batteryGlyphs b.glyph}";
-              })
-            batteryBands)
-            // {
-              charging = {
-                when = {
-                  percent = 100;
-                  charging = true;
-                };
-                format = "{percentage}% 󰂄";
-              };
-            };
-        }
-        # Built-in scroll, 1% a unit: a wheel notch is 1%, and a touchpad,
-        # this host's usual input, moves it by the distance swiped.
-        {
-          type = "brightness";
-          class = "mod";
-          use_default_profiles = false;
-          format = "{percentage}% 󰃠";
-          profiles = {
-            low = {
-              when = 33;
-              format = "{percentage}% 󰃞";
-            };
-            medium = {
-              when = 66;
-              format = "{percentage}% 󰃟";
-            };
-          };
-        }
-        sep
-      ]
+      ++ lib.optional isNotebook sep
       ++ [
         {
           type = "sys_info";
@@ -628,65 +555,31 @@
     .workspaces .item.focused { background-color: @accent_bg; }
     .workspaces .item.urgent { color: @base08; }
 
-    /* The volume mixer's sliders. Padding, not margin, on the scale: a
-       press anywhere in it that misses the knob counts as a trough press,
-       so the padding is the click target, not just the 4px trough. */
-    .popup-volume { min-width: 260px; }
-    .popup-volume scale {
-      padding: 10px 0;
-      min-width: 160px;
-    }
-    .popup-volume scale trough {
+    .volume { margin: 4px 0; }
+    .volume trough {
+      min-width: 100px;
       min-height: 4px;
       border-radius: 2px;
-      background-color: @base02;
+      background-color: @panel_bg;
     }
-    .popup-volume scale highlight {
+    .volume highlight {
       border-radius: 2px;
       background-color: @base05;
     }
-    .popup-volume scale slider {
+    .muted .volume highlight, .muted .volume slider { background-color: @base03; }
+    /* In the popup the trough sits on base00, where the bar's panel_bg
+       would vanish. */
+    .popup .volume trough { background-color: @base02; }
+    /* The volume popup's padding lives on its hover box instead. */
+    #popup-audio { padding: 0; }
+    .volume-box { padding: 8px; }
+    .volume slider {
       min-width: 12px;
       min-height: 12px;
       margin: -4px 0;
       border-radius: 6px;
       background-color: @base0F;
     }
-    .popup-volume .btn-mute, .popup-volume dropdown > button {
-      border-radius: 6px;
-      padding: 4px 8px;
-    }
-    .popup-volume .btn-mute:hover, .popup-volume dropdown > button:hover {
-      background-color: @base02;
-    }
-    .popup-volume .btn-mute:checked label { color: @base03; }
-    .popup-volume .apps-box .title { color: @base03; }
-
-    /* The bluetooth popup's power and connect switches, which `all: unset`
-       leaves with no size at all. */
-    .popup switch {
-      min-width: 32px;
-      min-height: 18px;
-      border-radius: 9px;
-      background-color: @base02;
-    }
-    .popup switch:checked { background-color: @accent_bg; }
-    .popup switch slider {
-      min-width: 14px;
-      min-height: 14px;
-      margin: 2px;
-      border-radius: 7px;
-      background-color: @base05;
-    }
-    .popup-bluetooth .header { margin-bottom: 8px; }
-    .popup-bluetooth .header .label { margin-left: 8px; }
-    .popup-bluetooth .device { padding: 4px 0; }
-    .popup-bluetooth .device .icon-box { margin-right: 8px; }
-    .popup-bluetooth .device .status { margin-right: 12px; }
-    .popup-bluetooth .footer-label { color: @base03; }
-
-    ${lib.concatMapStringsSep ", " (c: "${c} label") (batteryClasses "critical")} { color: @base08; }
-    ${lib.concatMapStringsSep ", " (c: "${c} label") (batteryClasses "warning")} { color: @base0A; }
 
     tooltip {
       background-color: @base00;
