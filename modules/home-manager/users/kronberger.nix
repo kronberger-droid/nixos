@@ -32,27 +32,44 @@ in {
       programs.ssh = {
         enable = true;
         enableDefaultConfig = false;
-        settings = {
-          "*" = {
-            addKeysToAgent = "yes";
+        settings =
+          {
+            "*" = {
+              addKeysToAgent = "yes";
+            };
+            # Cluster logins. These used to live in a nushell `connect`
+            # function, which only worked from nushell; as ssh_config hosts
+            # they serve scp, rsync, nix copy and git too.
+            datalab = {
+              HostName = "cluster.datalab.tuwien.ac.at";
+              User = "martin.kronberger";
+            };
+            asc4 = {
+              HostName = "vsc4.vsc.ac.at";
+              User = "sumo_mk";
+            };
+            asc5 = {
+              HostName = "vsc5.vsc.ac.at";
+              User = "sumo_mk";
+            };
+          }
+          # `homeserver` resolves through Tailscale's MagicDNS, so it needs an
+          # entry only for the key. On a host with an admin key
+          # (shared/ssh-admin-keys.nix) every login there, deploy-rs and
+          # nix-remote included, signs with that key from disk and never asks
+          # the agent. The control master makes a deploy's several connections
+          # cost one passphrase.
+          // lib.optionalAttrs (builtins.hasAttr host (import ../../shared/ssh-admin-keys.nix)) {
+            homeserver = {
+              IdentityFile = "~/.ssh/id_ed25519_admin";
+              IdentitiesOnly = "yes";
+              IdentityAgent = "none";
+              AddKeysToAgent = "no";
+              ControlMaster = "auto";
+              ControlPath = "~/.ssh/cm-%C";
+              ControlPersist = "10m";
+            };
           };
-          # Cluster logins. These used to live in a nushell `connect`
-          # function, which only worked from nushell; as ssh_config hosts
-          # they serve scp, rsync, nix copy and git too. `homeserver` needs
-          # no entry: it resolves through Tailscale's MagicDNS.
-          datalab = {
-            HostName = "cluster.datalab.tuwien.ac.at";
-            User = "martin.kronberger";
-          };
-          asc4 = {
-            HostName = "vsc4.vsc.ac.at";
-            User = "sumo_mk";
-          };
-          asc5 = {
-            HostName = "vsc5.vsc.ac.at";
-            User = "sumo_mk";
-          };
-        };
       };
 
       home = {

@@ -8,6 +8,12 @@
 }: let
   hostKeys = import ../../modules/shared/host-keys.nix;
   addrs = import ../../modules/shared/homeserver.nix;
+  # Keys for the two root-capable accounts below. The admin keys are the ones
+  # never served by an agent (shared/ssh-admin-keys.nix). While a machine is
+  # moving over, its everyday key stays accepted too.
+  rootKeys =
+    builtins.attrValues (import ../../modules/shared/ssh-admin-keys.nix)
+    ++ builtins.attrValues (import ../../modules/shared/ssh-keys.nix);
   # Keys that only ever talk to the store get no shell: the protocol command
   # is forced, as nix.sshServe does it. The personal keys stay unrestricted,
   # since `flake --remote` runs `nix build` over a plain ssh session.
@@ -201,7 +207,7 @@ in {
     # bash as the login shell, so `ssh homeserver <cmd>` and scripts piped
     # over ssh get POSIX sh. Interactive logins hop into nu below.
     shell = pkgs.bash;
-    openssh.authorizedKeys.keys = builtins.attrValues (import ../../modules/shared/ssh-keys.nix);
+    openssh.authorizedKeys.keys = rootKeys;
   };
   # Only interactive login shells: a plain `bash` started from nu stays bash,
   # and root's `sudo -i` and the other accounts are left alone.
@@ -222,7 +228,7 @@ in {
     createHome = true;
     shell = pkgs.bash;
     openssh.authorizedKeys.keys =
-      builtins.attrValues (import ../../modules/shared/ssh-keys.nix)
+      rootKeys
       # The workstations' host keys, for the buildMachines entry: their
       # nix-daemon connects as root with /etc/ssh/ssh_host_ed25519_key, over
       # ssh-ng, i.e. `nix-daemon --stdio` on this side.
