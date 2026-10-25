@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  inputs,
   ...
 }: {
   # Allow running dynamically linked executables (non-Nix binaries)
@@ -21,8 +22,11 @@
       };
 
       # Zotero MCP server for Claude Code; see the file for why it is
-      # packaged here rather than pulled from nixpkgs.
-      zotero-mcp = prev.callPackage ./zotero-mcp.nix {};
+      # packaged here rather than pulled from nixpkgs. Built from the
+      # nixpkgs-mcp pin, see that input for why.
+      zotero-mcp =
+        (import inputs.nixpkgs-mcp {inherit (prev.stdenv.hostPlatform) system;}).callPackage
+        ./zotero-mcp.nix {};
     })
   ];
 
