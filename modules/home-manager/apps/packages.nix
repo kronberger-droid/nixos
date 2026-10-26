@@ -2,7 +2,7 @@
   home.packages = with pkgs; [
     # Browsers
     helium
-    ladybird
+    # ladybird: sandboxed, see ladybird.nix
 
     # Messaging
     # aerion, zapzap: sandboxed, see aerion.nix and zapzap.nix
