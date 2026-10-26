@@ -67,6 +67,19 @@
     menuDrawers = builtins.toJSON ["tray"];
     barHeight = toString bar.height;
   };
+  # Every bar shares this name, so popup.nu can hide popups over IPC without
+  # knowing which output's bar it is.
+  barName = "main";
+  popup = script "popup" {
+    inherit barLib barName;
+    inherit (pkgs) ironbar;
+    barHeight = toString bar.height;
+  };
+  # On every module with a popup; see popup.nu.
+  popupHooks = {
+    on_mouse_enter = "${popup} enter";
+    on_mouse_exit = "${popup} leave";
+  };
 
   scripts = {
     # sieb.commands are argv lists; one wrapper each so menu.nu gets a path.
@@ -297,6 +310,7 @@
   batteryClasses = kind: map (b: ".battery.profile-${b.name}") (lib.filter (b: lib.hasPrefix kind b.name) batteryBands);
 
   bar = {
+    name = barName;
     position = "top";
     height = 30;
     anchor_to_edges = true;
@@ -339,6 +353,7 @@
             connected_battery = "󰂱 {device_alias} {device_battery_percent}%";
           };
           on_click_middle = run "tui" "bluetooth";
+          inherit (popupHooks) on_mouse_enter on_mouse_exit;
         }
 
         # Built-in: a click opens the mixer (output, mute, mic, per-app). Its
@@ -375,6 +390,7 @@
           on_scroll_up = volumeStep "+";
           on_scroll_down = volumeStep "-";
           smooth_scroll_speed = 10;
+          inherit (popupHooks) on_mouse_enter on_mouse_exit;
         }
 
         (streamed "mpris" {
@@ -392,6 +408,7 @@
           class = "mod";
           tooltip = "#vpn_tip";
           on_click_right = run "vpn" "disconnect-all";
+          inherit (popupHooks) on_mouse_enter on_mouse_exit;
           bar = [
             {
               type = "button";
@@ -418,6 +435,7 @@
         {
           type = "battery";
           class = "mod";
+          inherit (popupHooks) on_mouse_enter on_mouse_exit;
           show_icon = false;
           use_default_profiles = false;
           format = "{percentage}% ${lib.last batteryGlyphs}";
