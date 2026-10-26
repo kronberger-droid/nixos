@@ -38,10 +38,10 @@ _: {
 
   # Steam runs as an X11 client through xwayland-satellite, which hands it no
   # output scale, and its own "Scale text and icons" setting skips popups,
-  # menus and dialogs. This forces the scale on every Steam window. 1.5
-  # matches the AOC, which every shikane profile on this host drives at 1.5;
+  # menus and dialogs. This forces the scale on every Steam window. 1.75
+  # matches the AOC, which every shikane profile on this host drives at 1.75;
   # on the 2.0 panel Steam comes out a bit small.
-  environment.sessionVariables.STEAM_FORCE_DESKTOPUI_SCALING = "1.5";
+  environment.sessionVariables.STEAM_FORCE_DESKTOPUI_SCALING = "1.75";
 
   # NetworkManager stays, iwd drives wifi underneath it. See
   # modules/system/networking/iwd.nix for the stages.
