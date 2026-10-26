@@ -43,6 +43,10 @@ _: {
   # on the 2.0 panel Steam comes out a bit small.
   environment.sessionVariables.STEAM_FORCE_DESKTOPUI_SCALING = "1.5";
 
+  # NetworkManager stays, iwd drives wifi underneath it. See
+  # modules/system/networking/iwd.nix for the stages.
+  networking.iwdSwap.stage = "nm-backend";
+
   # Limit build parallelism to keep the system responsive. The i7-1185G7 is
   # 4 cores / 8 threads (`nproc` = 8), so one build gets half the threads.
   nix.settings = {
