@@ -255,8 +255,10 @@ in {
     isNormalUser = true;
     createHome = true;
     extraGroups = ["docker"];
-    # No keys and not in AllowUsers: the DietPi box that deployed from was
-    # retired. The account stays for the containers it owns.
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDkdsU9B7+sb5ISQy9RjykK0u04VdYTFYhnSHozpBqYl dietpi"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDZDyijah9B71tRnhZtLxLFuxJ9raP3RdwMSYihxECfA dietpi"
+    ];
   };
 
   # Packages
@@ -308,7 +310,7 @@ in {
   # modules/system/security/hardening.nix (imported above). Only the
   # host-specific additions live here: the extra accounts sshd may admit.
   # ${username} is already in the list from the shared module.
-  services.openssh.settings.AllowUsers = ["nix-remote"];
+  services.openssh.settings.AllowUsers = ["nix-remote" "wiesinger"];
 
   # The Claude Code sandbox, the same account the workstations have. It is
   # deliberately not in AllowUsers above: the way in is `ssh -t homeserver
