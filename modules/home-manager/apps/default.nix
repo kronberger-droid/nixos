@@ -20,6 +20,7 @@
     ./aerion.nix
     ./localsend.nix
     ./zotero.nix
+    ./ladybird.nix
     ./flatpak.nix
   ];
 }
