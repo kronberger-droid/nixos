@@ -23,8 +23,9 @@
 
   # tunet as an iwd 8021x profile, the counterpart of tunet.nix's NM profile.
   # Written at boot from the same agenix env file, since the credentials sit
-  # inline in the profile. ServerDomainMask is NM's domain-suffix-match.
-  # Neither profile pins a CA: verify the server chain before relying on it.
+  # inline in the profile. ServerDomainMask is NM's domain-suffix-match; its
+  # leading `*` covers several labels, so radius.it.tuwien.ac.at matches.
+  # CACert is the chain from tunet-ca.pem, see tunet.nix.
   tunetProfile = pkgs.writeShellScript "iwd-tunet-profile" ''
     set -eu
     env=${config.age.secrets.tunet-credentials.path}
@@ -38,6 +39,7 @@
     EAP-Method=PEAP
     EAP-Identity=anonymous@tuwien.ac.at
     EAP-PEAP-ServerDomainMask=*.tuwien.ac.at
+    EAP-PEAP-CACert=${./tunet-ca.pem}
     EAP-PEAP-Phase2-Method=MSCHAPV2
     EAP-PEAP-Phase2-Identity=$user
     EAP-PEAP-Phase2-Password=$pass
