@@ -31,20 +31,23 @@ const WIFI_TUI        = "@wifiTui@"
 
 use "@barLib@" *
 
-def drop [...cmd: string] {
+def drop [--width: float = 0.35, --height: float = 0.45, ...cmd: string] {
   # dropkitten -W/-H are fractions of the screen.
   # -t takes one of dropkitten's known terminal names, not a path, so this is
   # config.terminal.emulator rather than config.terminal.bin.
   # Built as one list rather than spread across lines: nushell ends an external
   # command at the newline, so a continuation line parses as a new expression.
-  let args = (["-t" "@terminalEmulator@" "-W" "0.35" "-H" "0.45" "--"] ++ $cmd)
+  let size = ["-W" ($width | into string) "-H" ($height | into string)]
+  let args = (["-t" "@terminalEmulator@"] ++ $size ++ ["--"] ++ $cmd)
   detach $DROPKITTEN ...$args
 }
 
 def main [what: string] {
   match $what {
     "wifi" => {
-      drop $WIFI_TUI
+      # impala's tables are fixed-width, the device table alone about 88
+      # columns; at 0.35 of the laptop panel its headers come out truncated.
+      drop --width 0.6 $WIFI_TUI
     }
     "audio" => { drop $WIREMIX }
     "bluetooth" => { drop $BLUETUI }
