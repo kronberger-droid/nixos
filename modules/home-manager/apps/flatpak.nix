@@ -34,6 +34,11 @@ _: {
         shared = ["!network"];
         filesystems = ["!host" "!/tmp" "xdg-documents" "xdg-download"];
       };
+      # Non-Steam games added from Downloads otherwise come in through the
+      # file chooser portal, which exports the .exe alone under
+      # /run/user/<uid>/doc, so the game starts without its data and exits.
+      # Writable, since many keep saves and config beside the exe.
+      "com.valvesoftware.Steam".Context.filesystems = ["xdg-download"];
     };
 
     # Flathub ships security fixes on its own schedule, so pull them weekly
