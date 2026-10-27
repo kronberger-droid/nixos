@@ -22,5 +22,6 @@
     ./zotero.nix
     ./ladybird.nix
     ./flatpak.nix
+    ./onlyoffice.nix
   ];
 }
