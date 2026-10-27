@@ -1,53 +1,15 @@
+# Obsidian itself comes from Flathub, see flatpak.nix for the reasons and
+# the sandbox it runs in. This module only owns the vault side: its path,
+# and the theme written into it, which reaches the app through the vault.
 {
   config,
   lib,
   pkgs,
-  inputs,
   ...
 }: let
   s = config.scheme;
   vaultRel = lib.removePrefix "${config.home.homeDirectory}/" config.vault.path;
-  mkNixPak = inputs.nixpak.lib.nixpak {inherit lib pkgs;};
-
-  # Obsidian in a bubblewrap sandbox, on the pattern of signal.nix. Community
-  # plugins are unaudited JS with the app's full reach, and BRAT installs them
-  # straight from GitHub, so the reach is cut to where vaults live: the notes
-  # tree and ~/Projects (robocat and whatever comes next). No ~/.ssh, no SSH
-  # agent, no Secret Service; sync is Syncthing's job, not Obsidian's.
-  #
-  # Plugins that shell out see only the store, not the host's PATH. Nothing
-  # in use does: enhancing-export would want pandoc, but has never been set
-  # up and pandoc is not installed.
-  obsidian = mkNixPak {
-    config = {sloth, ...}: {
-      imports = with inputs.nixpak.nixpakModules; [gui-base network];
-
-      app.package = pkgs.obsidian;
-      flatpak.appId = "md.obsidian.Obsidian";
-
-      # gui-base bundles its own mesa; the host's driver matches the kernel
-      # and is already in the store.
-      gpu.provider = lib.mkForce "nixos";
-
-      # Binds the host's /etc/localtime. Without it there is none in the
-      # sandbox and every timestamp shows in UTC.
-      timeZone.enable = true;
-
-      bubblewrap = {
-        bind.rw = [
-          (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/obsidian"))
-          (sloth.concat' sloth.homeDir "/Documents/notes")
-          (sloth.concat' sloth.homeDir "/Projects")
-          (sloth.concat' sloth.homeDir "/Downloads")
-          # A private /tmp, see signal.nix.
-          [(sloth.mkdir (sloth.concat' sloth.appCacheDir "/tmp")) "/tmp"]
-        ];
-      };
-    };
-  };
 in {
-  config.home.packages = [obsidian.config.env];
-
   options.vault = {
     path = lib.mkOption {
       type = lib.types.str;
