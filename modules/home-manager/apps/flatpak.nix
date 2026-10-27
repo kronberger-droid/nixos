@@ -15,6 +15,10 @@ _: {
       # not see ~/.ssh or the rest of $HOME. Client flags and the Terraria
       # fix are in steam.nix.
       "com.valvesoftware.Steam"
+      # Under nixpak the window stayed grey, the renderer failing inside
+      # Electron's own init. The likely cause is nixpkgs' Electron, newer
+      # than the one Obsidian ships for; Flathub bundles the matching one.
+      "md.obsidian.Obsidian"
     ];
 
     overrides = {
@@ -39,6 +43,27 @@ _: {
       # /run/user/<uid>/doc, so the game starts without its data and exits.
       # Writable, since many keep saves and config beside the exe.
       "com.valvesoftware.Steam".Context.filesystems = ["xdg-download"];
+      # Flathub grants all of $HOME, removable media, the SSH agent and the
+      # Secret Service. Community plugins are unaudited JS with the app's
+      # full reach, and BRAT installs them straight from GitHub, so the reach
+      # is cut to where vaults live: the notes tree and ~/Projects. Network
+      # stays for BRAT and plugin updates; sync is Syncthing's job.
+      "md.obsidian.Obsidian" = {
+        Context = {
+          filesystems = [
+            "!home"
+            "!/media"
+            "!/mnt"
+            "!/run/media"
+            "!xdg-run/gnupg"
+            "~/Documents/notes"
+            "~/Projects"
+            "xdg-download"
+          ];
+          sockets = ["!ssh-auth"];
+        };
+        "Session Bus Policy"."org.freedesktop.secrets" = "none";
+      };
     };
 
     # Flathub ships security fixes on its own schedule, so pull them weekly
