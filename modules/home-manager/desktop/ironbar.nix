@@ -97,6 +97,10 @@
       on = "#${config.scheme.base0B}";
       off = "#${config.scheme.base03}";
     };
+    bluetooth = {
+      inherit bridge;
+      inherit (pkgs) systemd bluez;
+    };
     mpris = {inherit (pkgs) playerctl;};
     dnd = {
       inherit bridge;
@@ -341,20 +345,10 @@
         (handle "toggles" "")
         sep
 
-        # Built-in: a click opens its device popup, with the power switch.
-        {
-          type = "bluetooth";
-          class = "mod";
-          format = {
-            not_found = "";
-            disabled = "󰂲 off";
-            enabled = "󰂯 on";
-            connected = "󰂱 {device_alias}";
-            connected_battery = "󰂱 {device_alias} {device_battery_percent}%";
-          };
-          on_click_middle = run "tui" "bluetooth";
-          inherit (popupHooks) on_mouse_enter on_mouse_exit;
-        }
+        (status "bluetooth" 5000 {
+          on_click_left = run "tui" "bluetooth";
+          on_click_right = run "bluetooth" "toggle";
+        })
 
         # Built-in: a click opens the mixer (output, mute, mic, per-app). Its
         # one format serves the sink and the source label alike, so the mic
@@ -680,28 +674,6 @@
     .popup-volume .btn-mute:checked label { color: @base03; }
     .popup-volume .apps-box .title { color: @base03; }
 
-    /* The bluetooth popup's power and connect switches, which `all: unset`
-       leaves with no size at all. */
-    .popup switch {
-      min-width: 32px;
-      min-height: 18px;
-      border-radius: 9px;
-      background-color: @base02;
-    }
-    .popup switch:checked { background-color: @accent_bg; }
-    .popup switch slider {
-      min-width: 14px;
-      min-height: 14px;
-      margin: 2px;
-      border-radius: 7px;
-      background-color: @base05;
-    }
-    .popup-bluetooth .header { margin-bottom: 8px; }
-    .popup-bluetooth .header .label { margin-left: 8px; }
-    .popup-bluetooth .device { padding: 4px 0; }
-    .popup-bluetooth .device .icon-box { margin-right: 8px; }
-    .popup-bluetooth .device .status { margin-right: 12px; }
-    .popup-bluetooth .footer-label { color: @base03; }
 
     ${lib.concatMapStringsSep ", " (c: "${c} label") (batteryClasses "critical")} { color: @base08; }
     ${lib.concatMapStringsSep ", " (c: "${c} label") (batteryClasses "warning")} { color: @base0A; }
