@@ -29,6 +29,31 @@
       lib.nameValuePair (builtins.baseNameOf clean) (inputs.mattpocock-skills + "/${clean}");
   in
     builtins.listToAttrs (map toEntry manifest.skills);
+
+  # humanizer installs as its own skill and doubles as a prose-sweep
+  # reference. Only SKILL.md and the licence: the rest of the repo is
+  # packaging for other harnesses.
+  humanizer = pkgs.linkFarm "humanizer-skill" [
+    {
+      name = "SKILL.md";
+      path = "${inputs.humanizer}/SKILL.md";
+    }
+    {
+      name = "LICENSE";
+      path = "${inputs.humanizer}/LICENSE";
+    }
+  ];
+
+  # prose-sweep's own files are local (the SNL-derived references are adapted
+  # copies); the verbatim upstream references are linked in from the inputs
+  # so a flake update moves them.
+  proseSweep = pkgs.runCommand "prose-sweep-skill" {} ''
+    cp -r ${./skills/prose-sweep} $out
+    chmod -R u+w $out
+    ln -s ${inputs.elements-of-style}/skills/writing-clearly-and-concisely/elements-of-style.md \
+      $out/references/elements-of-style.md
+    ln -s ${humanizer}/SKILL.md $out/references/humanizer.md
+  '';
 in {
   imports = [./claude.nix];
 
@@ -67,7 +92,12 @@ in {
   claude.skills.commit-writer.content = builtins.readFile ./skills/commit-writer.md;
   claude.skills.github-voice.content = builtins.readFile ./skills/github-voice.md;
 
-  # Matt Pocock's skills collection (github:mattpocock/skills), whole-folder
-  # symlinked into ~/.claude/skills/. See mattSkills above for derivation.
-  claude.skillDirs = mattSkills;
+  # Folder skills, whole-folder symlinked into ~/.claude/skills/: Matt
+  # Pocock's collection (see mattSkills above) plus the prose skills.
+  claude.skillDirs =
+    mattSkills
+    // {
+      humanizer = humanizer;
+      prose-sweep = proseSweep;
+    };
 }

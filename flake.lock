@@ -137,6 +137,22 @@
         "type": "github"
       }
     },
+    "elements-of-style": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1786571248,
+        "narHash": "sha256-oWypkpVPh4xsz1kVwJW4DqoKD4ohZMhM+26Zw06cdBs=",
+        "owner": "obra",
+        "repo": "the-elements-of-style",
+        "rev": "05fc4f0d2b97b7c042dd9949ad658568e4a1324e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "obra",
+        "repo": "the-elements-of-style",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -299,6 +315,22 @@
       "original": {
         "owner": "nix-community",
         "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "humanizer": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792177923,
+        "narHash": "sha256-PkMQTzYs/0uUa6/liyndLCblx30N96XYlVQYc0c8Hfo=",
+        "owner": "blader",
+        "repo": "humanizer",
+        "rev": "8c307f367c91bd974002f10f2be2965d642c13df",
+        "type": "github"
+      },
+      "original": {
+        "owner": "blader",
+        "repo": "humanizer",
         "type": "github"
       }
     },
@@ -805,8 +837,10 @@
         "deploy-rs": "deploy-rs",
         "disko": "disko",
         "dropkitten": "dropkitten",
+        "elements-of-style": "elements-of-style",
         "helix": "helix",
         "home-manager": "home-manager",
+        "humanizer": "humanizer",
         "lanzaboote": "lanzaboote",
         "mattpocock-skills": "mattpocock-skills",
         "niri": "niri",

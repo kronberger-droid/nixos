@@ -15,6 +15,9 @@ allowed-tools: Read Write Edit Grep Glob
 The text belongs to the author. You sharpen how it reads; the author owns what it
 says.
 
+A whole document at once (every chapter of a thesis, or consistency of terms
+across chapters) goes through `prose-sweep`, which runs this skill per chapter.
+
 ## Claim fidelity
 
 The one invariant, held across every pass: **every claim in your output traces to

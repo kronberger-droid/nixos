@@ -96,6 +96,19 @@
       url = "github:mattpocock/skills";
       flake = false;
     };
+    # Upstream prose-editing skills, plain files like mattpocock-skills.
+    # claude-settings.nix links Strunk's text and the humanizer pattern list
+    # into the prose-sweep skill, and installs humanizer on its own as well.
+    # elements-of-style ships no licence; it is Strunk's 1918 text, which is
+    # public domain, and is linked rather than copied.
+    elements-of-style = {
+      url = "github:obra/the-elements-of-style";
+      flake = false;
+    };
+    humanizer = {
+      url = "github:blader/humanizer";
+      flake = false;
+    };
     nix-pia-vpn = {
       url = "github:rcambrj/nix-pia-vpn";
       inputs.nixpkgs.follows = "nixpkgs";
