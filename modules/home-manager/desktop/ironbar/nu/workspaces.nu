@@ -19,9 +19,9 @@
 # on a name nothing matches takes it as typed. `main close` saves the same
 # way and then closes the workspace's windows, so it is out of the way until
 # picked again; Escape at the prompt closes nothing. `main` picks a save and
-# rebuilds it on the empty workspace at the end of the focused output, then
-# names that workspace after it, so picking the same save again only
-# focuses it.
+# rebuilds it on the focused workspace, right of whatever is there, and
+# names the workspace after it unless it has a name already. Picking a save
+# whose workspace is still open only focuses that one.
 
 # Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
@@ -101,6 +101,8 @@ def entry [w: record, output_width: number]: nothing -> any {
     row: $pos.1
     # As a share of the output, so a save made on one monitor fits another.
     width: (width-percent $w.layout.tile_size.0 $output_width)
+    # Only for spotting tabbed columns; dropped before the save is written.
+    height: $w.layout.tile_size.1
   }
   if $w.app_id == $TERMINAL_ID {
     # The shell is the terminal's only child, and what it runs is the
@@ -145,10 +147,21 @@ def save-workspace []: nothing -> any {
   let ws = (focused-workspace)
   if $ws == null { return null }
 
-  let output_width = (niri-json outputs | get -o $ws.output | get -o logical.width | default 1920)
+  let output = (niri-json outputs | get -o $ws.output | get -o logical)
+  let output_width = ($output | get -o width | default 1920)
+  let output_height = ($output | get -o height | default 1080)
   let windows = (niri-json windows
     | where workspace_id == $ws.id and (not $it.is_floating) and ($it.app_id? not-in $SKIP))
   let entries = ($windows | each {|w| entry $w $output_width } | compact)
+  # niri's IPC does not say how a column is displayed, but the heights do:
+  # stacked windows share the column's height, so none of several can reach
+  # half of the output, while every tab gets all of it.
+  let tabbed = ($entries | where row > 1 | get column | uniq | where {|c|
+    ($entries | where column == $c | get height | math min) > ($output_height * 0.6)
+  })
+  let entries = ($entries
+    | each {|e| $e | insert tabbed ($e.column in $tabbed) }
+    | reject height)
   # Several windows of one process are one launch: the command opens them all.
   let entries = ($entries | where kind != "app"
     | append ($entries | where kind == "app" | uniq-by pid)
@@ -204,7 +217,7 @@ def await-window [before: list, matches: closure, tries: int]: nothing -> any {
   null
 }
 
-def place [name: string, e: record] {
+def place [workspace: string, e: record] {
   let launch = match $e.kind {
     "terminal" => {
       let cwd = (if ($e.cwd | path exists) { $e.cwd } else { $env.HOME })
@@ -231,7 +244,7 @@ def place [name: string, e: record] {
 
   # New windows open on the focused workspace, and a restore takes a few
   # seconds; looking elsewhere meanwhile must not scatter the rest.
-  ^niri msg action focus-workspace $name | complete | ignore
+  ^niri msg action focus-workspace $workspace | complete | ignore
   let before = (niri-json windows | get id)
   ^niri msg action spawn -- ...$launch.argv | complete | ignore
   let id = (await-window $before $launch.matches $launch.tries)
@@ -243,6 +256,10 @@ def place [name: string, e: record] {
     ^niri msg action consume-or-expel-window-left --id $id | complete | ignore
   } else {
     ^niri msg action set-column-width $"($e.width)%" | complete | ignore
+    # Before the rest of the column joins, so they come in as tabs.
+    if $e.tabbed? == true {
+      ^niri msg action set-column-display tabbed | complete | ignore
+    }
   }
 }
 
@@ -258,18 +275,22 @@ def "main restore" [name: string] {
     ^niri msg action focus-workspace $name | complete | ignore
     # Restored already and still populated: being there is the whole point.
     if (niri-json windows | where workspace_id == $named.id | is-not-empty) { return }
-  } else {
-    # niri keeps one empty workspace at the end of each output.
-    let output = (focused-workspace | get -o output)
-    let target = (niri-json workspaces
-      | where output == $output and active_window_id == null and name == null
-      | sort-by idx
-      | last)
-    ^niri msg action focus-workspace $target.idx | complete | ignore
-    ^niri msg action set-workspace-name $name | complete | ignore
   }
 
-  for e in (open $file | get windows | sort-by column row) { place $name $e }
+  # `place` refocuses the workspace before every spawn, which takes a name;
+  # one the workspace has already is kept.
+  let ws = (focused-workspace)
+  let workspace = ($ws.name? | default $name)
+  if $ws.name? == null {
+    ^niri msg action set-workspace-name $name | complete | ignore
+  }
+  # New windows open right of the focused column, so starting from the last
+  # one puts the save after whatever is there.
+  if (niri-json windows | where workspace_id == $ws.id | is-not-empty) {
+    ^niri msg action focus-column-last | complete | ignore
+  }
+
+  for e in (open $file | get windows | sort-by column row) { place $workspace $e }
 }
 
 def main [] {
