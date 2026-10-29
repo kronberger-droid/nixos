@@ -211,6 +211,10 @@ in {
       # Scratchpad
       "${modifier}+Minus".action.spawn = ["${scratchpadToggle}" "toggle"];
 
+      # Saved workspaces; see ironbar/nu/workspaces.nu
+      "${modifier}+Ctrl+O".action.spawn = ["${config.xdg.configHome}/ironbar/scripts/workspaces"];
+      "${modifier}+Ctrl+S".action.spawn = ["${config.xdg.configHome}/ironbar/scripts/workspaces" "save"];
+
       # Session
       "${modifier}+Shift+Q".action.close-window = [];
       "${modifier}+Shift+E".action.spawn = config.sieb.commands.power;

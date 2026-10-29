@@ -81,6 +81,9 @@
     on_mouse_exit = "${popup} leave";
   };
 
+  # sieb.commands.prompt is an argv list; the scripts want one path.
+  siebPrompt = pkgs.writeShellScript "sieb-prompt" "exec ${lib.escapeShellArgs config.sieb.commands.prompt} \"$@\"";
+
   scripts = {
     # sieb.commands are argv lists; one wrapper each so menu.nu gets a path.
     menu = {
@@ -113,9 +116,19 @@
     screenrec = {
       inherit bridge barLib;
       inherit (pkgs) libnotify procps slurp;
-      # sieb.commands.prompt is an argv list; screenrec.nu wants one path.
-      siebPrompt = pkgs.writeShellScript "sieb-prompt" "exec ${lib.escapeShellArgs config.sieb.commands.prompt} \"$@\"";
+      inherit siebPrompt;
       wlScreenrec = pkgs.wl-screenrec;
+    };
+    workspaces = {
+      inherit siebPrompt;
+      inherit (pkgs) helium libnotify;
+      terminalBin = config.terminal.bin;
+      terminalEmulator = config.terminal.emulator;
+      terminalWorkingDirFlag = config.terminal.workingDirFlag;
+      terminalExecFlag = config.terminal.execFlag;
+      # What a restored terminal starts again, by program name; anything
+      # else comes back as a bare shell in the same directory.
+      rerun = builtins.toJSON ["hx" "nvim" "claude" "yazi" "btm"];
     };
     scratchpad = {
       inherit barLib;
