@@ -13,6 +13,8 @@
 # spelled inline at the call sites.
 const SPOTIFY_PLAYER  = "@spotifyPlayer@"
 const SPOTIFY_DEVICE  = "@spotifyDevice@"
+const SYSTEMCTL       = "@systemd@/bin/systemctl"
+const TIMEOUT         = "@coreutils@/bin/timeout"
 
 use "@barLib@" *
 
@@ -32,6 +34,32 @@ def await-state [app_id: string, want: string] {
       return
     }
     sleep 50ms
+  }
+}
+
+# Whether Spotify lists the daemon's Connect device. The daemon answers the
+# CLI over a local socket, so a dead daemon would leave it waiting; hence the
+# timeout. `connect` itself is no use as a probe: it exits 0 with no output
+# even when the device is missing.
+def device-registered? []: nothing -> bool {
+  let r = (^$TIMEOUT 5 $SPOTIFY_PLAYER get key devices | complete)
+  if $r.exit_code != 0 { return false }
+  let devices = (try { $r.stdout | from json } catch { [] })
+  $SPOTIFY_DEVICE in ($devices | get -o name)
+}
+
+# A network drop can kill the daemon's Connect session for good: librespot
+# gives up after one failed reconnect while the process stays up, so systemd's
+# Restart=on-failure never fires and the popup finds no device to play on.
+# Checked here rather than on a timer so it only costs anything when the
+# player is actually opened.
+def ensure-daemon [] {
+  if (device-registered?) { return }
+  ^$SYSTEMCTL --user restart spotify-player.service | complete | ignore
+  # The device takes a few seconds to show up in Spotify's list.
+  for _ in 1..20 {
+    if (device-registered?) { return }
+    sleep 500ms
   }
 }
 
@@ -58,6 +86,7 @@ def main [] {
     # whichever one is active, or the first listed, often another host's.
     # Moving playback onto the local daemon first leaves it nothing else to
     # pick. The daemon serves the request; play/pause state carries over.
+    ensure-daemon
     ^$SPOTIFY_PLAYER connect --name $SPOTIFY_DEVICE | complete | ignore
     # The daemon already owns the MPRIS name; a second registration from the
     # TUI would show up as a duplicate player in the mpris widget. Detached,
