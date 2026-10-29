@@ -16,7 +16,9 @@
 #   brings zathura back on the same PDF
 #
 # `main save` asks for a name, offering the saved ones to overwrite; Enter
-# on a name nothing matches takes it as typed. `main` picks a save and
+# on a name nothing matches takes it as typed. `main close` saves the same
+# way and then closes the workspace's windows, so it is out of the way until
+# picked again; Escape at the prompt closes nothing. `main` picks a save and
 # rebuilds it on the empty workspace at the end of the focused output, then
 # names that workspace after it, so picking the same save again only
 # focuses it.
@@ -137,9 +139,11 @@ def saves []: nothing -> list {
   glob ($dir | path join "*.json") | each {|f| open $f } | sort-by -r saved
 }
 
-def "main save" [] {
+# Saves the focused workspace under a name from the prompt. Returns the name
+# and the workspace's id, or null when nothing was saved.
+def save-workspace []: nothing -> any {
   let ws = (focused-workspace)
-  if $ws == null { return }
+  if $ws == null { return null }
 
   let output_width = (niri-json outputs | get -o $ws.output | get -o logical.width | default 1920)
   let windows = (niri-json windows
@@ -152,7 +156,7 @@ def "main save" [] {
     | sort-by column row)
   if ($entries | is-empty) {
     notify "Nothing to save" "The workspace has no tiled windows."
-    return
+    return null
   }
 
   # The workspace's own name first, so Enter alone re-saves it.
@@ -162,7 +166,7 @@ def "main save" [] {
     | ^$PROMPT -p "Save as" --lines ([($names | length) 1] | math max | [$in 8] | math min) --badge (char --unicode f0c7)
     | complete)
   let name = ($picked.stdout | str trim | str replace -ra '[^A-Za-z0-9._-]+' '-')
-  if $picked.exit_code != 0 or ($name | is-empty) { return }
+  if $picked.exit_code != 0 or ($name | is-empty) { return null }
 
   mkdir (store-dir)
   {name: $name, saved: (date now | format date "%+"), summary: (summary $entries), windows: $entries}
@@ -170,6 +174,21 @@ def "main save" [] {
   | save -f (save-path $name)
   ^niri msg action set-workspace-name $name | complete | ignore
   notify $"Saved ($name)" (summary $entries)
+  {name: $name, id: $ws.id}
+}
+
+def "main save" [] { save-workspace | ignore }
+
+def "main close" [] {
+  let saved = (save-workspace)
+  if $saved == null { return }
+  # Floating windows too: the workspace is going away, not just its layout.
+  for w in (niri-json windows | where workspace_id == $saved.id) {
+    ^niri msg action close-window --id $w.id | complete | ignore
+  }
+  # A named workspace outlives its windows; unnamed, niri drops it, and the
+  # picker builds the save on a fresh one.
+  ^niri msg action unset-workspace-name $saved.name | complete | ignore
 }
 
 # Spawns through niri so the window outlives this script, then waits for it
