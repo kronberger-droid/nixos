@@ -81,6 +81,9 @@
     on_mouse_exit = "${popup} leave";
   };
 
+  # Where workspaces.nu keeps its saves; nushell gets it too, see below.
+  workspacesDir = "${config.xdg.dataHome}/niri-workspaces";
+
   # sieb.commands.prompt is an argv list; the scripts want one path.
   siebPrompt = pkgs.writeShellScript "sieb-prompt" "exec ${lib.escapeShellArgs config.sieb.commands.prompt} \"$@\"";
 
@@ -120,7 +123,7 @@
       wlScreenrec = pkgs.wl-screenrec;
     };
     workspaces = {
-      inherit siebPrompt;
+      inherit siebPrompt workspacesDir;
       inherit (pkgs) helium libnotify;
       terminalBin = config.terminal.bin;
       terminalEmulator = config.terminal.emulator;
@@ -752,6 +755,9 @@ in {
     # playerctl backs the mpris module and is handy from a shell.
     pkgs.playerctl
   ];
+
+  # For pruning saves by hand: `ls $env.NIRI_WORKSPACES`.
+  programs.nushell.environmentVariables.NIRI_WORKSPACES = workspacesDir;
 
   xdg.configFile =
     {
