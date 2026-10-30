@@ -42,9 +42,9 @@ const SKIP = ["spotify_popup" "floating_shell" "sysmonitor"]
 # Programs a restored terminal starts again; set in ironbar.nix.
 def rerun-list []: nothing -> list<string> { '@rerun@' | from json }
 
-def store-dir []: nothing -> string {
-  $env.XDG_DATA_HOME? | default ($env.HOME | path join ".local/share") | path join "niri-workspaces"
-}
+# One file per save, `<name>.json`. Also `$env.NIRI_WORKSPACES` in nushell,
+# so pruning a save is `rm ($env.NIRI_WORKSPACES | path join foo.json)`.
+def store-dir []: nothing -> string { "@workspacesDir@" }
 
 def save-path [name: string]: nothing -> string {
   store-dir | path join $"($name).json"
