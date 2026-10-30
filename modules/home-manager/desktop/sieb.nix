@@ -149,21 +149,51 @@
     exec ${sieb}/bin/sieb --config ${launcherTheme} --script ${examples}/rbw/rbw.nu
   '';
 
-  # rofi's drun, run, filebrowser and window modes, labelled with the
-  # glyphs rofi's display-* used.
-  mode = code: script: "${glyph code}:${examples}/${script}";
+  # The launcher's `nu:` evaluates in a long-running `nu --mcp`. Its HTTP
+  # transport listens on a TCP port any local user could reach, so it runs
+  # in a network namespace of its own, and systemd-socket-proxyd in the same
+  # namespace hands it a Unix socket only this user can open. Both in one
+  # unit: a user manager cannot join two units' namespaces.
+  nuSocket = "nu-mcp.sock";
+  nuMcpPort = "8765";
+  nuMcp = pkgs.writeShellScript "nu-mcp" ''
+    # Its MCP library logs every request at debug level, --log-level or not.
+    ${lib.getExe config.programs.nushell.package} -n --mcp \
+      --mcp-transport http --mcp-port ${nuMcpPort} 2>/dev/null &
+    # The proxy forwards each connection the moment it accepts it; until nu
+    # listens they wait in the socket's backlog instead of being refused.
+    until (exec 3<>/dev/tcp/127.0.0.1/${nuMcpPort}) 2>/dev/null; do
+      ${pkgs.coreutils}/bin/sleep 0.05
+    done
+    # The listening fd is the unit's; sd_listen_fds only takes it in the
+    # process LISTEN_PID names, which the subshell's exec keeps, and refuses
+    # it outright while LISTEN_PIDFDID (systemd 258+) still names this shell.
+    (export LISTEN_PID=$BASHPID; unset LISTEN_PIDFDID; exec ${pkgs.systemd}/lib/systemd/systemd-socket-proxyd 127.0.0.1:${nuMcpPort}) &
+    # Either one gone leaves the other useless; Restart brings back both.
+    wait -n
+    exit 1
+  '';
+
+  # drun with typed prefixes (`p:`, `nu:`) in place of the other tabs; see
+  # sieb/launcher.nu.
+  launcherScript = pkgs.replaceVarsWith {
+    src = ./sieb/launcher.nu;
+    replacements = {
+      inherit (pkgs) coreutils;
+      nu = pkgs.nushell;
+      drun = "${examples}/launcher/drun.nu";
+      utilLinux = pkgs.util-linux;
+      wlClipboard = pkgs.wl-clipboard-rs;
+      inherit nuSocket sieb;
+    };
+    isExecutable = true;
+  };
   launcher = [
     "${sieb}/bin/sieb"
     "--config"
     "${launcherTheme}"
     "--script"
-    (mode "f002" "launcher/drun.nu")
-    "--script"
-    (mode "f121" "launcher/run.nu")
-    "--script"
-    (mode "f07c" "launcher/files.nu")
-    "--script"
-    (mode "f2d0" "niri/window.nu")
+    "${glyph "f002"}:${launcherScript}"
   ];
   power = [
     "${sieb}/bin/sieb"
@@ -211,5 +241,28 @@ in {
     xdg.configFile."sieb/power.toml".source = powerTheme;
     # Read by sieb-pinentry on its own, since rbw passes it no flags.
     xdg.configFile."sieb/pinentry.toml".source = pinentryTheme;
+
+    systemd.user.sockets.nu-mcp = {
+      Unit.Description = "Socket of the launcher's nu --mcp";
+      Socket = {
+        ListenStream = "%t/${nuSocket}";
+        SocketMode = "0600";
+      };
+      Install.WantedBy = ["sockets.target"];
+    };
+    systemd.user.services.nu-mcp = {
+      Unit.Description = "nu --mcp for the launcher, behind its socket";
+      Service = {
+        ExecStart = "${nuMcp}";
+        # Where relative paths in `nu:` resolve.
+        WorkingDirectory = "%h";
+        PrivateNetwork = true;
+        # A user manager may only set up a network namespace inside a user
+        # namespace of its own. Other accounts' files show as `nobody` there.
+        PrivateUsers = true;
+        Restart = "always";
+        RestartSec = 1;
+      };
+    };
   };
 }
