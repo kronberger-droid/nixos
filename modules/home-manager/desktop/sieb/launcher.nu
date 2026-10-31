@@ -18,7 +18,8 @@
 #   Ctrl+Enter     copies the row
 #   Tab            puts in the next completion of what is typed, from
 #                  `nu --ide-complete` (sieb's `complete`), also for `nu:`
-#                  in the app list
+#                  in the app list; Enter then keeps it rather than
+#                  running the line
 #   anything else  is a fresh expression, as at a prompt
 #
 # Evaluation happens in a long-running `nu --mcp`, reached over a socket
