@@ -137,6 +137,9 @@
       pkgs.wl-clipboard-rs
       pkgs.libnotify
     ]}:$PATH
+    # Where `rbw edit` opens $EDITOR. rbw.nu would otherwise take the first
+    # terminal it finds on PATH, which need not be this one.
+    export TERMINAL=${config.terminal.bin}
     # Bound to a key, so a failed unlock says why rather than nothing.
     # Escape on the prompt is no failure worth a toast.
     if ! err=$(rbw unlock 2>&1); then
