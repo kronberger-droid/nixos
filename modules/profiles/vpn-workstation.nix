@@ -7,6 +7,7 @@
   # host's configuration.nix carries the addresses Mullvad gave that key.
   services.mullvad-wg = lib.mkIf (config.age.secrets ? mullvad-wg-key) {
     enable = true;
+    startOnLogin = true;
     privateKeyFile = config.age.secrets.mullvad-wg-key.path;
   };
 

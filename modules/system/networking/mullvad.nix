@@ -45,6 +45,8 @@ in {
   options.services.mullvad-wg = {
     enable = lib.mkEnableOption "Mullvad over plain WireGuard (networkd)";
 
+    startOnLogin = lib.mkEnableOption "bringing the tunnel up when the graphical session starts";
+
     privateKeyFile = lib.mkOption {
       type = lib.types.str;
       description = "WireGuard private key registered with Mullvad, readable by systemd-network";
@@ -175,6 +177,20 @@ in {
         RemainAfterExit = true;
         ExecStart = up;
         ExecStop = "${pkgs.systemd}/bin/networkctl down ${iface}";
+      };
+    };
+
+    # On at login rather than boot: the system unit stays out of the boot
+    # transaction, and the session starts it through the sudo rule below,
+    # the same way the bar does. Not stopped at logout; the bar still turns
+    # it off.
+    systemd.user.services.mullvad-wg-login = lib.mkIf cfg.startOnLogin {
+      description = "Bring up Mullvad at login";
+      wantedBy = ["graphical-session.target"];
+      after = ["graphical-session.target"];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "/run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl start mullvad-wg.service";
       };
     };
 
