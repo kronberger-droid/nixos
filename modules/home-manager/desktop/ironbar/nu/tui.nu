@@ -31,8 +31,9 @@ const WIFI_TUI        = "@wifiTui@"
 
 use "@barLib@" *
 
-def drop [--width: float = 0.35, --height: float = 0.45, ...cmd: string] {
-  # dropkitten -W/-H are fractions of the screen.
+def drop [--width: number = 0.35, --height: number = 0.45, ...cmd: string] {
+  # dropkitten -W/-H take a float as a fraction of the screen and an int as
+  # logical pixels.
   # -t takes one of dropkitten's known terminal names, not a path, so this is
   # config.terminal.emulator rather than config.terminal.bin.
   # Built as one list rather than spread across lines: nushell ends an external
@@ -46,8 +47,11 @@ def main [what: string] {
   match $what {
     "wifi" => {
       # impala's tables are fixed-width, the device table alone about 88
-      # columns; at 0.35 of the laptop panel its headers come out truncated.
-      drop --width 0.6 $WIFI_TUI
+      # columns, so the size goes in pixels rather than fractions: 0.6 that
+      # fit the laptop panel's width spread across most of a 32" screen, and
+      # 0.45 of the panel's 1000 logical rows left the tables cramped. 1000px
+      # is about 100 columns of rio's 16px font.
+      drop --width 1000 --height 700 $WIFI_TUI
     }
     "audio" => { drop $WIREMIX }
     "bluetooth" => { drop $BLUETUI }
