@@ -6,6 +6,7 @@
   ...
 }: let
   cfg = config.services.mullvad-wg;
+  inherit (import ../../shared/mullvad.nix) relay;
   iface = "mullvad0";
   # Fwmark and routing table both, as wg-quick does. Bits 16-23 must stay
   # clear: Tailscale matches its own packets on 0x80000/0xff0000.
@@ -54,12 +55,12 @@ in {
     relay = {
       publicKey = lib.mkOption {
         type = lib.types.str;
-        default = "GLqlOTVJCyRpJx3vgR3ykTPNJLGKNytHXu61zBWIAls=";
-        description = "Relay public key (at-vie-wg-001 by default)";
+        default = relay.publicKey;
+        description = "Relay public key (shared/mullvad.nix by default)";
       };
       endpoint = lib.mkOption {
         type = lib.types.str;
-        default = "146.70.116.130:51820";
+        default = relay.endpoint;
         description = "Relay endpoint, an address so bringing the link up needs no DNS";
       };
     };

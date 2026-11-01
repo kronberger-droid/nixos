@@ -58,6 +58,8 @@ in {
   # Contents: the base64 key, one line.
   "mullvad-wg-key-intelNuc.age".publicKeys = for [intelNuc];
   "mullvad-wg-key-P14E.age".publicKeys = for [P14E];
+  # The homeserver's, for its Tailscale exit node (mullvad-exit.nix).
+  "mullvad-wg-key-homeserver.age".publicKeys = for [homeserver];
   # Server-only. The escrow is `editor` alone: a dead homeserver disk does
   # not take the cache signing key or the tunnel credentials with it as long
   # as intelNuc's host key survives (4811a66 escrowed these to all three

@@ -39,6 +39,7 @@ in {
     ../../modules/system/services/webdav.nix
     ../../modules/system/services/dns-healthcheck.nix
     ../../modules/system/services/flake-autoupdate.nix
+    ../../modules/system/networking/mullvad-exit.nix
   ];
 
   # Secrets (homeserver-specific — shared agenix.nix has desktop-only secrets)
@@ -52,6 +53,15 @@ in {
   age.secrets.cache-private-key = {
     file = "${inputs.self}/secrets/cache-private-key.age";
     path = "/run/secrets/cache-private-key";
+    mode = "0400";
+  };
+
+  # This host's own Mullvad key, for the exit node below. Gated on the file
+  # like the workstations' keys (security/agenix.nix): a missing .age fails
+  # the activation, not the eval.
+  age.secrets.mullvad-wg-key = lib.mkIf (builtins.pathExists "${inputs.self}/secrets/mullvad-wg-key-homeserver.age") {
+    file = "${inputs.self}/secrets/mullvad-wg-key-homeserver.age";
+    path = "/run/secrets/mullvad-wg-key";
     mode = "0400";
   };
 
@@ -354,17 +364,30 @@ in {
     enable = true;
 
     # Sets net.ipv4.conf.all.forwarding and the v6 equivalent, which is all a
-    # subnet router needs. It deliberately leaves reverse-path filtering strict:
-    # nixpkgs only loosens that for "client"/"both", since neither direction
-    # here is asymmetric. Inbound arrives on tailscale0 from 100.x and replies
-    # leave the same way, while LAN replies arrive on enp86s0 from a prefix
-    # routed back out enp86s0. If routing ever misbehaves, that is the knob.
+    # subnet router or exit node needs. Reverse-path filtering is the
+    # firewall module's default, loose; the subnet route alone would hold
+    # under strict, the exit node would not (its replies come back on
+    # mullvad0 from internet addresses), so mullvad-exit.nix pins loose.
     useRoutingFeatures = "server";
 
     # `tailscale set` rather than `tailscale up`, since extraUpFlags only
     # applies when a node authenticates from an authKeyFile and this one is
-    # already enrolled. `set` reconfigures a running node in place.
-    extraSetFlags = ["--advertise-routes=${addrs.lanSubnet}"];
+    # already enrolled. `set` reconfigures a running node in place. The exit
+    # node is advertised only once Mullvad is behind it, so it can never
+    # hand out the home address; like the route, it needs approving once in
+    # the admin console.
+    extraSetFlags =
+      ["--advertise-routes=${addrs.lanSubnet}"]
+      ++ lib.optional config.services.mullvad-exit.enable "--advertise-exit-node";
+  };
+
+  # Exit node for the tailnet, mostly the phone, which cannot run Tailscale
+  # and Mullvad side by side. On once the key is in ./secrets.
+  services.mullvad-exit = lib.mkIf (config.age.secrets ? mullvad-wg-key) {
+    enable = true;
+    privateKeyFile = config.age.secrets.mullvad-wg-key.path;
+    # What Mullvad assigned to secrets/mullvad-wg-key-homeserver.age.
+    addresses = ["10.73.231.176/32" "fc00:bbbb:bbbb:bb01::a:e7af/128"];
   };
 
   # Binary cache — serves /nix/store to other machines on the network. Same
