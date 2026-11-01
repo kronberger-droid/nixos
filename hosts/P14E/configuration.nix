@@ -47,6 +47,9 @@ _: {
   # modules/system/networking/iwd.nix for the stages.
   networking.iwdSwap.stage = "standalone";
 
+  # What Mullvad assigned to this host's key (secrets/mullvad-wg-key-P14E.age).
+  services.mullvad-wg.addresses = ["10.70.144.154/32" "fc00:bbbb:bbbb:bb01::7:9099/128"];
+
   # Limit build parallelism to keep the system responsive. The i7-1185G7 is
   # 4 cores / 8 threads (`nproc` = 8), so one build gets half the threads.
   nix.settings = {

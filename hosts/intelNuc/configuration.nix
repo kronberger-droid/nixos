@@ -96,7 +96,7 @@
   networking.iwdSwap.stage = "standalone";
 
   # What Mullvad assigned to this host's key (secrets/mullvad-wg-key-intelNuc.age).
-  services.mullvad-wg.addresses = ["10.75.168.53/32" "fc00:bbbb:bbbb:bb01::c:a834/128"];
+  services.mullvad-wg.addresses = ["10.65.114.54/32" "fc00:bbbb:bbbb:bb01::2:7235/128"];
 
   users.users.${username}.extraGroups = ["gamemode"];
 
