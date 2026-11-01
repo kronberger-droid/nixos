@@ -183,7 +183,12 @@ in {
     # Tapping a screen corner opens the overview — a pointer-free entry point
     # to niri's touch-friendly window management (tap to focus, drag between
     # workspaces). Touch-down at a corner counts as the pointer reaching it.
-    gestures.hot-corners.enable = true;
+    gestures.hot-corners = {
+      top-left = true;
+      top-right = false;
+      bottom-left = false;
+      bottom-right = false;
+    };
 
     screenshot-path = "~/Pictures/Screenshots/screenshot-%Y-%m-%d-%H-%M-%S.png";
 
