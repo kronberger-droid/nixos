@@ -35,15 +35,20 @@
     # byte-for-byte cache-matching setup (and its substituter in
     # nix-caches.nix) lives on in git history if checks ever come back.
     #
-    # Still deliberately unfollowed: Rio's own nixpkgs/rust-overlay lock is
-    # what upstream tests against, and it resolves Rio's habit of pinning its
-    # MSRV to a just-released Rust — following our rust-overlay lock is how
-    # that bit us before. Costs a second nixpkgs at eval time and a parallel
-    # set of runtime libs, all cheap and cached.
+    # rust-overlay follows ours, nixpkgs stays Rio's. Rio pins its MSRV to a
+    # just-released Rust but rarely updates its own lock (its bot PRs run
+    # no CI and get closed), so on its own lock `main` fails to evaluate
+    # after every toolchain bump, as 1.99.1 in rio#1993 did.
+    # Ours moves in the same nightly update as Rio, thus it already carries
+    # any stable release Rio can ask for. Rio's nixpkgs costs a second
+    # nixpkgs at eval time and a parallel set of runtime libs, all cached.
     #
-    # Use `.default`. `.rio-nightly` is not a fresher channel — it's the same
+    # Use `.default`. `.rio-nightly` is not a fresher channel, it is the same
     # main source built with a Rust nightly toolchain.
-    rio-upstream.url = "github:raphamorim/rio";
+    rio-upstream = {
+      url = "github:raphamorim/rio";
+      inputs.rust-overlay.follows = "rust-overlay";
+    };
     # Helix from master; the last release (25.07.1) trails it by over a year.
     # Unfollowed on purpose: helix.cachix.org (nix-caches.nix) holds builds
     # against helix's own nixpkgs lock, and following ours would change the
