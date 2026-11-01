@@ -12,9 +12,12 @@
   # clear: Tailscale matches its own packets on 0x80000/0xff0000.
   table = 51820;
 
-  # networkd skips a netdev whose key file is missing and does not look
-  # again. agenix writes the key from its own unit, which can lose that
-  # race at boot or on a switch, so reload first and wait for the link.
+  # networkd reads the key only when it creates the netdev: one whose key
+  # file was missing (agenix writes it from its own unit, which can lose
+  # that race at boot or on a switch) is skipped for good, and one that
+  # exists keeps its old key across a reload, a rotated key included. So
+  # drop the link, which is down at this point anyway, reload to create it
+  # afresh, and wait for it.
   #
   # DNS needs the tailnet's "Override local DNS" off. With it on, tailscale0
   # holds `~.` as well, two `~.` links are asked in parallel, and tailscaled
@@ -24,6 +27,7 @@
   # With the setting off, tailscale0 carries only the tailnet suffix, which
   # outranks `~.` for MagicDNS names. Refuse to start rather than leak.
   up = pkgs.writeShellScript "mullvad-wg-up" ''
+    ${pkgs.systemd}/bin/networkctl delete ${iface} 2>/dev/null || true
     ${pkgs.systemd}/bin/networkctl reload
     for _ in $(seq 50); do
       ${pkgs.iproute2}/bin/ip link show ${iface} >/dev/null 2>&1 && break

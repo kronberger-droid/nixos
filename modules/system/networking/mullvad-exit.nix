@@ -73,6 +73,13 @@ in {
       ];
     };
 
+    # agenix installs keys from its own unit, and without the ordering the
+    # tunnel can start first, find no key, fail, and with it the deploy.
+    systemd.services."wireguard-${iface}" = {
+      after = ["agenix-install-secrets.service"];
+      wants = ["agenix-install-secrets.service"];
+    };
+
     # Before tailscaled, so there is no window in which it forwards exit
     # traffic without the rules.
     systemd.services.mullvad-exit-rules = {
