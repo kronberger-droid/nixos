@@ -364,10 +364,9 @@ in {
     enable = true;
 
     # Sets net.ipv4.conf.all.forwarding and the v6 equivalent, which is all a
-    # subnet router or exit node needs. Reverse-path filtering is the
-    # firewall module's default, loose; the subnet route alone would hold
-    # under strict, the exit node would not (its replies come back on
-    # mullvad0 from internet addresses), so mullvad-exit.nix pins loose.
+    # subnet router or exit node needs. Reverse-path filtering stays the
+    # firewall module's default; the exit node's replies, which come back on
+    # mullvad0 from internet addresses, are exempted in mullvad-exit.nix.
     useRoutingFeatures = "server";
 
     # `tailscale set` rather than `tailscale up`, since extraUpFlags only
