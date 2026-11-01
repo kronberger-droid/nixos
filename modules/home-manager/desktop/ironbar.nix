@@ -256,23 +256,29 @@
   # The VPN popup's entries, in the order its rows appear. vpn.nu gets the
   # same list and pushes each row's state dot as `vpn_dot_<n>`. An empty unit
   # is Tailscale, which vpn.nu drives through its own CLI.
-  vpns = [
-    {
-      name = "Tailscale";
-      label = "TAIL";
-      unit = "";
-    }
-    {
-      name = "PIA VPN";
-      label = "PIA";
-      unit = "pia-vpn.service";
-    }
-    {
-      name = "TU Wien VPN";
-      label = "TU";
-      unit = "openconnect-tuwien.service";
-    }
-  ];
+  vpns =
+    [
+      {
+        name = "Tailscale";
+        label = "TAIL";
+        unit = "";
+      }
+      {
+        name = "PIA VPN";
+        label = "PIA";
+        unit = "pia-vpn.service";
+      }
+      {
+        name = "TU Wien VPN";
+        label = "TU";
+        unit = "openconnect-tuwien.service";
+      }
+    ]
+    ++ lib.optional (osConfig.services.mullvad-wg.enable or false) {
+      name = "Mullvad";
+      label = "MUL";
+      unit = "mullvad-wg.service";
+    };
   vpnRow = i: v: dropRow "drop-row" "#vpn_dot_${toString i}" v.name (run "vpn" "toggle '${v.name}'");
 
   wpctl = "${pkgs.wireplumber}/bin/wpctl";

@@ -7,6 +7,7 @@
   ...
 }: let
   rbwDeviceId = "${inputs.self}/secrets/rbw-device-id-${host}.age";
+  mullvadKey = "${inputs.self}/secrets/mullvad-wg-key-${host}.age";
 
   # Every secret has the same shape: an age file in ./secrets, decrypted to
   # /run/secrets/<name> with mode 0400. Only the owner varies (root vs the
@@ -75,5 +76,11 @@ in {
     # the file like the token above, since each is made on its own host.
     // lib.optionalAttrs (builtins.pathExists rbwDeviceId) {
       rbw-device-id = (mkSecret username "rbw-device-id") // {file = rbwDeviceId;};
+    }
+    # This host's Mullvad WireGuard key, per host since each key is its own
+    # Mullvad device with its own tunnel addresses. networkd reads it, and
+    # it does not run as root.
+    // lib.optionalAttrs (builtins.pathExists mullvadKey) {
+      mullvad-wg-key = (mkSecret "systemd-network" "mullvad-wg-key") // {file = mullvadKey;};
     };
 }

@@ -53,6 +53,11 @@ in {
   "rbw-device-id-intelNuc.age".publicKeys = for [intelNuc];
   "rbw-device-id-spectre.age".publicKeys = for [spectre];
   "rbw-device-id-P14E.age".publicKeys = for [P14E];
+  # Mullvad WireGuard private key, one per host: each is a device on the
+  # account with its own tunnel addresses (system/networking/mullvad.nix).
+  # Contents: the base64 key, one line.
+  "mullvad-wg-key-intelNuc.age".publicKeys = for [intelNuc];
+  "mullvad-wg-key-P14E.age".publicKeys = for [P14E];
   # Server-only. The escrow is `editor` alone: a dead homeserver disk does
   # not take the cache signing key or the tunnel credentials with it as long
   # as intelNuc's host key survives (4811a66 escrowed these to all three
