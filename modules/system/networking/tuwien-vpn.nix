@@ -41,6 +41,23 @@ in {
   config = lib.mkIf cfg.enable {
     # Create systemd service for TU Wien VPN
     systemd.services.openconnect-tuwien = let
+      # The stock vpnc-script hands tun0's servers to resolved but leaves
+      # the global opportunistic DNSOverTLS (networking.nix) in force on the
+      # link. TU Wien's IPv6 resolver rejects TCP 853 with admin-prohibited,
+      # which resolved takes as a hard failure instead of falling back to
+      # plain DNS, so every tuwien.ac.at lookup failed. DoT is turned off
+      # for this link only.
+      vpncScript = pkgs.writeShellScript "tuwien-vpnc-script" ''
+        ${pkgs.vpnc-scripts}/bin/vpnc-script "$@"
+        status=$?
+        case "$reason" in
+          connect | reconnect)
+            ${pkgs.systemd}/bin/resolvectl dnsovertls "$TUNDEV" no
+            ;;
+        esac
+        exit $status
+      '';
+
       connectScript = pkgs.writeShellScript "tuwien-vpn-connect" ''
         PASSWORD=$(cat "${cfg.passwordFile}")
         TOTP=$(${pkgs.oath-toolkit}/bin/oathtool --totp --base32 "$(cat "${cfg.totpSecretFile}")")
@@ -52,6 +69,7 @@ in {
             --no-external-auth \
             --passwd-on-stdin \
             --reconnect-timeout 30 \
+            --script ${vpncScript} \
             ${cfg.server}
       '';
     in {
