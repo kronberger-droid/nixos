@@ -94,8 +94,15 @@ in {
       };
     };
 
-    # Replies come back on mullvad0 from internet addresses, and the strict
-    # check routes those via the uplink and drops them.
-    networking.firewall.checkReversePath = "loose";
+    # Replies come back on mullvad0 from internet addresses, and the reverse
+    # path filter wants a route back to their source outside the tunnel's
+    # table. For IPv4 the uplink's default passes the loose check. There is
+    # no IPv6 at home, so no IPv6 default either, and even loose drops every
+    # IPv6 reply. What arrives on mullvad0 can only come out of the tunnel,
+    # so the spoofing check has nothing to add there. Inserted ahead of the
+    # chain's DROP; the firewall rebuilds the chain before running these.
+    networking.firewall.extraCommands = ''
+      ip46tables -t mangle -I nixos-fw-rpfilter -i ${iface} -j RETURN
+    '';
   };
 }
