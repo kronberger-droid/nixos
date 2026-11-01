@@ -21,6 +21,10 @@
     settings = {
       email = "kronberger@proton.me";
       base_url = "https://vault.bitwarden.eu";
+      # Seconds without a vault access before rbw-agent locks again. Idle
+      # time, not time since unlock: every pick resets it. rbw's default,
+      # spelled out so it is set here and not by whichever rbw is current.
+      lock_timeout = 3600;
       # The unlock prompt as a sieb panel, themed by sieb/pinentry.toml
       # from desktop/sieb.nix.
       pinentry = inputs.sieb.packages.${pkgs.stdenv.hostPlatform.system}.pinentry;

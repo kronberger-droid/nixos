@@ -913,11 +913,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793550272,
-        "narHash": "sha256-gRpUG4JR3Ld7NwUgl8IM+gOxN/c3BjubJ4nHVfvUZCU=",
+        "lastModified": 1793558596,
+        "narHash": "sha256-PJBYgfyMDt3DdzE0rUfsYvbKe3+Ne+ghgAaJ2V4eT08=",
         "owner": "kronberger-droid",
         "repo": "sieb",
-        "rev": "08b9ab1f1bd49c62419ed958c72fc23b490c953e",
+        "rev": "8931d300ca7143bd3cb8b361ac025300b0e95f17",
         "type": "github"
       },
       "original": {
