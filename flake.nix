@@ -274,6 +274,15 @@
         ];
       })
       lixModule
+      {
+        # The source this generation was built from, browsable on the machine
+        # and kept alive as long as the generation is. agenix's .age paths
+        # already pulled it into the closure, but only by accident.
+        environment.etc."nixos-source".source = self;
+        # `nixos-version --configuration-revision`. A dirty tree reports
+        # `<rev>-dirty`; its uncommitted changes are only in /etc/nixos-source.
+        system.configurationRevision = self.rev or self.dirtyRev or null;
+      }
     ];
 
     # Helper function to create host configurations
