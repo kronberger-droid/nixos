@@ -427,13 +427,21 @@ in {
         # hostname upstream like https://dns.cloudflare.com/dns-query could
         # never resolve itself, and the resolver would answer nothing at all,
         # not even on loopback. Bare IPs need no bootstrap, and DoH rides
-        # TCP/443, which the block does not touch. Google is deliberately
-        # absent: https://8.8.8.8/dns-query serves HTML without the dns.google
-        # SNI, so it is unusable as an IP literal. Cloudflare and Quad9 both
-        # answer correctly on their bare addresses.
+        # TCP/443, which the block does not touch.
+        #
+        # Mullvad first, so tailnet clients using this box as exit node get
+        # Mullvad DNS too: tailscaled answers their queries through blocky,
+        # from the server itself, so they take the home uplink, never the
+        # tunnel (mullvad-exit.nix only routes what arrives on tailscale0).
+        # The unfiltered resolver, since blocky does the blocking. Its
+        # certificate names only dns.mullvad.net, so `#` hands blocky the
+        # name to verify (and send as SNI) while it still dials the bare IP.
+        # Quad9 is the fallback and answers on its bare addresses. `strict`
+        # keeps it a fallback: the default parallel_best would send it half
+        # of all queries.
+        strategy = "strict";
         groups.default = [
-          "https://1.1.1.1/dns-query"
-          "https://1.0.0.1/dns-query"
+          "https://194.242.2.2/dns-query#dns.mullvad.net"
           "https://9.9.9.9/dns-query"
           "https://149.112.112.112/dns-query"
         ];
@@ -447,7 +455,7 @@ in {
       # blocky itself, and plain DNS anywhere else is blocked. So the same
       # IP-literal DoH as the upstreams.
       bootstrapDns = [
-        {upstream = "https://1.1.1.1/dns-query";}
+        {upstream = "https://194.242.2.2/dns-query#dns.mullvad.net";}
         {upstream = "https://9.9.9.9/dns-query";}
       ];
 

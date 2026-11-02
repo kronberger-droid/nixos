@@ -4,10 +4,12 @@
   # custom mapping cannot make this probe pass while real lookups fail.
   probeName = "cloudflare.com";
 
-  # Matches the DoH endpoints in hosts/homeserver/configuration.nix. Used only
-  # to tell "the resolver broke" apart from "the uplink broke", never to answer
-  # the probe itself.
-  upstreamProbe = "https://1.1.1.1/dns-query?name=${probeName}&type=A";
+  # The first DoH upstream in hosts/homeserver/configuration.nix. Used only to
+  # tell "the resolver broke" apart from "the uplink broke", never to answer
+  # the probe itself. Mullvad speaks only the RFC 8484 wire format, so the
+  # query is a base64url DNS message (the A record of probeName), and its
+  # certificate names only dns.mullvad.net, hence --resolve below.
+  upstreamProbe = "https://dns.mullvad.net/dns-query?dns=AAABAAABAAAAAAAACmNsb3VkZmxhcmUDY29tAAABAAE";
 
   healthcheck = pkgs.writeShellApplication {
     name = "dns-healthcheck";
@@ -29,7 +31,8 @@
       # anything, and it discards the cache that is still answering from memory
       # for everything already looked up.
       if ! curl -sS --max-time 8 -o /dev/null \
-           -H 'accept: application/dns-json' '${upstreamProbe}'; then
+           --resolve dns.mullvad.net:443:194.242.2.2 \
+           -H 'accept: application/dns-message' '${upstreamProbe}'; then
         echo "DoH upstream is unreachable too, so this is an uplink fault rather than a resolver fault. Leaving blocky alone." >&2
         exit 1
       fi
