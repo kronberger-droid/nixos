@@ -16,7 +16,8 @@
 #   brings zathura back on the same PDF
 #
 # `main save` asks for a name, offering the saved ones to overwrite; Enter
-# on a name nothing matches takes it as typed. `main close` saves the same
+# on a name nothing matches takes it as typed. It leaves the workspace's own
+# name alone. `main close` saves the same
 # way and then closes the workspace's windows, so it is out of the way until
 # picked again; Escape at the prompt closes nothing. `main` picks a save and
 # rebuilds it on the focused workspace, right of whatever is there, and
@@ -185,9 +186,8 @@ def save-workspace []: nothing -> any {
   {name: $name, saved: (date now | format date "%+"), summary: (summary $entries), windows: $entries}
   | to json
   | save -f (save-path $name)
-  ^niri msg action set-workspace-name $name | complete | ignore
   notify $"Saved ($name)" (summary $entries)
-  {name: $name, id: $ws.id}
+  {name: $name, id: $ws.id, workspace: $ws.name?}
 }
 
 def "main save" [] { save-workspace | ignore }
@@ -200,8 +200,11 @@ def "main close" [] {
     ^niri msg action close-window --id $w.id | complete | ignore
   }
   # A named workspace outlives its windows; unnamed, niri drops it, and the
-  # picker builds the save on a fresh one.
-  ^niri msg action unset-workspace-name $saved.name | complete | ignore
+  # picker builds the save on a fresh one. Saving never names the workspace,
+  # so only a name it had before needs to go.
+  if $saved.workspace != null {
+    ^niri msg action unset-workspace-name $saved.workspace | complete | ignore
+  }
 }
 
 # Spawns through niri so the window outlives this script, then waits for it
