@@ -7,6 +7,9 @@
 }: {
   programs.spotify-player = {
     enable = true;
+    # Native PulseAudio client (served by pipewire-pulse) instead of rodio,
+    # which reaches PipeWire through the ALSA shim.
+    package = pkgs.spotify-player.override {withAudioBackend = "pulseaudio";};
     settings = {
       theme = "base16";
       # Own Spotify app; the shared default ID is constantly rate limited.
@@ -17,6 +20,8 @@
       # Audio comes from the daemon below; the popup TUI only remote-controls
       # it, so closing the popup does not stop playback.
       enable_streaming = "DaemonOnly";
+      # Must match the backend compiled into the package above.
+      device.audio_backend = "pulseaudio";
       # No desktop notification on every track change.
       enable_notify = false;
       # Every host's daemon would otherwise register as `spotify-player`, and
