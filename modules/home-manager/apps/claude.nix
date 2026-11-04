@@ -314,6 +314,13 @@
       # every nix call the agent made came back as tens of KB of escape codes
       # around a few lines of answer. Raw keeps only the log lines.
       env.NIX_CONFIG = "log-format = raw";
+      # Mods draw formulas with the `Image` element, which needs the terminal
+      # to count as a kitty-graphics one. Claude Code probes for that, and its
+      # name allowlist covers kitty and Ghostty only, so Rio (which does draw
+      # kitty images) falls back to alt text unless this forces it. Set here
+      # rather than per launch so a session spawned through the daemon gets it
+      # too; a shell `with-env` does not reach those.
+      env.CLAUDE_CODE_FORCE_TERMINAL_IMAGES = "1";
       # Not set here: the fullscreen renderer (CLAUDE_CODE_NO_FLICKER=1, or
       # `/tui fullscreen` per session) that works around the inline
       # renderer's ghosting once output scrolls past the viewport (upstream
