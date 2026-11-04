@@ -121,5 +121,3 @@ there survives the session; the job tmp dir is deleted with the job.
   promise...`).
 - Credit people by name at the end, and **close on `Co-Authored-By:` trailers
   alone**: one per human co-author, each on its own line after a blank line.
-  A Claude trailer joins them only when I ask for one. The trailers are the
-  whole footer: no "🤖 Generated with Claude Code" line, no link.

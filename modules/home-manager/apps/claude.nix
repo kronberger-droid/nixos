@@ -295,10 +295,8 @@
       # Unset, Claude Code appends "End git commit messages with:
       # Co-Authored-By: ..." to its own system prompt, and the "Generated
       # with Claude Code" line for PR bodies. That sits above CLAUDE.md in the
-      # prompt hierarchy, so the disclosure rule in claude-md.md (trailer on
-      # request only) loses to it every time and the trailer shows up however
-      # plainly it was waved off. Empty strings turn the injection off, which
-      # is what lets the rule decide.
+      # prompt hierarchy, so no rule in claude-md.md can switch it off. Empty
+      # strings turn the injection off; this is the only place it is handled.
       #
       attribution.commit = "";
       attribution.pr = "";
@@ -306,7 +304,7 @@
       # attached over Remote Control inject "End git commit messages with:
       # Claude-Session: https://claude.ai/code/session_..." plus the matching
       # PR-body line, again above CLAUDE.md. This is the switch that stops the
-      # injection; claude-md.md restates the rule as a backstop.
+      # injection.
       attribution.sessionUrl = false;
 
       # Lix's default `log-format = auto` paints its progress bar
