@@ -34,6 +34,12 @@ position, not from an outside contributor's.
   bash whatever my login shell is, so nu syntax fails in it.
 - Commands sent over ssh: POSIX sh as well. My servers keep bash as the login
   shell and nushell interactive-only.
+- Scripting and data munging: use Nushell, not Python. From the Bash tool that
+  is `nu -c '...'` or a `.nu` file run with `nu file.nu`. Plain text edits go
+  through the Edit tool. Fall back to Python only when nu genuinely cannot do
+  it, and say so.
+- A tool that is not installed: `nix run nixpkgs#<pkg> -- <args>`, not a global
+  install and not a guess that it exists.
 
 ## Identity
 
