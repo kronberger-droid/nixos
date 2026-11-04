@@ -37,7 +37,7 @@ position, not from an outside contributor's.
 - Scripting and data munging: use Nushell, not Python. From the Bash tool that
   is `nu -c '...'` or a `.nu` file run with `nu file.nu`. Plain text edits go
   through the Edit tool. Fall back to Python only when nu genuinely cannot do
-  it, and say so.
+  it, and say so. The `nushell` skill has the traps; load it first.
 - A tool that is not installed: `nix run nixpkgs#<pkg> -- <args>`, not a global
   install and not a guess that it exists.
 
@@ -115,6 +115,9 @@ reconstructing the conventions from memory.
   vault's math and lilaq conventions too, since vault notes use Typst syntax.
 - **`vault`** — my Obsidian vault at `~/Documents/notes/general-vault/`. Reading
   context, searching, writing session logs, and the note syntax itself.
+- **`nushell`** — any script or data munging you would otherwise write in
+  Python. Invocation from the Bash tool, the traps of the nu build on this
+  machine, a Python translation table, and when Python is justified.
 
 ## This file is generated
 
