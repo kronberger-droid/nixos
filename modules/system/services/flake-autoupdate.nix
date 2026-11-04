@@ -94,8 +94,14 @@
     - update.log: which inputs moved and to what
     - status.md: build result per target, and what the fix phase did
     - *.diff: `nix store diff-closures` from the old system to the new one
-    - cves-fixed.txt and cves-introduced.txt: CVE delta from vulnix, and
-      the vulnix-*.json files they came from
+    - cves-fixed.txt and cves-introduced.txt: CVE delta from vulnix, one
+      "package CVE" per line, and the vulnix-*.json files they came from.
+      Only targets whose old and new closure were both scanned count;
+      cves-note.txt lists the ones that were not. vulnix matches by name and
+      version and knows nothing of nixpkgs backports, so the totals are
+      inflated: report the delta only, never the totals. If both files are
+      empty, say that nothing changed, or that no baseline was available when
+      cves-note.txt is not empty
     - versions.json: `flake-versions report` on the updated lock, taken
       before anything was built. `pins` compares each package the flake
       overrides with plain nixpkgs: "droppable" means nixpkgs caught up and
@@ -365,25 +371,46 @@
         # ---- closure diff and CVE delta ----------------------------------
         # vulnix is best effort: it needs the NVD feed, and a scanner that is
         # down must not block the update it exists to annotate.
+        #
+        # A scan that failed or never ran is not an empty scan. Treating it as
+        # one made every CVE of the new closure look "introduced". So a target
+        # only enters the delta when both its scans succeeded, and the rest are
+        # listed in cves-note.txt for the PR agent to mention.
+        #
+        # Keys are "pname CVE", not bare CVE ids: the delta then names the
+        # package, and a version bump that still carries the same CVE (openssl
+        # 3.6.1 to 3.6.3) is not reported as a change. Bootstrap toolchains
+        # never run on the host and only add noise.
         scan() {
           local rc=0
           vulnix --json "$1" >"$2" || rc=$?
           # 2 is "vulnerabilities found", which is the interesting answer.
-          [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ] || { echo "vulnix failed on $1 (exit $rc)" >&2; echo '[]' >"$2"; }
+          [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ] || { echo "vulnix failed on $1 (exit $rc)" >&2; return 1; }
+        }
+        keys() {
+          jq -r '.[] | select(.name | test("bootstrap") | not)
+                 | .pname as $p | (.affected_by - .whitelisted)[] | "\($p) \(.)"' "$1"
         }
         : >"$run/cves-old.txt"
         : >"$run/cves-new.txt"
+        : >"$run/cves-note.txt"
         for t in "''${build[@]}"; do
           s=$(slug "$t")
           old=$(cat "$run/$s.old-out" 2>/dev/null || true)
           new=$(cat "$run/$s.out" 2>/dev/null || true)
           [ -n "$new" ] || continue
-          scan "$new" "$run/vulnix-$s-new.json"
-          jq -r '.[] | .affected_by[]' "$run/vulnix-$s-new.json" >>"$run/cves-new.txt" || true
-          [ -n "$old" ] || continue
-          nix store diff-closures "$old" "$new" >"$run/$s.diff" 2>&1 || true
-          scan "$old" "$run/vulnix-$s-old.json"
-          jq -r '.[] | .affected_by[]' "$run/vulnix-$s-old.json" >>"$run/cves-old.txt" || true
+          if [ -n "$old" ]; then
+            nix store diff-closures "$old" "$new" >"$run/$s.diff" 2>&1 || true
+          else
+            echo "$t: no old closure in the store, so no CVE comparison" >>"$run/cves-note.txt"
+            continue
+          fi
+          if scan "$old" "$run/vulnix-$s-old.json" && scan "$new" "$run/vulnix-$s-new.json"; then
+            keys "$run/vulnix-$s-old.json" >>"$run/cves-old.txt"
+            keys "$run/vulnix-$s-new.json" >>"$run/cves-new.txt"
+          else
+            echo "$t: vulnix failed, so no CVE comparison" >>"$run/cves-note.txt"
+          fi
         done
         sort -u -o "$run/cves-old.txt" "$run/cves-old.txt"
         sort -u -o "$run/cves-new.txt" "$run/cves-new.txt"
