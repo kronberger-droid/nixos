@@ -113,6 +113,7 @@ in {
   claude.skills.scientific-writing.content = builtins.readFile ./skills/scientific-writing.md;
   claude.skills.commit-writer.content = builtins.readFile ./skills/commit-writer.md;
   claude.skills.github-voice.content = builtins.readFile ./skills/github-voice.md;
+  claude.skills.guided-dev.content = builtins.readFile ./skills/guided-dev.md;
 
   # Folder skills, whole-folder symlinked into ~/.claude/skills/: Matt
   # Pocock's collection (see mattSkills above), the prose skills, the Nushell
