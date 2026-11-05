@@ -60,6 +60,26 @@
         "type": "github"
       }
     },
+    "claude-mathpane": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793886991,
+        "narHash": "sha256-42v31MvoeGbkjkYvPi5AQwIbZnsxpDSeT/kbDzcULDw=",
+        "owner": "kronberger-droid",
+        "repo": "claude-mathpane",
+        "rev": "842399f95015570d46de6b310a25aa4516f7640b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kronberger-droid",
+        "repo": "claude-mathpane",
+        "type": "github"
+      }
+    },
     "crane": {
       "locked": {
         "lastModified": 1790899423,
@@ -820,6 +840,7 @@
         "agenix": "agenix",
         "base16": "base16",
         "claude-code": "claude-code",
+        "claude-mathpane": "claude-mathpane",
         "deploy-rs": "deploy-rs",
         "disko": "disko",
         "dropkitten": "dropkitten",
