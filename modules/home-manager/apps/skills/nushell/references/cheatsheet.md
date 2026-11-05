@@ -1,7 +1,8 @@
 # Nushell cheatsheet for an LLM agent (verified on the installed `nu`)
 
 Audience: Claude Code writing Nushell instead of Python for scripting and data munging, run from a bash-only tool.
-Not registered as a skill. Source material for one.
+Reference file of the `nushell` skill (`../SKILL.md`), the verified ground truth
+for this machine. Where `upstream/*.md` disagrees with it, this file wins.
 
 ## 0. What "0.116.2" actually is
 

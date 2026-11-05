@@ -116,6 +116,15 @@
       url = "github:blader/humanizer";
       flake = false;
     };
+    # Nushell Agent Skill from nushell/nu_scripts (MIT). Written by Mussar
+    # (0x4D5352, PR #1231), merged by Daren Schroeder (fdncred), with later
+    # fixes from AucaCoyan and nextgenthemes. Only its reference files are used:
+    # claude-settings.nix links them into the local `nushell` skill as
+    # `references/upstream/`, with the licence bundled.
+    nu-scripts = {
+      url = "github:nushell/nu_scripts";
+      flake = false;
+    };
     nix-pia-vpn = {
       url = "github:rcambrj/nix-pia-vpn";
       inputs.nixpkgs.follows = "nixpkgs";

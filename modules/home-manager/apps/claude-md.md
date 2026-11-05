@@ -105,7 +105,8 @@ reconstructing the conventions from memory.
   context, searching, writing session logs, and the note syntax itself.
 - **`nushell`** — any script or data munging you would otherwise write in
   Python. Invocation from the Bash tool, the traps of the nu build on this
-  machine, a Python translation table, and when Python is justified.
+  machine, a Python translation table, and when Python is justified. Also the
+  command reference and the guide to Rust tests in the nushell repo.
 
 ## This file is generated
 

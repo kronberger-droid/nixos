@@ -1,12 +1,13 @@
 ---
 name: nushell
-description: Write and run Nushell for scripting and data munging instead of Python, from the bash-only Bash tool.
+description: Write and run Nushell for scripting and data munging instead of Python, from the bash-only Bash tool. Also the reference for work on the nushell repo itself, Rust tests included.
 when_to_use: >-
   Whenever you are about to reach for Python, jq or awk to parse, reshape or
   summarise data (JSON, YAML, TOML, CSV, lock files, logs, file listings), do
   date or string munging, or write a throwaway script. Also when writing or
-  debugging any `.nu` file or `nu -c` one-liner, or when nu prints a parse or
-  type error.
+  debugging any `.nu` file or `nu -c` one-liner, when nu prints a parse or
+  type error, or when writing or refactoring Rust tests in nushell/nushell
+  (nu_test_support, NuTester, Playground, rstest).
 ---
 
 # Nushell
@@ -16,9 +17,28 @@ snippet goes through `nu`. Nu moves fast and this machine runs a build of
 upstream main (flake input `nushell-src`, no ref), so old tutorials and your
 memory are unreliable. When a flag is in doubt, run `nu -n -c 'help <cmd>'`.
 
-Full verified cheatsheet, with the version history and the error table:
-`~/.config/nixos/modules/home-manager/apps/skills/nushell-research.md`.
-Grep it before guessing.
+## Where to look
+
+This file is the working set: how to run nu from here, the traps, idioms. The
+rest is in `references/`, read on demand.
+
+| File | Read when you need |
+|---|---|
+| `references/cheatsheet.md` | Version history of this exact build, the error table, behaviours verified on the installed `nu`. Grep it before guessing. |
+| `references/upstream/commands.md` | Command tables: filters, strings, conversions, filesystem, math, dates |
+| `references/upstream/types-and-syntax.md` | Types, string kinds, operators, control flow, cell paths |
+| `references/upstream/data-analysis.md` | Format conversion, HTTP, Polars, SQLite, aggregation |
+| `references/upstream/advanced.md` | Custom commands, modules, error handling, jobs, externals, env |
+| `references/upstream/bash-equivalents.md` | Bash to Nushell translation |
+| `references/testing.md` | Writing or refactoring Rust tests in nushell/nushell |
+
+`references/upstream/` is the `nu_scripts` project's own Nushell skill, tracked
+by flake update, written against releases and the Nushell MCP server. When it
+disagrees with the cheatsheet or this file, this build wins. Skip its MCP
+material unless `mcp__nushell__*` tools are connected.
+
+Reviewing a PR on nushell/nushell or nu_scripts: `nu-pr-review`, and
+`nu-pr-recheck` for one already reviewed.
 
 ## Running it
 
@@ -89,6 +109,15 @@ Grep it before guessing.
     `http post --content-type application/json $url {a: 1}`.
 15. **`where type == match`** hits the `match` keyword. Quote it:
     `where type == "match"`.
+16. **`$in` inside `where` rebinds.** `where ($in.a > 1) and ($in.b > 2)`
+    fails with `Data cannot be accessed with a cell path`, since the second
+    `$in` is the bool from the first. Use bare columns:
+    `where a > 1 and b > 2`. `where not ($in.col | cmd)` fails with
+    `Variable not found`; write `where ($in.col | cmd) == false`.
+17. **`$"..."` evaluates every `( )`.** `$"(some text)"` runs `some` as a
+    command. Escape literal parens as `\(text\)`. Braces are not interpolation.
+18. **`2>&1` is `o+e>|`**: `^cmd o+e>| str trim`. Strip ANSI with `ansi strip`;
+    an escape is `char --unicode '1b'`, not `\u001b`.
 
 ## Idioms
 
