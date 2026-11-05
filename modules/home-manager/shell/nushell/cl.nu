@@ -108,7 +108,7 @@ def cl-create [dest: path]: nothing -> any {
     }
     let repo = $"kronberger-droid/($remotes | first | split row '/' | last)"
     let answer = (try { input $"No sandbox checkout at ($dest). Clone ($repo) there? [y/N] " } catch { "n" })
-    if ($answer | str downcase) not-in ["y" "yes"] { return null }
+    if ($answer | str lowercase) not-in ["y" "yes"] { return null }
 
     ^claude-sandbox /run/current-system/sw/bin/nu -l -c $"mkdir ($dest | path dirname | to nuon); gh repo clone ($repo) ($dest | to nuon)"
     if ($dest | path join ".git" | path exists) { return $dest }
