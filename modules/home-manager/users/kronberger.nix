@@ -80,6 +80,10 @@ in {
         # set in editors/helix.nix.
         packages = with pkgs; [
           dropkittenPkg
+          # `claude-math`: claude with the math pane mod loaded. Desktop only,
+          # since the pane draws images and the headless accounts have no
+          # terminal to show them in.
+          inputs.claude-mathpane.packages.${pkgs.stdenv.hostPlatform.system}.default
           nemo-with-extensions
           # Nix tooling (was in devShell)
           nix-tree

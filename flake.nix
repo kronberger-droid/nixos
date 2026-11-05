@@ -87,6 +87,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.rust-overlay.follows = "rust-overlay";
     };
+    # Claude Code mod for math sessions: slides in a pane beside the chat,
+    # formulas as Typst-rendered images. The package is `claude` with the mod
+    # loaded and typst on PATH (`claude-math`). Installed for the desktop
+    # user in modules/home-manager/users/kronberger.nix.
+    claude-mathpane = {
+      url = "github:kronberger-droid/claude-mathpane";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # Matt Pocock's Claude Code skills collection. Consumed as plain files
     # (flake = false): claude.nix symlinks each skill folder into
     # ~/.claude/skills/, and kronberger.nix derives the set from the repo's
