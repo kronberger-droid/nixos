@@ -20,9 +20,10 @@
 # name alone. `main close` saves the same
 # way and then closes the workspace's windows, so it is out of the way until
 # picked again; Escape at the prompt closes nothing. `main` picks a save and
-# rebuilds it on the focused workspace, right of whatever is there, and
-# names the workspace after it unless it has a name already. Picking a save
-# whose workspace is still open only focuses that one.
+# rebuilds it on the focused workspace, right of whatever is there, leaving
+# the workspace's name alone. Picking a save whose workspace is named like it
+# and still open only focuses that one. The picker ends in a row that
+# deletes the highlighted save on Ctrl+D; the workspace is not touched.
 
 # Binaries by store path; see ironbar.nix for why these are consts and not
 # spelled inline at the call sites.
@@ -187,7 +188,7 @@ def save-workspace []: nothing -> any {
   | to json
   | save -f (save-path $name)
   notify $"Saved ($name)" (summary $entries)
-  {name: $name, id: $ws.id, workspace: $ws.name?}
+  {name: $name, id: $ws.id}
 }
 
 def "main save" [] { save-workspace | ignore }
@@ -199,12 +200,8 @@ def "main close" [] {
   for w in (niri-json windows | where workspace_id == $saved.id) {
     ^niri msg action close-window --id $w.id | complete | ignore
   }
-  # A named workspace outlives its windows; unnamed, niri drops it, and the
-  # picker builds the save on a fresh one. Saving never names the workspace,
-  # so only a name it had before needs to go.
-  if $saved.workspace != null {
-    ^niri msg action unset-workspace-name $saved.workspace | complete | ignore
-  }
+  # Names are left alone: a named workspace outlives its windows, an unnamed
+  # one is dropped by niri and the picker builds the save on a fresh one.
 }
 
 # Spawns through niri so the window outlives this script, then waits for it
@@ -280,13 +277,10 @@ def "main restore" [name: string] {
     if (niri-json windows | where workspace_id == $named.id | is-not-empty) { return }
   }
 
-  # `place` refocuses the workspace before every spawn, which takes a name;
-  # one the workspace has already is kept.
+  # `place` refocuses the workspace before every spawn: by its name if it
+  # has one, else by index. Restoring never names the workspace.
   let ws = (focused-workspace)
-  let workspace = ($ws.name? | default $name)
-  if $ws.name? == null {
-    ^niri msg action set-workspace-name $name | complete | ignore
-  }
+  let workspace = ($ws.name? | default ($ws.idx | into string))
   # New windows open right of the focused column, so starting from the last
   # one puts the save after whatever is there.
   if (niri-json windows | where workspace_id == $ws.id | is-not-empty) {
@@ -296,18 +290,64 @@ def "main restore" [name: string] {
   for e in (open $file | get windows | sort-by column row) { place $workspace $e }
 }
 
-def main [] {
+# The picker is a sieb script menu (rofi script protocol, JSON rows): sieb
+# runs this file again with ROFI_RETV set, once to list the saves, and again
+# for each key. Enter restores the highlighted save, Ctrl+D deletes it and
+# lists what is left. Rows carry the save name in `info`, so the label is
+# never parsed.
+const DELETE_KEY = "Control+d"
+
+def emit [value: record] {
+  print ($value | to json --raw)
+}
+
+def menu [selected: int] {
   let all = (saves)
-  if ($all | is-empty) {
+  if ($all | is-empty) { return }
+  print '{"sieb": 1}'
+  emit {
+    prompt: "Workspace"
+    message: "Ctrl+D deletes the highlighted save"
+    no-custom: true
+    custom-keys: $DELETE_KEY
+    new-selection: ([$selected (($all | length) - 1)] | math min)
+  }
+  for s in $all {
+    emit {text: $"($s.name)    ($s.summary)", info: $s.name}
+  }
+}
+
+# One call of the script protocol. A pick that prints nothing ends sieb, and
+# niri spawns the restore so sieb is gone before it starts opening windows.
+def menu-call [retv: int] {
+  let name = ($env.ROFI_INFO? | default "")
+  match $retv {
+    1 => {
+      if $name != "" {
+        ^niri msg action spawn -- $env.CURRENT_FILE restore $name | complete | ignore
+      }
+    }
+    11 => {
+      let at = (saves | get name | enumerate | where item == $name | get 0?.index? | default 0)
+      if $name != "" and (save-path $name | path exists) {
+        rm -f (save-path $name)
+        notify $"Deleted ($name)" "The save is gone; the workspace is untouched."
+      }
+      menu $at
+    }
+    _ => { menu 0 }
+  }
+}
+
+def main [_row?: string] {
+  let retv = ($env.ROFI_RETV? | default "")
+  if $retv != "" {
+    menu-call ($retv | into int)
+    return
+  }
+  if (saves | is-empty) {
     notify "No saved workspaces" "Save the focused one first."
     return
   }
-
-  let picked = ($all
-    | each {|s| {name: $s.name, label: $"($s.name)    ($s.summary)"} | to json --raw }
-    | str join "\n"
-    | ^$PROMPT -p "Workspace" --text label --lines ([($all | length) 10] | math min) --badge (char --unicode f2d2)
-    | complete)
-  if $picked.exit_code != 0 { return }
-  main restore ($picked.stdout | from json | get name)
+  ^$PROMPT --script $env.CURRENT_FILE --lines 10 --badge (char --unicode f2d2) | complete | ignore
 }
