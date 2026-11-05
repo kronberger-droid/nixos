@@ -30,6 +30,9 @@ in {
   # `repository.branchProtectionRules`, which fine-grained PATs can't reach on
   # repos you don't administer (dlvhdr/gh-dash#562).
   "gh-dash-token.age".publicKeys = for workstations;
+  # HackMD API token (hackmd.io > Settings > API). Contents: the bare token,
+  # one line. Read from the file on demand, not exported into the environment.
+  "hackmd-token.age".publicKeys = for workstations;
   # Fine-grained PAT for the Claude Code sandbox account
   # (modules/system/security/agent-sandbox.nix). Contents: the bare token,
   # one line. Scope it on GitHub to the repositories the agent may push to,

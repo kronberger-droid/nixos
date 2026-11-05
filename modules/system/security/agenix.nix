@@ -82,5 +82,11 @@ in {
     # it does not run as root.
     // lib.optionalAttrs (builtins.pathExists mullvadKey) {
       mullvad-wg-key = (mkSecret "systemd-network" "mullvad-wg-key") // {file = mullvadKey;};
+    }
+    # HackMD API token, one line, read on demand from the file. Gated on the
+    # .age file like the secrets above, so the module lands before the token
+    # is pasted in.
+    // lib.optionalAttrs (builtins.pathExists "${inputs.self}/secrets/hackmd-token.age") {
+      hackmd-token = mkSecret username "hackmd-token";
     };
 }
