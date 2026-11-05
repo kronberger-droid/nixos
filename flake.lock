@@ -732,6 +732,22 @@
         "type": "gitlab"
       }
     },
+    "nu-scripts": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793451391,
+        "narHash": "sha256-CMwtlPDqYsdPgtbZlTqdrBZpnxKVGwhJ0ejGH4L0fNo=",
+        "owner": "nushell",
+        "repo": "nu_scripts",
+        "rev": "1e6533e8c316386f9576d7220a72ab05ce48c52a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nushell",
+        "repo": "nu_scripts",
+        "type": "github"
+      }
+    },
     "nushell-src": {
       "flake": false,
       "locked": {
@@ -859,6 +875,7 @@
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-mcp": "nixpkgs-mcp",
         "nixpkgs-zotero": "nixpkgs-zotero",
+        "nu-scripts": "nu-scripts",
         "nushell-src": "nushell-src",
         "oo7-nixos": "oo7-nixos",
         "rio-upstream": "rio-upstream",

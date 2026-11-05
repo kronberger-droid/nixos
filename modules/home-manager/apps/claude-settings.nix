@@ -44,6 +44,28 @@
     }
   ];
 
+  # The one Nushell skill. The hub, the verified cheatsheet and the testing
+  # guide are local (skills/nushell/); the nu_scripts project's own Nushell
+  # skill contributes its reference files as references/upstream/, linked from
+  # the input so a flake update moves them. Its SKILL.md is not used, the local
+  # one covers it, and http-transport.md is about the Nushell MCP server. The
+  # MIT licence from the repo root travels with the references.
+  nushellSkill = pkgs.runCommand "nushell-skill" {} ''
+    cp -r ${./skills/nushell} $out
+    chmod -R u+w $out
+    mkdir -p $out/references/upstream
+    for f in commands types-and-syntax data-analysis advanced bash-equivalents; do
+      cp ${inputs.nu-scripts}/skills/nushell/references/$f.md $out/references/upstream/
+    done
+    cp ${inputs.nu-scripts}/LICENSE $out/references/upstream/LICENSE
+    cat > $out/references/upstream/ATTRIBUTION.md <<'EOF'
+    Source: https://github.com/nushell/nu_scripts/tree/main/skills/nushell
+    Author: Mussar (0x4D5352), PR #1231. Merged by Daren Schroeder (fdncred).
+    Later fixes: AucaCoyan, nextgenthemes. MIT licensed, see LICENSE.
+    Reference files only, unchanged.
+    EOF
+  '';
+
   # prose-sweep's own files are local (the SNL-derived references are adapted
   # copies); the verbatim upstream references are linked in from the inputs
   # so a flake update moves them.
@@ -91,20 +113,20 @@ in {
   claude.skills.scientific-writing.content = builtins.readFile ./skills/scientific-writing.md;
   claude.skills.commit-writer.content = builtins.readFile ./skills/commit-writer.md;
   claude.skills.github-voice.content = builtins.readFile ./skills/github-voice.md;
-  claude.skills.nushell.content = builtins.readFile ./skills/nushell.md;
 
   # Folder skills, whole-folder symlinked into ~/.claude/skills/: Matt
-  # Pocock's collection (see mattSkills above), the prose skills, and five
-  # from Darren's skill pack that Matt's collection lacks. blast-radius,
-  # show-me and resolving-merge-conflicts are his; nu-pr-review and
-  # nu-pr-recheck are his workflows adapted here: Linux paths and a checkout
-  # in ~/Projects/rust, github-voice instead of his voice, no Copilot
-  # badges, no memory notes, and a fresh confirmation before anything is
-  # posted to GitHub.
+  # Pocock's collection (see mattSkills above), the prose skills, the Nushell
+  # skill, and five from Darren's skill pack that Matt's collection lacks.
+  # blast-radius, show-me, resolving-merge-conflicts and the testing guide in
+  # the nushell skill are his; nu-pr-review and nu-pr-recheck are his workflows
+  # adapted here: Linux paths and a checkout in ~/Projects/rust, github-voice
+  # instead of his voice, no Copilot badges, no memory notes, and a fresh
+  # confirmation before anything is posted to GitHub.
   claude.skillDirs =
     mattSkills
     // {
       humanizer = humanizer;
+      nushell = nushellSkill;
       prose-sweep = proseSweep;
       blast-radius = ./skills/blast-radius;
       show-me = ./skills/show-me;
