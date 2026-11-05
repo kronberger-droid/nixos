@@ -201,7 +201,7 @@ in {
       # Applications
       "${modifier}+Return".action.spawn = termSpawn {cwdArg = true;};
       "${modifier}+D".action.spawn = config.sieb.commands.launcher;
-      "${modifier}+Shift+S".action.spawn = wsSpawn ["${pkgs.helium}/bin/helium"];
+      "${modifier}+Shift+B".action.spawn = wsSpawn ["${pkgs.helium}/bin/helium"];
       "${modifier}+Shift+Return".action.spawn = termSpawn {
         floating = true;
         cwdArg = true;
@@ -217,16 +217,16 @@ in {
       "${modifier}+Minus".action.spawn = ["${scratchpadToggle}" "toggle"];
 
       # Saved workspaces; see ironbar/nu/workspaces.nu
-      "${modifier}+Ctrl+O".action.spawn = ["${config.xdg.configHome}/ironbar/scripts/workspaces"];
-      "${modifier}+Ctrl+S".action.spawn = ["${config.xdg.configHome}/ironbar/scripts/workspaces" "save"];
-      "${modifier}+Ctrl+C".action.spawn = ["${config.xdg.configHome}/ironbar/scripts/workspaces" "close"];
+      "${modifier}+Shift+O".action.spawn = ["${config.xdg.configHome}/ironbar/scripts/workspaces"];
+      "${modifier}+Shift+S".action.spawn = ["${config.xdg.configHome}/ironbar/scripts/workspaces" "save"];
+      "${modifier}+Shift+C".action.spawn = ["${config.xdg.configHome}/ironbar/scripts/workspaces" "close"];
 
       # Session
       "${modifier}+Shift+Q".action.close-window = [];
       "${modifier}+Shift+E".action.spawn = config.sieb.commands.power;
       "${modifier}+Shift+P".action.spawn = ["${pkgs.bitwarden-desktop}/bin/bitwarden"];
       "${modifier}+Shift+W".action.spawn = config.sieb.commands.rbw;
-      "${modifier}+Shift+B".action.spawn = ["${config.programs.qutebrowser.package}/bin/qutebrowser"];
+      "${modifier}+Shift+G".action.spawn = ["${config.programs.qutebrowser.package}/bin/qutebrowser"];
 
       # Notifications
       "${modifier}+Shift+D".action.spawn = ["${pkgs.mako}/bin/makoctl" "dismiss" "-a"];
