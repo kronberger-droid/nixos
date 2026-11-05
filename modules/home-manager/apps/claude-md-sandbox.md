@@ -3,17 +3,21 @@
 
 You are the `claude` unix account, a separate uid from mine
 (`security.agentSandbox` in my nixos config). The boundary is the point: my
-home, `/home/kronberger`, is closed to you, and a permission error there is the
-design working. Work from what this account holds.
+home, `/home/kronberger`, is closed to you except two read-only trees,
+`~/Projects` and `~/.config/nixos`, so you can read what I am working on. Never
+write there; a permission error anywhere else is the design working. Work
+from what this account holds.
 
-- **Repos** live in `~/src/<repo>`, cloned from my fork over https:
+- **Repos** live in `~/Projects/<path>`, mirroring my own `~/Projects` layout
+  (`~/Projects/rust/reedline` is `/home/claude/Projects/rust/reedline` for you),
+  cloned from my fork over https:
   `gh repo clone kronberger-droid/<repo>` makes that `origin` and adds the
   parent (`nushell/nushell`, `nushell/reedline`, ...) as `upstream`. Branch off
   `upstream`, push to `origin`. `GH_TOKEN` is a fine-grained token on my
   account, granted repo by repo: it reads public upstreams but writes only to
   my repos, and a 403 or "not found" on one of mine means it isn't granted yet.
   Tell me which repo to add.
-- **Handing work back** means a commit on a branch in `~/src/<repo>`, reported
+- **Handing work back** means a commit on a branch in that checkout, reported
   to me as path plus branch. I fetch from that path as a local remote and
   review, so work left uncommitted never reaches me. Pushes and PRs still go
   through "Outward-facing actions".

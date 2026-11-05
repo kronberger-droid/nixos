@@ -22,6 +22,9 @@
 #   - its own home at 750, group `claude`, with the primary user in that
 #     group: Martin reads the agent's tree, the agent never reads his (the
 #     primary home stays 700).
+#   - read-only access to ~/Projects and ~/.config/nixos through ACLs
+#     (claude-sandbox-read-acl below); everything else in the primary home
+#     stays closed, and nothing in those trees is writable.
 #   - its own ssh key, generated on first boot, no passphrase and no agent.
 #     A key that cannot leave its own uid does not need an agent to guard
 #     it. Server-side that key gets `restrict,from=` in authorized_keys.
@@ -37,11 +40,13 @@
 #     `claude-sandbox` from the primary user's session, which is a
 #     `machinectl shell` behind a polkit rule scoped to exactly that pair.
 #
-# Code comes back out the way a contributor's fork would: Martin adds
-# /home/claude/src/<repo> as a remote and fetches from it with
+# Code comes back out the way a contributor's fork would. The agent's
+# checkouts mirror his ~/Projects under /home/claude/Projects (`cl`, in
+# shell/nushell/cl.nu, maps one to the other and clones on demand). Martin
+# adds /home/claude/Projects/<path> as a remote and fetches from it with
 # `git fetch-sandbox` (home-manager/shell/git.nix; deliberately no global
-# safe.directory), reviews, and pushes with his own key. Nothing
-# gives the agent a path into the primary home in return.
+# safe.directory), reviews, and pushes with his own key. The agent's only
+# way into the primary home is the read-only ACLs above.
 {
   config,
   lib,
@@ -259,6 +264,40 @@ in {
           if [ -d "$vault/.obsidian" ]; then
             ${pkgs.acl}/bin/setfacl -R -x g:${user},d:g:${user} "$vault/.obsidian"
           fi
+        '';
+      };
+
+      # Read-only view of the primary user's project trees, so the agent
+      # sees what Martin sees without anything being copied over. Read only,
+      # on purpose: whatever the agent can write inside a tree he works in
+      # (.git/hooks, .envrc, build.rs, a flake) later runs as him. Writes
+      # stay in ~/src, fetched from like a contributor's fork.
+      #
+      # The primary home keeps mode 700; the one entry added to it is
+      # traverse-only (--x) for this group, which lets a path through but
+      # does not list the home or open anything in it that has no ACL of its
+      # own. The default entries make files created later readable too.
+      # Hosts without one of these directories skip it.
+      systemd.services.claude-sandbox-read-acl = let
+        primaryHome = config.users.users.${username}.home;
+        trees = ["${primaryHome}/Projects" "${primaryHome}/.config/nixos"];
+      in {
+        description = "Grant the Claude Code sandbox user read access to the project trees";
+        wantedBy = ["multi-user.target"];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+        script = ''
+          setfacl=${pkgs.acl}/bin/setfacl
+          ${lib.concatMapStringsSep "\n" (t: ''
+              if [ -d ${lib.escapeShellArg t} ]; then
+                $setfacl -m g:${user}:--x ${lib.escapeShellArg primaryHome}
+                $setfacl -m g:${user}:--x ${lib.escapeShellArg (builtins.dirOf t)}
+                $setfacl -R -m g:${user}:rX,d:g:${user}:rX ${lib.escapeShellArg t}
+              fi
+            '')
+            trees}
         '';
       };
 
