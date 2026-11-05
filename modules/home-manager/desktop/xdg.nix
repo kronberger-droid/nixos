@@ -1,5 +1,17 @@
-_: {
+{config, ...}: {
   xdg = {
+    # xdg-open for text: Helix is a TUI, so the entry spawns a terminal around
+    # it. Helix ships its own Helix.desktop, but that is `Terminal=true`, which
+    # leaves the choice of terminal to whatever xdg-open finds.
+    desktopEntries.helix-term = {
+      name = "Helix (terminal)";
+      genericName = "Text Editor";
+      exec = "${config.terminal.bin} ${config.terminal.execFlag} ${config.programs.helix.package}/bin/hx %F";
+      terminal = false;
+      categories = ["Utility" "TextEditor"];
+      mimeType = ["text/plain" "text/markdown" "text/x-log"];
+    };
+
     enable = true;
     userDirs = {
       enable = true;
@@ -17,6 +29,8 @@ _: {
     mimeApps = {
       enable = true;
       defaultApplications = {
+        "text/plain" = "helix-term.desktop";
+        "text/markdown" = "helix-term.desktop";
         "application/pdf" = "org.pwmt.zathura.desktop";
         # aerion rather than aerc: both are in use, but aerc's desktop entry
         # is `Terminal=true`, so handing it a mailto: link means spawning a
