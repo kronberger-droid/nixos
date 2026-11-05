@@ -94,11 +94,22 @@ in {
   claude.skills.nushell.content = builtins.readFile ./skills/nushell.md;
 
   # Folder skills, whole-folder symlinked into ~/.claude/skills/: Matt
-  # Pocock's collection (see mattSkills above) plus the prose skills.
+  # Pocock's collection (see mattSkills above), the prose skills, and five
+  # from Darren's skill pack that Matt's collection lacks. blast-radius,
+  # show-me and resolving-merge-conflicts are his; nu-pr-review and
+  # nu-pr-recheck are his workflows adapted here: Linux paths and a checkout
+  # in ~/Projects/rust, github-voice instead of his voice, no Copilot
+  # badges, no memory notes, and a fresh confirmation before anything is
+  # posted to GitHub.
   claude.skillDirs =
     mattSkills
     // {
       humanizer = humanizer;
       prose-sweep = proseSweep;
+      blast-radius = ./skills/blast-radius;
+      show-me = ./skills/show-me;
+      resolving-merge-conflicts = ./skills/resolving-merge-conflicts;
+      nu-pr-review = ./skills/nu-pr-review;
+      nu-pr-recheck = ./skills/nu-pr-recheck;
     };
 }
