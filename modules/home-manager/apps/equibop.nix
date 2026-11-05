@@ -6,6 +6,22 @@
 }: let
   mkNixPak = inputs.nixpak.lib.nixpak {inherit lib pkgs;};
 
+  # Equibop has no download handler: a link or attachment goes to Electron's
+  # shell.openExternal, which runs `xdg-open`, and the browser does the
+  # download. The sandbox binds /nix/store but not /run/current-system/sw/bin,
+  # so there was no xdg-open and every click did nothing. The one in nixpkgs
+  # only takes the portal route when $XDG_RUNTIME_DIR/flatpak-info exists,
+  # which nixpak does not create (it binds /.flatpak-info), so this one asks
+  # the OpenURI portal directly. gui-base already lets the sandbox talk to
+  # org.freedesktop.portal.*.
+  xdgOpen = pkgs.writeShellScriptBin "xdg-open" ''
+    exec ${pkgs.glib.bin}/bin/gdbus call --session \
+      --dest org.freedesktop.portal.Desktop \
+      --object-path /org/freedesktop/portal/desktop \
+      --method org.freedesktop.portal.OpenURI.OpenURI \
+      --timeout 5 "" "$1" {}
+  '';
+
   # Equibop in a bubblewrap sandbox, on the same pattern as signal.nix: its
   # own profile, Downloads, the cameras and the session services a voice
   # client needs. Unlike Signal it gets no Secret Service: nothing in its
@@ -47,6 +63,9 @@
         # Calls, and venmic's screenshare audio, which talks to PipeWire
         # directly. Screenshare video goes through the ScreenCast portal.
         sockets.pipewire = true;
+        # What the app runs by name: xdg-open above, and mkfifo, which its
+        # global-keybind setup spawns (it logged ENOENT without it).
+        env.PATH = lib.makeBinPath [xdgOpen pkgs.coreutils];
       };
     };
   };
