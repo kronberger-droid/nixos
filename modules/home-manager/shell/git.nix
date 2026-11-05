@@ -197,10 +197,10 @@ in {
         pull.rebase = true;
         push.autoSetupRemote = true;
         # The Claude Code sandbox account (system/security/agent-sandbox.nix)
-        # keeps its checkouts under /home/claude/src, and this user fetches
+        # keeps its checkouts under /home/claude/Projects, and this user fetches
         # from them as a local remote. git refuses a repository owned by
         # another uid ("dubious ownership") unless safe.directory lists it,
-        # and a global `/home/claude/src/*` entry would make every git
+        # and a global `/home/claude/Projects/*/*` entry would make every git
         # command run inside one of those checkouts honour the agent's
         # .git/config (core.fsmonitor, hooks, core.pager): code execution as
         # this user from a plain `git status`. So the trust is per command:
