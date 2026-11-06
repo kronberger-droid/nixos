@@ -202,6 +202,10 @@ in {
       "${modifier}+Return".action.spawn = termSpawn {cwdArg = true;};
       "${modifier}+D".action.spawn = config.sieb.commands.launcher;
       "${modifier}+Shift+B".action.spawn = wsSpawn ["${pkgs.helium}/bin/helium"];
+      "${modifier}+Shift+M".action.spawn = termSpawn {
+        cwdArg = true;
+        exec = "claude";
+      };
       "${modifier}+Shift+Return".action.spawn = termSpawn {
         floating = true;
         cwdArg = true;
