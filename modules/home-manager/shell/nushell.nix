@@ -30,9 +30,6 @@ in {
     gitui
   ];
 
-  # The helix_* keybinding modes need a nushell that knows them; every host
-  # gets the upstream-main build via the shared overlay, so this goes in as-is.
-  xdg.configFile."nushell/keybindings.nu".source = ./nushell/keybindings.nu;
   xdg.configFile."nushell/cl.nu".source = ./nushell/cl.nu;
   xdg.configFile."nushell/fetch.nu".source = ./nushell/fetch.nu;
 
@@ -563,18 +560,6 @@ in {
         # module's own nushell integration; see programs.carapace below.
         + "\n"
         + builtins.readFile ./nushell/carapace.nu
-        # Layer the edit mode on after the base record. Requires the
-        # upstream-main nushell from the shared overlay; nixpkgs' release
-        # doesn't know `helix` yet and hard-errors at startup on it.
-        + ''
-
-          $env.config.edit_mode = 'helix'
-          $env.config.cursor_shape = ($env.config.cursor_shape | merge {
-            helix_normal: block
-            helix_select: underscore
-            helix_insert: line
-          })
-        ''
         # Visual/select highlight, generated so it tracks the palette. helix
         # renders ui.selection as `gray` (base16_transparent), which ansi.nix
         # maps to base03, so pinning both keys here keeps the shell and the
