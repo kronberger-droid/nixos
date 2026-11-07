@@ -260,19 +260,30 @@
         git clean -qfdx
 
         # ---- old closures, for the diff ----------------------------------
-        # Only when nothing needs building: the previous run's out-links keep
-        # yesterday's closures rooted, so after the first day this is a store
-        # lookup, and a main that moved by hand is simply not diffed. A dry
-        # run that lists derivations to build means a rebuild, which on the
-        # desktop closures is hours, and the diff is not worth that.
+        # main is the baseline, since it is what the PR would replace. The
+        # previous run's out-links keep its closures rooted, so most of main's
+        # closure is already in the store. A commit by hand to main still makes
+        # the dry run list a few derivations (system-path, etc, the home
+        # generation), and refusing on any build at all meant the baseline was
+        # missing whenever main had moved. So a few builds are fine, and only a
+        # long list is refused: a moved input lists thousands, which on the
+        # desktop closures is hours the diff is not worth.
+        #
+        # The baseline gets an out-link of its own. Without one it was
+        # unrooted after the run, thus gone the next day whenever the PR stayed
+        # open, since the out-link above only holds the update's closure.
+        max_baseline_builds=150
         for t in "''${build[@]}"; do
           s=$(slug "$t")
           : >"$run/$s.old-out"
-          if nix build --dry-run ".#$t" >/dev/null 2>"$run/$s.old-dry.log" \
-             && ! grep -q 'will be built' "$run/$s.old-dry.log"; then
-            nix build --no-link --print-out-paths ".#$t" >"$run/$s.old-out" 2>"$run/$s.old.log" \
-              || : >"$run/$s.old-out"
+          if nix build --dry-run ".#$t" >/dev/null 2>"$run/$s.old-dry.log"; then
+            n=$(awk '/will be built/ {f=1; next} /^(this|these) / {f=0} f && /\.drv$/ {n++} END {print n+0}' "$run/$s.old-dry.log")
+            if [ "$n" -le "$max_baseline_builds" ]; then
+              nix build --out-link "$roots/$s.old" --print-out-paths ".#$t" >"$run/$s.old-out" 2>"$run/$s.old.log" \
+                || : >"$run/$s.old-out"
+            fi
           fi
+          [ -s "$run/$s.old-out" ] || rm -f "$roots/$s.old"
         done
 
         # ---- update ------------------------------------------------------
