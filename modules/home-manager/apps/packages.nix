@@ -42,7 +42,6 @@
     openssl
 
     # Networking
-    # localsend: sandboxed, see localsend.nix
     sshfs # mount remote SFTP/SSH dirs locally (see sftp-mount in nushell)
 
     # System

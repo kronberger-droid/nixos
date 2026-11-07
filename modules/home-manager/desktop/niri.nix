@@ -495,14 +495,6 @@ in {
         default-window-height = {proportion = 0.6;};
       }
 
-      # LocalSend
-      {
-        matches = [{app-id = "^localsend_app$";}];
-        open-floating = true;
-        default-column-width = {fixed = 1200;};
-        default-window-height = {fixed = 800;};
-      }
-
       # Bitwarden
       {
         # Case-insensitive: the app-id has flipped between "Bitwarden" and

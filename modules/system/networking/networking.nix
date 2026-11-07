@@ -1,6 +1,7 @@
 {
   host,
   lib,
+  username,
   ...
 }: {
   networking = {
@@ -80,7 +81,9 @@
     # over an accepted route needs. It does not imply --accept-routes; that flag
     # is separate and set below.
     useRoutingFeatures = lib.mkDefault "client";
-    extraSetFlags = lib.mkDefault ["--accept-routes"];
+    # The operator lets this user run `tailscale file get` and `cp` without
+    # sudo, which the Taildrop receiver service and `send` need.
+    extraSetFlags = lib.mkDefault ["--accept-routes" "--operator=${username}"];
   };
 
   # Syncthing ports (service runs as user via Home Manager)

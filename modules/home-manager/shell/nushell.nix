@@ -55,6 +55,26 @@ in {
         hx .
     }
 
+    # Devices Taildrop can reach right now (offline ones left out)
+    def send-targets [] {
+        ^tailscale file cp --targets | lines | where $it !~ offline | split column "\t" ip name | get name
+    }
+
+    # Send files to one of your own devices over Taildrop: send nothing a.pdf
+    def send [
+        device: string@send-targets   # device name from `tailscale status`
+        ...files: path                # what to send
+    ] {
+        if ($files | is-empty) { error make {msg: "no files to send"} }
+        ^tailscale file cp ...($files | path expand) $"($device):"
+    }
+
+    # Fetch what is waiting in Taildrop now. The taildrop-receive service does
+    # this on its own as files arrive; this is for a host without it.
+    def receive [] {
+        ^tailscale file get --conflict=rename ($nu.home-path | path join Downloads)
+    }
+
     # Launch a GUI app detached from this shell — survives closing the terminal
     def detach [...cmd: string] {
         ^setsid -f ...$cmd out> /dev/null err> /dev/null
