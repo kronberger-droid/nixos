@@ -18,7 +18,7 @@
     ./equibop.nix
     ./zapzap.nix
     ./aerion.nix
-    ./localsend.nix
+    ./taildrop.nix
     ./zotero.nix
     ./ladybird.nix
     ./flatpak.nix

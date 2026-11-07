@@ -19,12 +19,7 @@ in {
     # itself every time NetworkManager triggered a reload.
     logRefusedConnections = true;
 
-    # Nothing else on every interface; SSH is scoped to tailscale0 below.
-    # LocalSend: TCP 53317 for transfers, UDP 53317 for the multicast
-    # announcements that let peers find this host and it find them.
-    allowedTCPPorts = [53317];
-    allowedUDPPorts = [53317];
-
+    # Nothing open on every interface; SSH is scoped to tailscale0 below.
     # SSH only over the tailnet. The per-interface option covers both
     # address families and is idempotent across reloads; the iptables
     # extraCommands line it replaces was IPv4-only, so SSH over the tailnet's
