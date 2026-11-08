@@ -559,14 +559,6 @@ in {
   # runtime PM: the wrong trade for a 24/7 box serving DNS and the cache,
   # and the same reason power-management.nix disables it on the laptops.
 
-  # locale.nix (imported above) turns the full documentation set on for the
-  # workstations. Headless box: man pages stay for `man` over ssh, the doc
-  # and info trees do not earn their closure.
-  documentation = {
-    doc.enable = false;
-    info.enable = false;
-  };
-
   # sudo-rs hardening
   security.sudo-rs = {
     enable = true;

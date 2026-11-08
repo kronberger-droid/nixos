@@ -18,12 +18,14 @@
     };
   };
 
-  # These are the NixOS defaults, stated for visibility. mkDefault so a
-  # headless host (homeserver) can drop the doc and info trees.
+  # man pages only. The doc and info trees are read by nothing installed
+  # here, and documentation.nixos builds the NixOS manual plus the options
+  # reference on every rebuild, which is the slow part and is online anyway.
   documentation = {
     enable = true;
-    doc.enable = lib.mkDefault true;
     man.enable = true;
-    info.enable = lib.mkDefault true;
+    doc.enable = false;
+    info.enable = false;
+    nixos.enable = false;
   };
 }

@@ -99,7 +99,10 @@ in {
         # homeserver authorizes these keys from shared/host-keys.nix, so
         # there is no per-host key to generate or secret to ship.
         sshKey = "/etc/ssh/ssh_host_ed25519_key";
-        system = "x86_64-linux";
+        # aarch64 too: the homeserver has binfmt for the droid builds, and the
+        # workstations no longer emulate it themselves, so anything aarch64
+        # (droid, edgerouter) built from a workstation goes over this wire.
+        systems = ["x86_64-linux" "aarch64-linux"];
         # Matches the homeserver's own max-jobs cap (hosts/homeserver): 15 GB
         # of RAM and a dozen parallel Rust builds is a swap storm.
         maxJobs = 4;
