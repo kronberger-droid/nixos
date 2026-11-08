@@ -10,7 +10,6 @@
     ./music.nix
     ./contacts.nix
     ./ai.nix
-    ./qutebrowser.nix
     ./syncthing.nix
     ./obsidian.nix
     ./steam.nix
@@ -20,7 +19,6 @@
     ./aerion.nix
     ./taildrop.nix
     ./zotero.nix
-    ./ladybird.nix
     ./flatpak.nix
     ./onlyoffice.nix
   ];

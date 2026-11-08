@@ -49,15 +49,22 @@
     seahorse.enable = true;
   };
 
+  # niri-flake hardcodes polkit-kde-agent as the authentication agent, with
+  # no option to pick another: KDE Frameworks and breeze-icons for one
+  # password dialog. soteria is the same agent on GTK 4, which ironbar and
+  # loupe already keep in the closure.
+  systemd.user.services.niri-flake-polkit.serviceConfig.ExecStart =
+    lib.mkForce "${pkgs.soteria}/bin/soteria";
+
   hardware = {
     bluetooth = {
       enable = true;
       powerOnBoot = lib.mkDefault false;
     };
-    graphics = {
-      enable = true;
-      enable32Bit = true;
-    };
+    # No 32-bit stack: Steam is the Flathub build and brings its own
+    # Platform.GL32 and Compat.i386, and nothing native here is 32-bit (no
+    # wine, no lutris). enable32Bit was a second mesa and llvm, about 1G.
+    graphics.enable = true;
   };
 
   services = {
@@ -65,7 +72,17 @@
     avahi.enable = false;
     # speech-dispatcher defaults to enabled in nixpkgs; disable explicitly
     speechd.enable = false;
-    gvfs.enable = true;
+    # Nemo needs gvfs for trash://, the removable-drive sidebar (udisks2
+    # volume monitor) and MTP. The module default is pkgs.gnome.gvfs, which
+    # drags in gnome-online-accounts, libmsgraph and the OneDrive backend for
+    # a cloud-accounts daemon that nothing here runs. The plain build keeps
+    # everything Nemo uses and drops the GOA half. samba stays: vlc links it
+    # too, so overriding it out of gvfs alone would cost smb:// in Nemo and
+    # a local gvfs build per nixpkgs bump without freeing a byte.
+    gvfs = {
+      enable = true;
+      package = pkgs.gvfs;
+    };
     udisks2.enable = true;
     upower.enable = true;
     # For the Flathub apps in home-manager/apps/flatpak.nix.

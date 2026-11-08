@@ -40,7 +40,6 @@
   };
 
   boot = {
-    binfmt.emulatedSystems = ["aarch64-linux"];
     kernel.sysctl = {
       # 176 = enable sync (16) + enable remount-ro (32) + enable reboot (128)
       # Allows safe emergency reboot (REISUB) without exposing full sysrq

@@ -230,7 +230,6 @@ in {
       "${modifier}+Shift+E".action.spawn = config.sieb.commands.power;
       "${modifier}+Shift+P".action.spawn = ["${pkgs.bitwarden-desktop}/bin/bitwarden"];
       "${modifier}+Shift+W".action.spawn = config.sieb.commands.rbw;
-      "${modifier}+Shift+G".action.spawn = ["${config.programs.qutebrowser.package}/bin/qutebrowser"];
 
       # Notifications
       "${modifier}+Shift+D".action.spawn = ["${pkgs.mako}/bin/makoctl" "dismiss" "-a"];
@@ -533,16 +532,6 @@ in {
       # xdg-desktop-portal-gtk file picker (Firefox, Chromium, anything portal-routed)
       {
         matches = [{app-id = "^xdg-desktop-portal-gtk$";}];
-        open-floating = true;
-        default-column-width = {proportion = 0.5;};
-        default-window-height = {proportion = 0.6;};
-        max-width = 1280;
-        max-height = 860;
-      }
-
-      # qutebrowser internal file picker (Qt subprocess shows up as bare python3.x)
-      {
-        matches = [{app-id = "^python3\\.[0-9]+$";}];
         open-floating = true;
         default-column-width = {proportion = 0.5;};
         default-window-height = {proportion = 0.6;};

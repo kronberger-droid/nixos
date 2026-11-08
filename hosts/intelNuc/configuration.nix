@@ -23,7 +23,6 @@
   };
 
   boot = {
-    binfmt.emulatedSystems = ["aarch64-linux"];
     # The install used lanzaboote.autoGenerateKeys to get past the missing
     # keys; it also implies allowUnsigned, so it went once the keys existed.
     # A reinstall needs it back for that first nixos-install only.
@@ -64,18 +63,11 @@
 
   hardware.graphics = {
     enable = true;
-    enable32Bit = true;
-
     extraPackages = with pkgs; [
       intel-media-driver
       intel-vaapi-driver
       libva-vdpau-driver
       libvdpau-va-gl
-    ];
-
-    extraPackages32 = with pkgs.pkgsi686Linux; [
-      intel-media-driver
-      intel-vaapi-driver
     ];
   };
 
