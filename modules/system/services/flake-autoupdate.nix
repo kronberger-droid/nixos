@@ -171,6 +171,7 @@
     findutils
     gnugrep
     gnused
+    gawk
     gnutar
     diffutils
     flake-versions
