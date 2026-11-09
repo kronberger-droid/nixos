@@ -88,5 +88,11 @@ in {
     # is pasted in.
     // lib.optionalAttrs (builtins.pathExists "${inputs.self}/secrets/hackmd-token.age") {
       hackmd-token = mkSecret username "hackmd-token";
+    }
+    # GMX mailbox login, two lines (address, then password), read by the
+    # IMAP draft helper. Gated on the .age file like hackmd-token, so the
+    # module lands before the secret is created.
+    // lib.optionalAttrs (builtins.pathExists "${inputs.self}/secrets/gmx-mail-credentials.age") {
+      gmx-mail-credentials = mkSecret username "gmx-mail-credentials";
     };
 }
