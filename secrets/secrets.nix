@@ -33,6 +33,9 @@ in {
   # HackMD API token (hackmd.io > Settings > API). Contents: the bare token,
   # one line. Read from the file on demand, not exported into the environment.
   "hackmd-token.age".publicKeys = for workstations;
+  # GMX mailbox login for IMAP (Claude drafts into the Drafts folder). Contents,
+  # two lines: the address, then the password (an app password if 2FA is on).
+  "gmx-mail-credentials.age".publicKeys = for workstations;
   # Fine-grained PAT for the Claude Code sandbox account
   # (modules/system/security/agent-sandbox.nix). Contents: the bare token,
   # one line. Scope it on GitHub to the repositories the agent may push to,
