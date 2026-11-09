@@ -393,12 +393,20 @@ in {
       "${modifier}+Ctrl+Shift+WheelScrollDown".action.move-column-right = [];
       "${modifier}+Ctrl+Shift+WheelScrollUp".action.move-column-left = [];
 
-      # Touchpad two-finger scroll (window-in-column, e.g. tabs)
-      "${modifier}+TouchpadScrollDown" = {
+      # Window-in-column (e.g. tabs), same combo on wheel and touchpad
+      "${modifier}+Alt+WheelScrollDown" = {
         cooldown-ms = 150;
         action.focus-window-down = [];
       };
-      "${modifier}+TouchpadScrollUp" = {
+      "${modifier}+Alt+WheelScrollUp" = {
+        cooldown-ms = 150;
+        action.focus-window-up = [];
+      };
+      "${modifier}+Alt+TouchpadScrollDown" = {
+        cooldown-ms = 150;
+        action.focus-window-down = [];
+      };
+      "${modifier}+Alt+TouchpadScrollUp" = {
         cooldown-ms = 150;
         action.focus-window-up = [];
       };
