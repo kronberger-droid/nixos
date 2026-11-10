@@ -28,6 +28,13 @@ inputs: _final: prev: {
     # package expression ends in `...` and ignores unknown callPackage args,
     # so passing doCheck there would be silently dropped.
     doCheck = false;
+    # nixpkgs' cargo setup hook forces system libraries since nixpkgs 44cddf9
+    # ("Force system libs"): LIBGIT2_NO_VENDOR=1 and
+    # LIBSQLITE3_SYS_USE_PKG_CONFIG=1 make libgit2-sys and libsqlite3-sys link
+    # the system copies instead of compiling their bundled ones. Upstream's
+    # expression lists libgit2 for Darwin only and no sqlite at all; nixpkgs'
+    # own nushell package has both unconditionally.
+    buildInputs = (old.buildInputs or []) ++ [prev.libgit2 prev.sqlite];
     # `shellPath` is a nixpkgs convention with no meaning to nushell itself,
     # so upstream's expression has no reason to set it — but NixOS's
     # users.users.<n>.shell rejects any package without it ("is not a shell
