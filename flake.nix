@@ -267,7 +267,10 @@
     # "helix"`, the setting the overlay was first brought in for.
     commonOverlays = system:
       baseOverlays system
-      ++ [(import ./modules/shared/nushell-overlay.nix inputs)];
+      ++ [
+        (import ./modules/shared/nushell-overlay.nix inputs)
+        (import ./modules/shared/backports-overlay.nix)
+      ];
 
     # The NixOS modules every nixosSystem host with a user on it shares:
     # home-manager with the base16 scheme module, agenix, and Lix. Droid has
