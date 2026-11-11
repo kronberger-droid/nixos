@@ -86,6 +86,15 @@ in {
   # file sync. Only the server reads it — the Zotero clients hold the same
   # password in their own settings store, not from here.
   "webdav-zotero.age".publicKeys = for [homeserver];
+  # MAUTRIX_WHATSAPP_BRIDGE_LOGIN_SHARED_SECRET=as_token:<token>, the
+  # double-puppet appservice token (services/matrix.nix). Anyone holding it
+  # can act as any user on the Matrix server. Only the server reads it.
+  "mautrix-whatsapp-env.age".publicKeys = for [homeserver];
+  # The two appservice registrations tuwunel loads at startup, tokens and
+  # all: the bridge's own (from `mautrix-whatsapp -g`) and the double-puppet
+  # one, whose as_token is the one in mautrix-whatsapp-env.
+  "mautrix-whatsapp-registration.age".publicKeys = for [homeserver];
+  "matrix-doublepuppet-registration.age".publicKeys = for [homeserver];
   # For the nightly flake-autoupdate job (services/flake-autoupdate.nix),
   # which pushes update branches and opens PRs on its own. Both are the bare
   # token, one line. github: a fine-grained PAT on nixos, lab-servers and

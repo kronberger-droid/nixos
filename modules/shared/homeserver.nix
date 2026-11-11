@@ -7,4 +7,10 @@
   tailnet6 = "fd7a:115c:a1e0::35:2e61";
   lan4 = "192.168.2.54";
   lanSubnet = "192.168.2.0/24";
+
+  # Matrix (services/matrix.nix). The server name is permanent: it is in
+  # every user and room ID. The URL is `tailscale serve` on the homeserver,
+  # HTTPS with a tailnet certificate, reachable from the tailnet only.
+  matrixServerName = "kron-berger.com";
+  matrixUrl = "https://homeserver.tailc7340c.ts.net";
 }
