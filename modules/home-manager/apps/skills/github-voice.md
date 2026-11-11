@@ -121,3 +121,20 @@ there survives the session; the job tmp dir is deleted with the job.
   promise...`).
 - Credit people by name at the end, and **close on `Co-Authored-By:` trailers
   alone**: one per human co-author, each on its own line after a blank line.
+- **No AI attribution.** No "Generated with Claude Code" line, no
+  `Co-Authored-By:` for Claude or Anthropic, no claude.ai session link. That
+  holds even when the work was done mostly with Claude.
+- **Ask before adding a [0rwx](https://0rwx.com) marker.** When Claude did a
+  meaningful part of the PR's work, ask me before posting whether to add the
+  0rwx marker, and propose which levels fit: R (I wrote it, the LLM only read
+  along), W (Claude wrote it, I read and fixed it), X (checked by running it,
+  not line by line). Never add one unasked; I'm still trying this out. If I say
+  yes, put the matching badges at the end of the body, before any trailers,
+  on their own lines with no section heading above them. Same format as the
+  rusty-tip README:
+
+  ```markdown
+  [![AI:W WRITE](https://img.shields.io/badge/AI-WRITE-grey?style=flat&logoSize=auto&labelColor=13171f)](https://0rwx.com)
+  ```
+
+  The R and X badges follow the same pattern with `READ` and `EXECUTE`.
