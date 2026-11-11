@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   ...
@@ -95,12 +96,27 @@
   # (home-manager/apps/steam.nix).
   hardware.steam-hardware.enable = true;
 
-  systemd.services.rfkill-unblock-bluetooth = {
-    wantedBy = ["multi-user.target"];
-    after = ["systemd-rfkill.service"];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.util-linux}/bin/rfkill unblock bluetooth";
-    };
-  };
+  systemd.services =
+    {
+      rfkill-unblock-bluetooth = {
+        wantedBy = ["multi-user.target"];
+        after = ["systemd-rfkill.service"];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${pkgs.util-linux}/bin/rfkill unblock bluetooth";
+        };
+      };
+    }
+    # Home Manager activation at boot runs before any session bus exists, so
+    # dconfSettings wraps dconf in a throwaway dbus-run-session. dconf 51
+    # (glib 2.90) activates gvfsd on that bus; its gvfsd-fuse mounts ~/.gvfs
+    # for want of XDG_RUNTIME_DIR and segfaults when the bus goes away. The
+    # core dump then holds the mount for systemd-coredump's five minutes, and
+    # ironbar and rio hang on it until it is killed. Nothing in activation
+    # needs gvfs, so GIO stays on the local VFS there.
+    // lib.mapAttrs' (user: _:
+      lib.nameValuePair "home-manager-${user}" {
+        environment.GIO_USE_VFS = "local";
+      })
+    config.home-manager.users;
 }
