@@ -92,6 +92,12 @@ in {
       # bridge <-> WhatsApp, and Matrix traffic stays on this server.
       allow_federation = false;
 
+      # Unset, /.well-known/matrix/client answers M_NOT_FOUND, and Element
+      # classic on Android takes that for a fatal login error instead of
+      # falling back to the URL it was given. Element desktop never asks,
+      # its config.json names the server.
+      well_known.client = hs.matrixUrl;
+
       # Read at startup only; every *.yaml in it is one registration.
       appservice_dir = "/run/credentials/tuwunel.service";
     };
