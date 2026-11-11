@@ -16,6 +16,7 @@
     ./signal.nix
     ./equibop.nix
     ./zapzap.nix
+    ./element.nix
     ./aerion.nix
     ./taildrop.nix
     ./zotero.nix
