@@ -21,14 +21,20 @@
   # the set tracks upstream exactly (a flake update adds/removes skills with it).
   # plugin.json lists relative paths like "./skills/engineering/tdd"; we map each
   # to { <foldername> = <store path to that folder>; } for claude.skillDirs.
+  #
+  # `excluded` drops skills by folder name. `pr` describes itself as "Use when
+  # writing a PR body", which competed with github-voice for every PR and won
+  # often enough to make PR bodies unpredictable. Filtering by name keeps it
+  # out across flake updates.
   mattSkills = let
     manifest = builtins.fromJSON (builtins.readFile "${inputs.mattpocock-skills}/.claude-plugin/plugin.json");
+    excluded = ["pr"];
     toEntry = rel: let
       clean = lib.removePrefix "./" rel;
     in
       lib.nameValuePair (builtins.baseNameOf clean) (inputs.mattpocock-skills + "/${clean}");
   in
-    builtins.listToAttrs (map toEntry manifest.skills);
+    removeAttrs (builtins.listToAttrs (map toEntry manifest.skills)) excluded;
 
   # humanizer installs as its own skill and doubles as a prose-sweep
   # reference. Only SKILL.md and the licence: the rest of the repo is

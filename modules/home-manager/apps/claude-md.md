@@ -98,7 +98,11 @@ reconstructing the conventions from memory.
 - **`github-voice`** — anything posted to GitHub under my name: review comments,
   issue replies, PR bodies. Covers drafts written to a scratch file and PRs you
   open yourself as one step of a larger task. The target repo's own PR template
-  always wins over anything in the skill; check for one before drafting.
+  always wins over anything in the skill; check for one before drafting. This
+  is the only skill for PR bodies. Never put AI attribution in them (no
+  Generated-with line, no Claude co-author, no session link). For a PR Claude
+  did real work on, ask me whether to add a 0rwx AI-use marker; never add one
+  without asking.
 - **`typst`** — formulas, documents and plots. Typst, never LaTeX. Carries the
   vault's math and lilaq conventions too, since vault notes use Typst syntax.
 - **`vault`** — my Obsidian vault at `~/Documents/notes/general-vault/`. Reading
