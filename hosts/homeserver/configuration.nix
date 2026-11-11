@@ -37,6 +37,7 @@ in {
     ../../modules/system/services/syncthing.nix
     ../../modules/system/services/website.nix
     ../../modules/system/services/webdav.nix
+    ../../modules/system/services/matrix.nix
     ../../modules/system/services/dns-healthcheck.nix
     ../../modules/system/services/flake-autoupdate.nix
     ../../modules/system/networking/mullvad-exit.nix

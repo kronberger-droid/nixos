@@ -39,4 +39,16 @@ _final: prev: {
       hash = "sha256-K0S3J6i3tf/yeu8dkrIvoKlImyFq+JipDrLz5bFy8q4=";
     };
   });
+  # nixpkgs #585169 (open, 2026-11-08): "matrix-tuwunel: fix build with
+  # forced system libraries". Same AWS_LC_SYS_USE_SYSTEM=1 as rqbit, plus the
+  # hook's JEMALLOC_OVERRIDE, which needs an unprefixed system jemalloc
+  # (tuwunel enables jemalloc by default). Both inputs as in the PR.
+  matrix-tuwunel = prev.matrix-tuwunel.overrideAttrs (old: {
+    buildInputs =
+      (old.buildInputs or [])
+      ++ [
+        prev.aws-lc
+        (prev.rust-jemalloc-sys.override {unprefixed = true;})
+      ];
+  });
 }
