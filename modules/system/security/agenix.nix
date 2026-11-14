@@ -94,5 +94,9 @@ in {
     # module lands before the secret is created.
     // lib.optionalAttrs (builtins.pathExists "${inputs.self}/secrets/gmx-mail-credentials.age") {
       gmx-mail-credentials = mkSecret username "gmx-mail-credentials";
+    }
+    # TU Wien mailbox password, one line, read by himalaya (apps/mail.nix).
+    // lib.optionalAttrs (builtins.pathExists "${inputs.self}/secrets/tuwien-mail-password.age") {
+      tuwien-mail-password = mkSecret username "tuwien-mail-password";
     };
 }

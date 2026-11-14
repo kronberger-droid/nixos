@@ -36,6 +36,9 @@ in {
   # GMX mailbox login for IMAP (Claude drafts into the Drafts folder). Contents,
   # two lines: the address, then the password (an app password if 2FA is on).
   "gmx-mail-credentials.age".publicKeys = for workstations;
+  # TU Wien mailbox password for IMAP/SMTP as mkronber@intern.tuwien.ac.at.
+  # Contents: the bare password, one line.
+  "tuwien-mail-password.age".publicKeys = for workstations;
   # Fine-grained PAT for the Claude Code sandbox account
   # (modules/system/security/agent-sandbox.nix). Contents: the bare token,
   # one line. Scope it on GitHub to the repositories the agent may push to,

@@ -9,6 +9,7 @@
     ./yazi.nix
     ./music.nix
     ./contacts.nix
+    ./mail.nix
     ./ai.nix
     ./syncthing.nix
     ./obsidian.nix
