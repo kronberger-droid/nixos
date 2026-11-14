@@ -118,6 +118,10 @@
       "Bash(ssh:*)"
       "Bash(nix copy:*)"
       "Bash(cachix:*)"
+      # Sending mail is outward-facing. Reading and saving drafts is not.
+      "Bash(himalaya message send:*)"
+      "Bash(himalaya msg send:*)"
+      "Bash(himalaya smtp:*)"
     ]
     # `gh`, by subcommand rather than wholesale. A blanket `Bash(gh:*)` also
     # caught `gh pr view`, `gh issue list` and every `gh api` GET, which is the
@@ -267,6 +271,21 @@
   settingsToMerge =
     {
       permissions.ask = outwardFacing;
+
+      # Credentials stay out of the transcript. Prefix rules are easy to walk
+      # around (`nu -c`, a script), so this is a speed bump and not a wall:
+      # the real boundary is running Claude as the sandbox account. himalaya's
+      # debug and trace output echoes the auth exchange, which is how the GMX
+      # login ended up in a transcript once.
+      permissions.deny = [
+        "Read(/run/secrets/**)"
+        "Read(/run/agenix/**)"
+        "Bash(cat /run/secrets:*)"
+        "Bash(cat /run/agenix:*)"
+        "Bash(himalaya *--debug*)"
+        "Bash(himalaya *--trace*)"
+        "Bash(curl *-v*imap*)"
+      ];
 
       hooks.PreToolUse = [
         {
