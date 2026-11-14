@@ -37,6 +37,9 @@ $env.config = {
 # signature, type and preview, which say little for anything that isn't a builtin.
 $env.config.status_line = {enable: true, errors: true, signature: false, type: false, preview: false}
 
+# Bracket and quote auto-pairing (nushell#19199, main only until 0.118).
+$env.config.auto_pairs.enable = true
+
 # Starting from the defaults keeps this stable if the file is sourced again.
 # The helix_* modes need the upstream-main nushell from the shared overlay.
 $env.config.keybindings = (config default).keybindings ++ [{
