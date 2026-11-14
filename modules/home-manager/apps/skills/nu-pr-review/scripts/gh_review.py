@@ -37,7 +37,8 @@ CSS = Path(__file__).resolve().parent.parent / "assets" / "github-markdown.css"
 
 
 def badge(sev):
-    """No badge. Severity is carried by the wording of the thread and the order of the overview.
+    """No badge. Severity is carried by the wording of the thread, and in the overview by a counts
+    line and the word leading each finding.
 
     Copilot's severity icons are not used, so a review under the user's name never reads as Copilot's.
     `sev_of` below still reads them, to recognise other reviewers' threads."""
@@ -318,11 +319,15 @@ def comment_body(f, F):
 
 
 def overview(F, links):
-    """The 'Review overview' body: summary, counts, one linked line per finding, High→Low."""
+    """The 'Review overview' body: summary, a counts line, one linked line per finding led by its severity, High→Low.
+
+    The counts and the leading word are plain text, so how much is high, medium and low shows at a
+    glance without Copilot's icons (see `badge`)."""
     items = sorted(F["findings"], key=lambda f: SEVS.index(f["sev"]))
-    lines = "\n".join(f"- [{f['title']}](#discussion_r{links[f['title']]})" for f in items)
+    counts = " · ".join(f"{sum(f['sev'] == s for f in items)} {s}" for s in SEVS)
+    lines = "\n".join(f"- {f['sev'].capitalize()}: [{f['title']}](#discussion_r{links[f['title']]})" for f in items)
     return (f"## Review overview\n\n### {F['heading']}\n\n{F['summary'].strip()}\n\n"
-            f"{lines}\n\n{F['footer'].strip()}")
+            f"**Findings:** {counts}\n\n{lines}\n\n{F['footer'].strip()}")
 
 
 def placeholder(F):

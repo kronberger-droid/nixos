@@ -1,6 +1,6 @@
 # Findings: file format, severity, voice
 
-Shared by `nu-pr-review` and `nu-pr-recheck`. `scripts/gh_review.py` turns the file into the posted review: the "Review overview" layout lives in the script. There are no severity badges: severity is carried by the wording of each thread.
+Shared by `nu-pr-review` and `nu-pr-recheck`. `scripts/gh_review.py` turns the file into the posted review: the "Review overview" layout lives in the script. There are no severity badges. In a thread, severity is carried by the wording. The overview spells it out in plain text: a `**Findings:** 2 high · 3 medium · 0 low` line, and each linked finding led by `High:`, `Medium:` or `Low:`.
 
 ## The file
 
@@ -47,7 +47,7 @@ Other keys:
 
 ## Severity
 
-By what happens if the author doesn't fix it. `sev` orders the overview and picks the framing of the thread, there is no label in the posted text:
+By what happens if the author doesn't fix it. `sev` orders the overview, is counted and named there, and picks the framing of the thread. The thread itself carries no label:
 
 - **high**: changes behavior, gives wrong output with no error, regresses something main does right, or needs a design decision before merge. Frame it as a blocker: say what stops the merge and what would unblock it.
 - **medium**: should be fixed before merge: rejects valid input, fails CI (clippy, fmt, tests), loses test coverage, a new command or flag with no `examples()` entry, a fix that misses part of its own stated scope. Frame it as "Two small things before we land it:" style changes.
