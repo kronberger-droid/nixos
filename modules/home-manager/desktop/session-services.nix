@@ -247,6 +247,9 @@ in {
     day_gamma = 100;
     latitude = 48.2;
     longitude = 16.4;
+    # Fade over a minute (the maximum) when starting or resuming in the
+    # evening, instead of the default half-second snap.
+    startup_duration = 60;
   };
 
   systemd.user.services.sunsetr = {
