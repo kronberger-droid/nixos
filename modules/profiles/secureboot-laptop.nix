@@ -47,7 +47,6 @@
     };
     # List option: hosts append their own (P14E's resume_offset).
     kernelParams = [
-      "snd_intel_dspcfg.dsp_driver=1"
       "intel_iommu=on"
     ];
     blacklistedKernelModules = [
