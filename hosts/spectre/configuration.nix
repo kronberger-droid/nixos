@@ -29,6 +29,9 @@ _: {
   boot.kernelParams = [
     "nvme_core.default_ps_max_latency_us=0"
     "pcie_aspm=off"
+    # Legacy HDA instead of SOF. Kept from the 2025 bring-up; P14E dropped it
+    # because it hides the DMIC array that only SOF can drive.
+    "snd_intel_dspcfg.dsp_driver=1"
   ];
 
   # Limit build parallelism to keep the system responsive
