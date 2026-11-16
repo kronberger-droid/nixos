@@ -365,8 +365,8 @@
                     # pull in a parallel nixpkgs niri build.
                     niri = final.niri-unstable;
                   })
-                  (_: _: {
-                    deploy-rs = inputs.deploy-rs.packages.${system}.default;
+                  (final: _: {
+                    deploy-rs =inputs.deploy-rs.packages.${system}.default;
                     # Unmodified, so helix.cachix.org hits; see the helix input.
                     helix = inputs.helix.packages.${system}.default;
                     # rio from upstream main, tests skipped — same policy as the
@@ -384,7 +384,12 @@
                     # back on.
                     rio =
                       inputs.rio-upstream.packages.${system}.default.overrideAttrs
-                      (_: {doCheck = false;});
+                      (old: {
+                        doCheck = false;
+                        # onig_sys links the system oniguruma, which the
+                        # upstream package no longer provides.
+                        buildInputs = (old.buildInputs or []) ++ [final.oniguruma];
+                      });
                     # bitwarden-desktop is stock again. Until 2026.8.0 it carried
                     # a doCheck = false (a failing desktop_native cargo test) and
                     # a wrapper hiding the GNOME token in XDG_CURRENT_DESKTOP so
