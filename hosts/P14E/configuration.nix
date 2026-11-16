@@ -11,7 +11,9 @@ _: {
     ../../modules/system/hardware/droidcam.nix
   ];
 
-  # ThinkPad P14E specifics on top of the shared laptop profile. Started as
+  # P14E specifics on top of the shared laptop profile. Not a ThinkPad despite
+  # the name: DMI reports Intel Client Systems, board CM11EBV716W, which with
+  # the i7-1185G7 and ALC274 looks like Intel's NUC M15 laptop kit. Started as
   # a copy of spectre before the hardware arrived; the hardware config, LUKS
   # layout and SSH key are real now.
   # The webcam is not IPU6. It is a USB UVC module (Foxlink 05c8:03e9) on
