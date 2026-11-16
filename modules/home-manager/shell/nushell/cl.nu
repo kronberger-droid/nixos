@@ -4,9 +4,10 @@
 #
 # The sandbox mirrors ~/Projects: ~/Projects/rust/reedline here is
 # /home/claude/Projects/rust/reedline there, so a path means the same thing on
-# both sides. That mirror path is tried first. Inside ~/Projects with no
-# mirror yet, `cl` offers to clone it (the fork, `gh repo clone` adds the
-# parent as `upstream`). Anywhere else it runs here.
+# both sides. That mirror path is tried first. With no sandbox checkout yet,
+# `cl` offers to clone one (the fork, `gh repo clone` adds the parent as
+# `upstream`): to the mirror path inside ~/Projects, to other/<repo> for a
+# repo elsewhere such as ~/.config/nixos. Outside any repo it runs here.
 #
 # Failing the path, "same repo" means the two checkouts share a GitHub remote, compared as
 # owner/repo. Directory names miss the common case: here `origin` is
@@ -33,6 +34,17 @@ def cl-mirror-path []: nothing -> any {
     let projects = ($nu.home-dir | path join "Projects")
     if not ($top | str starts-with $"($projects)/") { return null }
     $CL_MIRROR | path join ($top | path relative-to $projects)
+}
+
+# Where a new sandbox checkout of the current repo goes: the mirror path, or
+# other/<repo> for a repo outside ~/Projects. Two levels down either way,
+# since that is the depth cl-matches scans. Null outside a repo.
+def cl-clone-dest []: nothing -> any {
+    let mirror = cl-mirror-path
+    if $mirror != null { return $mirror }
+    let here = (^git rev-parse --show-toplevel | complete)
+    if $here.exit_code != 0 { return null }
+    $CL_MIRROR | path join "other" ($here.stdout | str trim | path basename)
 }
 
 def cl-sandboxed []: nothing -> bool {
@@ -108,7 +120,10 @@ def cl-create [dest: path]: nothing -> any {
     }
     let repo = $"kronberger-droid/($remotes | first | split row '/' | last)"
     let answer = (try { input $"No sandbox checkout at ($dest). Clone ($repo) there? [y/N] " } catch { "n" })
-    if ($answer | str lowercase) not-in ["y" "yes"] { return null }
+    if ($answer | str lowercase) not-in ["y" "yes"] {
+        print $"(ansi yellow)cl:(ansi reset) not cloning. Starting here."
+        return null
+    }
 
     ^claude-sandbox /run/current-system/sw/bin/nu -l -c $"mkdir ($dest | path dirname | to nuon); gh repo clone ($repo) ($dest | to nuon)"
     if ($dest | path join ".git" | path exists) { return $dest }
@@ -122,7 +137,10 @@ def --wrapped cl [...args: string] {
     let mirror = cl-mirror-path
     let matches = cl-matches
     let target = match ($matches | length) {
-        0 => (if $mirror != null and (cl-sandboxed) { cl-create $mirror } else { null })
+        0 => {
+            let dest = cl-clone-dest
+            if $dest != null and (cl-sandboxed) { cl-create $dest } else { null }
+        }
         1 => ($matches | first)
         _ if $mirror != null and ($mirror in $matches) => $mirror
         _ => {
