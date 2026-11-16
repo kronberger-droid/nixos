@@ -86,9 +86,7 @@
     extraSetFlags = lib.mkDefault ["--accept-routes" "--operator=${username}"];
   };
 
-  # Syncthing ports (service runs as user via Home Manager)
-  networking.firewall = {
-    allowedTCPPorts = [22000];
-    allowedUDPPorts = [22000 21027];
-  };
+  # Syncthing (runs as user via Home Manager) syncs over the tailnet only, see
+  # shared/syncthing-options.nix.
+  networking.firewall.interfaces."tailscale0".allowedTCPPorts = [22000];
 }

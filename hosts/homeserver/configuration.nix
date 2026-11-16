@@ -185,8 +185,8 @@ in {
       # ICMP is the only liveness check the network has for the one host
       # everything depends on.
       allowPing = true;
-      # LAN-wide: SSH, DNS, and syncthing (22000/21027, appended by
-      # modules/system/services/syncthing.nix). Everything else on this box
+      # LAN-wide: SSH and DNS. Syncthing is tailnet-only (22000 on tailscale0,
+      # from modules/system/services/syncthing.nix). Everything else on this box
       # speaks plain HTTP (Radicale is Basic auth, immich is a
       # password login, harmonia serves the store) and is only meant to be
       # reached over the tailnet, so it is opened on tailscale0 alone, the
