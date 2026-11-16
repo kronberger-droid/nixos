@@ -17,8 +17,45 @@
   # smears the redraw (see github.com/anthropics/claude-code issues #22115,
   # #51828). Segments are measured by their PLAIN text but emitted COLORED, so
   # truncation only ever lands on a clean boundary, never mid-escape-sequence.
+  # Activity line shown above the main statusline, as "intent › step".
+  # Intent is the first non-empty line of Claude's newest text block (the
+  # one-line narration the global CLAUDE.md asks for before each batch of tool
+  # calls); it stays put while the tools run. Step is the newest tool call, shown
+  # only when it came after that text: its description (Bash) or the tool name
+  # plus its target. When space runs out the step is cut first, since the intent
+  # is the part worth reading. Input is read raw and parsed per line, so a
+  # half-written last line is skipped rather than failing the whole parse.
+  # Lengths and slices in jq count codepoints, not bytes.
+  activityFilter = pkgs.writeText "claude-activity.jq" ''
+    def clean: gsub("[\r\n\t]"; " ") | gsub("[`*]"; "");
+    def step:
+      .input.description
+      // (.name + (if .input.file_path then " " + (.input.file_path | split("/") | last)
+                   elif .input.pattern then " " + .input.pattern
+                   else "" end));
+
+    (split("\n")
+     | map(fromjson? // empty | select(.type == "assistant") | .message.content[]?
+           | select(.type == "text" or .type == "tool_use"))) as $b
+    | ([$b | to_entries[] | select(.value.type == "text") | .key] | last) as $ti
+    | ([$b | to_entries[] | select(.value.type == "tool_use") | .key] | last) as $ui
+    | (if $ti == null then ""
+       else $b[$ti].text | split("\n") | map(select(test("\\S"))) | (first // "") | clean
+       end) as $intent
+    | (if $ui != null and ($ti == null or $ui > $ti)
+       then $b[$ui] | step | clean else "" end) as $step
+    | if $intent == "" and $step == "" then ""
+      elif $intent == "" then "▸ " + $step | .[0:$max]
+      elif $step == "" then $intent | .[0:$max]
+      else ($max - ($intent | length) - 3) as $room
+        | if $room >= 10 then $intent + " › " + ($step | .[0:$room])
+          else $intent | .[0:$max] end
+      end
+  '';
+
   statuslineScript = pkgs.writeShellScript "claude-statusline" ''
     input=$(cat)
+    transcript=$(printf '%s' "$input" | ${pkgs.jq}/bin/jq -r '.transcript_path // ""')
 
     # Parse JSON fields (strip stray newlines so output is always single-line)
     model=$(printf '%s' "$input" | ${pkgs.jq}/bin/jq -r '.model.display_name // "Claude"' | tr -d '\n\r')
@@ -96,6 +133,13 @@
         ctx_color=$dim
       fi
       add_segment " | ctx $ctx_int%" " ''${dim}│''${reset} ''${ctx_color}ctx ''${ctx_int}%''${reset}"
+    fi
+
+    # Activity line. tail keeps this cheap on multi-megabyte transcripts.
+    if [ -f "$transcript" ]; then
+      said=$(tail -n 300 "$transcript" \
+        | ${pkgs.jq}/bin/jq -rRs --argjson max "$max" -f ${activityFilter} 2>/dev/null)
+      [ -n "$said" ] && printf '%b%s%b\n' "$dim" "$said" "$reset"
     fi
 
     printf "%b" "$output"
