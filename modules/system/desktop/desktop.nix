@@ -37,6 +37,13 @@
   # in the PAM environment, which greetd's niri-session inherits.
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
+  # Turns on reedline's frame painter in the nushell build from
+  # `frame-painter-daily` (see the nushell-src input). reedline reads it from
+  # the process environment when the line editor is created, so `$env` in
+  # env.nu is too late; PAM's environment is not. Desktops only, so a shell
+  # over ssh on the homeserver keeps the streaming painter.
+  environment.sessionVariables.REEDLINE_FRAME_PAINTER = "1";
+
   # veila (modules/home-manager/desktop/veila.nix) authenticates against a
   # service named after itself and falls back to system-auth, which NixOS does
   # not have, so without this entry no password would ever unlock it.
