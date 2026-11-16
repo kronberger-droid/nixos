@@ -82,6 +82,21 @@
     },
     "crane": {
       "locked": {
+        "lastModified": 1793836618,
+        "narHash": "sha256-TREenflwEjxOSq292FYwbc3kEm7TDRtXCZRNWEdjBmg=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "79fd63528501446749c09f08cad486a58c7d173e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
+    "crane_2": {
+      "locked": {
         "lastModified": 1790899423,
         "narHash": "sha256-THGtz65UGJU+sonZidRboyCMk+9DclpMF7pwL4uDV4M=",
         "owner": "ipetkov",
@@ -356,7 +371,7 @@
     },
     "lanzaboote": {
       "inputs": {
-        "crane": "crane",
+        "crane": "crane_2",
         "nixpkgs": [
           "nixpkgs"
         ],
@@ -858,6 +873,7 @@
         "base16": "base16",
         "claude-code": "claude-code",
         "claude-mathpane": "claude-mathpane",
+        "crane": "crane",
         "deploy-rs": "deploy-rs",
         "disko": "disko",
         "dropkitten": "dropkitten",
