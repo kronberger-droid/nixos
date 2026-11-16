@@ -205,8 +205,13 @@
     # scripts/nix: the overlay callPackages their package expression against our
     # own nixpkgs. See modules/shared/nushell-overlay.nix for why that beats
     # taking the flake.
+    #
+    # Temporarily on my fork's `frame-painter-daily`: upstream main with
+    # reedline repointed at the frame painter (reedline#1299), to daily-drive
+    # it. `REEDLINE_FRAME_PAINTER` in desktop.nix switches it on. Go back to
+    # `github:nushell/nushell` when done.
     nushell-src = {
-      url = "github:nushell/nushell";
+      url = "github:kronberger-droid/nushell/frame-painter-daily";
       flake = false;
     };
     # Personal site (CV / blog / publications / projects). Its flake builds the
