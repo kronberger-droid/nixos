@@ -378,7 +378,11 @@ in {
           User = user;
           Group = user;
           WorkingDirectory = "${home}/src";
-          LoadCredential = lib.optional (config.age.secrets ? claude-github-token) "github-token:${config.age.secrets.claude-github-token.path}";
+          LoadCredential =
+            lib.optional (config.age.secrets ? claude-github-token) "github-token:${config.age.secrets.claude-github-token.path}"
+            # Only homeserver defines it: the nushell-org token for the issue
+            # sweep, read as a file by its posting scripts, never exported.
+            ++ lib.optional (config.age.secrets ? claude-nushell-token) "nushell-token:${config.age.secrets.claude-nushell-token.path}";
           RuntimeDirectory = "claude-sandbox";
           RuntimeDirectoryMode = "0700";
           ExecStart = lib.getExe (pkgs.writeShellScriptBin "claude-remote-control" ''
@@ -386,6 +390,9 @@ in {
               install -m 0400 "$CREDENTIALS_DIRECTORY/github-token" "$RUNTIME_DIRECTORY/github-token"
               GH_TOKEN="$(< "$RUNTIME_DIRECTORY/github-token")"
               export GH_TOKEN GITHUB_PERSONAL_ACCESS_TOKEN="$GH_TOKEN"
+            fi
+            if [ -r "''${CREDENTIALS_DIRECTORY:-/nonexistent}/nushell-token" ]; then
+              install -m 0400 "$CREDENTIALS_DIRECTORY/nushell-token" "$RUNTIME_DIRECTORY/nushell-token"
             fi
             exec ${lib.getExe' pkgs.claude-code-bin "claude"} remote-control
           '');
