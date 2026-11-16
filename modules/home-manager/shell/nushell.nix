@@ -32,6 +32,7 @@ in {
 
   xdg.configFile."nushell/cl.nu".source = ./nushell/cl.nu;
   xdg.configFile."nushell/fetch.nu".source = ./nushell/fetch.nu;
+  xdg.configFile."nushell/heat.nu".source = ./nushell/heat.nu;
 
   # Generated so it can use centralised path variables
   xdg.configFile."nushell/utilities.nu".text = ''
@@ -571,6 +572,7 @@ in {
         ''
           source ~/.config/nushell/cl.nu
           source ~/.config/nushell/fetch.nu
+          source ~/.config/nushell/heat.nu
         ''
         + (lib.optionalString hasTerminal ''
           source ~/.config/nushell/development.nu
