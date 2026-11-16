@@ -78,18 +78,11 @@ in
           };
         };
 
-        options = {
-          urAccepted = -1; # Disable usage reporting
-          relaysEnabled = true;
-          localAnnounceEnabled = true;
-          globalAnnounceEnabled = true;
-        };
+        options = import ../../shared/syncthing-options.nix;
       };
     };
 
-    # Open firewall for Syncthing
-    networking.firewall = {
-      allowedTCPPorts = [22000]; # Sync protocol
-      allowedUDPPorts = [22000 21027]; # Sync + discovery
-    };
+    # Sync is tailnet-only (shared/syncthing-options.nix), so the port opens
+    # on tailscale0 alone and discovery's 21027/udp not at all.
+    networking.firewall.interfaces."tailscale0".allowedTCPPorts = [22000];
   }

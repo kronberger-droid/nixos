@@ -75,12 +75,7 @@ in
           };
         };
 
-        options = {
-          urAccepted = -1;
-          relaysEnabled = true;
-          localAnnounceEnabled = true;
-          globalAnnounceEnabled = true;
-        };
+        options = import ../../shared/syncthing-options.nix;
       };
     };
   }
