@@ -51,6 +51,13 @@ in {
   # workflows, no administration. A ruleset requiring a PR on main is what
   # keeps it to branches. Contents: the bare token, one line.
   "claude-github-token-homeserver.age".publicKeys = for [homeserver];
+  # A second fine-grained PAT for the homeserver sandbox, with resource owner
+  # the nushell org: nushell/nushell and nushell/reedline, Issues read/write,
+  # nothing else, short expiry. Only the issue sweep's posting scripts read
+  # it (from /run/claude-sandbox/nushell-token); it is never GH_TOKEN, so
+  # everything else in the sandbox keeps only the token above. Contents: the
+  # bare token, one line.
+  "claude-nushell-token-homeserver.age".publicKeys = for [homeserver];
   "tunet-credentials.age".publicKeys = for workstations;
   "tuwien-vpn-totp.age".publicKeys = for workstations;
   "spotify-password.age".publicKeys = for workstations;

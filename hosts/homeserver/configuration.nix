@@ -96,6 +96,15 @@ in {
     mode = "0400";
     owner = "root";
   };
+  # The org-owned token for the nushell issue sweep (secrets/secrets.nix).
+  # Same delivery as the one above, but agent-sandbox.nix only drops it into
+  # /run/claude-sandbox as a file and never exports it.
+  age.secrets.claude-nushell-token = lib.mkIf (builtins.pathExists "${inputs.self}/secrets/claude-nushell-token-homeserver.age") {
+    file = "${inputs.self}/secrets/claude-nushell-token-homeserver.age";
+    path = "/run/secrets/claude-nushell-token";
+    mode = "0400";
+    owner = "root";
+  };
 
   # ZOTERO_DAV_USER / ZOTERO_DAV_PASSWORD, in systemd EnvironmentFile form.
   # Stays root-owned: systemd reads it as root before dropping to the webdav
