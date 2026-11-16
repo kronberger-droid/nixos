@@ -6,17 +6,21 @@
 # ls names get their LS_COLORS from the table's path_columns handling, which
 # wins over a `string` closure. So `lsh` styles the name itself.
 
+# Plain ANSI names only, so the terminal resolves them through the base16
+# palette (theming/ansi.nix). base09 is red in this scheme, so bold red stands
+# in for the hottest step instead of an orange.
+
 # Age bands for date cells, newest first.
 const HEAT_AGE = [
     [max color];
-    [1hr red3b] [6hr orange3] [1day yellow3b] [3day chartreuse2b]
-    [1wk green3b] [6wk darkturquoise] [52wk deepskyblue3b]
+    [1hr red_bold] [6hr red] [1day yellow] [3day green]
+    [1wk cyan] [6wk blue] [52wk magenta]
 ]
 
-# Churn bands for `lsh`, lines added plus deleted inside the window.
+# Churn bands for `lsh`, commits touching the path inside the window.
 const HEAT_CHURN = [
     [min color];
-    [2000 red3b] [500 orange3] [100 yellow3b] [20 chartreuse2b] [1 green3b]
+    [50 red_bold] [20 red] [8 yellow] [3 green] [1 cyan]
 ]
 
 $env.config.color_config.datetime = {||
@@ -24,38 +28,44 @@ $env.config.color_config.datetime = {||
     $HEAT_AGE | where max > $age | get -o 0.color | default dark_gray
 }
 
-# Lines changed per path since `since`, for every file and each of its parent
-# directories, keyed repo-root relative. Cached per HEAD, window and day, so
+# Commits per path since `since`, for every file and each of its parent
+# directories, keyed repo-root relative. A directory counts each commit once,
+# however many of its files it touched. Cached per HEAD, window and day, so
 # repeat calls cost a file read; uncommitted edits are not counted.
+#
+# Counts commits rather than lines: --name-only skips the content diffs that
+# --numstat needs, 1.1s -> 0.2s for a year of the nushell repo.
 def git-heat [since: string]: nothing -> record {
     let key = ([(^git rev-parse HEAD) $since (date now | format date "%F")] | str join | hash md5)
     let cache = ($nu.cache-dir | path join $"heat-($key).nuon")
     if ($cache | path exists) { return (open $cache) }
 
     let heat = (
-        ^git log $"--since=($since)" --numstat --format= --no-renames
-        | lines
-        | compact -e
-        | parse "{add}\t{del}\t{path}"
-        | each {|r|
-            # Binary files report "-" for both counts.
-            let n = ([$r.add $r.del] | each { if $in == "-" { 0 } else { into int } } | math sum)
-            let parts = ($r.path | path split)
-            1..($parts | length) | each {|k| {path: ($parts | first $k | path join), n: $n} }
+        # NUL before each commit's file list, to split on.
+        ^git log $"--since=($since)" --name-only --format=%x00 --no-renames
+        | split row "\u{0}"
+        | each {|commit|
+            $commit | lines | compact -e | each {|f|
+                let parts = ($f | path split)
+                1..($parts | length) | each {|k| $parts | first $k | path join }
+            } | flatten | uniq
         }
         | flatten
-        # group-by, not reduce/upsert: ~5x faster on the nushell repo.
-        | group-by path --to-table
-        | each {|g| [$g.path ($g.items.n | math sum)] }
+        | uniq --count
+        | each {|r| [$r.value $r.count] }
         | into record
     )
     mkdir $nu.cache-dir
+    # A new HEAD or day orphans the old entries, so drop them here.
+    glob ($nu.cache-dir | path join "heat-*.nuon")
+    | where {|f| ((date now) - (ls $f | get 0.modified)) > 1day }
+    | each { rm $in }
     $heat | save -f $cache
     $heat
 }
 
-# `ls` with names coloured by git churn and a `heat` column (lines changed
-# since --since). Outside a git repo it is plain `ls`.
+# `ls` with names coloured by git churn and a `heat` column (commits touching
+# it since --since). Outside a git repo it is plain `ls`.
 def lsh [
     --since: string = "6 weeks ago"  # git log window
     ...paths: glob
