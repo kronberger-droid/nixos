@@ -5,43 +5,29 @@
 # single source of truth: mkHost hosts and the homeserver (built outside
 # mkHost) import this. Droid does not; flake.nix's commonOverlays has why.
 #
-# The build is upstream's own package expression rather than a hand-rolled
-# overrideAttrs on nixpkgs' derivation. It reads the version out of Cargo.toml,
-# assembles src with lib.fileset, and sets `cargoLock.allowBuiltinFetchGit`,
-# which is what keeps the git-pinned reedline dep from needing a hash here —
-# builtins.fetchGit takes the rev straight from main's Cargo.lock. That was the
-# one recurring maintenance cost of the old overlay.
+# Built with crane (./nushell-crane.nix), which compiles the third-party crates
+# in a derivation of their own. A bump that leaves Cargo.lock alone reuses it
+# and recompiles only nushell's workspace crates; one that touches the lock,
+# which a week of upstream commits nearly always does, still rebuilds it.
 #
-# Deliberately callPackage'd against *our* nixpkgs instead of consuming
+# The expression already does what this overlay used to patch onto upstream's
+# `buildRustPackage` one: no test run in the package, libgit2 and sqlite linked
+# from the system as nixpkgs' cargo setup hook would force, and
+# `passthru.shellPath`, which NixOS's users.users.<n>.shell needs to accept nu
+# as a login shell. It also passes the input's rev as NU_COMMIT_HASH, which
+# the old callPackage silently dropped, so `version` names the commit.
+#
+# Deliberately built against *our* nixpkgs and its rustc instead of consuming
 # upstream's flake at scripts/nix: that flake pins its own nixpkgs and
-# rust-overlay, and unlike rio (see the rio-upstream input) there is no nushell
-# binary cache, so matching upstream's inputs byte for byte buys nothing and
-# costs a second nixpkgs. nixpkgs' rustc clears nushell's rust-toolchain.toml
-# with room to spare — upstream targets ~2 releases behind stable on purpose —
-# so their `rustPlatform'` isn't needed either.
-inputs: _final: prev: {
-  nushell = (prev.callPackage "${inputs.nushell-src}/scripts/nix" {})
-    .overrideAttrs (old: {
-    # Carried over from the previous overlay. nushell's suite is long and
-    # some of it forks ptys, which is a poor fit for the sandbox; upstream CI
-    # gates main already. Note this has to go through overrideAttrs — the
-    # package expression ends in `...` and ignores unknown callPackage args,
-    # so passing doCheck there would be silently dropped.
-    doCheck = false;
-    # nixpkgs' cargo setup hook forces system libraries since nixpkgs 44cddf9
-    # ("Force system libs"): LIBGIT2_NO_VENDOR=1 and
-    # LIBSQLITE3_SYS_USE_PKG_CONFIG=1 make libgit2-sys and libsqlite3-sys link
-    # the system copies instead of compiling their bundled ones. Upstream's
-    # expression lists libgit2 for Darwin only and no sqlite at all; nixpkgs'
-    # own nushell package has both unconditionally.
-    buildInputs = (old.buildInputs or []) ++ [prev.libgit2 prev.sqlite];
-    # `shellPath` is a nixpkgs convention with no meaning to nushell itself,
-    # so upstream's expression has no reason to set it — but NixOS's
-    # users.users.<n>.shell rejects any package without it ("is not a shell
-    # package"), which is fatal here since nu is the login shell everywhere.
-    # It goes in passthru, not meta: lib.types.shellPackage checks
-    # `hasAttr "shellPath"` on the derivation itself, and passthru is what
-    # lands attrs there.
-    passthru = (old.passthru or {}) // {shellPath = "/bin/nu";};
-  });
+# rust-overlay, and there is no nushell binary cache, so matching upstream's
+# inputs byte for byte buys nothing and costs a second nixpkgs. nixpkgs' rustc
+# clears nushell's rust-toolchain.toml with room to spare.
+inputs: final: _prev: {
+  nushell =
+    (final.callPackage ./nushell-crane.nix {
+      craneLib = inputs.crane.mkLib final;
+      inherit (final.rustPlatform) bindgenHook;
+      nushellSrc = inputs.nushell-src.outPath;
+      commitHash = inputs.nushell-src.rev;
+    }).nushell;
 }

@@ -202,7 +202,7 @@
     # `nix flake update nushell-src` is the bump.
     #
     # Consumed as a plain source tree even though upstream ships a flake at
-    # scripts/nix: the overlay callPackages their package expression against our
+    # scripts/nix: the overlay builds it with a crane expression against our
     # own nixpkgs. See modules/shared/nushell-overlay.nix for why that beats
     # taking the flake.
     #
@@ -214,6 +214,9 @@
       url = "github:kronberger-droid/nushell/frame-painter-daily";
       flake = false;
     };
+    # Builds nushell-src in the nushell overlay, with the dependencies in a
+    # derivation of their own. Has no inputs, so there is nothing to follow.
+    crane.url = "github:ipetkov/crane";
     # Personal site (CV / blog / publications / projects). Its flake builds the
     # Zola output into a store path; the homeserver's website.nix points nginx
     # at that path. Content lives in its own repo so writing a post is not a
