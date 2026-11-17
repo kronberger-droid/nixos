@@ -24,6 +24,36 @@
   # from= keeps them to the tailnet (v4 CGNAT range and v6 ULA) and the LAN,
   # where every one of those clients lives.
   storeOnly = command: key: ''restrict,from="100.64.0.0/10,fd7a:115c:a1e0::/48,${addrs.lanSubnet}",command="${config.nix.package.out}/bin/${command}" ${key}'';
+
+  # TISS calendar mirror, see the tiss-calendar unit below.
+  hasTissUrl = builtins.pathExists "${inputs.self}/secrets/tiss-calendar-url.age";
+  # Both secrets come in through LoadCredential, so pimsync reads them from
+  # $CREDENTIALS_DIRECTORY. The `shell` blocks need their own lines; pimsync
+  # rejects them written inline.
+  tissPimsyncConf = pkgs.writeText "tiss-pimsync.conf" ''
+    status_path "/var/lib/tiss-calendar/status"
+    storage tiss {
+      type webcal
+      url {
+        shell cat "$CREDENTIALS_DIRECTORY/url"
+      }
+      collection_id tuwien
+    }
+    storage radicale {
+      type caldav
+      url http://127.0.0.1:5232/
+      username kronberger
+      password {
+        shell cat "$CREDENTIALS_DIRECTORY/password"
+      }
+    }
+    pair tiss {
+      storage_a tiss
+      storage_b radicale
+      collection tuwien
+      one_way
+    }
+  '';
 in {
   imports = [
     ./hardware-configuration.nix
@@ -533,6 +563,43 @@ in {
     # failed unit and deploy-rs to roll back. The only service here that
     # reads a secret as its own user; the rest read theirs as root.
     after = ["agenix-chown.service"];
+  };
+
+  # TISS timetable mirrored into Radicale as its own `tuwien` calendar, so the
+  # phone gets it through DAVx5 like any other and needs no ICSx5. one_way:
+  # TISS is the source, and anything edited in Radicale is overwritten on the
+  # next run. Gated on the URL secret, so this switches on with the secret
+  # and the config evaluates before it exists. That secret and the homeserver
+  # recipient on radicale-password.age come from the same `agenix -r`.
+  age.secrets.tiss-calendar-url = lib.mkIf hasTissUrl {
+    file = "${inputs.self}/secrets/tiss-calendar-url.age";
+    mode = "0400";
+  };
+  age.secrets.radicale-password = lib.mkIf hasTissUrl {
+    file = "${inputs.self}/secrets/radicale-password.age";
+    mode = "0400";
+  };
+  systemd.services.tiss-calendar = lib.mkIf hasTissUrl {
+    description = "Mirror the TISS timetable into Radicale";
+    after = ["radicale.service" "network-online.target"];
+    wants = ["network-online.target"];
+    serviceConfig = {
+      Type = "oneshot";
+      DynamicUser = true;
+      StateDirectory = "tiss-calendar";
+      LoadCredential = [
+        "url:${config.age.secrets.tiss-calendar-url.path}"
+        "password:${config.age.secrets.radicale-password.path}"
+      ];
+      ExecStart = "${pkgs.pimsync}/bin/pimsync -c ${tissPimsyncConf} sync";
+    };
+  };
+  systemd.timers.tiss-calendar = lib.mkIf hasTissUrl {
+    wantedBy = ["timers.target"];
+    timerConfig = {
+      OnCalendar = "hourly";
+      Persistent = true;
+    };
   };
 
   # Pinned, not left to system.stateVersion. The module picks the major from

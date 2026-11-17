@@ -86,8 +86,12 @@ in {
   "cache-private-key.age".publicKeys = for [homeserver];
   # bcrypt htpasswd line — only the server needs it.
   "radicale-htpasswd.age".publicKeys = for [homeserver];
-  # plaintext CardDAV password — the user machines (vdirsyncer) need it.
-  "radicale-password.age".publicKeys = for workstations;
+  # plaintext CardDAV password: the user machines (pimsync) need it, and so
+  # does the homeserver's TISS calendar mirror, which writes into Radicale.
+  "radicale-password.age".publicKeys = for (workstations ++ [homeserver]);
+  # TISS calendar feed URL with its token (Terminkalender > iCal export).
+  # Contents: the bare URL, one line. Anyone holding it can read the schedule.
+  "tiss-calendar-url.age".publicKeys = for [homeserver];
   # Cloudflare Tunnel credentials JSON, written by `cloudflared tunnel create`.
   # Contains the tunnel secret — anyone holding it can serve traffic on the
   # tunnel's hostnames. Only the server runs cloudflared.
