@@ -15,7 +15,7 @@
   hs = import ../../shared/homeserver.nix;
   serverName = hs.matrixServerName;
 
-  # tuwunel's own default. Bound on every address like miniflux and radicale,
+  # tuwunel's own default. Bound on every address like radicale and immich,
   # and opened on tailscale0 only (below), so it is reachable over the tailnet
   # and nowhere else, and does not depend on tailscaled having the address up
   # before tuwunel starts. Clients use the HTTPS front below (matrixUrl);

@@ -12,7 +12,7 @@ to turn.
 | `intelNuc` | x86_64 | Desktop |
 | `spectre` | x86_64 | Laptop |
 | `P14E` | x86_64 | Laptop |
-| `homeserver` | x86_64 | Server: DNS, RSS, photos, CalDAV, binary cache, website |
+| `homeserver` | x86_64 | Server: DNS, photos, CalDAV, binary cache, website |
 | `droid` | aarch64 | Phone, via nix-on-droid |
 | `recovery` | x86_64 | Rescue ISO, `nix build .#recovery` |
 | `edgerouter` | mips | EdgeOS router; config snapshot only, not built by Nix |
