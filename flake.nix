@@ -267,12 +267,8 @@
       })
     ];
 
-    # nushell from upstream main; see the overlay file. Droid stays on
-    # nixpkgs' release nushell instead: its aarch64 build of main is not in
-    # any cache, so every bump compiled under qemu on the homeserver for
-    # hours, while the release build comes straight from cache.nixos.org.
-    # The release (0.116.1 at the time of writing) accepts `edit_mode =
-    # "helix"`, the setting the overlay was first brought in for.
+    # nushell from upstream main; see the overlay file. Droid takes the same
+    # build through droidNushellOverlay below.
     commonOverlays = system:
       baseOverlays system
       ++ [
@@ -427,6 +423,24 @@
     # Standard system configurations
     x86System = "x86_64-linux";
     armSystem = "aarch64-linux";
+
+    # Droid's upstream-main nushell, cross-compiled from x86_64 rather than
+    # built natively for aarch64. Nothing caches an aarch64 build of main, and
+    # the native one ran under qemu on the homeserver for hours per bump; the
+    # cross build takes the toolchain and libraries from cache.nixos.org and
+    # compiles only crane's deps and nushell, at native speed. The phone
+    # cannot build at all, so it hands this x86_64 derivation to the
+    # homeserver like everything else (builders in hosts/droid).
+    droidNushellOverlay = _final: _prev: {
+      inherit
+        (import nixpkgs {
+          localSystem = x86System;
+          crossSystem = armSystem;
+          overlays = [(import ./modules/shared/nushell-overlay.nix inputs)];
+        })
+        nushell
+        ;
+    };
   in {
     nixosConfigurations = {
       # Desktop systems
@@ -482,7 +496,8 @@
         config.allowUnfree = true;
         overlays =
           [inputs.nix-on-droid.overlays.default]
-          ++ baseOverlays armSystem;
+          ++ baseOverlays armSystem
+          ++ [droidNushellOverlay];
       };
       modules = [./hosts/droid/nix-on-droid.nix];
       extraSpecialArgs = {inherit inputs;};

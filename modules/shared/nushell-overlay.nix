@@ -3,7 +3,8 @@
 # main for months before it shipped. Bumping is `nix flake update nushell-src`
 # and nothing else. Factored out here so every host gets the same build from a
 # single source of truth: mkHost hosts and the homeserver (built outside
-# mkHost) import this. Droid does not; flake.nix's commonOverlays has why.
+# mkHost) import this. Droid imports it cross-compiled; see
+# droidNushellOverlay in flake.nix.
 #
 # Built with crane (./nushell-crane.nix), which compiles the third-party crates
 # in a derivation of their own. A bump that leaves Cargo.lock alone reuses it
