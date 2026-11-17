@@ -13,18 +13,21 @@
 
   # One entry per flake the job maintains. `build` attributes are built for
   # real and get a closure diff and a CVE scan; `eval` attributes are only
-  # instantiated. droid is eval-only because its activationPackage is
-  # aarch64: homeserver has binfmt for it, but the upstream-main nushell in
-  # that config would compile under qemu for hours.
+  # instantiated. droid's activationPackage is eval-only, since building it
+  # would run its aarch64 bits under qemu. Its nushell is cross-compiled from
+  # x86_64 (droidNushellOverlay in flake.nix), so that one is built: a bump
+  # then waits in this store, and the phone's next switch only copies it.
   repos = [
     {
       name = "nixos";
-      build = map (h: "nixosConfigurations.${h}.config.system.build.toplevel") [
-        "intelNuc"
-        "spectre"
-        "P14E"
-        "homeserver"
-      ];
+      build =
+        map (h: "nixosConfigurations.${h}.config.system.build.toplevel") [
+          "intelNuc"
+          "spectre"
+          "P14E"
+          "homeserver"
+        ]
+        ++ ["nixOnDroidConfigurations.droid.pkgs.nushell"];
       eval = ["nixOnDroidConfigurations.droid.activationPackage"];
     }
     {

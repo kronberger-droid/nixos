@@ -83,8 +83,9 @@ in {
     # Tailscale app is connected) first, home LAN (192.168.2.54) as fallback;
     # nix skips an unreachable builder and tries the next. Trade-off:
     # switching needs the homeserver reachable — acceptable, since local
-    # builds cannot work at all.
-    builders = ssh://nix-remote@${homeserver.tailnet4} aarch64-linux ; ssh://nix-remote@${homeserver.lan4} aarch64-linux
+    # builds cannot work at all. x86_64-linux is listed too, since droid's
+    # nushell is cross-compiled from it (droidNushellOverlay in flake.nix).
+    builders = ssh://nix-remote@${homeserver.tailnet4} aarch64-linux,x86_64-linux ; ssh://nix-remote@${homeserver.lan4} aarch64-linux,x86_64-linux
     builders-use-substitutes = true
     max-jobs = 0
   '';
