@@ -65,6 +65,14 @@ in {
   # from coming back if the alias ever moves. It is also what nix-on-droid ships.
   user.shell = "${pkgs.bashInteractive}/bin/bash";
 
+  # Pinned to the app's Android uid/gid (`id -u` / `id -g` on the phone).
+  # nix-on-droid's default runs `id -u` in an IFD derivation, which with
+  # max-jobs = 0 is built in the homeserver's sandbox and yields 1000:100.
+  # /etc/passwd then lacks the real uid and ssh to the builder fails with
+  # "No user exists for uid". A reinstall of the app changes the uid.
+  user.uid = 10329;
+  user.gid = 10329;
+
   # Read the changelog before changing this value
   system.stateVersion = "24.05";
 
