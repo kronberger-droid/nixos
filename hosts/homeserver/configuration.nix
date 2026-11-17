@@ -24,6 +24,11 @@
   # from= keeps them to the tailnet (v4 CGNAT range and v6 ULA) and the LAN,
   # where every one of those clients lives.
   storeOnly = command: key: ''restrict,from="100.64.0.0/10,fd7a:115c:a1e0::/48,${addrs.lanSubnet}",command="${config.nix.package.out}/bin/${command}" ${key}'';
+  # Nothing Phone (nix-on-droid). Generated on the phone 2026-10-23, lives
+  # in ~/.ssh/id_ed25519 there without a passphrase, since the phone's
+  # `builders` use it unattended. Store-only on nix-remote, a plain login
+  # on the `droid` account.
+  phoneKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ0CUHZDE++aHyF/eKKYPTxABX1h6KxImbwMf+Qrlg0K kronberger-droid";
 
   # TISS calendar mirror, see the tiss-calendar unit below.
   hasTissUrl = builtins.pathExists "${inputs.self}/secrets/tiss-calendar-url.age";
@@ -256,9 +261,10 @@ in {
     openssh.authorizedKeys.keys = rootKeys;
   };
   # Only interactive login shells: a plain `bash` started from nu stays bash,
-  # and root's `sudo -i` and the other accounts are left alone.
+  # and root's `sudo -i` and the accounts other than ${username} and droid
+  # are left alone.
   programs.bash.interactiveShellInit = ''
-    if shopt -q login_shell && [[ $(id -un) == ${username} ]]; then
+    if shopt -q login_shell && [[ $(id -un) == ${username} || $(id -un) == droid ]]; then
       exec ${pkgs.nushell}/bin/nu --login
     fi
   '';
@@ -279,11 +285,10 @@ in {
       # nix-daemon connects as root with /etc/ssh/ssh_host_ed25519_key, over
       # ssh-ng, i.e. `nix-daemon --stdio` on this side.
       ++ map (storeOnly "nix-daemon --stdio") [hostKeys.intelNuc hostKeys.spectre hostKeys.P14E]
-      # Nothing Phone (Termux). Only ever needs the store, so it is not in the
-      # shared key set any more. Generated on the phone 2026-10-23, lives in
-      # ~/.ssh/id_ed25519 there. Its `builders` use the legacy ssh:// store,
+      # The phone is not in the shared key set: those keys reach the
+      # root-capable accounts. Its `builders` use the legacy ssh:// store,
       # which runs `nix-store --serve --write` here.
-      ++ [(storeOnly "nix-store --serve --write" "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ0CUHZDE++aHyF/eKKYPTxABX1h6KxImbwMf+Qrlg0K kronberger-droid")];
+      ++ [(storeOnly "nix-store --serve --write" phoneKey)];
   };
   # Trusted users are always allowed to connect to the daemon, whatever
   # allowed-users says, so this one line is the whole grant.
@@ -301,6 +306,18 @@ in {
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDkdsU9B7+sb5ISQy9RjykK0u04VdYTFYhnSHozpBqYl dietpi"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDZDyijah9B71tRnhZtLxLFuxJ9raP3RdwMSYihxECfA dietpi"
     ];
+  };
+
+  # Login for the phone, whose key has no passphrase and so must not reach
+  # an account with sudo. Same nu setup as ${username} (home-manager in
+  # users/kronberger-server.nix), and sudo for the Remote Control window
+  # only (extraRules below). `claude-sandbox`, the machinectl shell into
+  # the sandbox, stays with ${username}: its polkit rule names that user.
+  users.users.droid = {
+    isNormalUser = true;
+    createHome = true;
+    shell = pkgs.bash;
+    openssh.authorizedKeys.keys = [phoneKey];
   };
 
   # Packages
@@ -352,7 +369,7 @@ in {
   # modules/system/security/hardening.nix (imported above). Only the
   # host-specific additions live here: the extra accounts sshd may admit.
   # ${username} is already in the list from the shared module.
-  services.openssh.settings.AllowUsers = ["nix-remote" "wiesinger"];
+  services.openssh.settings.AllowUsers = ["nix-remote" "wiesinger" "droid"];
 
   # The Claude Code sandbox, the same account the workstations have. It is
   # deliberately not in AllowUsers above: the way in is `ssh -t homeserver
@@ -629,6 +646,18 @@ in {
             options = ["NOPASSWD"];
           }
         ];
+      }
+      # The phone opens and closes the Remote Control window and nothing
+      # else. Both scripts re-exec through sudo as "$0", which is this path
+      # when they are called by name.
+      {
+        users = ["droid"];
+        commands =
+          map (c: {
+            command = "/run/current-system/sw/bin/${c}";
+            options = ["NOPASSWD"];
+          })
+          ["claude-sandbox-open" "claude-sandbox-close"];
       }
     ];
   };

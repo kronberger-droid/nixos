@@ -81,6 +81,21 @@ in {
     ./tools.nix
   ];
 
+  # `ssh homeserver` logs into the homeserver's `droid` account, a plain
+  # user with sudo for the Remote Control window only. The tailnet IP,
+  # since MagicDNS does not resolve inside proot. Same key as the builders,
+  # which name nix-remote@<ip> themselves and so never match this block.
+  programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false;
+    settings.homeserver = {
+      HostName = (import ../../modules/shared/homeserver.nix).tailnet4;
+      User = "droid";
+      IdentityFile = "~/.ssh/id_ed25519";
+      IdentitiesOnly = "yes";
+    };
+  };
+
   # The repo isn't checked out at a fixed path on Android, so copy helix's
   # editable config from the store instead of out-of-store symlinking.
   helix.liveConfigPath = null;
