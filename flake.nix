@@ -390,9 +390,18 @@
                     # (~25 min). The substituter was dropped from nix-caches.nix
                     # along with this; restore both together if checks ever go
                     # back on.
+                    #
+                    # dontCargoUseSystemLibs: Rio's nixpkgs now has the cargo
+                    # setup hook export RUSTONIG_SYSTEM_LIBONIG=1, and pkgRio.nix
+                    # has no oniguruma, so onig_sys fails. This keeps the
+                    # vendored onig Rio always built with. Drop it once upstream
+                    # lists oniguruma in pkgRio.nix.
                     rio =
                       inputs.rio-upstream.packages.${system}.default.overrideAttrs
-                      (_: {doCheck = false;});
+                      (_: {
+                        doCheck = false;
+                        dontCargoUseSystemLibs = true;
+                      });
                     # bitwarden-desktop is stock again. Until 2026.8.0 it carried
                     # a doCheck = false (a failing desktop_native cargo test) and
                     # a wrapper hiding the GNOME token in XDG_CURRENT_DESKTOP so
