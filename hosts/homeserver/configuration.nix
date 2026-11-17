@@ -74,13 +74,6 @@ in {
   ];
 
   # Secrets (homeserver-specific — shared agenix.nix has desktop-only secrets)
-  age.secrets.miniflux-credentials = {
-    file = "${inputs.self}/secrets/miniflux-credentials.age";
-    path = "/run/secrets/miniflux-credentials";
-    mode = "0400";
-    owner = "root";
-  };
-
   age.secrets.cache-private-key = {
     file = "${inputs.self}/secrets/cache-private-key.age";
     path = "/run/secrets/cache-private-key";
@@ -189,8 +182,8 @@ in {
       allowPing = true;
       # LAN-wide: SSH, DNS, and syncthing (22000/21027, appended by
       # modules/system/services/syncthing.nix). Everything else on this box
-      # speaks plain HTTP (Radicale is Basic auth, immich and miniflux are
-      # password logins, harmonia serves the store) and is only meant to be
+      # speaks plain HTTP (Radicale is Basic auth, immich is a
+      # password login, harmonia serves the store) and is only meant to be
       # reached over the tailnet, so it is opened on tailscale0 alone, the
       # same way modules/system/services/webdav.nix scopes port 8081.
       # Tailscale's subnet route still lets tailnet peers reach the LAN, not
@@ -203,7 +196,6 @@ in {
       allowedUDPPorts = [53];
       interfaces."tailscale0".allowedTCPPorts = [
         5001 # harmonia binary cache
-        8070 # miniflux
         2283 # immich
         5232 # radicale
       ];
@@ -500,12 +492,11 @@ in {
       ];
 
       # Local names for the services on this box. They answer with the
-      # tailnet address, not the LAN one: the ports behind them (8070, 2283)
-      # are opened on tailscale0 only, so a LAN answer would resolve and then
+      # tailnet address, not the LAN one: the port behind them (2283) is
+      # opened on tailscale0 only, so a LAN answer would resolve and then
       # hang on a dropped SYN. A client without Tailscale cannot reach these
       # services either way.
       customDNS.mapping = {
-        "rss.home.lan" = addrs.tailnet4;
         "photos.home.lan" = addrs.tailnet4;
       };
 
@@ -604,22 +595,9 @@ in {
 
   # Pinned, not left to system.stateVersion. The module picks the major from
   # stateVersion (17 at 25.11, 18 at 26.11) and the data dir is per major, so
-  # bumping stateVersion alone would start miniflux and immich on an empty
+  # bumping stateVersion alone would start immich on an empty
   # /var/lib/postgresql/18. A major upgrade is dump, bump this, restore.
   services.postgresql.package = pkgs.postgresql_17;
-
-  # RSS reader — backed by PostgreSQL (auto-provisioned by the module)
-  services.miniflux = {
-    enable = true;
-    config = {
-      LISTEN_ADDR = "0.0.0.0:8070";
-      BASE_URL = "http://rss.home.lan:8070";
-      POLLING_FREQUENCY = "15";
-      CLEANUP_ARCHIVE_UNREAD_DAYS = "-1";
-      CLEANUP_ARCHIVE_READ_DAYS = "60";
-    };
-    adminCredentialsFile = "/run/secrets/miniflux-credentials";
-  };
 
   # Photo/video backup — Postgres (vectorchord) + Redis auto-provisioned by the module.
   # Local unix-socket DB auth needs no secrets file (User=immich peers with role "immich").

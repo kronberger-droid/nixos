@@ -82,7 +82,6 @@ in {
   # workstations; 17d1aec narrowed them to the readers plus editor). After
   # editing this list the .age files must be re-encrypted (`agenix -r`)
   # where a current recipient's private key lives.
-  "miniflux-credentials.age".publicKeys = for [homeserver];
   "cache-private-key.age".publicKeys = for [homeserver];
   # bcrypt htpasswd line — only the server needs it.
   "radicale-htpasswd.age".publicKeys = for [homeserver];
