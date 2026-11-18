@@ -33,6 +33,11 @@ in {
   # HackMD API token (hackmd.io > Settings > API). Contents: the bare token,
   # one line. Read from the file on demand, not exported into the environment.
   "hackmd-token.age".publicKeys = for workstations;
+  # Anthropic API key for Pi, from the console org that gets the monthly API
+  # credit. Contents: the bare key, one line. Pi reads it through a `!cat`
+  # entry in ~/.pi/agent/auth.json; never exported, or Claude Code would bill
+  # the API instead of the subscription.
+  "anthropic-api-key.age".publicKeys = for workstations;
   # GMX mailbox login for IMAP (Claude drafts into the Drafts folder). Contents,
   # two lines: the address, then the password (an app password if 2FA is on).
   "gmx-mail-credentials.age".publicKeys = for workstations;

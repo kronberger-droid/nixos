@@ -36,6 +36,7 @@
     "radicale-password" # plaintext CardDAV password, read by vdirsyncer
     "spotify-password"
     "sftp-password" # single-line SFTP password, read by the sftp-mount nushell helper
+    "anthropic-api-key" # read by Pi via `!cat` in ~/.pi/agent/auth.json, never exported
   ];
 in {
   # sshd itself (which agenix relies on for the host key) is configured in
