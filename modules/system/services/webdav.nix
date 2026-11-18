@@ -1,4 +1,8 @@
-{...}: let
+{
+  config,
+  lib,
+  ...
+}: let
   # hacdias/webdav's default. Nothing else on this host claims it.
   port = 6065;
 
@@ -102,4 +106,28 @@ in {
   # needs it is on the tailnet anyway, and the traffic is already WireGuard
   # encrypted, which is why plain HTTP is fine on the Zotero side.
   networking.firewall.interfaces."tailscale0".allowedTCPPorts = [port];
+
+  # HTTPS front for Zotero on Android, which refuses plain HTTP to anything
+  # but .local/.home.arpa names. Same pattern as tailscale-serve-matrix in
+  # services/matrix.nix; 443 is tuwunel's, so this takes 8443. A separate port
+  # rather than --set-path on 443: serve strips the mount prefix before
+  # proxying, and the hrefs in PROPFIND replies would then miss it. Desktop
+  # clients can stay on the plain tailnet-IP URL above.
+  systemd.services.tailscale-serve-webdav = let
+    ts = lib.getExe config.services.tailscale.package;
+  in {
+    description = "HTTPS front for webdav on the tailnet";
+    after = ["tailscaled.service" "webdav.service"];
+    wants = ["tailscaled.service"];
+    wantedBy = ["multi-user.target"];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${ts} serve --bg --https=8443 http://127.0.0.1:${toString port}";
+      ExecStop = "${ts} serve --https=8443 off";
+      # At boot tailscaled may not be logged in yet.
+      Restart = "on-failure";
+      RestartSec = 10;
+    };
+  };
 }
