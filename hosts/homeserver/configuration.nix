@@ -319,6 +319,10 @@ in {
     shell = pkgs.bash;
     openssh.authorizedKeys.keys = [phoneKey];
   };
+  # home-manager activates as droid and talks to nix-daemon for its profile;
+  # outside allowed-users the daemon resets the connection and the switch
+  # rolls back. Allowed, not trusted: no substituters or settings of its own.
+  nix.settings.allowed-users = ["droid"];
 
   # Packages
   environment.systemPackages = with pkgs; [
