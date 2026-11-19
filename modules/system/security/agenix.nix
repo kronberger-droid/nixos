@@ -90,6 +90,11 @@ in {
     // lib.optionalAttrs (builtins.pathExists "${inputs.self}/secrets/hackmd-token.age") {
       hackmd-token = mkSecret username "hackmd-token";
     }
+    # TU coLAB personal access token, one line, read by the colab MCP server
+    # (users/kronberger.nix). Gated the same way.
+    // lib.optionalAttrs (builtins.pathExists "${inputs.self}/secrets/colab-token.age") {
+      colab-token = mkSecret username "colab-token";
+    }
     # GMX mailbox login, two lines (address, then password), read by the
     # IMAP draft helper. Gated on the .age file like hackmd-token, so the
     # module lands before the secret is created.
