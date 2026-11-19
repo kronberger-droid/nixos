@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   inputs,
@@ -24,6 +25,31 @@ in {
         # it is imported by path rather than through apps/default.nix.
         ../apps/claude-settings.nix
       ];
+
+      # TU coLAB (Confluence Data Center 10.2) for Claude Code, read-only.
+      # Here rather than in claude-settings.nix: the token is this user's,
+      # and the sandbox account and the homeserver must not get the server.
+      #
+      # The token never enters ~/.claude.json: mcp-atlassian runs
+      # CONFLUENCE_PERSONAL_TOKEN_COMMAND at start and reads the agenix file
+      # itself. READ_ONLY_MODE is the server's promise, not colab's: a PAT
+      # carries all of its owner's rights, so the token's expiry is the
+      # real limit.
+      #
+      # Not in nixpkgs, hence uvx with a pinned version, fetched from PyPI
+      # on first start. uv's own Python downloads are dynamically linked
+      # and do not run on NixOS, so it gets nixpkgs' interpreter instead.
+      claude.mcpServers.colab = lib.mkIf (config.age.secrets ? colab-token) {
+        command = "${pkgs.uv}/bin/uvx";
+        args = ["mcp-atlassian@0.24.6"];
+        env = {
+          CONFLUENCE_URL = "https://colab.tuwien.ac.at";
+          CONFLUENCE_PERSONAL_TOKEN_COMMAND = "cat ${config.age.secrets.colab-token.path}";
+          READ_ONLY_MODE = "true";
+          UV_PYTHON = "${pkgs.python3}/bin/python3";
+          UV_PYTHON_DOWNLOADS = "never";
+        };
+      };
 
       # The one terminal that gets installed and configured (terminals/*.nix
       # are gated on this).

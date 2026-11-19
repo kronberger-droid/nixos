@@ -33,6 +33,10 @@ in {
   # HackMD API token (hackmd.io > Settings > API). Contents: the bare token,
   # one line. Read from the file on demand, not exported into the environment.
   "hackmd-token.age".publicKeys = for workstations;
+  # TU coLAB (Confluence Data Center) personal access token, from colab's
+  # profile > Settings > Personal Access Tokens. Contents: the bare token,
+  # one line. Read by the colab MCP server at its start (users/kronberger.nix).
+  "colab-token.age".publicKeys = for workstations;
   # Anthropic API key for Pi, from the console org that gets the monthly API
   # credit. Contents: the bare key, one line. Pi reads it through a `!cat`
   # entry in ~/.pi/agent/auth.json; never exported, or Claude Code would bill
