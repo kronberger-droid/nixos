@@ -40,9 +40,16 @@
 #     `claude-sandbox` from the primary user's session, which is a
 #     `machinectl shell` behind a polkit rule scoped to exactly that pair.
 #
+# The other direction is closed as well: the primary user has no Claude Code
+# of his own. `claude` in his profile is claude-enter.nu, which opens the
+# session in this account, and the real binary is installed for the sandbox
+# account alone (home-manager/users/claude.nix). Do not add claude-code-bin
+# to a host's systemPackages or to the primary user's home: either puts the
+# real one back on his PATH.
+#
 # Code comes back out the way a contributor's fork would. The agent's
-# checkouts mirror his ~/Projects under /home/claude/Projects (`cl`, in
-# shell/nushell/cl.nu, maps one to the other and clones on demand). Martin
+# checkouts mirror his ~/Projects under /home/claude/Projects (`claude`, i.e.
+# claude-enter.nu, maps one to the other and clones on demand). Martin
 # adds /home/claude/Projects/<path> as a remote and fetches from it with
 # `git fetch-sandbox` (home-manager/shell/git.nix; deliberately no global
 # safe.directory), reviews, and pushes with his own key. The agent's only
@@ -73,12 +80,31 @@
   # so anything socket-activated has nowhere to live. TERM is forwarded by
   # hand; machinectl starts from a clean environment and the shell would
   # otherwise come up as a dumb terminal.
+  #
+  # Quiet when handed a command: machinectl's "Connected to the local host"
+  # and "Connection terminated" lines belong around a shell somebody types
+  # into, not around the output of one program.
   launcher = pkgs.writeShellScriptBin "claude-sandbox" ''
     set -eu
     args=(--setenv=TERM="''${TERM:-xterm-256color}")
     [ -n "''${COLORTERM:-}" ] && args+=(--setenv=COLORTERM="$COLORTERM")
+    [ $# -gt 0 ] && args+=(--quiet)
     exec ${pkgs.systemd}/bin/machinectl shell "''${args[@]}" ${user}@ "$@"
   '';
+
+  # `claude` for the primary user: a real executable rather than a shell
+  # alias, so keybinds, `sh -c` and scripts get the sandbox too. The script
+  # says where a session opens.
+  enter = pkgs.replaceVarsWith {
+    name = "claude";
+    src = ./claude-enter.nu;
+    replacements = {
+      nu = pkgs.nushell;
+      claudeSandbox = lib.getExe launcher;
+    };
+    dir = "bin";
+    isExecutable = true;
+  };
 in {
   imports = [../../home-manager/users/claude.nix];
 
@@ -120,7 +146,10 @@ in {
         description = "Claude Code sandbox";
         shell = pkgs.nushell;
       };
-      users.users.${username}.extraGroups = [user];
+      users.users.${username} = {
+        extraGroups = [user];
+        packages = [enter];
+      };
 
       # nix-settings.nix limits the daemon to root and the primary user;
       # without this line every `nix build` in the sandbox is refused.

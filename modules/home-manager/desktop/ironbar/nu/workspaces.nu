@@ -80,9 +80,17 @@ def children [pid: int]: nothing -> list<int> {
 
 # argv with the program by name rather than store path, which a rebuild
 # would leave dangling. Nix wrappers exec `.foo-wrapped`; foo is the name.
+#
+# A script's argv starts with its interpreter (`nu -n /…/bin/claude …`),
+# while the kernel names the process after the script itself. So where
+# /proc/<pid>/comm matches a later argument, argv starts there: `claude`,
+# the sandbox launcher, is such a script.
 def cmdline [pid: int]: nothing -> list<string> {
-  let argv = (open --raw $"/proc/($pid)/cmdline" | split row (char nul) | where $it != "")
-  if ($argv | is-empty) { return [] }
+  let raw = (open --raw $"/proc/($pid)/cmdline" | split row (char nul) | where $it != "")
+  if ($raw | is-empty) { return [] }
+  let comm = (try { open --raw $"/proc/($pid)/comm" | str trim } catch { "" })
+  let script = ($raw | enumerate | skip 1 | where {|a| ($a.item | path basename) == $comm } | get 0?.index)
+  let argv = (if $script == null { $raw } else { $raw | skip $script })
   $argv | update 0 {|a| $a | path basename | str replace -r '^\.(.*)-wrapped$' '$1' }
 }
 
