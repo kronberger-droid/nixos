@@ -89,7 +89,29 @@
     args=(--setenv=TERM="''${TERM:-xterm-256color}")
     [ -n "''${COLORTERM:-}" ] && args+=(--setenv=COLORTERM="$COLORTERM")
     [ $# -gt 0 ] && args+=(--quiet)
-    exec ${pkgs.systemd}/bin/machinectl shell "''${args[@]}" ${user}@ "$@"
+    exec ${pkgs.systemd}/bin/machinectl shell "''${args[@]}" ${user}@ ${session} "$@"
+  '';
+
+  # What the launcher starts on the far side: the given command, or a login
+  # shell, on a pty of the account's own.
+  #
+  # machined passes the shell its pty as file descriptors, and systemd only
+  # chowns a terminal it opened itself through StandardInput=tty
+  # (exec-invoke.c). The session's pty therefore stays root:tty 620. The
+  # inherited descriptors work, but opening /dev/stdin, /dev/stdout or
+  # /dev/stderr by path is refused, and home-manager's direnv hook does that
+  # on every prompt (`e> /dev/stderr`). `script` allocates a second pty as
+  # this user and relays bytes and window size, so nothing needs to know.
+  #
+  # `script -c` runs its command through $SHELL, which here is nu; it gets
+  # bash for the one line that restores SHELL and execs the real argv.
+  session = pkgs.writeShellScript "claude-sandbox-session" ''
+    shell="''${SHELL:-/run/current-system/sw/bin/nu}"
+    [ $# -gt 0 ] || set -- "$shell" -l
+    printf -v cmd '%q ' "$@"
+    printf -v restore 'SHELL=%q' "$shell"
+    SHELL=${pkgs.runtimeShell} exec ${pkgs.util-linux}/bin/script \
+      --quiet --return --command "$restore exec $cmd" /dev/null
   '';
 
   # `claude` for the primary user: a real executable rather than a shell
