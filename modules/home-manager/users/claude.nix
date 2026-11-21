@@ -28,11 +28,14 @@
       username = "claude";
       homeDirectory = "/home/claude";
       stateVersion = "26.11";
-      # ai.nix's set minus inpdf: claude itself, plus node for the
-      # npx-launched MCP servers the enabled plugins bring along.
+      # The one account with Claude Code itself (the primary user's `claude`
+      # is the launcher that lands here), plus node for the npx-launched MCP
+      # servers the enabled plugins bring along. typst for `claude-math`,
+      # whose wrapper puts it on a PATH that does not cross the boundary.
       packages = with pkgs; [
         claude-code-bin
         nodejs
+        typst
       ];
     };
 

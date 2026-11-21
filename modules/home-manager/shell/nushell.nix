@@ -30,7 +30,6 @@ in {
     gitui
   ];
 
-  xdg.configFile."nushell/cl.nu".source = ./nushell/cl.nu;
   xdg.configFile."nushell/fetch.nu".source = ./nushell/fetch.nu;
   xdg.configFile."nushell/heat.nu".source = ./nushell/heat.nu;
 
@@ -38,11 +37,17 @@ in {
   xdg.configFile."nushell/utilities.nu".text = ''
     # Utility functions for various tasks
 
-    # Quick Q&A using Claude Haiku — pipe a question or pass directly
+    # Quick Q&A using Claude Haiku — pipe a question or pass directly.
+    # The question travels as an argument: for the primary user `claude`
+    # crosses into the sandbox through a pty (security/claude-enter.nu),
+    # which is no place to send a pipe.
     def ask [question?: string] {
         let q = if ($question | is-not-empty) { $question } else { $in }
-        $q | claude -p --model haiku --system-prompt "Answer in 1-3 concise sentences. Be direct, no preamble."
+        claude -p --model haiku --system-prompt "Answer in 1-3 concise sentences. Be direct, no preamble." $q
     }
+
+    # Kept from when `cl` was the sandbox launcher and `claude` ran here.
+    alias cl = claude
 
     # Open helix in the Obsidian vault. `cd` is scoped to this function, so
     # your shell's working dir is unchanged after you quit helix.
@@ -253,18 +258,11 @@ in {
           }
       }
 
-      # Build a claude terminal command string. With a sandbox checkout of
-      # this repo (cl.nu), the pane runs `cl`, which crosses over and picks
-      # between several matches itself; no local dev shell around it, since
-      # the sandbox builds its own. Otherwise claude runs here.
-      def claudeCmd [cwd: string, dev_env: record] {
-          if (cl-matches | is-not-empty) {
-              termIn $cwd "nu -l -c cl"
-          } else if $dev_env.has_direnv or not $dev_env.has_flake {
-              termIn $cwd "sh -c 'exec claude'"
-          } else {
-              termIn $cwd $"nix develop ($dev_env.dev_shell) -c sh -c 'exec claude'"
-          }
+      # Build a claude terminal command string. No local dev shell around
+      # it: `claude` crosses into the sandbox (security/claude-enter.nu),
+      # which finds its checkout of this repo and builds its own.
+      def claudeCmd [cwd: string] {
+          termIn $cwd "claude"
       }
 
       # Niri development layout setup
@@ -302,7 +300,7 @@ in {
               ^niri msg action focus-column-right
 
               # Claude joins the original terminal's tabbed column, helix stays visible
-              ^niri msg action spawn -- sh -c (claudeCmd $cwd $dev_env)
+              ^niri msg action spawn -- sh -c (claudeCmd $cwd)
               sleep 500ms
               ^niri msg action consume-or-expel-window-left
               ^niri msg action focus-window-up
@@ -315,7 +313,7 @@ in {
               ^niri msg action consume-or-expel-window-left
 
               # Spawn Claude terminal as the right column
-              ^niri msg action spawn -- sh -c (claudeCmd $cwd $dev_env)
+              ^niri msg action spawn -- sh -c (claudeCmd $cwd)
               sleep 500ms
 
               # Focus back to left column, top window (original terminal for helix)
@@ -566,11 +564,7 @@ in {
 
     extraConfig = lib.mkMerge [
       (
-        # cl.nu first: development.nu calls `cl-matches`, and nushell binds
-        # command names at parse time, so a def sourced later would be taken
-        # for an external command.
         ''
-          source ~/.config/nushell/cl.nu
           source ~/.config/nushell/fetch.nu
           source ~/.config/nushell/heat.nu
         ''
