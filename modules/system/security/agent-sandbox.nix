@@ -21,7 +21,7 @@
 # What the account gets, and does not get:
 #   - its own home at 750, group `claude`, with the primary user in that
 #     group: Martin reads the agent's tree, the agent never reads his (the
-#     primary home stays 700).
+#     primary home stays closed to everyone but him).
 #   - read-only access to ~/Projects and ~/.config/nixos through ACLs
 #     (claude-sandbox-read-acl below); everything else in the primary home
 #     stays closed, and nothing in those trees is writable.
@@ -40,9 +40,16 @@
 #     `claude-sandbox` from the primary user's session, which is a
 #     `machinectl shell` behind a polkit rule scoped to exactly that pair.
 #
+# The other direction is closed as well: the primary user has no Claude Code
+# of his own. `claude` in his profile is claude-enter.nu, which opens the
+# session in this account, and the real binary is installed for the sandbox
+# account alone (home-manager/users/claude.nix). Do not add claude-code-bin
+# to a host's systemPackages or to the primary user's home: either puts the
+# real one back on his PATH.
+#
 # Code comes back out the way a contributor's fork would. The agent's
-# checkouts mirror his ~/Projects under /home/claude/Projects (`cl`, in
-# shell/nushell/cl.nu, maps one to the other and clones on demand). Martin
+# checkouts mirror his ~/Projects under /home/claude/Projects (`claude`, i.e.
+# claude-enter.nu, maps one to the other and clones on demand). Martin
 # adds /home/claude/Projects/<path> as a remote and fetches from it with
 # `git fetch-sandbox` (home-manager/shell/git.nix; deliberately no global
 # safe.directory), reviews, and pushes with his own key. The agent's only
@@ -73,12 +80,53 @@
   # so anything socket-activated has nowhere to live. TERM is forwarded by
   # hand; machinectl starts from a clean environment and the shell would
   # otherwise come up as a dumb terminal.
+  #
+  # Quiet when handed a command: machinectl's "Connected to the local host"
+  # and "Connection terminated" lines belong around a shell somebody types
+  # into, not around the output of one program.
   launcher = pkgs.writeShellScriptBin "claude-sandbox" ''
     set -eu
     args=(--setenv=TERM="''${TERM:-xterm-256color}")
     [ -n "''${COLORTERM:-}" ] && args+=(--setenv=COLORTERM="$COLORTERM")
-    exec ${pkgs.systemd}/bin/machinectl shell "''${args[@]}" ${user}@ "$@"
+    [ $# -gt 0 ] && args+=(--quiet)
+    exec ${pkgs.systemd}/bin/machinectl shell "''${args[@]}" ${user}@ ${session} "$@"
   '';
+
+  # What the launcher starts on the far side: the given command, or a login
+  # shell, on a pty of the account's own.
+  #
+  # machined passes the shell its pty as file descriptors, and systemd only
+  # chowns a terminal it opened itself through StandardInput=tty
+  # (exec-invoke.c). The session's pty therefore stays root:tty 620. The
+  # inherited descriptors work, but opening /dev/stdin, /dev/stdout or
+  # /dev/stderr by path is refused, and home-manager's direnv hook does that
+  # on every prompt (`e> /dev/stderr`). `script` allocates a second pty as
+  # this user and relays bytes and window size, so nothing needs to know.
+  #
+  # `script -c` runs its command through $SHELL, which here is nu; it gets
+  # bash for the one line that restores SHELL and execs the real argv.
+  session = pkgs.writeShellScript "claude-sandbox-session" ''
+    shell="''${SHELL:-/run/current-system/sw/bin/nu}"
+    [ $# -gt 0 ] || set -- "$shell" -l
+    printf -v cmd '%q ' "$@"
+    printf -v restore 'SHELL=%q' "$shell"
+    SHELL=${pkgs.runtimeShell} exec ${pkgs.util-linux}/bin/script \
+      --quiet --return --command "$restore exec $cmd" /dev/null
+  '';
+
+  # `claude` for the primary user: a real executable rather than a shell
+  # alias, so keybinds, `sh -c` and scripts get the sandbox too. The script
+  # says where a session opens.
+  enter = pkgs.replaceVarsWith {
+    name = "claude";
+    src = ./claude-enter.nu;
+    replacements = {
+      nu = pkgs.nushell;
+      claudeSandbox = lib.getExe launcher;
+    };
+    dir = "bin";
+    isExecutable = true;
+  };
 in {
   imports = [../../home-manager/users/claude.nix];
 
@@ -120,7 +168,13 @@ in {
         description = "Claude Code sandbox";
         shell = pkgs.nushell;
       };
-      users.users.${username}.extraGroups = [user];
+      users.users.${username} = {
+        extraGroups = [user];
+        # Not 700: see claude-sandbox-read-acl below, which this mode keeps
+        # working across switches.
+        homeMode = "710";
+        packages = [enter];
+      };
 
       # nix-settings.nix limits the daemon to root and the primary user;
       # without this line every `nix build` in the sandbox is refused.
@@ -201,7 +255,7 @@ in {
       };
 
       # A bind mount resolves permissions on the vault's own inodes, never on
-      # /home/<primary> above it, so the 700 there stays intact while the
+      # /home/<primary> above it, so the home stays closed while the
       # vault inside is reachable. nofail: on a host where syncthing has not
       # delivered the vault yet the boot must not wait on it.
       # slave, not the default: `/` is a shared mount, so a plain bind joins
@@ -273,11 +327,19 @@ in {
       # (.git/hooks, .envrc, build.rs, a flake) later runs as him. Writes
       # stay in ~/src, fetched from like a contributor's fork.
       #
-      # The primary home keeps mode 700; the one entry added to it is
-      # traverse-only (--x) for this group, which lets a path through but
-      # does not list the home or open anything in it that has no ACL of its
-      # own. The default entries make files created later readable too.
-      # Hosts without one of these directories skip it.
+      # The one entry added to the primary home is traverse-only (--x) for
+      # this group, which lets a path through but does not list the home or
+      # open anything in it that has no ACL of its own. The default entries
+      # make files created later readable too. Hosts without one of these
+      # directories skip it.
+      #
+      # The home's mode is 710 for that entry's sake (homeMode above), and
+      # its owning group is pinned to nothing here. On a directory with an
+      # ACL the mode's group bits are the mask, not the owning group's
+      # rights, and userborn's tmpfiles rule chmods the home to homeMode on
+      # every switch. At 700 that set the mask to --- and blanked this
+      # entry until the next boot. At 710 the mask it writes is --x, and
+      # `group::---` keeps `users` out all the same.
       systemd.services.claude-sandbox-read-acl = let
         primaryHome = config.users.users.${username}.home;
         trees = ["${primaryHome}/Projects" "${primaryHome}/.config/nixos"];
@@ -292,7 +354,7 @@ in {
           setfacl=${pkgs.acl}/bin/setfacl
           ${lib.concatMapStringsSep "\n" (t: ''
               if [ -d ${lib.escapeShellArg t} ]; then
-                $setfacl -m g:${user}:--x ${lib.escapeShellArg primaryHome}
+                $setfacl -m g::---,g:${user}:--x ${lib.escapeShellArg primaryHome}
                 $setfacl -m g:${user}:--x ${lib.escapeShellArg (builtins.dirOf t)}
                 $setfacl -R -m g:${user}:rX,d:g:${user}:rX ${lib.escapeShellArg t}
               fi
