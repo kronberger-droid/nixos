@@ -105,13 +105,22 @@
   #
   # `script -c` runs its command through $SHELL, which here is nu; it gets
   # bash for the one line that restores SHELL and execs the real argv.
+  #
+  # `script` runs as a child of this wrapper, never exec'd in its place.
+  # systemd forks its (sd-pam) helper as a child of the session's main
+  # process, and util-linux's `script` (2.42.4, ul_pty_wait_for_child)
+  # reaps with `waitpid(-1, WNOHANG)` in a loop that only ends on an
+  # error. With a child of its own that it never started still alive, that
+  # returns 0 forever: `script` spins after its command has exited and the
+  # caller's terminal never comes back.
   session = pkgs.writeShellScript "claude-sandbox-session" ''
     shell="''${SHELL:-/run/current-system/sw/bin/nu}"
     [ $# -gt 0 ] || set -- "$shell" -l
     printf -v cmd '%q ' "$@"
     printf -v restore 'SHELL=%q' "$shell"
-    SHELL=${pkgs.runtimeShell} exec ${pkgs.util-linux}/bin/script \
+    SHELL=${pkgs.runtimeShell} ${pkgs.util-linux}/bin/script \
       --quiet --return --command "$restore exec $cmd" /dev/null
+    exit $?
   '';
 
   # `claude` for the primary user: a real executable rather than a shell
