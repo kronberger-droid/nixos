@@ -49,10 +49,10 @@
 #
 # Code comes back out the way a contributor's fork would. The agent's
 # checkouts mirror his ~/Projects under /home/claude/Projects (`claude`, i.e.
-# claude-enter.nu, maps one to the other and clones on demand). Martin
-# adds /home/claude/Projects/<path> as a remote and fetches from it with
-# `git fetch-sandbox` (home-manager/shell/git.nix; deliberately no global
-# safe.directory), reviews, and pushes with his own key. The agent's only
+# claude-enter.nu, maps one to the other, clones on demand and keeps a
+# `sandbox` remote in his repo pointed at the checkout). Martin fetches from
+# it with `git fetch-sandbox` (home-manager/shell/git.nix; deliberately no
+# global safe.directory), reviews, and pushes with his own key. The agent's only
 # way into the primary home is the read-only ACLs above.
 {
   config,
