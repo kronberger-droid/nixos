@@ -333,10 +333,9 @@ in {
     zellij
     docker-compose
     lm_sensors
-    # Claude Code, from the sadjow/claude-code-nix flake input rather than
-    # nixpkgs — same build every other host gets, and nix-caches.nix already
-    # trusts claude-code.cachix.org so it comes down prebuilt.
-    claude-code-bin
+    # No claude-code-bin: it would put the real binary on every account's
+    # PATH. The sandbox account brings its own (users/claude.nix), and
+    # ${username}'s `claude` is the launcher from agent-sandbox.nix.
     # Rust toolchain for building/testing crates (e.g. the nushell fork)
     # directly on the server. nixpkgs' cargo/rustc — matches the compiler
     # nixpkgs' own nushell build uses. gcc + pkg-config + openssl cover the
