@@ -39,6 +39,9 @@
 
 const SANDBOX = "@claudeSandbox@"
 const MIRROR = "/home/claude/Projects"
+# The remote this user's repos know their sandbox checkout by; `git
+# fetch-sandbox` (git.nix) defaults to the same name.
+const REMOTE = "sandbox"
 # As the sandbox account sees it.
 const SANDBOX_NU = "/run/current-system/sw/bin/nu"
 # Environment a wrapper such as `claude-math` sets for Claude Code and that
@@ -145,7 +148,7 @@ def clone [dest: path, source: record]: nothing -> any {
 # Anywhere else it is the remote's own URL, as it stands: the sandbox account
 # reaches that host with its own ssh key or not at all.
 def clone-source [top: string]: nothing -> any {
-    let names = (^git -C $top remote | complete | get stdout | lines)
+    let names = (^git -C $top remote | complete | get stdout | lines | where $it != $REMOTE)
     if ($names | is-empty) { return null }
     let name = if "origin" in $names { "origin" } else { $names | first }
     let url = (^git -C $top remote get-url $name | complete | get stdout | str trim)
@@ -160,6 +163,34 @@ def clone-source [top: string]: nothing -> any {
             command: $"git clone -- ($url | to nuon)"
             hint: "the sandbox account needs access of its own to that host: its key is /home/claude/.ssh/id_ed25519.pub"
         }
+    }
+}
+
+# Point the `sandbox` remote of the repo at `top` at its sandbox checkout, so
+# work comes back with `git fetch-sandbox` and `git merge sandbox/<branch>`
+# (git.nix). Checked on every launch rather than once at clone time: that
+# also covers checkouts older than this, and remotes left pointing at a
+# place the sandbox has moved away from.
+#
+# Only for the checkout at the repo's own place in the mirror. A side
+# checkout (reedline-pr1183) is fetched by path and does not take the name.
+# The URL is inert as config: a plain `git fetch sandbox` still stops at
+# git's ownership check, and `fetch-sandbox` is what lifts it, per command.
+def link-remote [top: string, checkout: string, quiet: bool] {
+    if $checkout != (clone-dest $top) { return }
+    if not ($checkout | path join ".git" | path exists) { return }
+    let current = (^git -C $top remote get-url $REMOTE | complete)
+    let done = if $current.exit_code != 0 {
+        ^git -C $top remote add $REMOTE $checkout | complete
+    } else if ($current.stdout | str trim) != $checkout {
+        ^git -C $top remote set-url $REMOTE $checkout | complete
+    } else {
+        return
+    }
+    if $done.exit_code != 0 {
+        note $"could not set the `($REMOTE)` remote: ($done.stderr | str trim)"
+    } else if not $quiet {
+        note $"remote `($REMOTE)` -> ($checkout)"
     }
 }
 
@@ -202,6 +233,7 @@ def --wrapped main [...args: string] {
 
     let top = (repo-top)
     let checkout = if $top == null { null } else { pick $top (not $headless) }
+    if $checkout != null { link-remote $top $checkout $headless }
     let dir = ($checkout | default $env.PWD)
 
     # Run by the sandbox's login shell. The directory is settled there, since
