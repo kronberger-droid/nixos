@@ -206,7 +206,10 @@ in {
         # this user from a plain `git status`. So the trust is per command:
         # `git fetch-sandbox <remote-or-path> [refspec...]` names only the
         # repository being fetched, and fetching runs none of that config.
-        alias.fetch-sandbox = ''!f() { url=$(git remote get-url "$1" 2>/dev/null || printf %s "$1"); git -c safe.directory="$url" fetch "$@"; }; f'';
+        # With no argument it fetches the `sandbox` remote, which the
+        # `claude` launcher (security/claude-enter.nu) keeps pointed at the
+        # sandbox's checkout of the repo.
+        alias.fetch-sandbox = ''!f() { [ $# -gt 0 ] || set -- sandbox; url=$(git remote get-url "$1" 2>/dev/null || printf %s "$1"); git -c safe.directory="$url" fetch "$@"; }; f'';
       };
     };
   };
