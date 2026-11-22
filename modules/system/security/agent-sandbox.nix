@@ -21,7 +21,7 @@
 # What the account gets, and does not get:
 #   - its own home at 750, group `claude`, with the primary user in that
 #     group: Martin reads the agent's tree, the agent never reads his (the
-#     primary home stays 700).
+#     primary home stays closed to everyone but him).
 #   - read-only access to ~/Projects and ~/.config/nixos through ACLs
 #     (claude-sandbox-read-acl below); everything else in the primary home
 #     stays closed, and nothing in those trees is writable.
@@ -170,6 +170,9 @@ in {
       };
       users.users.${username} = {
         extraGroups = [user];
+        # Not 700: see claude-sandbox-read-acl below, which this mode keeps
+        # working across switches.
+        homeMode = "710";
         packages = [enter];
       };
 
@@ -252,7 +255,7 @@ in {
       };
 
       # A bind mount resolves permissions on the vault's own inodes, never on
-      # /home/<primary> above it, so the 700 there stays intact while the
+      # /home/<primary> above it, so the home stays closed while the
       # vault inside is reachable. nofail: on a host where syncthing has not
       # delivered the vault yet the boot must not wait on it.
       # slave, not the default: `/` is a shared mount, so a plain bind joins
@@ -324,11 +327,19 @@ in {
       # (.git/hooks, .envrc, build.rs, a flake) later runs as him. Writes
       # stay in ~/src, fetched from like a contributor's fork.
       #
-      # The primary home keeps mode 700; the one entry added to it is
-      # traverse-only (--x) for this group, which lets a path through but
-      # does not list the home or open anything in it that has no ACL of its
-      # own. The default entries make files created later readable too.
-      # Hosts without one of these directories skip it.
+      # The one entry added to the primary home is traverse-only (--x) for
+      # this group, which lets a path through but does not list the home or
+      # open anything in it that has no ACL of its own. The default entries
+      # make files created later readable too. Hosts without one of these
+      # directories skip it.
+      #
+      # The home's mode is 710 for that entry's sake (homeMode above), and
+      # its owning group is pinned to nothing here. On a directory with an
+      # ACL the mode's group bits are the mask, not the owning group's
+      # rights, and userborn's tmpfiles rule chmods the home to homeMode on
+      # every switch. At 700 that set the mask to --- and blanked this
+      # entry until the next boot. At 710 the mask it writes is --x, and
+      # `group::---` keeps `users` out all the same.
       systemd.services.claude-sandbox-read-acl = let
         primaryHome = config.users.users.${username}.home;
         trees = ["${primaryHome}/Projects" "${primaryHome}/.config/nixos"];
@@ -343,7 +354,7 @@ in {
           setfacl=${pkgs.acl}/bin/setfacl
           ${lib.concatMapStringsSep "\n" (t: ''
               if [ -d ${lib.escapeShellArg t} ]; then
-                $setfacl -m g:${user}:--x ${lib.escapeShellArg primaryHome}
+                $setfacl -m g::---,g:${user}:--x ${lib.escapeShellArg primaryHome}
                 $setfacl -m g:${user}:--x ${lib.escapeShellArg (builtins.dirOf t)}
                 $setfacl -R -m g:${user}:rX,d:g:${user}:rX ${lib.escapeShellArg t}
               fi
