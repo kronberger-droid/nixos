@@ -49,10 +49,10 @@
 #
 # Code comes back out the way a contributor's fork would. The agent's
 # checkouts mirror his ~/Projects under /home/claude/Projects (`claude`, i.e.
-# claude-enter.nu, maps one to the other and clones on demand). Martin
-# adds /home/claude/Projects/<path> as a remote and fetches from it with
-# `git fetch-sandbox` (home-manager/shell/git.nix; deliberately no global
-# safe.directory), reviews, and pushes with his own key. The agent's only
+# claude-enter.nu, maps one to the other, clones on demand and keeps a
+# `sandbox` remote in his repo pointed at the checkout). Martin fetches from
+# it with `git fetch-sandbox` (home-manager/shell/git.nix; deliberately no
+# global safe.directory), reviews, and pushes with his own key. The agent's only
 # way into the primary home is the read-only ACLs above.
 {
   config,
@@ -228,7 +228,7 @@ in {
       in {
         "${home}/Documents" = owned;
         "${home}/Documents/notes" = owned;
-        "${home}/src" = owned;
+        "${home}/Projects" = owned;
       };
 
       # The source side needs the same treatment. For a bind mount systemd
@@ -325,7 +325,7 @@ in {
       # sees what Martin sees without anything being copied over. Read only,
       # on purpose: whatever the agent can write inside a tree he works in
       # (.git/hooks, .envrc, build.rs, a flake) later runs as him. Writes
-      # stay in ~/src, fetched from like a contributor's fork.
+      # stay in its own ~/Projects, fetched from like a contributor's fork.
       #
       # The one entry added to the primary home is traverse-only (--x) for
       # this group, which lets a path through but does not list the home or
@@ -439,7 +439,7 @@ in {
         serviceConfig = {
           User = user;
           Group = user;
-          WorkingDirectory = "${home}/src";
+          WorkingDirectory = "${home}/Projects";
           LoadCredential =
             lib.optional (config.age.secrets ? claude-github-token) "github-token:${config.age.secrets.claude-github-token.path}"
             # Only homeserver defines it: the nushell-org token for the issue
