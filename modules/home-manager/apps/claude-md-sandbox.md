@@ -33,8 +33,8 @@ from what this account holds.
   `nix-shell -p pkg-config openssl --run 'cargo build'`. `nix-shell` runs the
   setup hooks that point `pkg-config` and the linker at the library, which
   `nix shell` skips.
-- **This file** is generated too. Here the nixos config is `~/src/nixos`
-  (`kronberger-droid/nixos`), and this section's source is
+- **This file** is generated too. Here the nixos config is
+  `~/Projects/other/nixos` (`kronberger-droid/nixos`), and this section's source is
   `modules/home-manager/apps/claude-md-sandbox.md`, appended in
   `modules/home-manager/users/claude.nix`.
 
@@ -56,7 +56,7 @@ these rules:
   rules. Show me the exact `set`/`delete` lines and wait for my yes before
   `commit-confirm`. Reading config (`show configuration`, `show ...`) needs no
   confirmation.
-- **Afterwards refresh the snapshot** in `~/src/nixos`:
+- **Afterwards refresh the snapshot** in `~/Projects/other/nixos`:
   `nu hosts/edgerouter/pull-config.nu --user claude --key ~/.ssh/id_ed25519`,
   then commit it like any other work. Check the diff for secrets first.
 - `hosts/edgerouter/README.md` lists the settings that look wrong and are
