@@ -15,6 +15,7 @@
 # Enrolling the TPM before Secure Boot is on seals against the wrong PCR 7;
 # it fails safe, back to the passphrase prompt, but has to be redone.
 {
+  config,
   pkgs,
   lib,
   inputs,
@@ -23,22 +24,14 @@
   imports = [inputs.lanzaboote.nixosModules.lanzaboote];
 
   boot = {
-    # Lanzaboote replaces systemd-boot for Secure Boot
-    systemd-boot-defaults.enable = false;
+    # Lanzaboote replaces systemd-boot for Secure Boot. The menu settings
+    # (editor off, timeout, generation limit) are boot-systemd.nix's.
     loader.systemd-boot.enable = lib.mkForce false;
     loader.efi.canTouchEfiVariables = false;
-    # systemd-boot-defaults is off here, so boot-systemd.nix's editor = false
-    # never applies; lanzaboote copies this value into loader.conf regardless.
-    # With TPM auto-unlock, an editable cmdline (init=/bin/sh) is root on the
-    # decrypted disk, which is the one thing Secure Boot exists to stop.
-    loader.systemd-boot.editor = false;
-    # Same story for boot-systemd.nix's timeout = 1: without it these hosts
-    # sat on the menu for the default 5s on every boot.
-    loader.timeout = 1;
     lanzaboote = {
       enable = true;
       pkiBundle = "/var/lib/sbctl";
-      configurationLimit = 20;
+      inherit (config.boot.loader.systemd-boot) configurationLimit;
     };
     initrd.luks.devices."nixos-root" = {
       crypttabExtraOpts = ["tpm2-device=auto"];
