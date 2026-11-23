@@ -160,6 +160,10 @@
       "Bash(git push:*)"
       "Bash(deploy:*)"
       "Bash(ssh:*)"
+      "Bash(scp:*)"
+      "Bash(sftp:*)"
+      "Bash(rsync:*)"
+      "Bash(tailscale file cp:*)"
       "Bash(nix copy:*)"
       "Bash(cachix:*)"
       # Sending mail is outward-facing. Reading and saving drafts is not.
@@ -286,7 +290,7 @@
     pushes() {
       printf '%s' "$cmd" | tr ';&|' '\n\n\n' \
         | ${pkgs.gnugrep}/bin/grep -E '\bgit\b.*\bpush\b' \
-        | ${pkgs.gnugrep}/bin/grep -Evq '\bgit\b.*\bstash\b.*\bpush\b'
+        | ${pkgs.gnugrep}/bin/grep -Evq '\bgit\b.*[[:space:]]stash[[:space:]]+push\b'
     }
 
     if pushes \
@@ -322,10 +326,14 @@
       # debug and trace output echoes the auth exchange, which is how the GMX
       # login ended up in a transcript once.
       permissions.deny = [
-        "Read(/run/secrets/**)"
-        "Read(/run/agenix/**)"
-        "Bash(cat /run/secrets:*)"
-        "Bash(cat /run/agenix:*)"
+        # Two slashes: one is relative to the settings file. And `/*`, not
+        # `:*`, which matches at a word boundary and so never matched a
+        # path below the directory. agenix decrypts to /run/secrets here
+        # (security/agenix.nix), nothing lives in /run/agenix.
+        "Read(//run/secrets/**)"
+        "Read(//run/claude-sandbox/**)"
+        "Bash(cat /run/secrets/*)"
+        "Bash(cat /run/claude-sandbox/*)"
         "Bash(himalaya *--debug*)"
         "Bash(himalaya *--trace*)"
         "Bash(curl *-v*imap*)"
