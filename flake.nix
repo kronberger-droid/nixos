@@ -564,6 +564,9 @@
             inherit pkgs inputs;
             overlays = commonOverlays system;
           };
+          # Sandbox grants end to end, in a VM: the id-mapped mount on ext4,
+          # its end, both ways of approving, and what is refused.
+          sandbox-grants = import ./tests/sandbox-grants.nix {inherit pkgs;};
           format = pkgs.runCommand "alejandra-check" {} ''
             ${pkgs.alejandra}/bin/alejandra --check --quiet ${self} && touch $out
           '';

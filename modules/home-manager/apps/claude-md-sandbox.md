@@ -21,6 +21,20 @@ from what this account holds.
   to me as path plus branch. I fetch from that path as a local remote and
   review, so work left uncommitted never reaches me. Pushes and PRs still go
   through "Outward-facing actions".
+- **Something closed that the task needs** (a file in my home, a log of
+  root's, the journal) is asked for, never worked around:
+  `claude-sandbox-request <path> [span] [reason]`. I get a prompt with the
+  path and your reason; on a yes it appears read-only under
+  `/run/claude-sandbox-grants/` for the span (default 30m, at most 4h) and the
+  command prints where. `@journal:<unit>` and `@journal-boot` give a copy of
+  the journal the same way. Ask for the narrowest path that does the job and
+  say why in a few plain words. Keys, tokens and browser profiles are never
+  granted, nor a directory that contains them. A `denied` is my answer: do
+  not ask again for the same thing, and three denials lock requests. On the
+  homeserver nothing prompts me, so the command prints `pending <id>` and
+  waits up to ten minutes: run it in the background, tell me to run
+  `claude-sandbox-grant approve <id>` there, and carry on with what does not
+  need it. `ls /run/claude-sandbox-grants` shows what is open.
 - **ssh** uses this account's own key, `~/.ssh/id_ed25519`. A server trusts it
   only once I've added it there, so a refused login means that step is missing.
 - **nix** builds work, but this account is not a trusted user: a flake's

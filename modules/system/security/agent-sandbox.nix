@@ -36,6 +36,9 @@
 #     claude-sandbox-vault-acl below).
 #   - nix as an allowed user, not a trusted one: it may build, it may not
 #     add substituters or push unsigned paths.
+#   - nothing else of the primary user's or root's, except for a while and
+#     on approval: agent-sandbox-grants.nix, asked for from inside with
+#     `claude-sandbox-request`.
 #   - no password, no authorized_keys, no sudo. The only way in is
 #     `claude-sandbox` from the primary user's session, which is a
 #     `machinectl shell` behind a polkit rule scoped to exactly that pair.
@@ -58,6 +61,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   username,
   ...
 }: let
@@ -140,7 +144,7 @@
     isExecutable = true;
   };
 in {
-  imports = [../../home-manager/users/claude.nix];
+  imports = [../../home-manager/users/claude.nix ./agent-sandbox-grants.nix];
 
   options.security.agentSandbox = {
     enable = lib.mkEnableOption "a dedicated unix account for Claude Code";
@@ -186,6 +190,16 @@ in {
         # working across switches.
         homeMode = "710";
         packages = [enter];
+      };
+
+      # Temporary read access to what stays closed otherwise. The vault and
+      # this account's home are named as what it can already write. The
+      # panel is sieb's pinentry, the one rbw unlocks with; a host that
+      # sets `frontend = "queue"` never builds it.
+      security.agentSandbox.grants = {
+        enable = lib.mkDefault true;
+        writablePaths = [home vaultSrc];
+        pinentry = lib.mkDefault (lib.getExe inputs.sieb.packages.${pkgs.stdenv.hostPlatform.system}.pinentry);
       };
 
       # nix-settings.nix limits the daemon to root and the primary user;

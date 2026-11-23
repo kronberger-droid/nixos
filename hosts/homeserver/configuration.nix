@@ -400,6 +400,9 @@ in {
   security.agentSandbox = {
     enable = true;
     remoteControl.enable = true;
+    # No compositor to show a prompt in: a request waits for
+    # `claude-sandbox-grant approve`, from an ssh session or the phone.
+    grants.frontend = "queue";
     # Off the docker bridges. DOCKER-USER above only sees forwarded traffic,
     # so a process on this host reaches every container directly, and
     # wiesinger's (a redis with no password among them) are not the agent's
@@ -680,6 +683,18 @@ in {
             options = ["NOPASSWD"];
           })
           ["claude-sandbox-open" "claude-sandbox-close"];
+      }
+      # And answers the sandbox's grant requests. As ${username}, whose
+      # queue it is; the script re-execs itself that way.
+      {
+        users = ["droid"];
+        runAs = username;
+        commands = [
+          {
+            command = "/run/current-system/sw/bin/claude-sandbox-grant";
+            options = ["NOPASSWD"];
+          }
+        ];
       }
     ];
   };
