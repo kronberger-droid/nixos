@@ -208,9 +208,6 @@
       export GIT_CONFIG_VALUE_0="!f() { echo username=x-access-token; echo \"password=\$(cat $CREDENTIALS_DIRECTORY/github-token)\"; }; f"
       export GIT_AUTHOR_NAME=flake-autoupdate GIT_COMMITTER_NAME=flake-autoupdate
       export GIT_AUTHOR_EMAIL=flake-update@homeserver GIT_COMMITTER_EMAIL=flake-update@homeserver
-      # Same token for nix's own input fetches; the flake.lock rate limit
-      # for anonymous GitHub fetches is what makes a daily update flaky.
-      export NIX_CONFIG="access-tokens = github.com=$github_token"
 
       gh_() { GH_TOKEN="$github_token" gh "$@"; }
       slug() { printf '%s' "$1" | tr -c 'A-Za-z0-9' '_'; }
@@ -291,7 +288,13 @@
         done
 
         # ---- update ------------------------------------------------------
-        nix flake update 2>"$run/update.log"
+        # The token for nix's own input fetches, since the rate limit on
+        # anonymous GitHub fetches is what makes a daily update flaky. For
+        # this command alone: exported to every step, it would also be at
+        # hand when the new, unreviewed inputs are evaluated and built, and
+        # an input could then fetch a private repo with it.
+        NIX_CONFIG="access-tokens = github.com=$github_token" \
+          nix flake update 2>"$run/update.log"
         if git diff --quiet -- flake.lock; then
           echo "$repo: inputs are current, nothing to do" >&2
           # A PR left open from an earlier run is stale once main has caught
@@ -362,13 +365,18 @@
           note="the agent could not fix it: $(tail -n +2 "$run/fix-result.md")"
         elif [ ! -s "$run/fix.patch" ]; then
           note="the agent claimed a fix but changed no tracked file"
+        elif git apply --numstat "$run/fix.patch" 2>/dev/null | cut -f3 \
+          | grep -Eq '^(flake\.lock$|secrets/|\.githooks/)'; then
+          # The prompt forbids these; nothing else checked that it listened.
+          note="the agent's patch touched flake.lock, secrets or hooks and was dropped"
         elif ! git apply --index "$run/fix.patch" 2>"$run/fix-apply.log"; then
           note="the agent's patch did not apply (see fix-apply.log)"
           git reset --quiet --hard
         else
           # The agent's word is not the verification; the rebuild is.
           git commit --quiet -F "$run/fix-result.md"
-          note="the agent committed a fix ($(git rev-parse --short HEAD)); rebuilt to verify"
+          # The file list is the job's own, whatever the agent's message says.
+          note="the agent committed a fix ($(git rev-parse --short HEAD), touching $(git diff-tree --no-commit-id --name-only -r HEAD | tr '\n' ' ')); rebuilt to verify"
         fi
         echo "$note" >"$run/fix-note.txt"
 
@@ -545,13 +553,17 @@
 
       case $mode in
       fix)
-        # No web access here: a page the agent reads must not be able to
+        # No web tool here: a page the agent reads must not be able to
         # steer an edit. Bash is limited to what it needs to look and
-        # verify; anything else is denied without a prompt.
+        # verify; anything else is denied without a prompt. The allowlist
+        # is advice more than a wall, since `nix eval` can fetch and read
+        # the environment. What bounds a steered agent is the unit:
+        # agentProps below.
         { echo "The run directory is $run."; echo; cat "$run/fix-prompt.md"; } \
           | claude_ \
             --tools Read,Grep,Glob,Edit,Bash \
             --allowedTools Read Grep Glob Edit \
+            --disallowedTools 'Read(//proc/**)' 'Read(//run/credentials/**)' \
               'Bash(nix build:*)' 'Bash(nix eval:*)' 'Bash(nix log:*)' \
               'Bash(git diff:*)' 'Bash(git log:*)' 'Bash(git status:*)' \
             --add-dir "$run" \
@@ -564,7 +576,11 @@
         { echo "The run directory is $run."; echo; cat "$run/pr-prompt.md"; } \
           | claude_ \
             --tools Read,Grep,Glob,Bash,WebFetch \
-            --allowedTools Read Grep Glob WebFetch \
+            --allowedTools Read Grep Glob \
+              'WebFetch(domain:github.com)' 'WebFetch(domain:raw.githubusercontent.com)' \
+              'WebFetch(domain:gitlab.com)' 'WebFetch(domain:codeberg.org)' \
+              'WebFetch(domain:nixos.org)' 'WebFetch(domain:crates.io)' \
+            --disallowedTools 'Read(//proc/**)' 'Read(//run/credentials/**)' \
               'Bash(git log:*)' 'Bash(git diff:*)' 'Bash(git show:*)' \
             --add-dir "$run" \
           >"$work/answer.json" || true
@@ -596,6 +612,9 @@
     "NoNewPrivileges=yes"
     "CapabilityBoundingSet="
     "RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX"
+    # A step that hangs must not outlive the driver (TimeoutStartSec on the
+    # service below) into the next night's run of the same checkout.
+    "RuntimeMaxSec=8h"
     # Evaluation is the only heavy work in the steps themselves (the builds
     # run in the daemon); it should lose to everything the box serves.
     "Nice=10"
@@ -617,6 +636,11 @@
     commonProps
     ++ [
       "LoadCredential=claude-token:/run/secrets/flake-update-claude-token"
+      # The agent reads pages and logs nobody vetted. It talks to the
+      # internet and to nothing on this side of the router: not the LAN,
+      # the tailnet or the docker bridges (the passwordless redis the
+      # sandbox account is kept from as well).
+      "IPAddressDeny=10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 169.254.0.0/16 fc00::/7 fe80::/10"
       # Belt and braces next to the 0700 mode above.
       "InaccessiblePaths=/var/lib/${user}"
       "Environment=PATH=${agentPath}"
