@@ -674,6 +674,8 @@ in {
             let dir = ($env.PWD | str replace $nu.home-dir "~")
             $"(ansi dark_gray)(date now | format date '%a %d %b %Y %H:%M:%S')  ($dir)(ansi reset)\n"
         }
+        # Unset, the collapsed line would keep the live right prompt.
+        $env.TRANSIENT_PROMPT_COMMAND_RIGHT = ""
       '')
     ];
 
@@ -727,17 +729,30 @@ in {
         ["maven" "os"])
       {
         command_timeout = 2000;
-        # Single-line module row. `$all` is every module in default order, which
-        # *includes* a `$line_break` (after cmd_duration, pushing time/status to
-        # a 2nd line) and a trailing `$character` caret. Disable both: line_break
-        # so all modules stay on one row, character to drop the caret. The real
-        # 2nd line (the input line) comes from the PROMPT_COMMAND wrapper above,
-        # which appends the newline in nushell. Don't move that newline into this
-        # format string: nushell strips one trailing newline off external command
-        # output, so starship's own would never reach reedline.
-        format = "$all";
+        # The module row holds what should survive a slim terminal: where you
+        # are, what git says, and the package version for release work. Every
+        # other module goes to the right prompt, where `$all` means "all that
+        # `format` did not name". starship's nu init sets
+        # `render_right_prompt_on_last_line`, so the right side sits on the
+        # input line and reedline hides it once the typing reaches it: it can
+        # neither wrap the module row nor collide with it. Turned off, it
+        # would land on the blank spacer row (`add_newline`) instead, since
+        # that row is the prompt's first.
+        #
+        # `$all` *includes* a `$line_break` and a trailing `$character` caret.
+        # Disable both: a line break has no place in a right prompt, and the
+        # caret is dropped. The real 2nd line (the input line) comes from the
+        # PROMPT_COMMAND wrapper above, which appends the newline in nushell.
+        # Don't move that newline into this format string: nushell strips one
+        # trailing newline off external command output, so starship's own
+        # would never reach reedline.
+        format = "$username$hostname$directory$git_branch$git_commit$git_state$git_status$package";
+        right_format = "$all";
         line_break.disabled = true;
         character.disabled = true;
+        # Nothing shortens the left row once directory and branch alone
+        # outgrow the terminal, so cap the one part with no natural limit.
+        git_branch.truncation_length = 32;
         # Relabel long, uninteresting paths to short names (git-repo-like).
         # Applied before truncation, so the label only survives within
         # `truncation_length` (default 3) folders of the root — same as how
