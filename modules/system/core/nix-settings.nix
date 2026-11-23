@@ -55,7 +55,11 @@ in {
       # Security
       sandbox = true;
       allowed-users = ["root" username];
-      trusted-users = ["root" username];
+      # Root only. A trusted user can hand the daemon settings such as
+      # post-build-hook, which is root without a password for every process
+      # of that account. Substituters and builders are daemon config here,
+      # so the workstations need no more; the homeserver adds who it must.
+      trusted-users = ["root"];
 
       # nh handles dirty tree warnings
       warn-dirty = false;

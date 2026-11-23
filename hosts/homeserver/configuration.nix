@@ -190,7 +190,7 @@ in {
       # speaks plain HTTP (Radicale is Basic auth, immich is a
       # password login, harmonia serves the store) and is only meant to be
       # reached over the tailnet, so it is opened on tailscale0 alone, the
-      # same way modules/system/services/webdav.nix scopes port 8081.
+      # same way modules/system/services/webdav.nix scopes its port.
       # Tailscale's subnet route still lets tailnet peers reach the LAN, not
       # the reverse. This list does not govern docker: a port published with
       # -p is DNAT'd to the container and forwarded, never reaching nixos-fw.
@@ -292,7 +292,10 @@ in {
   };
   # Trusted users are always allowed to connect to the daemon, whatever
   # allowed-users says, so this one line is the whole grant.
-  nix.settings.trusted-users = ["nix-remote"];
+  # The primary user as well: deploy-rs uploads the closure unsigned over
+  # ssh as him (flake.nix, `sshUser`), which the daemon takes from a trusted
+  # user only. He has sudo here anyway.
+  nix.settings.trusted-users = ["nix-remote" username];
 
   # Container deployments. `docker` alone is still root-equivalent through
   # the socket; moving these workloads to rootless podman is the real fix
@@ -429,7 +432,10 @@ in {
     # the admin console.
     extraSetFlags =
       ["--advertise-routes=${addrs.lanSubnet}"]
-      ++ lib.optional config.services.mullvad-exit.enable "--advertise-exit-node";
+      # Said either way. `tailscale set` changes only the flags it is given,
+      # so leaving the flag out would keep an earlier "on" in tailscaled's
+      # state after mullvad-exit and its kill switch are gone.
+      ++ ["--advertise-exit-node=${lib.boolToString config.services.mullvad-exit.enable}"];
   };
 
   # Exit node for the tailnet, mostly the phone, which cannot run Tailscale
@@ -574,6 +580,9 @@ in {
     # failed unit and deploy-rs to roll back. The only service here that
     # reads a secret as its own user; the rest read theirs as root.
     after = ["agenix-chown.service"];
+    # `after` alone orders the two only when both are in the transaction
+    # (services/matrix.nix has the long version).
+    wants = ["agenix-chown.service"];
   };
 
   # TISS timetable mirrored into Radicale as its own `tuwien` calendar, so the
