@@ -14,6 +14,7 @@
     # Documents
     # obsidian: from Flathub, see flatpak.nix and obsidian.nix
     # onlyoffice-desktopeditors: from Flathub, see flatpak.nix
+    # ladybird: from its own Flatpak repository, see flatpak.nix
     # zotero: sandboxed, see zotero.nix
 
     # Media
