@@ -124,4 +124,9 @@ in {
   # claude: the output of `claude setup-token`, a subscription OAuth token.
   "flake-update-github-token.age".publicKeys = for [homeserver];
   "flake-update-claude-token.age".publicKeys = for [homeserver];
+  # The homeserver backup (services/backup.nix, which says what goes in
+  # each). restic runs once all three exist.
+  "restic-repository.age".publicKeys = for [homeserver];
+  "restic-password.age".publicKeys = for [homeserver];
+  "restic-env.age".publicKeys = for [homeserver];
 }
