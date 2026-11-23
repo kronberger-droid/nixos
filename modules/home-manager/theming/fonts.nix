@@ -29,8 +29,7 @@ _: {
     </fontconfig>
   '';
 
-  home.file = {
-    ".local/share/fonts/Futura_PT".source = ./fonts/Futura_PT;
-    ".local/share/fonts/gfsneohellenicmath".source = ./fonts/gfsneohellenicmath;
-  };
+  # No font files in this repo. Fonts that nixpkgs does not package (Futura
+  # PT, which is commercial, and GFS Neohellenic Math) are copied into
+  # ~/.local/share/fonts by hand; fontconfig picks them up from there.
 }
