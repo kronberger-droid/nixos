@@ -16,14 +16,6 @@
       app.package = pkgs.aerion;
       flatpak.appId = "io.github.hkdb.Aerion";
 
-      # gui-base bundles its own mesa; the host's driver matches the kernel
-      # and is already in the store.
-      gpu.provider = lib.mkForce "nixos";
-
-      # Binds the host's /etc/localtime. Without it there is none in the
-      # sandbox and every timestamp shows in UTC.
-      timeZone.enable = true;
-
       dbus.policies = {
         # Account passwords and OAuth tokens go through go-keyring, which
         # talks to the Secret Service directly. Same trade-off as Signal:
@@ -40,9 +32,6 @@
           # accounts/ here, the mail database and keys in the data dir.
           (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/aerion"))
           (sloth.mkdir (sloth.concat' sloth.xdgDataHome "/aerion"))
-          (sloth.concat' sloth.homeDir "/Downloads")
-          # A private /tmp, see signal.nix.
-          [(sloth.mkdir (sloth.concat' sloth.appCacheDir "/tmp")) "/tmp"]
         ];
       };
     };

@@ -33,14 +33,6 @@
       app.package = pkgs.equibop;
       flatpak.appId = "io.github.equicord.equibop";
 
-      # gui-base bundles its own mesa; the host's driver matches the kernel
-      # and is already in the store.
-      gpu.provider = lib.mkForce "nixos";
-
-      # Binds the host's /etc/localtime. Without it there is none in the
-      # sandbox and every timestamp shows in UTC.
-      timeZone.enable = true;
-
       dbus.policies = {
         # Electron notifies through libnotify, not the portal.
         "org.freedesktop.Notifications" = "talk";
@@ -51,10 +43,6 @@
         bind.rw = [
           # The real profile: it holds the login and the Equicord settings.
           (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/equibop"))
-          (sloth.concat' sloth.homeDir "/Downloads")
-          # A private /tmp. The mkdir also creates the app cache dir that
-          # gui-base maps onto ~/.cache, see signal.nix.
-          [(sloth.mkdir (sloth.concat' sloth.appCacheDir "/tmp")) "/tmp"]
         ];
         # Cameras for video calls. P14E's UVC module enumerates low, intelNuc
         # only has the DroidCam loopback (video_nr=42, droidcam.nix). Bound

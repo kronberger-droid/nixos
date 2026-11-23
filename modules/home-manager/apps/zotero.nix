@@ -21,17 +21,19 @@
       app.package = pkgs.zotero;
       flatpak.appId = "org.zotero.Zotero";
 
-      # gui-base bundles its own mesa; the host's driver matches the kernel
-      # and is already in the store.
-      gpu.provider = lib.mkForce "nixos";
-
-      # Binds the host's /etc/localtime. Without it there is none in the
-      # sandbox and every timestamp shows in UTC.
-      timeZone.enable = true;
-
       dbus.policies = {
         "org.freedesktop.Notifications" = "talk";
       };
+
+      # A trial, on the app with the least to lose. The raw compositor
+      # socket gives a sandboxed client what any Wayland client gets on
+      # niri: the clipboard of every app, screen capture, synthetic input.
+      # The proxy passes the core protocols only. If Zotero misbehaves
+      # (scaling, clipboard, popups), remove this line; if it holds up, it
+      # moves to nixpak-common.nix for all six. No title tag, which would
+      # break window rules that match on titles.
+      waylandProxy.enable = true;
+      waylandProxy.tag = "";
 
       bubblewrap = {
         # gui-base's default. This app plays and records nothing.
@@ -41,9 +43,6 @@
           (sloth.concat' sloth.homeDir "/Zotero")
           # The profile, which also holds the sync login.
           (sloth.mkdir (sloth.concat' sloth.homeDir "/.zotero"))
-          (sloth.concat' sloth.homeDir "/Downloads")
-          # A private /tmp, see signal.nix.
-          [(sloth.mkdir (sloth.concat' sloth.appCacheDir "/tmp")) "/tmp"]
         ];
         # Its launcher (lib/zotero) is a shell script that calls dirname and
         # readlink by name. The inherited PATH points at host profiles that

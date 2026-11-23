@@ -16,14 +16,6 @@
       app.package = pkgs.zapzap;
       flatpak.appId = "com.rtosta.zapzap";
 
-      # gui-base bundles its own mesa; the host's driver matches the kernel
-      # and is already in the store.
-      gpu.provider = lib.mkForce "nixos";
-
-      # Binds the host's /etc/localtime. Without it there is none in the
-      # sandbox and every timestamp shows in UTC.
-      timeZone.enable = true;
-
       dbus.policies = {
         # It notifies over both this and the portal, depending on settings.
         "org.freedesktop.Notifications" = "talk";
@@ -36,9 +28,6 @@
           # the QR code again.
           (sloth.mkdir (sloth.concat' sloth.xdgDataHome "/ZapZap"))
           (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/ZapZap"))
-          (sloth.concat' sloth.homeDir "/Downloads")
-          # A private /tmp, see signal.nix.
-          [(sloth.mkdir (sloth.concat' sloth.appCacheDir "/tmp")) "/tmp"]
         ];
       };
     };

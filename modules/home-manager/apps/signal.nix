@@ -18,14 +18,6 @@
       app.package = pkgs.signal-desktop;
       flatpak.appId = "org.signal.Signal";
 
-      # gui-base bundles its own mesa; the host's driver matches the kernel
-      # and is already in the store.
-      gpu.provider = lib.mkForce "nixos";
-
-      # Binds the host's /etc/localtime. Without it there is none in the
-      # sandbox and every timestamp shows in UTC.
-      timeZone.enable = true;
-
       dbus.policies = {
         # Signal encrypts its database key with safeStorage, pinned to
         # gnome_libsecret in config.json. That talks to the Secret Service
@@ -43,11 +35,6 @@
           # The real profile, not ~/.var/app/org.signal.Signal: it holds the
           # linked account, so a fresh dir would mean relinking the device.
           (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/Signal"))
-          (sloth.concat' sloth.homeDir "/Downloads")
-          # A private /tmp. The mkdir also creates the app cache dir that
-          # gui-base maps onto ~/.cache: it binds with --bind-try, which
-          # silently skips a missing source.
-          [(sloth.mkdir (sloth.concat' sloth.appCacheDir "/tmp")) "/tmp"]
         ];
         sockets.pipewire = true;
         # Chromium only tries libsecret when this names GNOME, and falls

@@ -28,14 +28,6 @@
       app.package = pkgs.element-desktop;
       flatpak.appId = "im.riot.Riot";
 
-      # gui-base bundles its own mesa; the host's driver matches the kernel
-      # and is already in the store.
-      gpu.provider = lib.mkForce "nixos";
-
-      # Binds the host's /etc/localtime. Without it there is none in the
-      # sandbox and every timestamp shows in UTC.
-      timeZone.enable = true;
-
       dbus.policies = {
         # Element keeps its store key in Electron safeStorage, which needs a
         # real keyring (newer Element refuses the plaintext "basic" store,
@@ -53,10 +45,6 @@
         bind.rw = [
           # The real profile: session, crypto store and config.json.
           (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/Element"))
-          (sloth.concat' sloth.homeDir "/Downloads")
-          # A private /tmp. The mkdir also creates the app cache dir that
-          # gui-base maps onto ~/.cache, see signal.nix.
-          [(sloth.mkdir (sloth.concat' sloth.appCacheDir "/tmp")) "/tmp"]
         ];
         # Voice and video calls.
         sockets.pipewire = true;
