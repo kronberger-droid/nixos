@@ -315,42 +315,49 @@
       )}'
   '';
 
+  # The rules that limit the agent, as opposed to the preferences below.
+  # They do not go into ~/.claude/settings.json, which the account they
+  # limit owns and can edit. users/claude.nix writes them to
+  # /etc/claude-code/managed-settings.json: root-owned, and read by Claude
+  # Code ahead of every user and project setting.
+  policySettings = {
+    permissions.ask = outwardFacing;
+
+    # Credentials stay out of the transcript. Prefix rules are easy to walk
+    # around (`nu -c`, a script), so this is a speed bump and not a wall:
+    # the real boundary is running Claude as the sandbox account. himalaya's
+    # debug and trace output echoes the auth exchange, which is how the GMX
+    # login ended up in a transcript once.
+    permissions.deny = [
+      # Two slashes: one is relative to the settings file. And `/*`, not
+      # `:*`, which matches at a word boundary and so never matched a
+      # path below the directory. agenix decrypts to /run/secrets here
+      # (security/agenix.nix), nothing lives in /run/agenix.
+      "Read(//run/secrets/**)"
+      "Read(//run/claude-sandbox/**)"
+      "Bash(cat /run/secrets/*)"
+      "Bash(cat /run/claude-sandbox/*)"
+      "Bash(himalaya *--debug*)"
+      "Bash(himalaya *--trace*)"
+      "Bash(curl *-v*imap*)"
+    ];
+
+    hooks.PreToolUse = [
+      {
+        matcher = "Bash";
+        hooks = [
+          {
+            type = "command";
+            command = "${bashGuardHook}";
+          }
+        ];
+      }
+    ];
+  };
+
   # JSON to merge into ~/.claude/settings.json (statusline + plugins)
   settingsToMerge =
     {
-      permissions.ask = outwardFacing;
-
-      # Credentials stay out of the transcript. Prefix rules are easy to walk
-      # around (`nu -c`, a script), so this is a speed bump and not a wall:
-      # the real boundary is running Claude as the sandbox account. himalaya's
-      # debug and trace output echoes the auth exchange, which is how the GMX
-      # login ended up in a transcript once.
-      permissions.deny = [
-        # Two slashes: one is relative to the settings file. And `/*`, not
-        # `:*`, which matches at a word boundary and so never matched a
-        # path below the directory. agenix decrypts to /run/secrets here
-        # (security/agenix.nix), nothing lives in /run/agenix.
-        "Read(//run/secrets/**)"
-        "Read(//run/claude-sandbox/**)"
-        "Bash(cat /run/secrets/*)"
-        "Bash(cat /run/claude-sandbox/*)"
-        "Bash(himalaya *--debug*)"
-        "Bash(himalaya *--trace*)"
-        "Bash(curl *-v*imap*)"
-      ];
-
-      hooks.PreToolUse = [
-        {
-          matcher = "Bash";
-          hooks = [
-            {
-              type = "command";
-              command = "${bashGuardHook}";
-            }
-          ];
-        }
-      ];
-
       # The rules above match a command's leading text, which `nu -c "git
       # push"`, a `git -C` elsewhere, or a one-line script all walk straight
       # past. Auto mode's classifier reads a command for what it does instead,
@@ -459,6 +466,13 @@
   hasAnyConfig = cfg.statusline.enable || cfg.mcpServers != {} || cfg.plugins != [] || cfg.claudeMd != "" || cfg.disableAutoMemory || cfg.skills != {} || cfg.skillDirs != {};
 in {
   options.claude = {
+    policy = lib.mkOption {
+      type = lib.types.attrs;
+      readOnly = true;
+      default = policySettings;
+      description = "Permission rules and hooks for the system-wide managed settings file.";
+    };
+
     statusline.enable = lib.mkEnableOption "Claude Code statusline";
 
     disableAutoMemory = lib.mkEnableOption "disable Claude Code auto-memory";

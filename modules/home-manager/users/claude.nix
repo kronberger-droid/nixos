@@ -14,6 +14,12 @@
   pkgs,
   ...
 }: {
+  # The agent cannot edit its own guard rails: see `policySettings` in
+  # apps/claude.nix.
+  environment.etc."claude-code/managed-settings.json" = lib.mkIf config.security.agentSandbox.enable {
+    text = builtins.toJSON config.home-manager.users.claude.claude.policy;
+  };
+
   home-manager.users.claude = lib.mkIf config.security.agentSandbox.enable {
     imports = [
       ../shell/nushell.nix
