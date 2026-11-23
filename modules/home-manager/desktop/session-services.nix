@@ -109,6 +109,11 @@ in {
       "urgency=low" = {
         border-color = "#${config.scheme.base03}";
       };
+      # What the bar toggle sets (ironbar/nu/dnd.nu). mako has no such mode
+      # built in: without this section the toggle changed nothing.
+      "mode=do-not-disturb" = {
+        invisible = 1;
+      };
     };
   };
 

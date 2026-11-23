@@ -37,9 +37,6 @@
     "net.ipv4.tcp_rmem" = "4096 65536 134217728";
     "net.ipv4.tcp_wmem" = "4096 65536 134217728";
     "net.ipv4.tcp_congestion_control" = "bbr";
-
-    # File system performance
-    "fs.file-max" = 2097152;
   };
 
   # Boot optimizations
@@ -70,13 +67,11 @@
 
   # System optimization services
   # Journal retention is enforced continuously by journald via SystemMaxUse
-  # (set per-host in journald.settings.Journal), so no extra vacuum timer is needed.
+  # (core/systemd-tweaks.nix and the laptop profile), so no extra vacuum timer is needed.
   systemd = {
-    # Faster shutdown
-    settings.Manager = {
-      DefaultTimeoutStopSec = "10s";
-      DefaultTimeoutStartSec = "10s";
-    };
+    # Faster shutdown. The stop timeout only: a short start timeout kills
+    # whatever is slow to come up on a cold or busy boot.
+    settings.Manager.DefaultTimeoutStopSec = "10s";
     # The system manager's default above does not propagate to user
     # instances, which keep systemd's 90 s. Anything in the session that
     # sits on SIGTERM therefore held shutdown for a minute and a half ("A

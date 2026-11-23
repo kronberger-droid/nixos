@@ -166,6 +166,10 @@ in {
     # fwmark, finds the tunnel instead of the uplink and drops them.
     # Tailscale's client mode already sets loose; this holds without it.
     networking.firewall.checkReversePath = lib.mkDefault "loose";
+    # The firewall option covers its own rpfilter rule only. The kernel has
+    # a filter too, which security/hardening.nix sets strict, and for that
+    # one the stricter of `all` and the interface wins.
+    boot.kernel.sysctl."net.ipv4.conf.all.rp_filter" = 2;
 
     # Down at boot, like PIA: started from the bar or by hand.
     systemd.services.mullvad-wg = {

@@ -127,7 +127,9 @@
     "kernel.yama.ptrace_scope" = lib.mkDefault 1;
     "kernel.kexec_load_disabled" = lib.mkDefault 1;
 
-    # Disable core dumps for security
+    # No core dumps of setuid programs (the kernel default, pinned). Other
+    # processes still dump through systemd-coredump, which `coredumpctl`
+    # relies on.
     "fs.suid_dumpable" = lib.mkDefault 0;
 
     # Virtual memory security. `vm.mmap_rnd_bits` (32) and
