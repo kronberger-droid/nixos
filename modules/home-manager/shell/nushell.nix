@@ -25,6 +25,64 @@
     projects = "~/Projects";
     vault = vaultTilde;
   };
+
+  # LS_COLORS from the base16 scheme. Left unset, nushell falls back to a
+  # built-in table of 256-color indices (38;5;N), which the terminal palette
+  # in theming/ansi.nix never touches, so `ls` names, `grid -c` and path
+  # completions ignored the theme. Truecolor rather than the 16 ANSI codes so
+  # the string carries the scheme itself and reads the same in a terminal
+  # that was not themed from it. Hues follow the dircolors conventions.
+  lsColors = let
+    s = config.scheme;
+    rgb = slot: "${s."${slot}-rgb-r"};${s."${slot}-rgb-g"};${s."${slot}-rgb-b"}";
+    fg = slot: "38;2;${rgb slot}";
+    bg = slot: "48;2;${rgb slot}";
+    exts = style: map (ext: "*.${ext}=${style}");
+  in
+    lib.concatStringsSep ":" (
+      [
+        "no=0"
+        "fi=0"
+        "di=${fg "base0D"}"
+        "ln=${fg "base0C"}"
+        "ex=1;${fg "base0B"}"
+        # Broken links and their missing targets.
+        "or=${fg "base08"}"
+        "mi=${fg "base08"}"
+        "so=${fg "base0E"}"
+        "pi=${fg "base0E"}"
+        "bd=${fg "base0A"}"
+        "cd=${fg "base0A"}"
+        "su=${fg "base00"};${bg "base08"}"
+        "sg=${fg "base00"};${bg "base0A"}"
+        # Sticky and other-writable directories stay plain directories:
+        # /tmp and every mounted share would otherwise shout.
+        "st=${fg "base0D"}"
+        "tw=${fg "base0D"}"
+        "ow=${fg "base0D"}"
+        "*~=${fg "base03"}"
+      ]
+      ++ exts (fg "base03") ["bak" "orig" "swp" "tmp" "lock" "log" "pyc" "o"]
+      ++ exts (fg "base0A") ["tar" "tgz" "gz" "xz" "zst" "bz2" "zip" "7z" "rar" "iso" "deb" "rpm"]
+      ++ exts (fg "base0E") [
+        "png"
+        "jpg"
+        "jpeg"
+        "gif"
+        "webp"
+        "svg"
+        "avif"
+        "mp4"
+        "mkv"
+        "webm"
+        "mov"
+        "mp3"
+        "flac"
+        "ogg"
+        "opus"
+        "wav"
+      ]
+    );
 in {
   home.packages = with pkgs; [
     gitui
@@ -554,6 +612,9 @@ in {
 
   programs.nushell = {
     enable = true;
+
+    # Exported, so eza, fd and anything else reading LS_COLORS follows too.
+    environmentVariables.LS_COLORS = lsColors;
 
     extraEnv = builtins.readFile ./nushell/extra_env.nu;
 
