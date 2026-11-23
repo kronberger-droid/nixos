@@ -185,7 +185,9 @@ in {
       # ICMP is the only liveness check the network has for the one host
       # everything depends on.
       allowPing = true;
-      # LAN-wide: SSH and DNS. Syncthing is tailnet-only (22000 on tailscale0,
+      # SSH and DNS on the LAN and the tailnet, by interface. A global list
+      # would open them on mullvad0 and the docker bridges as well.
+      # Syncthing is tailnet-only (22000 on tailscale0,
       # from modules/system/services/syncthing.nix). Everything else on this box
       # speaks plain HTTP (Radicale is Basic auth, immich is a
       # password login, harmonia serves the store) and is only meant to be
@@ -197,13 +199,20 @@ in {
       # DOCKER-USER in extraCommands below scopes those to the tailnet. Also
       # `flake --remote` depends on the tailnet end to end (ssh via
       # MagicDNS, the cache on 5001).
-      allowedTCPPorts = [22 53];
-      allowedUDPPorts = [53];
-      interfaces."tailscale0".allowedTCPPorts = [
-        5001 # harmonia binary cache
-        2283 # immich
-        5232 # radicale
-      ];
+      interfaces.enp86s0 = {
+        allowedTCPPorts = [22 53];
+        allowedUDPPorts = [53];
+      };
+      interfaces."tailscale0" = {
+        allowedTCPPorts = [
+          22
+          53
+          5001 # harmonia binary cache
+          2283 # immich
+          5232 # radicale
+        ];
+        allowedUDPPorts = [53];
+      };
 
       # Rate-limited log of dropped packets. This is the module default and
       # is spelled out because the hand-rolled iptables LOG line it replaces
