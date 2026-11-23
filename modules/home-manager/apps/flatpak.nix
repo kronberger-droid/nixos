@@ -36,7 +36,10 @@ _: {
       # only the folders documents live in, and no way to send anything.
       "org.onlyoffice.desktopeditors".Context = {
         shared = ["!network"];
-        filesystems = ["!host" "!/tmp" "xdg-documents" "xdg-download"];
+        # The notes tree read-only: a macro that could write there could
+        # drop a plugin into the vault, which Obsidian runs with network and
+        # ~/Projects.
+        filesystems = ["!host" "!/tmp" "xdg-documents" "xdg-documents/notes:ro" "xdg-download"];
       };
       # Non-Steam games added from Downloads otherwise come in through the
       # file chooser portal, which exports the .exe alone under

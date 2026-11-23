@@ -11,7 +11,7 @@
   # portal, which Aerion calls directly, so no document folders are bound.
   aerion = mkNixPak {
     config = {sloth, ...}: {
-      imports = with inputs.nixpak.nixpakModules; [gui-base network];
+      imports = (with inputs.nixpak.nixpakModules; [gui-base network]) ++ [./nixpak-common.nix];
 
       app.package = pkgs.aerion;
       flatpak.appId = "io.github.hkdb.Aerion";
@@ -34,6 +34,8 @@
       };
 
       bubblewrap = {
+        # gui-base's default. This app plays and records nothing.
+        sockets.pulse = lib.mkForce false;
         bind.rw = [
           # accounts/ here, the mail database and keys in the data dir.
           (sloth.mkdir (sloth.concat' sloth.xdgConfigHome "/aerion"))

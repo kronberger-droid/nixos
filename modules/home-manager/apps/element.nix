@@ -23,7 +23,7 @@
   # needs.
   element = mkNixPak {
     config = {sloth, ...}: {
-      imports = with inputs.nixpak.nixpakModules; [gui-base network];
+      imports = (with inputs.nixpak.nixpakModules; [gui-base network]) ++ [./nixpak-common.nix];
 
       app.package = pkgs.element-desktop;
       flatpak.appId = "im.riot.Riot";

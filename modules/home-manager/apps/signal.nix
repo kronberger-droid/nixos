@@ -13,7 +13,7 @@
   # points at a path that is not there.
   signal = mkNixPak {
     config = {sloth, ...}: {
-      imports = with inputs.nixpak.nixpakModules; [gui-base network];
+      imports = (with inputs.nixpak.nixpakModules; [gui-base network]) ++ [./nixpak-common.nix];
 
       app.package = pkgs.signal-desktop;
       flatpak.appId = "org.signal.Signal";

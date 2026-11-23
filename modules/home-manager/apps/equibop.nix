@@ -28,7 +28,7 @@
   # profile is pinned to libsecret, and `talk` there is the whole keyring.
   equibop = mkNixPak {
     config = {sloth, ...}: {
-      imports = with inputs.nixpak.nixpakModules; [gui-base network];
+      imports = (with inputs.nixpak.nixpakModules; [gui-base network]) ++ [./nixpak-common.nix];
 
       app.package = pkgs.equibop;
       flatpak.appId = "io.github.equicord.equibop";

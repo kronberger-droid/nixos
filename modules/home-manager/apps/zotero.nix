@@ -16,7 +16,7 @@
   # (claude-settings.nix) and the browser connector talk to.
   zotero = mkNixPak {
     config = {sloth, ...}: {
-      imports = with inputs.nixpak.nixpakModules; [gui-base network];
+      imports = (with inputs.nixpak.nixpakModules; [gui-base network]) ++ [./nixpak-common.nix];
 
       app.package = pkgs.zotero;
       flatpak.appId = "org.zotero.Zotero";
@@ -34,6 +34,8 @@
       };
 
       bubblewrap = {
+        # gui-base's default. This app plays and records nothing.
+        sockets.pulse = lib.mkForce false;
         bind.rw = [
           # The library and attachments (extensions.zotero.dataDir).
           (sloth.concat' sloth.homeDir "/Zotero")
