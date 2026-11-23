@@ -5,6 +5,9 @@ machines and workflow -- it is not designed to be reusable or configurable for
 others. Expect hardcoded preferences, minimal abstraction, and very few knobs
 to turn.
 
+How to use it day to day (getting into machines and services, switching,
+deploying, secrets, the network) is in the [handbook](docs/README.md).
+
 ## Hosts
 
 | Host | Arch | Description |
