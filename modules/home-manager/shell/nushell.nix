@@ -672,7 +672,7 @@ in {
         # timestamp on each instead of a full module row per command.
         $env.TRANSIENT_PROMPT_COMMAND = {||
             let dir = ($env.PWD | str replace $nu.home-dir "~")
-            $"(ansi dark_gray)(date now | format date '%a %d %b %Y %H:%M:%S')  ($dir)(ansi reset)\n"
+            $"\n(ansi dark_gray)(date now | format date '%a %d %b %Y %H:%M:%S')  ($dir)(ansi reset)\n"
         }
         # Unset, the collapsed line would keep the live right prompt.
         $env.TRANSIENT_PROMPT_COMMAND_RIGHT = ""
