@@ -48,7 +48,8 @@ in {
       max-jobs = lib.mkDefault "auto";
       cores = lib.mkDefault 0;
 
-      # Faster evaluation
+      # Build-time inputs of everything rooted survive a GC, so a dev shell
+      # or a rebuild works offline. Costs store space, not evaluation time.
       keep-derivations = true;
       keep-outputs = true;
 

@@ -22,11 +22,9 @@
     swapSize = "20G";
   };
 
-  boot = {
-    # The install used lanzaboote.autoGenerateKeys to get past the missing
-    # keys; it also implies allowUnsigned, so it went once the keys existed.
-    # A reinstall needs it back for that first nixos-install only.
-  };
+  # The install used lanzaboote.autoGenerateKeys to get past the missing
+  # keys; it also implies allowUnsigned, so it went once the keys existed.
+  # A reinstall needs it back for that first nixos-install only.
 
   # The rest of Steam is in home-manager/apps/steam.nix.
   home-manager.users.${username}.steamFlatpak.extraArgs = ["-cef-disable-gpu"];
@@ -45,10 +43,6 @@
         # pinned to `performance` after the first game.
         defaultgov = "powersave";
       };
-      gpu = {
-        apply_gpu_optimisations = "accept-responsibility";
-        gpu_device = 1;
-      };
       cpu = {
         park_cores = "no";
         pin_policy = "prefer-high-performance";
@@ -61,15 +55,8 @@
     };
   };
 
-  hardware.graphics = {
-    enable = true;
-    extraPackages = with pkgs; [
-      intel-media-driver
-      intel-vaapi-driver
-      libva-vdpau-driver
-      libvdpau-va-gl
-    ];
-  };
+  # iHD only, as on the laptops: the i965 driver is for pre-Broadwell chips.
+  hardware.graphics.extraPackages = [pkgs.intel-media-driver];
 
   # Limit build parallelism to keep the system responsive. 16 threads; two
   # jobs at 6 cores each leave 4 free. cores is per job, so the old 12 let

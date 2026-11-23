@@ -36,7 +36,8 @@ _: {
 
   # Limit build parallelism to keep the system responsive
   nix.settings = {
-    cores = 8; # Leave 4 threads free for desktop responsiveness
+    # Per job, so 2 x 4 = 8 of the 12 threads, leaving 4 for the desktop.
+    cores = 4;
     max-jobs = 2; # Max parallel derivation builds
   };
 

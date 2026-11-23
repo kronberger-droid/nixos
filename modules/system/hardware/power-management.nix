@@ -57,10 +57,6 @@ in {
         DISK_IDLE_SECS_ON_AC = 0;
         DISK_IDLE_SECS_ON_BAT = 2;
 
-        # Graphics
-        RADEON_DPM_STATE_ON_AC = "performance";
-        RADEON_DPM_STATE_ON_BAT = "battery";
-
         # WiFi power management
         WIFI_PWR_ON_AC = "off";
         WIFI_PWR_ON_BAT = "on";
@@ -72,8 +68,6 @@ in {
         # Battery care
         START_CHARGE_THRESH_BAT0 = 40;
         STOP_CHARGE_THRESH_BAT0 = 80;
-        START_CHARGE_THRESH_BAT1 = 40;
-        STOP_CHARGE_THRESH_BAT1 = 80;
 
         # Audio power saving
         SOUND_POWER_SAVE_ON_AC = 0;
@@ -174,8 +168,6 @@ in {
     then [
       powertop
       acpi
-      tlp
-      brightnessctl
     ]
     else []
   );

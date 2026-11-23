@@ -88,7 +88,6 @@
     cachix
 
     # Others
-    fwupd
     nixpkgs-review
     woeusb
   ];

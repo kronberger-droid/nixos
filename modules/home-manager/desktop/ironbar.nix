@@ -368,7 +368,7 @@
         (handle "toggles" "")
         sep
 
-        (status "bluetooth" 5000 {
+        (status "bluetooth" 30000 {
           on_click_left = run "tui" "bluetooth";
           on_click_right = run "bluetooth" "toggle";
         })

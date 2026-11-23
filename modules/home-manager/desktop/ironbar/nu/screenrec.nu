@@ -47,7 +47,7 @@ def refresh [] {
 
 def "main toggle" [] {
   if (recording?) {
-    ^$PKILL wl-screenrec | complete | ignore
+    ^$PKILL -x wl-screenrec | complete | ignore
     notify "Recording stopped"
     refresh
     return

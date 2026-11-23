@@ -1,7 +1,7 @@
 {...}: {
   # Helium — privacy-focused Chromium fork from imputnet, shipped only as an
-  # x86_64 AppImage. Factored into its own overlay module so non-core hosts
-  # (e.g. the x86 media kiosk) can get `pkgs.helium` without importing all of
+  # x86_64 AppImage. Factored into its own overlay module so a host can get
+  # `pkgs.helium` without importing all of
   # modules/system/core/packages.nix.
   #
   # ARM note: there is no aarch64 AppImage upstream, so this overlay is a no-op

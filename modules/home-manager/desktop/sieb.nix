@@ -133,6 +133,8 @@
   rbw = pkgs.writeShellScript "sieb-rbw" ''
     export PATH=${lib.makeBinPath [
       config.programs.rbw.package
+      pkgs.coreutils
+      pkgs.util-linux
       pkgs.wtype
       pkgs.wl-clipboard-rs
       pkgs.libnotify
@@ -165,7 +167,10 @@
       --mcp-transport http --mcp-port ${nuMcpPort} 2>/dev/null &
     # The proxy forwards each connection the moment it accepts it; until nu
     # listens they wait in the socket's backlog instead of being refused.
+    # Not forever: a nu that exits at once (a flag renamed by a bump, its
+    # stderr discarded above) has to fail the unit, or Restart never fires.
     until (exec 3<>/dev/tcp/127.0.0.1/${nuMcpPort}) 2>/dev/null; do
+      kill -0 $! 2>/dev/null || exit 1
       ${pkgs.coreutils}/bin/sleep 0.05
     done
     # The listening fd is the unit's; sd_listen_fds only takes it in the

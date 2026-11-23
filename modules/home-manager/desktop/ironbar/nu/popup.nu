@@ -19,6 +19,10 @@ const BAR_HEIGHT = "@barHeight@"
 
 const WATCH_EVERY = 150ms
 const AWAY = 1sec
+# Then the watcher gives up and the popup stays until dismissed. Each round
+# forks three processes, and a pointer parked under the popup would keep
+# that going for as long as it is open.
+const WATCH_FOR = 2min
 # How far from the leave point, sideways and down, a popup can hang. The
 # volume popup is the big one, and one at the screen's edge is pushed in.
 const REACH = {x: 300, y: 500}
@@ -44,7 +48,7 @@ def "main leave" [] {
   # When the pointer went out, in ns since the epoch; 0 while it is inside.
   mut away_since = 0
 
-  loop {
+  for _ in 1..($WATCH_FOR // $WATCH_EVERY) {
     if (try { get-var popup_tok | into int } catch { 0 }) >= $start { return }
     if not (visible) { return }
 

@@ -18,11 +18,6 @@
         # gtk has no ScreenCast impl, so window sharing (Helium/Teams) needs this.
         "org.freedesktop.impl.portal.ScreenCast" = ["gnome"];
         "org.freedesktop.impl.portal.Screenshot" = ["gnome"];
-        # Same story for Clipboard and the RemoteDesktop session it rides on:
-        # gtk implements neither, and Bitwarden falls back to them whenever its
-        # X11 clipboard backend is unavailable.
-        "org.freedesktop.impl.portal.RemoteDesktop" = ["gnome"];
-        "org.freedesktop.impl.portal.Clipboard" = ["gnome"];
         # This file replaces the niri-portals.conf niri ships, so its Secret
         # line has to be restated. Without it oo7-portal runs but is never
         # routed to (its .portal says UseIn=gnome, ignored once a conf exists).

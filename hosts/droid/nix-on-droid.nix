@@ -18,7 +18,7 @@ in {
     ./proot-pin.nix
 
     # The rust-overlay toolchain is built on the homeserver (the remote
-    # builder in flake.nix), so it no longer runs into proot's build env.
+    # builder further down in this file), so it no longer runs into proot's build env.
     ./rust.nix
   ];
 
