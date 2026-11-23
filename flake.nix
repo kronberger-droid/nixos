@@ -370,7 +370,6 @@
                     niri = final.niri-unstable;
                   })
                   (_: _: {
-                    deploy-rs = inputs.deploy-rs.packages.${system}.default;
                     # Unmodified, so helix.cachix.org hits; see the helix input.
                     helix = inputs.helix.packages.${system}.default;
                     # rio from upstream main, tests skipped — same policy as the
@@ -413,6 +412,25 @@
 
     # Standard system configurations
     x86System = "x86_64-linux";
+
+    # deploy-rs builds its activation wrapper from a nixpkgs with its own
+    # overlay, which compiles deploy-rs from the input: no cache has that.
+    # nixpkgs ships the same release, so the overlay keeps its lib and takes
+    # the package from there (the pattern in the deploy-rs README). The CLI
+    # is plain `pkgs.deploy-rs` for the same reason.
+    deployLib =
+      (import nixpkgs {
+        system = x86System;
+        overlays = [
+          inputs.deploy-rs.overlays.default
+          (_: prev: {
+            deploy-rs = {
+              inherit (nixpkgs.legacyPackages.${x86System}) deploy-rs;
+              inherit (prev.deploy-rs) lib;
+            };
+          })
+        ];
+      }).deploy-rs.lib;
     armSystem = "aarch64-linux";
 
     # Droid's upstream-main nushell, cross-compiled from x86_64 rather than
@@ -516,7 +534,7 @@
       confirmTimeout = 60;
       activationTimeout = 240;
       profiles.system.path =
-        inputs.deploy-rs.lib.${x86System}.activate.nixos
+        deployLib.activate.nixos
         self.nixosConfigurations.homeserver;
     };
 
