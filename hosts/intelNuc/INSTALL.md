@@ -6,7 +6,8 @@ disk that disko has formatted: do not rebuild the old install from it.
 
 Shells: the old intelNuc and P14E run nu as the login shell, so commands there
 are nu and anything after `ssh P14E` is parsed by nu (no `>` redirects). The
-live stick is a stock installer, its commands are sh.
+live stick opens in nu as well; its commands here are sh, so type `bash` there
+first (see `hosts/recovery/INSTALL.md`).
 
 ## Before wiping (on the old intelNuc, nu)
 

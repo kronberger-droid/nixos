@@ -2,7 +2,10 @@
 
 The steps every fresh install shares. Each host's own `INSTALL.md` covers
 what differs (partitioning, identity restore, hardware checks) and says where
-it slots in. The stick's shell is sh; the installed hosts run nu.
+it slots in. The installed hosts run nu, and so does a terminal on the stick
+(`hosts/recovery/configuration.nix` hands every interactive bash to nu). The
+snippets here are sh: type `bash` first, which stays bash when started from
+nu.
 
 Why the order matters: the stick has no disk of its own. Its `/`, the upper
 layer of `/nix/store` and `/tmp` are all tmpfs, so anything big that is not
