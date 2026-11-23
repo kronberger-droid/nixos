@@ -71,7 +71,10 @@
   # rebuilt string, so it tracks any users.users.<name>.home override. The
   # tail matches vault.path in home-manager/apps/obsidian.nix.
   vaultRel = "Documents/notes/general-vault";
-  vaultSrc = "${config.users.users.${username}.home}/${vaultRel}";
+  primaryHome = config.users.users.${username}.home;
+  vaultSrc = "${primaryHome}/${vaultRel}";
+  # What the sandbox reads of the primary home: claude-sandbox-read-acl.
+  sharedTrees = ["${primaryHome}/Projects" "${primaryHome}/.config/nixos"];
   vaultDst = "${home}/${vaultRel}";
 
   # `machinectl shell claude@` rather than `sudo -u claude -i`: machined runs
@@ -284,6 +287,10 @@ in {
       # parent only, so `mv .obsidian x; mkdir .obsidian` would hand it a
       # fresh plugin directory (the root's default ACL) until the next strip.
       # A mountpoint cannot be renamed (EBUSY) and this one is not writable.
+      # That holds in this mount namespace only: from a user namespace that
+      # binds the source path there is no mount over `.obsidian`. The source
+      # is out of reach, since ~/Documents is closed to this account
+      # (claude-sandbox-close-acl).
       # The primary user reaches the vault through its own path, unaffected.
       fileSystems."${vaultDst}/.obsidian" = {
         device = "${vaultSrc}/.obsidian";
@@ -317,9 +324,18 @@ in {
         unitConfig.ConditionPathIsDirectory = vaultSrc;
         # Stays active after the run, so a switch that changes the script
         # restarts it instead of waiting for the next boot.
+        #
+        # Root walks a tree the agent can write, by path. Should an entry
+        # be swapped for a symlink mid-walk, the link must lead nowhere:
+        # nothing but the vault is writable or even present in this unit's
+        # view of /home, and the rest of the system is read-only.
         serviceConfig = {
           Type = "oneshot";
           RemainAfterExit = true;
+          ProtectSystem = "strict";
+          ProtectHome = "tmpfs";
+          BindPaths = [vaultSrc];
+          PrivateTmp = true;
         };
         script = ''
           vault=${lib.escapeShellArg vaultSrc}
@@ -337,22 +353,28 @@ in {
       # stay in its own ~/Projects, fetched from like a contributor's fork.
       #
       # The one entry added to the primary home is traverse-only (--x) for
-      # this group, which lets a path through but does not list the home or
-      # open anything in it that has no ACL of its own. The default entries
-      # make files created later readable too. Hosts without one of these
-      # directories skip it.
+      # this group, which lets a path through without listing the home. It
+      # does not close what lies beside the trees, though. A process in a
+      # group that an ACL names is judged by the group entries alone, and
+      # where an inode has none it falls through to the `other` bits, which
+      # umask 022 leaves at r-x. With only the traverse entry the agent read
+      # ~/Documents, ~/Downloads and the shell history. So every other entry
+      # directly in the home and in ~/.config carries `g:claude:---`
+      # (claude-sandbox-close-acl below): a named entry that matches and
+      # grants nothing ends the lookup there. One level is enough, since
+      # nothing below a directory is reachable without searching it.
+      #
+      # The default entries make files created later in the trees readable
+      # too. Hosts without one of these directories skip it.
       #
       # The home's mode is 710 for that entry's sake (homeMode above), and
-      # its owning group is pinned to nothing here. On a directory with an
-      # ACL the mode's group bits are the mask, not the owning group's
-      # rights, and userborn's tmpfiles rule chmods the home to homeMode on
-      # every switch. At 700 that set the mask to --- and blanked this
-      # entry until the next boot. At 710 the mask it writes is --x, and
-      # `group::---` keeps `users` out all the same.
-      systemd.services.claude-sandbox-read-acl = let
-        primaryHome = config.users.users.${username}.home;
-        trees = ["${primaryHome}/Projects" "${primaryHome}/.config/nixos"];
-      in {
+      # its owning group is pinned to nothing here, tree or no tree. On a
+      # directory with an ACL the mode's group bits are the mask, not the
+      # owning group's rights, and userborn's tmpfiles rule chmods the home
+      # to homeMode on every switch. At 700 that set the mask to --- and
+      # blanked this entry until the next boot. At 710 the mask it writes
+      # is --x, and `group::---` keeps `users` out all the same.
+      systemd.services.claude-sandbox-read-acl = {
         description = "Grant the Claude Code sandbox user read access to the project trees";
         wantedBy = ["multi-user.target"];
         serviceConfig = {
@@ -361,15 +383,55 @@ in {
         };
         script = ''
           setfacl=${pkgs.acl}/bin/setfacl
+          $setfacl -m g::--- ${lib.escapeShellArg primaryHome}
           ${lib.concatMapStringsSep "\n" (t: ''
               if [ -d ${lib.escapeShellArg t} ]; then
-                $setfacl -m g::---,g:${user}:--x ${lib.escapeShellArg primaryHome}
+                $setfacl -m g:${user}:--x ${lib.escapeShellArg primaryHome}
                 $setfacl -m g:${user}:--x ${lib.escapeShellArg (builtins.dirOf t)}
                 $setfacl -R -m g:${user}:rX,d:g:${user}:rX ${lib.escapeShellArg t}
               fi
             '')
-            trees}
+            sharedTrees}
         '';
+      };
+
+      # The deny entries. Not default ACLs on the two directories: those
+      # replace the umask for everything created there, and are inherited
+      # all the way down. Instead a pass over the direct children, at boot
+      # and again whenever one of the two directories changes (the path unit
+      # below), so an entry made later is closed moments after it appears.
+      # A file replaced by rename is a new inode and is open for that long.
+      #
+      # Only entries still lacking the deny are touched. setfacl on a child
+      # is an attribute change in the watched directory, so rewriting all of
+      # them each time would trigger the path unit from its own service.
+      # Symlinks are left alone: setfacl would follow them, into the
+      # read-only store for everything home-manager links.
+      systemd.services.claude-sandbox-close-acl = {
+        description = "Close the primary home to the Claude Code sandbox user outside the project trees";
+        wantedBy = ["multi-user.target"];
+        after = ["claude-sandbox-read-acl.service"];
+        serviceConfig.Type = "oneshot";
+        path = [pkgs.acl pkgs.findutils pkgs.gnugrep];
+        script = ''
+          close() {
+            dir=$1
+            shift
+            [ -d "$dir" ] || return 0
+            find "$dir" -mindepth 1 -maxdepth 1 ! -type l "$@" -print0 |
+              while IFS= read -r -d "" entry; do
+                getfacl -cp -- "$entry" 2>/dev/null | grep -qx 'group:${user}:---' ||
+                  setfacl -m g:${user}:--- -- "$entry" || true
+              done
+          }
+          close ${lib.escapeShellArg primaryHome} ! -name Projects ! -name .config
+          close ${lib.escapeShellArg "${primaryHome}/.config"} ! -name nixos
+        '';
+      };
+      systemd.paths.claude-sandbox-close-acl = {
+        description = "Watch the primary home for entries the sandbox user could still read";
+        wantedBy = ["multi-user.target"];
+        pathConfig.PathChanged = [primaryHome "${primaryHome}/.config"];
       };
 
       # One ed25519 key per host, made where it will live. No passphrase: the
