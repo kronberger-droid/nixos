@@ -23,16 +23,27 @@
   # Kept apart from the tunnel's own up and down, so a tunnel that fails at
   # boot or dies later leaves the rules, and with them the kill switch, in
   # place. `iif` takes an interface name before it exists.
-  rules = add: ''
+  #
+  # Adding fills in what is missing and never flushes first, and the
+  # `unreachable` rule goes in before the two above it: at no point is
+  # there a route to Mullvad's table without the dead end behind it, or a
+  # moment with the rules gone. A switch reloads the unit (ExecReload below)
+  # instead of stopping it for the same reason. The price: a changed rule,
+  # as opposed to a missing one, takes a `systemctl restart`.
+  rulesAdd = ''
+    set -e
+    for fam in -4 -6; do
+      have() { ${ip} $fam rule show | ${pkgs.gnugrep}/bin/grep -q "^$1:"; }
+      have 10002 || ${ip} $fam rule add iif tailscale0 unreachable priority 10002
+      have 10000 || ${ip} $fam rule add iif tailscale0 lookup main suppress_prefixlength 0 priority 10000
+      have 10001 || ${ip} $fam rule add iif tailscale0 lookup ${table} priority 10001
+    done
+  '';
+  rulesDel = ''
     for fam in -4 -6; do
       for prio in 10000 10001 10002; do
         while ${ip} $fam rule del priority $prio 2>/dev/null; do :; done
       done
-      ${lib.optionalString add ''
-      ${ip} $fam rule add iif tailscale0 lookup main suppress_prefixlength 0 priority 10000
-      ${ip} $fam rule add iif tailscale0 lookup ${table} priority 10001
-      ${ip} $fam rule add iif tailscale0 unreachable priority 10002
-    ''}
     done
   '';
 in {
@@ -86,11 +97,15 @@ in {
       description = "Route Tailscale exit-node traffic through Mullvad";
       wantedBy = ["multi-user.target"];
       before = ["tailscaled.service"];
-      serviceConfig = {
+      reloadIfChanged = true;
+      serviceConfig = let
+        add = pkgs.writeShellScript "mullvad-exit-rules-add" rulesAdd;
+      in {
         Type = "oneshot";
         RemainAfterExit = true;
-        ExecStart = pkgs.writeShellScript "mullvad-exit-rules-add" (rules true);
-        ExecStop = pkgs.writeShellScript "mullvad-exit-rules-del" (rules false);
+        ExecStart = add;
+        ExecReload = add;
+        ExecStop = pkgs.writeShellScript "mullvad-exit-rules-del" rulesDel;
       };
     };
 
