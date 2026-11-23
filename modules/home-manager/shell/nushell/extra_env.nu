@@ -34,19 +34,14 @@ def --env load-secret [file: string, ...vars: string] {
     }
 }
 
-# Two separate tokens for the primary user on purpose, so the scope sets stay
-# independent.
+# The primary user's GitHub token is not exported here. The login shell's
+# environment becomes the session's, and from there every app's, the
+# sandboxed ones included: a token in it is readable by any of them. `gh`
+# and `gh-dash` read theirs at call time instead (shell/git.nix).
 #
-# GITHUB_PERSONAL_ACCESS_TOKEN feeds the Claude Code GitHub plugin. `gh`
-# resolves GH_TOKEN ahead of ~/.config/gh/hosts.yml, so setting it here also
-# means `gh auth login` is never needed — which matters, since that flow would
-# try to write ~/.config/gh/config.yml, a read-only home-manager store symlink.
-# Note this covers every `gh` invocation, not only gh-dash.
-load-secret /run/secrets/github-token GITHUB_PERSONAL_ACCESS_TOKEN
-load-secret /run/secrets/gh-dash-token GH_TOKEN
-
 # The sandbox account holds one fine-grained token for both jobs; only it can
-# read these files, so on the primary user's side the lines are no-ops. The
+# read these files, so on the primary user's side the lines are no-ops, and
+# its session runs no sandboxed apps that would inherit the value. The
 # workstations keep it in /run/secrets. The homeserver hands it out only
 # while a Remote Control window is open (claude-sandbox-open), at the second
 # path, which is gone again when the window closes.

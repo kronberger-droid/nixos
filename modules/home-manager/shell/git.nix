@@ -4,6 +4,23 @@
   ...
 }: let
   s = config.scheme;
+
+  # `gh` resolves GH_TOKEN ahead of ~/.config/gh/hosts.yml, so `gh auth
+  # login` is never needed, which matters: that flow would try to write
+  # ~/.config/gh/config.yml, a read-only home-manager store symlink. The
+  # token is read when the program starts and not exported from the shell,
+  # where every process of the session would inherit it. A GH_TOKEN already
+  # set wins, which is how the sandbox account's reaches it.
+  withToken = bin: pkg:
+    pkgs.symlinkJoin {
+      inherit (pkg) pname version;
+      paths = [pkg];
+      nativeBuildInputs = [pkgs.makeWrapper];
+      postBuild = ''
+        wrapProgram $out/bin/${bin} --run '[ -n "''${GH_TOKEN-}" ] || ! [ -r /run/secrets/gh-dash-token ] || export GH_TOKEN="$(< /run/secrets/gh-dash-token)"'
+      '';
+      inherit (pkg) meta;
+    };
 in {
   programs = {
     delta = {
@@ -18,6 +35,7 @@ in {
 
     gh = {
       enable = true;
+      package = withToken "gh" pkgs.gh;
       settings = {
         git_protocol = "ssh";
       };
@@ -25,6 +43,7 @@ in {
 
     gh-dash = {
       enable = true;
+      package = withToken "gh-dash" pkgs.gh-dash;
       settings = {
         prSections = [
           {
