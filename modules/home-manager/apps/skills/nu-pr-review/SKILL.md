@@ -46,13 +46,15 @@ for c in "'a-b' | split column '-' col col | to nuon" ; do
 done
 ```
 
-Where CI hasn't run clippy or the tests on this head, run them in the worktree, scoped to the touched crates:
+Where CI hasn't run clippy or the tests on this head, run them in the worktree, scoped to the touched crates. Anything that compiles or runs the PR goes through `$S/pr_jail.sh`: it is a stranger's code, and the jail takes the ssh key, the logins, the token variables and the network away from it. That includes the built `target/debug/nu` when probing.
 
 ```sh
-cargo clippy -p <crate> --profile ci --all-targets -- -D warnings -D clippy::unwrap_used -D clippy::unchecked_time_subtraction
-cargo test -p <crate> --test tests -- <filter>
+$S/pr_jail.sh cargo clippy -p <crate> --profile ci --all-targets --offline -- -D warnings -D clippy::unwrap_used -D clippy::unchecked_time_subtraction
+$S/pr_jail.sh cargo test -p <crate> --offline --test tests -- <filter>
 cargo fmt --all --check && typos <changed files>
 ```
+
+A probe that needs the network takes `pr_jail.sh --net`, which still hides the credentials.
 
 Every candidate ends in one state:
 

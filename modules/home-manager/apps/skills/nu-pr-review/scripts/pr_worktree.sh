@@ -64,7 +64,10 @@ fi
 cd "$WT"
 unset CARGO_TARGET_DIR
 mkdir -p target
-if ! cargo build >target/pr_build.log 2>&1; then
+# The build runs the PR: build.rs, proc macros. In the jail, and offline once the crates are fetched.
+JAIL=$(dirname "$(readlink -f "$0")")/pr_jail.sh
+"$JAIL" --net cargo fetch >target/pr_build.log 2>&1 || true
+if ! "$JAIL" cargo build --offline >>target/pr_build.log 2>&1; then
   tail -40 target/pr_build.log
   echo "build failed: full log in $WT/target/pr_build.log" >&2
   exit 1
