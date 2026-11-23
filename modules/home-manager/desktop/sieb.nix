@@ -129,7 +129,7 @@
 
   # The vault picker. Unlocking first, so the master password prompt (a
   # sieb-pinentry panel) is not opened under a picker that already holds
-  # the keyboard. rbw.nu calls its tools bare, so they go on PATH here.
+  # the keyboard. sieb/rbw.nu calls its tools bare, so they go on PATH here.
   rbw = pkgs.writeShellScript "sieb-rbw" ''
     export PATH=${lib.makeBinPath [
       config.programs.rbw.package
@@ -137,6 +137,9 @@
       pkgs.wl-clipboard-rs
       pkgs.libnotify
     ]}:$PATH
+    # rbw.nu reopens on the entry last used. That is to last as long as the
+    # unlock, which only this side sees ending.
+    rbw unlocked >/dev/null 2>&1 || export RBW_PICKER_FRESH=1
     # Bound to a key, so a failed unlock says why rather than nothing.
     # Escape on the prompt is no failure worth a toast.
     if ! err=$(rbw unlock 2>&1); then
@@ -146,7 +149,7 @@
       esac
       exit 1
     fi
-    exec ${sieb}/bin/sieb --config ${launcherTheme} --script ${examples}/rbw/rbw.nu
+    exec ${sieb}/bin/sieb --config ${launcherTheme} --script ${./sieb/rbw.nu}
   '';
 
   # The launcher's `nu:` evaluates in a long-running `nu --mcp`. Its HTTP
