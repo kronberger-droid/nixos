@@ -13,7 +13,11 @@ from what this account holds.
   cloned from my fork over https:
   `gh repo clone kronberger-droid/<repo>` makes that `origin` and adds the
   parent (`nushell/nushell`, `nushell/reedline`, ...) as `upstream`. Branch off
-  `upstream`, push to `origin`. `GH_TOKEN` is a fine-grained token on my
+  `upstream`, push to `origin`. A repo of my own has no `upstream`, so there
+  the base is `origin`. Either way `git fetch` first and branch off the remote
+  ref (`git switch -c <branch> origin/main`): nothing keeps the local `main`
+  of these clones current, and a branch cut from it carries stale history
+  into my merge. `GH_TOKEN` is a fine-grained token on my
   account, granted repo by repo: it reads public upstreams but writes only to
   my repos, and a 403 or "not found" on one of mine means it isn't granted yet.
   Tell me which repo to add.

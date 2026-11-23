@@ -92,6 +92,6 @@ the terminal palette cannot remap. It needs the second route.
 
 ## Handing over
 
-Branch off `main`, whatever branch the checkout happens to be on, one change
-per branch. Report the path, the branch, the rung reached, and any host in the
+`git fetch origin`, then branch off `origin/main`, whatever the checkout has
+checked out and wherever its local `main` points. One change per branch. Report the path, the branch, the rung reached, and any host in the
 reach that went unchecked.
