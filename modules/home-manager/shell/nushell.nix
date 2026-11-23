@@ -231,22 +231,17 @@ in {
           { has_direnv: $has_direnv, has_flake: $has_flake, dev_shell: $dev_shell }
       }
 
-      # Open the terminal in a directory and run a command there. Honours
-      # terminal.cwdViaExec the same way desktop/niri.nix's termSpawn does:
-      # a terminal whose working-dir flag is broken gets the cd inside a
-      # bash -c wrapper instead.
-      ${
-        if config.terminal.cwdViaExec
-        then ''
-          def termIn [cwd: string, cmd: string] {
-              $"${config.terminal.bin} ${config.terminal.execFlag} ${pkgs.bash}/bin/bash -c \"cd '($cwd)' && exec ($cmd)\""
-          }
-        ''
-        else ''
-          def termIn [cwd: string, cmd: string] {
-              $"${config.terminal.bin} ${config.terminal.workingDirFlag}=($cwd) ${config.terminal.execFlag} ($cmd)"
-          }
-        ''
+      # One word for sh, whatever is in it: the strings built below go
+      # through `sh -c`, and a directory name may hold spaces or worse.
+      def shq [word: string] {
+          let q = (char single_quote)
+          $q + ($word | str replace --all $q $"($q)\\($q)($q)") + $q
+      }
+
+      # Open the terminal in a directory and run a command there. `cmd` is
+      # sh text, the directory is not.
+      def termIn [cwd: string, cmd: string] {
+          $"${config.terminal.bin} ${config.terminal.workingDirFlag}=(shq $cwd) ${config.terminal.execFlag} ($cmd)"
       }
 
       # Build a terminal command string with optional dev shell wrapping
@@ -284,7 +279,7 @@ in {
 
           if $is_typst {
               # typst watch goes up first so main.pdf exists when zathura opens
-              ^niri msg action spawn -- sh -c (termCmd $cwd $dev_env $"typst watch ($cwd)/main.typ ($cwd)/main.pdf")
+              ^niri msg action spawn -- sh -c (termCmd $cwd $dev_env $"typst watch (shq $"($cwd)/main.typ") (shq $"($cwd)/main.pdf")")
               sleep 500ms
 
               ^niri msg action spawn -- zathura ($cwd + "/main.pdf")

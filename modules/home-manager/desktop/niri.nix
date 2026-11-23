@@ -20,18 +20,14 @@
       if floating && config.terminal.floatingAppId != null
       then "${config.terminal.appIdFlag} ${config.terminal.floatingAppId} "
       else "";
-    # When --working-dir is broken (e.g. Rio), use -e bash -c "cd ... && exec cmd"
+    # Quoted: the directory is whatever the focused window sits in, spaces
+    # and all.
     cwdPart =
-      if cwdArg && !config.terminal.cwdViaExec
-      then "${config.terminal.workingDirFlag} $(${cwd}) "
+      if cwdArg
+      then "${config.terminal.workingDirFlag} \"$(${cwd})\" "
       else "";
     execPart =
-      if cwdArg && config.terminal.cwdViaExec
-      then
-        if exec != null
-        then "${config.terminal.execFlag} ${pkgs.bash}/bin/bash -c \"cd '$(${cwd})' && exec ${exec}\""
-        else "${config.terminal.execFlag} ${pkgs.bash}/bin/bash -c \"cd '$(${cwd})' && exec \\$SHELL\""
-      else if exec != null
+      if exec != null
       then "${config.terminal.execFlag} ${exec} "
       else "";
   in ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${idPart}${cwdPart}${execPart}"];
@@ -213,9 +209,9 @@ in {
       "${modifier}+Shift+T".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} sysmonitor ${config.terminal.execFlag} ${pkgs.bottom}/bin/btm"];
       "${modifier}+Shift+X".action.spawn = termSpawn {
         floating = true;
-        exec = "${pkgs.yazi}/bin/yazi $(${cwd})";
+        exec = "${pkgs.yazi}/bin/yazi \"$(${cwd})\"";
       };
-      "${modifier}+Shift+N".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${pkgs.nemo-with-extensions}/bin/nemo $(${cwd})"];
+      "${modifier}+Shift+N".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${pkgs.nemo-with-extensions}/bin/nemo \"$(${cwd})\""];
 
       # Scratchpad
       "${modifier}+Minus".action.spawn = ["${scratchpadToggle}" "toggle"];

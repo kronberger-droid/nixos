@@ -14,13 +14,8 @@
       workingDirFlag = "--working-dir";
       appIdFlag = "--app-id";
       floatingAppId = "floating_shell";
-      # --working-dir was broken on the April 2026 fork build, hence the
-      # cwdViaExec machinery. It was never broken for `-e` commands, only
-      # for the bare shell, since rio's default fork path ignores the
-      # directory; rio.nix sets `use-fork = false` so the flag now works for
-      # both. Flip this back if a bump regresses it; niri.nix and nushell.nix
-      # both still honour it.
-      cwdViaExec = false;
+      # --working-dir only reaches the bare shell with `use-fork = false`
+      # (rio.nix): rio's default fork path ignores the directory.
     };
   };
 
@@ -68,12 +63,6 @@ in {
       description = "App ID value for floating windows (null if not supported)";
     };
 
-    cwdViaExec = lib.mkOption {
-      type = lib.types.bool;
-      readOnly = true;
-      description = "Use -e cd workaround instead of --working-dir flag";
-    };
-
     cwdScript = lib.mkOption {
       type = lib.types.str;
       readOnly = true;
@@ -93,7 +82,6 @@ in {
       workingDirFlag = lib.mkDefault selectedConfig.workingDirFlag;
       appIdFlag = lib.mkDefault selectedConfig.appIdFlag;
       floatingAppId = lib.mkDefault selectedConfig.floatingAppId;
-      cwdViaExec = lib.mkDefault selectedConfig.cwdViaExec;
       cwdScript = "${config.xdg.configHome}/wm/cwd.sh";
     };
 
@@ -115,7 +103,7 @@ in {
             exit 0
         fi
 
-        relevant_apps="rio|foot|wezterm|ghostty|nemo|nautilus|thunar|yazi|ranger|helix|nvim|vim|emacs|code|zed"
+        relevant_apps="rio|nemo|yazi|helix"
 
         if [[ "$app_id" =~ ^($relevant_apps) ]]; then
             ppid=$(${pkgs.procps}/bin/pgrep --newest --parent "$pid")
