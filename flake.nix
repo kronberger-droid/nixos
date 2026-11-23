@@ -398,15 +398,6 @@
                         doCheck = false;
                         dontCargoUseSystemLibs = true;
                       });
-                    # bitwarden-desktop is stock again. Until 2026.8.0 it carried
-                    # a doCheck = false (a failing desktop_native cargo test) and
-                    # a wrapper hiding the GNOME token in XDG_CURRENT_DESKTOP so
-                    # it would not pick the RemoteDesktop clipboard portal, which
-                    # always failed under PR_SET_DUMPABLE(0). 2026.8.0 made X11
-                    # the default backend (bitwarden/clients#22062) and the
-                    # locked nixpkgs builds it clean, so the cached binary is
-                    # back. If the clipboard regresses, that wrapper is
-                    # `wrapProgram $out/bin/bitwarden --set XDG_CURRENT_DESKTOP niri`.
                     # zotero fails on unstable's firefox-esr 153.4. See the
                     # nixpkgs-zotero input above.
                     zotero = (import inputs.nixpkgs-zotero {inherit system;}).zotero;

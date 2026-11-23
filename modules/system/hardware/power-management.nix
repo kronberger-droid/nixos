@@ -181,7 +181,7 @@ in {
   );
 
   # Disable memfd_secret kernel-wide wherever hibernation is wired up. Any
-  # process holding secret memory (Electron/Chromium apps like Bitwarden do)
+  # process holding secret memory (Electron/Chromium apps do)
   # makes the kernel refuse hibernation, since secretmem pages must never hit
   # disk but a hibernate image writes all of RAM. LUKS-encrypted swap already
   # protects the image at rest, so the trade-off is negligible.

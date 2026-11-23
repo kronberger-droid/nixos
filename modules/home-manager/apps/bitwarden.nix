@@ -13,9 +13,9 @@
     source = config.lib.file.mkOutOfStoreSymlink osConfig.age.secrets.rbw-device-id.path;
   };
 
-  home.packages = with pkgs; [
-    bitwarden-desktop
-  ];
+  # No desktop client: the vault is rbw behind sieb's picker
+  # (desktop/sieb.nix), and editing happens in the web vault until
+  # `rbw edit` is safe (doy/rbw#364).
   programs.rbw = {
     enable = true;
     settings = {

@@ -17,7 +17,6 @@
     # zotero: sandboxed, see zotero.nix
 
     # Media
-    drawio
     inkscape
     # Photo browsing. Not the image/* default: that stays swayimg (xdg.nix),
     # which is also yazi's opener.

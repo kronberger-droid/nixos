@@ -228,8 +228,7 @@ in {
       # Session
       "${modifier}+Shift+Q".action.close-window = [];
       "${modifier}+Shift+E".action.spawn = config.sieb.commands.power;
-      "${modifier}+Shift+P".action.spawn = ["${pkgs.bitwarden-desktop}/bin/bitwarden"];
-      "${modifier}+Shift+W".action.spawn = config.sieb.commands.rbw;
+      "${modifier}+Shift+P".action.spawn = config.sieb.commands.rbw;
 
       # Notifications
       "${modifier}+Shift+D".action.spawn = ["${pkgs.mako}/bin/makoctl" "dismiss" "-a"];
@@ -500,33 +499,6 @@ in {
         open-floating = true;
         default-column-width = {proportion = 0.5;};
         default-window-height = {proportion = 0.6;};
-      }
-
-      # Bitwarden
-      {
-        # Case-insensitive: the app-id has flipped between "Bitwarden" and
-        # "bitwarden" across releases.
-        matches = [{app-id = "(?i)^bitwarden$";}];
-        open-floating = true;
-        default-column-width = {proportion = 0.6;};
-        default-window-height = {proportion = 0.7;};
-        # Render as a solid block in screencasts/recordings — the vault
-        # stays visible to us but never leaks into shared/recorded screens.
-        block-out-from = "screencast";
-      }
-
-      # Proton Pass
-      {
-        matches = [
-          {
-            app-id = "^electron$";
-            title = "^Proton Pass$";
-          }
-        ];
-        open-floating = true;
-        default-column-width = {proportion = 0.6;};
-        default-window-height = {proportion = 0.7;};
-        block-out-from = "screencast";
       }
 
       # File dialogs
