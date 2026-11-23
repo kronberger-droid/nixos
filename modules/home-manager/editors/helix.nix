@@ -266,10 +266,10 @@ in {
           # printf restores the escape sequences yazi clobbered; :open reads
           # the path back; the mouse toggle forces a clean redraw.
           "C-x" = [
-            ":sh rm -f /tmp/helix-yazi-chooser"
-            ":insert-output yazi \"%{buffer_name}\" --chooser-file=/tmp/helix-yazi-chooser"
+            ":sh rm -f \"$XDG_RUNTIME_DIR/helix-yazi-chooser\""
+            ":insert-output yazi \"%{buffer_name}\" --chooser-file=\"$XDG_RUNTIME_DIR/helix-yazi-chooser\""
             ":sh printf \"\\x1b[?1049h\\x1b[?2004h\" > /dev/tty"
-            ":open %sh{cat /tmp/helix-yazi-chooser}"
+            ":open %sh{cat \"$XDG_RUNTIME_DIR/helix-yazi-chooser\"}"
             ":redraw"
             ":set mouse false"
             ":set mouse true"

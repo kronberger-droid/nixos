@@ -60,7 +60,9 @@ in {
 
       connectScript = pkgs.writeShellScript "tuwien-vpn-connect" ''
         PASSWORD=$(cat "${cfg.passwordFile}")
-        TOTP=$(${pkgs.oath-toolkit}/bin/oathtool --totp --base32 "$(cat "${cfg.totpSecretFile}")")
+        # `@file`, not "$(cat file)": the seed on a command line is in
+        # /proc/<pid>/cmdline for every local uid to read.
+        TOTP=$(${pkgs.oath-toolkit}/bin/oathtool --totp --base32 "@${cfg.totpSecretFile}")
         printf '%s\n%s\n' "$PASSWORD" "$TOTP" | \
           ${pkgs.openconnect}/bin/openconnect \
             --user=${cfg.username} \

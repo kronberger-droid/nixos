@@ -8,9 +8,13 @@
   sessionBin = "niri-session";
 
   # Wrapper that redirects stderr so TTY stays clean on login.
-  # Warnings/errors still readable at /tmp/${sessionBin}.log.
+  # Warnings/errors still readable at $XDG_RUNTIME_DIR/${sessionBin}.log.
+  # Not /tmp: a second local uid could create the file there first, and the
+  # failed redirect would end the login before the session starts.
   sessionWrapper = pkgs.writeShellScript "${sessionBin}-quiet" ''
-    exec ${sessionBin} 2>/tmp/${sessionBin}.log
+    log=/dev/null
+    [ -n "$XDG_RUNTIME_DIR" ] && log=$XDG_RUNTIME_DIR/${sessionBin}.log
+    exec ${sessionBin} 2>"$log"
   '';
 
   # Desktop entry so tuigreet shows a clean name instead of the Nix store path.

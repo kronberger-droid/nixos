@@ -3,6 +3,10 @@
   pkgs,
   ...
 }: let
+  # Radicale is dialled by its tailnet address, not by name. It speaks plain
+  # HTTP, and off the tailnet a bare `homeserver` resolves through whatever
+  # search domain the network hands out, Basic auth and all.
+  hs = import ../../shared/homeserver.nix;
   # `contacts`: a skim picker over khard, because `khard edit <name>` needs you
   # to remember the name and there are 400 of them. Built the way ironbar.nix builds
   # its helpers — a real .nu file with @var@ placeholders, so the script stays
@@ -34,7 +38,7 @@ in {
       };
       remote = {
         type = "carddav";
-        url = "http://homeserver:5232/";
+        url = "http://${hs.tailnet4}:5232/";
         userName = "kronberger";
         # Plaintext CardDAV password from agenix (see security/agenix.nix).
         passwordCommand = ["cat" "/run/secrets/radicale-password"];
@@ -87,7 +91,7 @@ in {
         params = ["homeserver_remote"];
         children = [
           (d "type" ["carddav"])
-          (d "url" ["http://homeserver:5232/"])
+          (d "url" ["http://${hs.tailnet4}:5232/"])
           (d "username" ["kronberger"])
           {
             name = "password";
