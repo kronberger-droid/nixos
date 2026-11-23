@@ -112,6 +112,9 @@ reconstructing the conventions from memory.
   Python. Invocation from the Bash tool, the traps of the nu build on this
   machine, a Python translation table, and when Python is justified. Also the
   command reference and the guide to Rust tests in the nushell repo.
+- **`nixos-config`** — any edit or check in `~/.config/nixos`. Which hosts a
+  change reaches and the cheapest check that proves it, before reaching for
+  `nix flake check`.
 
 ## This file is generated
 
