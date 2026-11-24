@@ -31,7 +31,13 @@ const GLYPH = {
     cmake: "\u{e794}"
     typst: "\u{f37f}"
     nix: "\u{f313}"
+    battery: "\u{f0083}"
+    charging: "\u{f0084}"
+    jobs: "\u{2726}"
 }
+
+# Where the kernel publishes batteries.
+const POWER = "/sys/class/power_supply"
 
 # `text` in `style`, or nothing when there is no text, so an absent segment
 # drops out of the row instead of leaving a gap.
@@ -116,6 +122,18 @@ def seg-package []: nothing -> string {
     if ($v | describe) == "string" { paint {fg: $ACCENT} $"($GLYPH.package) v($v)" } else { "" }
 }
 
+# A battery at 10% or less, starship's threshold. It is a warning, so it sits
+# in the row that stays. Read from sysfs: a machine without a battery, or
+# without sysfs, shows nothing.
+def seg-battery []: nothing -> string {
+    let battery = (glob $"($POWER)/BAT*" | get -o 0)
+    if $battery == null { return "" }
+    let level = (try { open --raw ($battery | path join capacity) | str trim | into int } catch { return "" })
+    if $level > 10 { return "" }
+    let status = (try { open --raw ($battery | path join status) | str trim } catch { "" })
+    paint red_bold $"(if $status == Charging { $GLYPH.charging } else { $GLYPH.battery }) ($level)%"
+}
+
 # The module row: what should survive a slim terminal. Leads with the blank
 # spacer row and ends on a newline, so the input starts on a line of its own.
 export def left []: nothing -> string {
@@ -123,7 +141,7 @@ export def left []: nothing -> string {
     # A failing call (the directory was deleted under the shell, say) must not
     # take the prompt down with it.
     let g = (try { gstat --exact-tag } catch { {repo_name: no_repository} })
-    let row = ([(seg-host) (seg-dir $g) ...(seg-git $g) (seg-package)] | where $it != "" | str join " ")
+    let row = ([(seg-host) (seg-dir $g) ...(seg-git $g) (seg-package) (seg-battery)] | where $it != "" | str join " ")
     $"\n($row)\n"
 }
 
@@ -186,10 +204,17 @@ def seg-nix []: nothing -> string {
     paint blue ([$GLYPH.nix (if $kind == "pure" { "pure" } else { "" }) ($env.name? | default "")] | where $it != "" | str join " ")
 }
 
+# Background jobs: the mark alone for one, with the count from two, as
+# starship has it.
+def seg-jobs []: nothing -> string {
+    let count = (job list | length)
+    if $count == 0 { "" } else { paint blue_bold $"($GLYPH.jobs)(if $count > 1 { $count } else { '' })" }
+}
+
 # The right side: what can go when space is tight. It sits on the input line
 # and reedline hides it once the typing reaches it.
 export def right []: nothing -> string {
-    [...(seg-tools) (seg-nix) (seg-took)] | where $it != "" | str join " "
+    [...(seg-tools) (seg-nix) (seg-jobs) (seg-took)] | where $it != "" | str join " "
 }
 
 # What a prompt collapses to once its line is submitted: when it ran and
