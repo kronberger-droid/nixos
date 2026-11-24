@@ -133,20 +133,26 @@ def seg-battery []: nothing -> string {
     paint red_bold $"(if $status == Charging { $GLYPH.charging } else { $GLYPH.battery }) ($level)%"
 }
 
+# What a prompt starts with: the blank spacer row, with the last command's
+# duration in a row of its own above it when there is one. That puts the
+# duration right under the output it timed and keeps the row above the prompt
+# blank either way. `left` and `transient` both start with this, so the
+# duration stays where it is when the prompt collapses. In the right prompt
+# it jumped from the input line to here on every submit.
+def lead []: nothing -> string {
+    let took = (seg-took)
+    if ($took | is-empty) { "\n" } else { $"($took)\n\n" }
+}
+
 # The module row: what should survive a slim terminal. Leads with the spacer
 # row and ends on a newline, so the input starts on a line of its own.
-#
-# The spacer row holds the last command's duration and is otherwise blank.
-# `transient` puts the duration in that same row, so it stays where it is
-# when the prompt collapses. In the right prompt it jumped from the input
-# line to this row on every submit.
 export def left []: nothing -> string {
     # --exact-tag: only a tag on HEAD, without a walk through the history.
     # A failing call (the directory was deleted under the shell, say) must not
     # take the prompt down with it.
     let g = (try { gstat --exact-tag } catch { {repo_name: no_repository} })
     let row = ([(seg-host) (seg-dir $g) ...(seg-git $g) (seg-package) (seg-battery)] | where $it != "" | str join " ")
-    $"(seg-took)\n($row)\n"
+    $"(lead)($row)\n"
 }
 
 # The version `bin` reports, asked once per build of it. A tool on PATH in a
@@ -228,9 +234,8 @@ export def right []: nothing -> string {
 # instead of a full module row per command.
 #
 # A prompt collapses before its command runs, so the only duration it can know
-# is the previous command's. That one goes in the spacer row, which puts it
-# right under the output it timed, and where `left` already drew it.
+# is the previous command's. `lead` puts that one where `left` already drew it.
 export def transient []: nothing -> string {
     let dir = ($env.PWD | str replace $nu.home-dir "~")
-    $"(seg-took)\n(paint dark_gray $'(date now | format date "%a %d %b %Y %H:%M:%S")  ($dir)')\n"
+    $"(lead)(paint dark_gray $'(date now | format date "%a %d %b %Y %H:%M:%S")  ($dir)')\n"
 }
