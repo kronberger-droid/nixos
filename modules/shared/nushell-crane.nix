@@ -2,6 +2,10 @@
 # no nushell-src branch carries yet. Delete it and callPackage
 # "${inputs.nushell-src}/scripts/nix/crane.nix" once the tracked branch does.
 #
+# One change against that copy: each plugin has a dependency build of its own.
+# Upstream shares one across all of them, which is right for building them
+# all and wrong here, where only gstat is built and would wait on polars.
+#
 # Incremental builds of nushell, its plugins and the CI checks, using crane.
 #
 # Unlike `default.nix`, which builds everything in one `buildRustPackage`
@@ -105,7 +109,6 @@
       curlMinimal
     ];
   };
-  pluginPackages = lib.concatMapStringsSep " " (name: "-p nu_plugin_${name}") (lib.attrNames plugins);
   pluginBuildInputs = lib.unique (lib.concatMap (p: p.buildInputs or []) (lib.attrValues plugins));
 
   # Dependency builds for the packages. These skip `cargo check` and the test
@@ -122,11 +125,16 @@
       // args
     );
   nuDeps = depsOnly {};
-  pluginDeps = depsOnly {
-    pname = "nushell-plugins";
-    cargoExtraArgs = "--locked ${pluginPackages}";
-    buildInputs = commonArgs.buildInputs ++ pluginBuildInputs;
-  };
+  pluginDeps =
+    lib.mapAttrs (
+      name: extra:
+        depsOnly {
+          pname = "nu_plugin_${name}";
+          cargoExtraArgs = "--locked -p nu_plugin_${name}";
+          buildInputs = commonArgs.buildInputs ++ (extra.buildInputs or []);
+        }
+    )
+    plugins;
 
   # Tests run in `checks`, against the `ci` profile, not in the packages.
   package = args:
@@ -158,7 +166,7 @@
       name: extra:
         package {
           pname = "nu_plugin_${name}";
-          cargoArtifacts = pluginDeps;
+          cargoArtifacts = pluginDeps.${name};
           cargoExtraArgs = "--locked -p nu_plugin_${name}";
           buildInputs = commonArgs.buildInputs ++ (extra.buildInputs or []);
           meta = {

@@ -33,7 +33,7 @@
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   # Turns on reedline's frame painter in the nushell build from
-  # `frame-painter-daily` (see the nushell-src input). reedline reads it from
+  # `daily` (see the nushell-src input). reedline reads it from
   # the process environment when the line editor is created, so `$env` in
   # env.nu is too late; PAM's environment is not. Desktops only, so a shell
   # over ssh on the homeserver keeps the streaming painter.

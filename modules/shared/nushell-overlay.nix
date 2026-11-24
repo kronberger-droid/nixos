@@ -23,12 +23,21 @@
 # rust-overlay, and there is no nushell binary cache, so matching upstream's
 # inputs byte for byte buys nothing and costs a second nixpkgs. nixpkgs' rustc
 # clears nushell's rust-toolchain.toml with room to spare.
-inputs: final: _prev: {
-  nushell =
-    (final.callPackage ./nushell-crane.nix {
-      craneLib = inputs.crane.mkLib final;
-      inherit (final.rustPlatform) bindgenHook;
-      nushellSrc = inputs.nushell-src.outPath;
-      commitHash = inputs.nushell-src.rev;
-    }).nushell;
+#
+# `nu_plugin_gstat` comes out of the same expression, thus the same source and
+# version as the shell that loads it: a plugin from nixpkgs is built for the
+# release nixpkgs carries and the protocol check turns it away. Named on its
+# own instead of going into `nushellPlugins` so that a package set without
+# this overlay's nushell, droid's cross one, has no plugin to pick up by
+# mistake.
+inputs: final: _prev: let
+  built = final.callPackage ./nushell-crane.nix {
+    craneLib = inputs.crane.mkLib final;
+    inherit (final.rustPlatform) bindgenHook;
+    nushellSrc = inputs.nushell-src.outPath;
+    commitHash = inputs.nushell-src.rev;
+  };
+in {
+  inherit (built) nushell;
+  nu_plugin_gstat = built.plugins.gstat;
 }

@@ -616,6 +616,13 @@ in {
     # Exported, so eza, fd and anything else reading LS_COLORS follows too.
     environmentVariables.LS_COLORS = lsColors;
 
+    # Git status for a prompt in one call to a process that stays up, instead
+    # of spawning git. Guarded since the package only exists where the nushell
+    # overlay provides it (not on droid, see nushell-overlay.nix). The
+    # registry this writes is a store path, so `plugin add` by hand fails
+    # with a read-only error: add plugins here.
+    plugins = lib.optionals (pkgs ? nu_plugin_gstat) [pkgs.nu_plugin_gstat];
+
     extraEnv = builtins.readFile ./nushell/extra_env.nu;
 
     extraConfig = lib.mkMerge [

@@ -766,16 +766,16 @@
     "nushell-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1795135101,
-        "narHash": "sha256-CjBiteg3VM+zavkTGIZbdQbdwUYvZNMtDyhR2SwHPrk=",
+        "lastModified": 1795515356,
+        "narHash": "sha256-XAfmlUX2+Tm0/Wl11VHbOKap6sjU63WV1MHSIcm/83c=",
         "owner": "kronberger-droid",
         "repo": "nushell",
-        "rev": "6602213ff72152a492cdc219d78c5952edef6353",
+        "rev": "222116bf6b068d52ffd7ee7ab717cf9f57f1f5e9",
         "type": "github"
       },
       "original": {
         "owner": "kronberger-droid",
-        "ref": "frame-painter-daily",
+        "ref": "daily",
         "repo": "nushell",
         "type": "github"
       }
