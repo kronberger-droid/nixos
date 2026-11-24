@@ -677,9 +677,22 @@ in {
         # Once a line is submitted its prompt collapses to this: when it ran
         # and where, dim, so scrollback is commands and output with a
         # timestamp on each instead of a full module row per command.
+        #
+        # A prompt collapses when its line is submitted, before the command
+        # runs, so the only duration it can know is the previous command's.
+        # That one goes in the spacer row, which puts it right under the
+        # output it timed. Same 2s threshold and `1h2m3s` form as starship's
+        # cmd_duration on the live prompt.
         $env.TRANSIENT_PROMPT_COMMAND = {||
             let dir = ($env.PWD | str replace $nu.home-dir "~")
-            $"\n(ansi dark_gray)(date now | format date '%a %d %b %Y %H:%M:%S')  ($dir)(ansi reset)\n"
+            let ms = ($env.CMD_DURATION_MS? | default "0" | into int)
+            let took = if $ms < 2000 { "" } else {
+                let s = $ms // 1000
+                let parts = ([[n unit]; [($s // 3600) h] [(($s mod 3600) // 60) m] [($s mod 60) s]]
+                    | where n > 0 | each {|p| $"($p.n)($p.unit)" } | str join)
+                $"(ansi yellow)took ($parts)(ansi reset)"
+            }
+            $"($took)\n(ansi dark_gray)(date now | format date '%a %d %b %Y %H:%M:%S')  ($dir)(ansi reset)\n"
         }
         # Unset, the collapsed line would keep the live right prompt.
         $env.TRANSIENT_PROMPT_COMMAND_RIGHT = ""
@@ -828,7 +841,9 @@ in {
           format = "[$symbol$state( $name)](blue) ";
         };
         cmd_duration = {
-          format = "[$duration]($style) ";
+          # The one connective kept: a bare "3s" has no symbol to say what
+          # it measures.
+          format = "took [$duration]($style) ";
           style = "yellow";
         };
         # No `time`: a clock on the live prompt says when the prompt was
