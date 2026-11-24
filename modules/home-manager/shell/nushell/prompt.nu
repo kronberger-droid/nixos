@@ -134,15 +134,20 @@ def seg-battery []: nothing -> string {
     paint red_bold $"(if $status == Charging { $GLYPH.charging } else { $GLYPH.battery }) ($level)%"
 }
 
-# The module row: what should survive a slim terminal. Leads with the blank
-# spacer row and ends on a newline, so the input starts on a line of its own.
+# The module row: what should survive a slim terminal. Leads with the spacer
+# row and ends on a newline, so the input starts on a line of its own.
+#
+# The spacer row holds the last command's duration and is otherwise blank.
+# `transient` puts the duration in that same row, so it stays where it is
+# when the prompt collapses. In the right prompt it jumped from the input
+# line to this row on every submit.
 export def left []: nothing -> string {
     # --exact-tag: only a tag on HEAD, without a walk through the history.
     # A failing call (the directory was deleted under the shell, say) must not
     # take the prompt down with it.
     let g = (try { gstat --exact-tag } catch { {repo_name: no_repository} })
     let row = ([(seg-host) (seg-dir $g) ...(seg-git $g) (seg-package) (seg-battery)] | where $it != "" | str join " ")
-    $"\n($row)\n"
+    $"(seg-took)\n($row)\n"
 }
 
 # The version `bin` reports, asked once per build of it. A tool on PATH in a
@@ -214,7 +219,7 @@ def seg-jobs []: nothing -> string {
 # The right side: what can go when space is tight. It sits on the input line
 # and reedline hides it once the typing reaches it.
 export def right []: nothing -> string {
-    [...(seg-tools) (seg-nix) (seg-jobs) (seg-took)] | where $it != "" | str join " "
+    [...(seg-tools) (seg-nix) (seg-jobs)] | where $it != "" | str join " "
 }
 
 # What a prompt collapses to once its line is submitted: when it ran and
@@ -223,7 +228,7 @@ export def right []: nothing -> string {
 #
 # A prompt collapses before its command runs, so the only duration it can know
 # is the previous command's. That one goes in the spacer row, which puts it
-# right under the output it timed.
+# right under the output it timed, and where `left` already drew it.
 export def transient []: nothing -> string {
     let dir = ($env.PWD | str replace $nu.home-dir "~")
     $"(seg-took)\n(paint dark_gray $'(date now | format date "%a %d %b %Y %H:%M:%S")  ($dir)')\n"
