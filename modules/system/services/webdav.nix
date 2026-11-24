@@ -123,9 +123,11 @@ in {
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      # Waits out tailscaled's startup, see tailscale-serve-matrix.
+      ExecStartPre = "${ts} wait --timeout=60s";
       ExecStart = "${ts} serve --bg --https=8443 http://127.0.0.1:${toString port}";
       ExecStop = "${ts} serve --https=8443 off";
-      # At boot tailscaled may not be logged in yet.
+      # At boot tailscaled may not be logged in within that minute.
       Restart = "on-failure";
       RestartSec = 10;
     };

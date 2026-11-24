@@ -143,9 +143,14 @@ in {
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      # tailscaled reports ready to systemd before its backend is running,
+      # and serve fails in that gap. A switch that restarts tailscaled lands
+      # there, and a start that fails once is a failed unit to deploy-rs,
+      # which rolls the generation back, whatever Restart does afterwards.
+      ExecStartPre = "${ts} wait --timeout=60s";
       ExecStart = "${ts} serve --bg --https=443 http://127.0.0.1:${toString port}";
       ExecStop = "${ts} serve --https=443 off";
-      # At boot tailscaled may not be logged in yet.
+      # At boot tailscaled may not be logged in within that minute.
       Restart = "on-failure";
       RestartSec = 10;
     };
