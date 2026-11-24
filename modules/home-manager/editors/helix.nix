@@ -259,7 +259,7 @@ in {
             r = ":reload-all";
           };
           # Ctrl-x: browse with yazi, open the picked file in *this* helix.
-          # X for "explorer", matching the niri Mod+Shift+X yazi binding.
+          # X for "explorer", matching the niri Mod+X yazi binding.
           # Helix has no RPC, so the round-trip goes through a chooser file:
           # :insert-output hands yazi the terminal (and inserts nothing, since
           # --chooser-file sends the path to the temp file, not stdout); the

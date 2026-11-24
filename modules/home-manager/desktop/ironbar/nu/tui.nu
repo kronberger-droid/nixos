@@ -59,7 +59,7 @@ def main [what: string] {
     "monitor" => {
       # Straight to the terminal with the app-id niri's window rule matches.
       # app-id, not title: a TUI's title arrives via OSC after the window
-      # maps, too late for the rule, which is why niri.nix's Mod+Shift+T does
+      # maps, too late for the rule, which is why niri.nix's Mod+T does
       # the same.
       spawn-terminal sysmonitor $BOTTOM
     }

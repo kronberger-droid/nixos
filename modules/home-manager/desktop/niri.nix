@@ -197,8 +197,8 @@ in {
       # Applications
       "${modifier}+Return".action.spawn = termSpawn {cwdArg = true;};
       "${modifier}+D".action.spawn = config.sieb.commands.launcher;
-      "${modifier}+Shift+B".action.spawn = wsSpawn ["${pkgs.helium}/bin/helium"];
-      "${modifier}+Shift+M".action.spawn = termSpawn {
+      "${modifier}+B".action.spawn = wsSpawn ["${pkgs.helium}/bin/helium"];
+      "${modifier}+M".action.spawn = termSpawn {
         cwdArg = true;
         exec = "claude";
       };
@@ -206,12 +206,12 @@ in {
         floating = true;
         cwdArg = true;
       };
-      "${modifier}+Shift+T".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} sysmonitor ${config.terminal.execFlag} ${pkgs.bottom}/bin/btm"];
-      "${modifier}+Shift+X".action.spawn = termSpawn {
+      "${modifier}+T".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${terminal} ${config.terminal.appIdFlag} sysmonitor ${config.terminal.execFlag} ${pkgs.bottom}/bin/btm"];
+      "${modifier}+X".action.spawn = termSpawn {
         floating = true;
         exec = "${pkgs.yazi}/bin/yazi \"$(${cwd})\"";
       };
-      "${modifier}+Shift+N".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${pkgs.nemo-with-extensions}/bin/nemo \"$(${cwd})\""];
+      "${modifier}+N".action.spawn = ["${pkgs.bash}/bin/bash" "-c" "${pkgs.nemo-with-extensions}/bin/nemo \"$(${cwd})\""];
 
       # Scratchpad
       "${modifier}+Minus".action.spawn = ["${scratchpadToggle}" "toggle"];
