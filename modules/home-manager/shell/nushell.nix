@@ -730,11 +730,12 @@ in {
   };
 
   programs.starship = {
-    enable = true;
-    # Only where nushell has no prompt of its own, see `hasGstat`. Still
-    # installed everywhere: bash on the servers uses it, and the settings
-    # below are what both of those get.
-    enableNushellIntegration = !hasGstat;
+    # Only where nushell has no prompt of its own, see `hasGstat`: that is
+    # droid. Everywhere else nothing would call it, since no host runs it in
+    # bash, so it is not installed there and the settings below are never
+    # evaluated, the preset read out of its package included.
+    enable = !hasGstat;
+    enableNushellIntegration = true;
 
     settings =
       lib.recursiveUpdate
