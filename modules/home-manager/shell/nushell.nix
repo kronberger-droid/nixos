@@ -96,7 +96,6 @@ in {
   # Plain .nu with @name@ placeholders, so it stays lintable; replaceVars fails
   # the build on one left unfilled.
   xdg.configFile."nushell/prompt.nu".source = pkgs.replaceVars ./nushell/prompt.nu {
-    accent = "#${config.scheme.base0F}";
     vault = dirs.vault;
   };
 
@@ -818,10 +817,10 @@ in {
           style = "green";
         };
         # Stock is `208 bold`, a 256-color index the terminal palette does
-        # not remap. base0F is the scheme's own spare accent.
+        # not remap.
         package = {
           format = "is [$symbol$version]($style) ";
-          style = "#${config.scheme.base0F}";
+          style = "yellow";
         };
         rust = {
           format = "via [$symbol($version )]($style)";
@@ -855,7 +854,7 @@ in {
         };
         cmd_duration = {
           # Stock but for the weight.
-          format = "took [$duration]($style) ";
+          format = "< took [$duration]($style) ";
           style = "yellow";
         };
         # No `time`: a clock on the live prompt says when the prompt was

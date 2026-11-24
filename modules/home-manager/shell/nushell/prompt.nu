@@ -11,12 +11,10 @@
 # `left` and `right` need `gstat`. `transient` does not, so a host without the
 # plugin can keep starship for the live prompt and still collapse to this one.
 #
-# The two placeholder constants below are filled in by nushell.nix
+# The placeholder constant below is filled in by nushell.nix
 # (pkgs.replaceVars).
 
-# base0F of the scheme, for the package segment. The other colors are ANSI
-# names, which the terminal already resolves through the scheme.
-const ACCENT = "@accent@"
+# Every color is an ANSI name, which the terminal resolves through the scheme.
 # The vault, ~-contracted. Shown as "vault" instead of its long path.
 const VAULT = "@vault@"
 
@@ -52,11 +50,12 @@ def clock [ms: int]: nothing -> string {
     | where n > 0 | each {|p| $"($p.n)($p.unit)" } | str join
 }
 
-# "took 3s" for the last command, from 2s up. `$env.CMD_DURATION_MS` starts
+# "< took 3s" for the last command, from 2s up, the "<" answering the ">" the
+# command was typed at. `$env.CMD_DURATION_MS` starts
 # out as the string "0823", which is under the threshold like any fast command.
 def seg-took []: nothing -> string {
     let ms = ($env.CMD_DURATION_MS? | default "0" | into int)
-    if $ms < 2000 { "" } else { paint yellow $"took (clock $ms)" }
+    if $ms < 2000 { "" } else { "< " + (paint yellow $"took (clock $ms)") }
 }
 
 # user@host, only where it is not obvious: over ssh, or as root.
@@ -119,7 +118,7 @@ def seg-package []: nothing -> string {
     let toml = (try { open Cargo.toml } catch { return "" })
     let own = ($toml | get -o package.version)
     let v = if ($own | describe) == "string" { $own } else { $toml | get -o workspace.package.version }
-    if ($v | describe) == "string" { "is " + (paint {fg: $ACCENT} $"($GLYPH.package) v($v)") } else { "" }
+    if ($v | describe) == "string" { "is " + (paint yellow $"($GLYPH.package) v($v)") } else { "" }
 }
 
 # A battery at 10% or less, starship's threshold. It is a warning, so it sits
@@ -199,14 +198,14 @@ def seg-tools []: nothing -> list<string> {
             let v = (tool-version typst [--version] $version)
             paint cyan $"($GLYPH.typst) (if ($v | is-empty) { '' } else { $'v($v)' })"
         })
-    ] | compact | each {|s| $"via ($s | str trim)" }
+    ] | compact | each { str trim }
 }
 
 # A nix shell: "pure" when it is, and the name the shell goes by.
 def seg-nix []: nothing -> string {
     let kind = ($env.IN_NIX_SHELL? | default "")
     if ($kind | is-empty) { return "" }
-    "via " + (paint blue ([$GLYPH.nix (if $kind == "pure" { "pure" } else { "" }) ($env.name? | default "")] | where $it != "" | str join " "))
+    paint blue ([$GLYPH.nix (if $kind == "pure" { "pure" } else { "" }) ($env.name? | default "")] | where $it != "" | str join " ")
 }
 
 # Background jobs: the mark alone for one, with the count from two, as
@@ -216,10 +215,12 @@ def seg-jobs []: nothing -> string {
     if $count == 0 { "" } else { paint blue_bold $"($GLYPH.jobs)(if $count > 1 { $count } else { '' })" }
 }
 
-# The right side: what can go when space is tight. It sits on the input line
+# The right side: what can go when space is tight, the toolchains and the nix
+# shell behind one "via", then the jobs. It sits on the input line
 # and reedline hides it once the typing reaches it.
 export def right []: nothing -> string {
-    [...(seg-tools) (seg-nix) (seg-jobs)] | where $it != "" | str join " "
+    let via = ([...(seg-tools) (seg-nix)] | where $it != "" | str join " ")
+    [(if ($via | is-empty) { "" } else { $"via ($via)" }) (seg-jobs)] | where $it != "" | str join " "
 }
 
 # What a prompt collapses to once its line is submitted: when it ran and
