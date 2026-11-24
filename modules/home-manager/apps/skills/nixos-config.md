@@ -24,7 +24,7 @@ imports up from the file you changed until you hit one of these roots:
 | Root | Hosts |
 |------|-------|
 | `hosts/<name>/configuration.nix` | that host |
-| `hosts/common.nix`, `modules/home-manager/users/kronberger.nix` | the workstations: `intelNuc`, `spectre`, `P14E` |
+| `hosts/common.nix`, `modules/home-manager/users/kronberger.nix` | the workstations: `intelNuc`, `P14E`, and `spectre`, which is retired but still defined |
 | `modules/home-manager/users/kronberger-server.nix` | `homeserver` |
 | `modules/home-manager/users/claude.nix` | the sandbox account, on every host that enables `security.agentSandbox` |
 | `hosts/droid/home.nix` | `droid` |
@@ -55,7 +55,7 @@ so a new file that is not staged does not exist to nix.
    value is text for another program, feed it to that program and look at the
    result. This rung is enough for a change to one module's generated output.
 3. **One host per root.** One representative for each root in the reach,
-   `spectre` for the workstations:
+   `P14E` for the workstations:
 
        nix build --no-link .#checks.x86_64-linux.eval-<host>
 
