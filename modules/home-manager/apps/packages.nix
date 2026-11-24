@@ -1,7 +1,7 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
     # Browsers
-    helium
+    # helium: see helium.nix, which also wires up Widevine
 
     # Messaging
     # aerion, zapzap: sandboxed, see aerion.nix and zapzap.nix
