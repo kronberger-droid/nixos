@@ -117,15 +117,21 @@ in {
     ts = lib.getExe config.services.tailscale.package;
   in {
     description = "HTTPS front for webdav on the tailnet";
-    after = ["tailscaled.service" "webdav.service"];
+    # Behind the matrix unit, on the way up and thus ahead of it on the way
+    # down: tailscaled refuses a serve config written while another client
+    # writes one ("etag mismatch"), and a switch stops and starts both units
+    # at once.
+    after = ["tailscaled.service" "webdav.service" "tailscale-serve-matrix.service"];
     wants = ["tailscaled.service"];
     wantedBy = ["multi-user.target"];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      # Waits out tailscaled's startup, see tailscale-serve-matrix.
+      ExecStartPre = "${ts} wait --timeout=60s";
       ExecStart = "${ts} serve --bg --https=8443 http://127.0.0.1:${toString port}";
       ExecStop = "${ts} serve --https=8443 off";
-      # At boot tailscaled may not be logged in yet.
+      # At boot tailscaled may not be logged in within that minute.
       Restart = "on-failure";
       RestartSec = 10;
     };
