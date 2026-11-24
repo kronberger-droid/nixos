@@ -117,7 +117,11 @@ in {
     ts = lib.getExe config.services.tailscale.package;
   in {
     description = "HTTPS front for webdav on the tailnet";
-    after = ["tailscaled.service" "webdav.service"];
+    # Behind the matrix unit, on the way up and thus ahead of it on the way
+    # down: tailscaled refuses a serve config written while another client
+    # writes one ("etag mismatch"), and a switch stops and starts both units
+    # at once.
+    after = ["tailscaled.service" "webdav.service" "tailscale-serve-matrix.service"];
     wants = ["tailscaled.service"];
     wantedBy = ["multi-user.target"];
     serviceConfig = {
