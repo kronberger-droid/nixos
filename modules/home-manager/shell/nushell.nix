@@ -803,11 +803,10 @@ in {
         git_branch.symbol = " ";
         # The row reads by weight: where you are and what git says stay bold,
         # versions and the rest drop to plain color. The stock formats are
-        # restated without their connectives ("on", "is", "via", "took"),
-        # which cost a dozen columns that the symbols already cover. Only the
-        # modules for what gets worked on here are restated; any other
-        # language keeps starship's stock look.
-        git_branch.format = "[$symbol$branch(:$remote_branch)]($style) ";
+        # restated for that, connectives ("on", "is", "via") included: the row
+        # reads as a sentence with them. Only the modules for what gets worked
+        # on here are restated; any other language keeps starship's stock look.
+        git_branch.format = "on [$symbol$branch(:$remote_branch)]($style) ";
         # The tag sitting on HEAD, on a branch too, so a release commit shows
         # its tag beside the package version. Stock only shows this module on
         # a detached HEAD, with the hash; the hash is given up for the tag.
@@ -821,42 +820,41 @@ in {
         # Stock is `208 bold`, a 256-color index the terminal palette does
         # not remap. base0F is the scheme's own spare accent.
         package = {
-          format = "[$symbol$version]($style) ";
+          format = "is [$symbol$version]($style) ";
           style = "#${config.scheme.base0F}";
         };
         rust = {
-          format = "[$symbol($version )]($style)";
+          format = "via [$symbol($version )]($style)";
           style = "red";
         };
         python = {
-          format = "[\${symbol}\${pyenv_prefix}(\${version} )(\\($virtualenv\\) )]($style)";
+          format = "via [\${symbol}\${pyenv_prefix}(\${version} )(\\($virtualenv\\) )]($style)";
           style = "yellow";
         };
         # c, cpp and typst are stock 256-color or hex, off the scheme.
         c = {
-          format = "[$symbol($version(-$name) )]($style)";
+          format = "via [$symbol($version(-$name) )]($style)";
           style = "green";
         };
         cpp = {
-          format = "[$symbol($version(-$name) )]($style)";
+          format = "via [$symbol($version(-$name) )]($style)";
           style = "green";
         };
         cmake = {
-          format = "[$symbol($version )]($style)";
+          format = "via [$symbol($version )]($style)";
           style = "blue";
         };
         typst = {
-          format = "[$symbol($version )]($style)";
+          format = "via [$symbol($version )]($style)";
           style = "cyan";
         };
         nix_shell = {
           impure_msg = "";
           pure_msg = "pure";
-          format = "[$symbol$state( $name)](blue) ";
+          format = "via [$symbol$state( $name)](blue) ";
         };
         cmd_duration = {
-          # The one connective kept: a bare "3s" has no symbol to say what
-          # it measures.
+          # Stock but for the weight.
           format = "took [$duration]($style) ";
           style = "yellow";
         };

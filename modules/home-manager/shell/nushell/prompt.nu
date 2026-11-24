@@ -62,7 +62,7 @@ def seg-took []: nothing -> string {
 # user@host, only where it is not obvious: over ssh, or as root.
 def seg-host []: nothing -> string {
     if ($env.SSH_CONNECTION? | is-empty) and not (is-admin) { return "" }
-    paint yellow_bold $"($env.USER? | default '?')@((sys host).hostname)"
+    (paint yellow_bold $"($env.USER? | default '?')@((sys host).hostname)") + " in"
 }
 
 # Where we are: from the repository root down inside one, the ~-contracted
@@ -105,7 +105,7 @@ def seg-git [g: record]: nothing -> list<string> {
     let upstream = ($g.remote | split row "/" | skip 1 | str join "/")
     let tracked = if ($upstream | is-empty) or $upstream == $g.branch { "" } else { $":($upstream)" }
     [
-        (paint purple_bold $"($GLYPH.branch) ($branch)($tracked)")
+        ("on " + (paint purple_bold $"($GLYPH.branch) ($branch)($tracked)"))
         (if $g.tag == "no_tag" { "" } else { paint green $"($GLYPH.tag) ($g.tag)" })
         (if $g.state in ["clean" "no_state" ""] { "" } else { paint yellow_bold ($g.state | str uppercase) })
         (seg-git-status $g)
@@ -119,7 +119,7 @@ def seg-package []: nothing -> string {
     let toml = (try { open Cargo.toml } catch { return "" })
     let own = ($toml | get -o package.version)
     let v = if ($own | describe) == "string" { $own } else { $toml | get -o workspace.package.version }
-    if ($v | describe) == "string" { paint {fg: $ACCENT} $"($GLYPH.package) v($v)" } else { "" }
+    if ($v | describe) == "string" { "is " + (paint {fg: $ACCENT} $"($GLYPH.package) v($v)") } else { "" }
 }
 
 # A battery at 10% or less, starship's threshold. It is a warning, so it sits
@@ -199,14 +199,14 @@ def seg-tools []: nothing -> list<string> {
             let v = (tool-version typst [--version] $version)
             paint cyan $"($GLYPH.typst) (if ($v | is-empty) { '' } else { $'v($v)' })"
         })
-    ] | compact | each { str trim }
+    ] | compact | each {|s| $"via ($s | str trim)" }
 }
 
 # A nix shell: "pure" when it is, and the name the shell goes by.
 def seg-nix []: nothing -> string {
     let kind = ($env.IN_NIX_SHELL? | default "")
     if ($kind | is-empty) { return "" }
-    paint blue ([$GLYPH.nix (if $kind == "pure" { "pure" } else { "" }) ($env.name? | default "")] | where $it != "" | str join " ")
+    "via " + (paint blue ([$GLYPH.nix (if $kind == "pure" { "pure" } else { "" }) ($env.name? | default "")] | where $it != "" | str join " "))
 }
 
 # Background jobs: the mark alone for one, with the count from two, as
