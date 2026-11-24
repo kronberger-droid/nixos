@@ -7,6 +7,9 @@
   ...
 }: let
   hasTerminal = options ? terminal;
+  # The nushell overlay's plugin, absent from a package set that does not
+  # carry that overlay's nushell (droid). It decides who draws the prompt.
+  hasGstat = pkgs ? nu_plugin_gstat;
 
   # The vault lives in `vault.path` (apps/obsidian.nix), declared only for
   # users that import the apps tree; the server and droid users fall back to
@@ -90,6 +93,12 @@ in {
 
   xdg.configFile."nushell/fetch.nu".source = ./nushell/fetch.nu;
   xdg.configFile."nushell/heat.nu".source = ./nushell/heat.nu;
+  # Plain .nu with @name@ placeholders, so it stays lintable; replaceVars fails
+  # the build on one left unfilled.
+  xdg.configFile."nushell/prompt.nu".source = pkgs.replaceVars ./nushell/prompt.nu {
+    accent = "#${config.scheme.base0F}";
+    vault = dirs.vault;
+  };
 
   # Generated so it can use centralised path variables
   xdg.configFile."nushell/utilities.nu".text = ''
@@ -621,7 +630,7 @@ in {
     # overlay provides it (not on droid, see nushell-overlay.nix). The
     # registry this writes is a store path, so `plugin add` by hand fails
     # with a read-only error: add plugins here.
-    plugins = lib.optionals (pkgs ? nu_plugin_gstat) [pkgs.nu_plugin_gstat];
+    plugins = lib.optionals hasGstat [pkgs.nu_plugin_gstat];
 
     extraEnv = builtins.readFile ./nushell/extra_env.nu;
 
@@ -656,47 +665,48 @@ in {
         ''
       )
 
-      # Make the prompt itself end in a newline, so *every* indicator reedline
-      # can swap in (vi mode, reverse-search, menu markers) starts on line two.
-      # Only the vi indicators are configurable; nushell hardcodes the other two
-      # without a leading newline, so carrying it there left them rendering on
-      # the Starship row.
+      # The prompt. Where the gstat plugin exists it is nushell's own, from
+      # ./nushell/prompt.nu; elsewhere (droid) starship draws the live prompt as
+      # before. Either way a submitted prompt collapses to `prompt transient`.
+      #
+      # The prompt ends in a newline, so *every* indicator reedline can swap in
+      # (vi mode, reverse-search, menu markers) starts on line two. Only the vi
+      # indicators are configurable; nushell hardcodes the other two without a
+      # leading newline, so carrying it there left them rendering on the module
+      # row. For starship the "\n" has to be appended here rather than in its
+      # `format`, since nushell strips one trailing newline off external
+      # command output and would eat it.
       #
       # mkAfter since starship's enableNushellIntegration writes into this same
       # option and its export-env `load-env` installs PROMPT_COMMAND, so we can
       # only wrap the closure once that has run.
-      #
-      # The "\n" has to be appended in nushell rather than via starship's
-      # `format`, since nushell strips one trailing newline off external command
-      # output and would eat it.
-      (lib.mkAfter ''
+      (lib.mkAfter (''
 
-        let starship_prompt = $env.PROMPT_COMMAND
-        $env.PROMPT_COMMAND = {|| (do $starship_prompt) + "\n" }
-
-        # Once a line is submitted its prompt collapses to this: when it ran
-        # and where, dim, so scrollback is commands and output with a
-        # timestamp on each instead of a full module row per command.
-        #
-        # A prompt collapses when its line is submitted, before the command
-        # runs, so the only duration it can know is the previous command's.
-        # That one goes in the spacer row, which puts it right under the
-        # output it timed. Same 2s threshold and `1h2m3s` form as starship's
-        # cmd_duration on the live prompt.
-        $env.TRANSIENT_PROMPT_COMMAND = {||
-            let dir = ($env.PWD | str replace $nu.home-dir "~")
-            let ms = ($env.CMD_DURATION_MS? | default "0" | into int)
-            let took = if $ms < 2000 { "" } else {
-                let s = $ms // 1000
-                let parts = ([[n unit]; [($s // 3600) h] [(($s mod 3600) // 60) m] [($s mod 60) s]]
-                    | where n > 0 | each {|p| $"($p.n)($p.unit)" } | str join)
-                $"(ansi yellow)took ($parts)(ansi reset)"
-            }
-            $"($took)\n(ansi dark_gray)(date now | format date '%a %d %b %Y %H:%M:%S')  ($dir)(ansi reset)\n"
-        }
-        # Unset, the collapsed line would keep the live right prompt.
-        $env.TRANSIENT_PROMPT_COMMAND_RIGHT = ""
-      '')
+          use ~/.config/nushell/prompt.nu
+        ''
+        + (
+          if hasGstat
+          then ''
+            $env.PROMPT_COMMAND = {|| prompt left }
+            $env.PROMPT_COMMAND_RIGHT = {|| prompt right }
+            # What starship's init used to set alongside its prompt: no
+            # indicator of the prompt's own, its continuation mark, and the
+            # right side on the input line (see `right_format` below for why
+            # that row).
+            $env.PROMPT_INDICATOR = ""
+            $env.PROMPT_MULTILINE_INDICATOR = $"(ansi dark_gray)∙(ansi reset) "
+            $env.config.render_right_prompt_on_last_line = true
+          ''
+          else ''
+            let starship_prompt = $env.PROMPT_COMMAND
+            $env.PROMPT_COMMAND = {|| (do $starship_prompt) + "\n" }
+          ''
+        )
+        + ''
+          $env.TRANSIENT_PROMPT_COMMAND = {|| prompt transient }
+          # Unset, the collapsed line would keep the live right prompt.
+          $env.TRANSIENT_PROMPT_COMMAND_RIGHT = ""
+        ''))
     ];
 
     shellAliases =
@@ -721,7 +731,10 @@ in {
 
   programs.starship = {
     enable = true;
-    enableNushellIntegration = true;
+    # Only where nushell has no prompt of its own, see `hasGstat`. Still
+    # installed everywhere: bash on the servers uses it, and the settings
+    # below are what both of those get.
+    enableNushellIntegration = !hasGstat;
 
     settings =
       lib.recursiveUpdate
