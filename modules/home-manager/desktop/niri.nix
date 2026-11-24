@@ -198,6 +198,11 @@ in {
       "${modifier}+Return".action.spawn = termSpawn {cwdArg = true;};
       "${modifier}+D".action.spawn = config.sieb.commands.launcher;
       "${modifier}+B".action.spawn = wsSpawn ["${pkgs.helium}/bin/helium"];
+      # A second Ladybird start only hands its arguments to the running
+      # browser, which opens a tab unless told otherwise. No wsSpawn: after
+      # that handoff the window belongs to the old process, out of reach of
+      # a rule bound to this spawn.
+      "${modifier}+S".action.spawn = ["flatpak" "run" "org.ladybird.Ladybird" "--new-window"];
       "${modifier}+M".action.spawn = termSpawn {
         cwdArg = true;
         exec = "claude";
