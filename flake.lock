@@ -47,11 +47,11 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1795215682,
-        "narHash": "sha256-NzqBLAIGMiQesm6Fe0hO9OXjBzeNJ9x6XO9F97pTKaw=",
+        "lastModified": 1795471286,
+        "narHash": "sha256-eff6PLpfE8Z/keVrrenlcw25HUoELC+Jd3OI1HsQizQ=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "4c9d590f6924cd7bb4437c0a8636abc3ea506ad3",
+        "rev": "fadaff01f0a5728ec1e2a5928bcdf68163eb2a15",
         "type": "github"
       },
       "original": {
@@ -428,11 +428,11 @@
         "xwayland-satellite-unstable": "xwayland-satellite-unstable"
       },
       "locked": {
-        "lastModified": 1795346411,
-        "narHash": "sha256-cvMqI3tXFdA8lMgCMLisSnGsOar4YjbnuqnlHapqwxo=",
+        "lastModified": 1795467990,
+        "narHash": "sha256-Z7kJBmdqchhNpC31e3YyS3Nu4T8jEvHtzixynKr/W58=",
         "owner": "epireyn",
         "repo": "niri-flake",
-        "rev": "836d60bd099a4dd1f1e7fb65e6e6acd8f662f43e",
+        "rev": "229788bcd27a51599f8a676b7583fb9bdb947134",
         "type": "github"
       },
       "original": {
@@ -854,11 +854,11 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 1795354980,
-        "narHash": "sha256-QqNQxeOTav7M5wgUUh56DwmjXlh9EotPDr07MbdQoJg=",
+        "lastModified": 1795428978,
+        "narHash": "sha256-CE+DRcJqQR1TEvP3+KwK8aR4mMnKOsgzRVNkL6NgNxk=",
         "owner": "raphamorim",
         "repo": "rio",
-        "rev": "d2400983c39be5715c85d69138047f78ba583dd7",
+        "rev": "10621ddc076891ee9aa63b7ff46dde655484bd8e",
         "type": "github"
       },
       "original": {
@@ -929,11 +929,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795340093,
-        "narHash": "sha256-fosvQ7eeQMrh6RvUXotBc6d92dHskAI6tu1EERJQ2LY=",
+        "lastModified": 1795429968,
+        "narHash": "sha256-MJVmTxxAm87tT7yxH5BU8EnKGza32SQ2pqYsHWpJ1H4=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "5aa410a1df0e4e9c25f3818320651c2bddf66aff",
+        "rev": "ea2084066e0f3fed86a76a2654658ed2eb998046",
         "type": "github"
       },
       "original": {
@@ -968,11 +968,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793558596,
-        "narHash": "sha256-PJBYgfyMDt3DdzE0rUfsYvbKe3+Ne+ghgAaJ2V4eT08=",
+        "lastModified": 1795431297,
+        "narHash": "sha256-8HpcR2BZe2VMZ+FtJeEe0z3cRB7q4gCETAPjtnYV2AU=",
         "owner": "kronberger-droid",
         "repo": "sieb",
-        "rev": "8931d300ca7143bd3cb8b361ac025300b0e95f17",
+        "rev": "a52e192f201ec890c7a942222b5907efea261b89",
         "type": "github"
       },
       "original": {
