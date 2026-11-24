@@ -206,12 +206,15 @@
     # own nixpkgs. See modules/shared/nushell-overlay.nix for why that beats
     # taking the flake.
     #
-    # Temporarily on my fork's `frame-painter-daily`: upstream main with
-    # reedline repointed at the frame painter (reedline#1299), to daily-drive
-    # it. `REEDLINE_FRAME_PAINTER` in desktop.nix switches it on. Go back to
-    # `github:nushell/nushell` when done.
+    # Temporarily on my fork's `daily`: upstream main plus what is not merged
+    # there yet. Each piece leaves the branch as it lands upstream; go back
+    # to `github:nushell/nushell` once it is empty.
+    # - reedline repointed at the frame painter (reedline#1299), to
+    #   daily-drive it. `REEDLINE_FRAME_PAINTER` in desktop.nix switches it on.
+    # - the `gstat` plugin keeping its repository open, `--exact-tag`, and no
+    #   hash check on every object read (branches `gstat-*` on the fork).
     nushell-src = {
-      url = "github:kronberger-droid/nushell/frame-painter-daily";
+      url = "github:kronberger-droid/nushell/daily";
       flake = false;
     };
     # Builds nushell-src in the nushell overlay, with the dependencies in a

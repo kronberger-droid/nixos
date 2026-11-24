@@ -37,6 +37,11 @@ $env.config = {
 # signature, type and preview, which say little for anything that isn't a builtin.
 $env.config.status_line = {enable: true, errors: true, signature: false, type: false, preview: false}
 
+# gstat keeps the repository of its last call open, which is half of what
+# makes it fast. Nushell stops an idle plugin after 10s by default and the
+# handle goes with it, so give this one long enough to survive reading output.
+$env.config.plugin_gc.plugins.gstat = {enabled: true, stop_after: 10min}
+
 # Bracket and quote auto-pairing (nushell#19199, main only until 0.118).
 $env.config.auto_pairs.enable = true
 
