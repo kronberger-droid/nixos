@@ -4,9 +4,12 @@
 # bus names and quirks.
 {
   lib,
+  pkgs,
   sloth,
   ...
-}: {
+}: let
+  gtkTheme = import ../theming/gtk-theme.nix pkgs;
+in {
   # gui-base bundles its own mesa; the host's driver matches the kernel
   # and is already in the store.
   gpu.provider = lib.mkForce "nixos";
@@ -43,6 +46,16 @@
     # `clearEnv`: that needs the full list of what each toolkit reads, and
     # a miss is an app that does not start.
     env = {
+      # gui-base binds ~/.config/gtk-3.0, so GTK in the sandbox reads the
+      # theme's name, but its XDG_DATA_DIRS holds no themes. GTK then drops
+      # the dark variant along with the name and draws light Adwaita, which
+      # is what an app's own file picker and dialogs came up in. gui-base's
+      # two entries are restated because this replaces its value.
+      XDG_DATA_DIRS = lib.mkForce (lib.makeSearchPath "share" [
+        gtkTheme.package
+        pkgs.adwaita-icon-theme
+        pkgs.shared-mime-info
+      ]);
       GH_TOKEN = "";
       GITHUB_TOKEN = "";
       GITHUB_PERSONAL_ACCESS_TOKEN = "";

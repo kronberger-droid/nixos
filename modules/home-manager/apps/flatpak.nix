@@ -5,7 +5,13 @@
 #
 # The system side (services.flatpak.enable) is in system/desktop/desktop.nix;
 # this module turns itself on from that.
-{pkgs, ...}: let
+{
+  config,
+  pkgs,
+  ...
+}: let
+  gtkTheme = config.gtk.theme;
+
   # The key Ladybird signs its repository with, as the `GPGKey=` line of
   # https://flatpak.ladybird.org/ladybird.flatpakrepo has it. Pinned here
   # and the remote added by its bare URL, so the key is not whatever that
@@ -17,6 +23,10 @@
     EOF
   '';
 in {
+  # For the Flatpak apps only, see the global override below. The session
+  # finds the theme in the profile.
+  home.file.".themes/${gtkTheme.name}".source = "${gtkTheme.package}/share/themes/${gtkTheme.name}";
+
   services.flatpak = {
     # Setting this replaces the module's default, hence Flathub again.
     remotes = [
@@ -59,8 +69,20 @@ in {
       # empty, so X11 apps fell back to the core cursor. The store is
       # world-readable on the host anyway; read-only it adds nothing an app
       # could not already learn.
+      #
+      # The GTK theme has the same problem. The Settings portal hands an app
+      # the theme's name, the runtime has no theme by that name, and GTK
+      # falls back to light Adwaita. ~/.themes is the one host path GTK
+      # still searches from inside a Flatpak (its XDG_DATA_HOME is the
+      # app's own), and the gtk-3.0 and gtk-4.0 folders carry settings.ini
+      # with the dark preference.
       global = {
-        Context.filesystems = ["/nix/store:ro"];
+        Context.filesystems = [
+          "/nix/store:ro"
+          "~/.themes:ro"
+          "xdg-config/gtk-3.0:ro"
+          "xdg-config/gtk-4.0:ro"
+        ];
         Environment.XCURSOR_PATH = "/run/host/user-share/icons:/run/host/share/icons";
       };
       # Flathub grants filesystem=host and the network. It parses untrusted

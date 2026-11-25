@@ -1,4 +1,6 @@
-{pkgs, ...}: {
+{pkgs, ...}: let
+  gtkTheme = import ./gtk-theme.nix pkgs;
+in {
   qt = {
     enable = true;
     platformTheme.name = "gtk3";
@@ -15,18 +17,7 @@
   gtk = {
     enable = true;
     gtk4.theme = null;
-    theme = {
-      # Colloid, not Fluent: nixpkgs dropped gtk-engine-murrine, which took
-      # fluent-gtk-theme (and most other classic themes) with it. Same
-      # upstream author and the same override arguments; Fluent's "round"
-      # tweak has no counterpart since Colloid is rounded by default.
-      name = "Colloid-Dark-Compact";
-      package = pkgs.colloid-gtk-theme.override {
-        themeVariants = ["default"];
-        colorVariants = ["dark"];
-        sizeVariants = ["compact"];
-      };
-    };
+    theme = gtkTheme;
     iconTheme = {
       name = "Qogir";
       package = pkgs.qogir-icon-theme;
@@ -37,6 +28,6 @@
 
   dconf.settings."org/gnome/desktop/interface" = {
     color-scheme = "prefer-dark";
-    gtk-theme = "Colloid-Dark-Compact";
+    gtk-theme = gtkTheme.name;
   };
 }
