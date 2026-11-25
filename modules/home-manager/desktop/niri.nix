@@ -546,10 +546,14 @@ in {
         };
       }
 
-      # Inactive window opacity
+      # Inactive window opacity. The blur is drawn behind the window, so it
+      # only shows through the 5% this lets through; lower `opacity` to see
+      # more of it. Xray is niri's default with blur: tiled windows blur the
+      # wallpaper once instead of whatever is below them.
       {
         matches = [{is-focused = false;}];
         opacity = 0.95;
+        background-effect.blur = true;
       }
     ];
   };
