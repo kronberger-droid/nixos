@@ -4,6 +4,7 @@
   ...
 }: let
   gtkTheme = import ./gtk-theme.nix pkgs;
+  iconTheme = import ./icon-theme.nix pkgs;
 
   # The scheme, under the color names adw-gtk3 (GTK3) and libadwaita (GTK4)
   # both build their palettes from. Loaded after the theme, as the user's
@@ -67,10 +68,8 @@ in {
     enable = true;
     gtk4.theme = null;
     theme = gtkTheme;
-    iconTheme = {
-      name = "Adwaita";
-      package = pkgs.adwaita-icon-theme;
-    };
+    # Inherits Adwaita, which is in the profile as the cursor's package.
+    inherit iconTheme;
     gtk3.extraCss = adwaitaColors;
     gtk4.extraCss = adwaitaColors;
     gtk3.extraConfig.gtk-application-prefer-dark-theme = true;
