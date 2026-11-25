@@ -452,6 +452,24 @@ in {
       };
     };
 
+    # sieb (desktop/sieb.nix) puts a transparent backdrop over the whole
+    # output and draws its panel on a subsurface, so a rule on its layer
+    # blurs the screen behind the picker, not just the panel. A stopgap:
+    # the panel alone takes sieb asking for a blur region itself through
+    # `ext-background-effect`, and `blur = true` here would override that
+    # region, so this rule goes once sieb does. Xray off since the layer is
+    # above the windows; with it they would vanish behind a blurred
+    # wallpaper.
+    layer-rules = [
+      {
+        matches = [{namespace = "^sieb$";}];
+        background-effect = {
+          blur = true;
+          xray = false;
+        };
+      }
+    ];
+
     # Window rules
     window-rules = [
       # Default all windows to slightly rounded corners
