@@ -229,13 +229,44 @@ export def right []: nothing -> string {
     [(if ($via | is-empty) { "" } else { $"via ($via)" }) (seg-jobs)] | where $it != "" | str join " "
 }
 
-# What a prompt collapses to once its line is submitted: when it ran and
-# where, dim, so scrollback is commands and output with a timestamp on each
-# instead of a full module row per command.
+# The checkout the directory is in: its branch, or the short hash when HEAD
+# is detached, and nothing outside a repository. Read off `.git/HEAD` and
+# not asked of gstat, so `transient` keeps working without the plugin and
+# pays a few file reads per submit where gstat's status walk costs up to
+# 25ms.
+def head-name []: nothing -> string {
+    let parts = ($env.PWD | path split)
+    let dot = (
+        ($parts | length)..1
+        | each {|n| $parts | first $n | path join | path join .git }
+        | where ($it | path exists)
+        | get -o 0
+    )
+    if $dot == null { return "" }
+    # In a worktree or a submodule `.git` is a file that names the real
+    # directory, relative to itself or absolute.
+    let gitdir = if ($dot | path join HEAD | path exists) { $dot } else {
+        let target = (try { open --raw $dot | str trim | str replace "gitdir: " "" } catch { return "" })
+        $dot | path dirname | path join $target
+    }
+    let head = (try { open --raw ($gitdir | path join HEAD) | str trim } catch { return "" })
+    if ($head | str starts-with "ref: ") {
+        $head | str replace "ref: " "" | str replace "refs/heads/" ""
+    } else {
+        $head | str substring 0..<7
+    }
+}
+
+# What a prompt collapses to once its line is submitted: when it ran, where,
+# and on which checkout, dim, so scrollback is commands and output with a
+# stamp on each instead of a full module row per command.
 #
 # A prompt collapses before its command runs, so the only duration it can know
 # is the previous command's. `lead` puts that one where `left` already drew it.
+# For the same reason the directory and the checkout are the ones the command
+# started in: a `git switch` line shows the branch it left.
 export def transient []: nothing -> string {
     let dir = ($env.PWD | str replace $nu.home-dir "~")
-    $"(lead)(paint dark_gray $'(date now | format date "%a %d %b %Y %H:%M:%S")  ($dir)')\n"
+    let stamp = ([(date now | format date "%a %d %b %Y %H:%M:%S") $dir (head-name)] | where $it != "" | str join "  ")
+    $"(lead)(paint dark_gray $stamp)\n"
 }
