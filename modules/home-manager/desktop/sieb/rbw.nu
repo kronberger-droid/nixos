@@ -231,8 +231,10 @@ def entries-menu [queue: list, note: string = "", select?: string] {
         emit {text: $hint, selectable: false}
         return
     }
+    # One line of the message box: 86 characters at the launcher theme's
+    # width and font size. Anything longer wraps or is cut.
     let status = if ($queue | is-empty) {
-        "Enter: type login    Ctrl+Enter: fields    Alt+u/p/t: copy    Alt+Shift+u/p: type    Alt+s: sync"
+        "Enter: login  Ctrl+Enter: fields  Alt+u/p/t: copy  Alt+Shift+u/p: type  Alt+s: sync"
     } else {
         $"queued: (queue-text $queue)"
     }
@@ -271,7 +273,7 @@ def read-shown [id: string, field: string]: nothing -> string {
 
 # The field named `select` starts selected.
 def fields-menu [entry: record, queue: list, select?: string] {
-    let hint = "Enter: queue    Ctrl+Enter: type    Alt+c: copy"
+    let hint = "Enter: queue  Ctrl+Enter: type  Alt+c: copy"
     let message = if ($queue | is-empty) { $hint } else { $"($hint)    queued: (queue-text $queue)" }
     menu-header {
         prompt: ($entry.name | plain)
