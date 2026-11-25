@@ -546,6 +546,30 @@ in {
         };
       }
 
+      # Floating windows are see-through while focused too. They sit on top
+      # of the tiled strip, so xray is off for them: the blur is of the
+      # windows underneath, where xray would show the wallpaper through
+      # those. niri calls non-xray blur experimental. It is recomputed
+      # whenever what lies below changes, and it drops out during open and
+      # close animations, which are off here anyway.
+      #
+      # This sits above the inactive rule so that one still sets the opacity
+      # of an unfocused floating window; a later rule wins per property, and
+      # nothing below touches xray.
+      #
+      # A window that keeps its client-side decorations gets its border as a
+      # filled rectangle behind it, which would tint a see-through window in
+      # the accent color. Hence `draw-border-with-background`.
+      {
+        matches = [{is-floating = true;}];
+        opacity = 0.9;
+        draw-border-with-background = false;
+        background-effect = {
+          blur = true;
+          xray = false;
+        };
+      }
+
       # Inactive window opacity. The blur is drawn behind the window, so
       # `opacity` sets how much of it shows: at 0.95 it was close to
       # invisible. It fades the window's content by the same amount, so this
