@@ -54,17 +54,8 @@
     base0F = "#${scheme.base0F}"
   '';
 
-  livePath = config.helix.liveConfigPath;
-  # Editable helix config: when a live repo checkout is configured, symlink
-  # straight into it (edit without rebuild); otherwise copy from the store
-  # (e.g. nix-on-droid, where the repo isn't checked out at a fixed path).
-  mkConfigSource = {
-    repoPath,
-    storePath,
-  }:
-    if livePath != null
-    then config.lib.file.mkOutOfStoreSymlink "${livePath}/${repoPath}"
-    else storePath;
+  # Editable helix config, read from `live/helix/` (see ../live-config.nix).
+  live = path: config.lib.liveConfig.source "helix/${path}";
 
   # When false, drop the heavyweight language tooling (Typst, Python, CSV,
   # PDF viewer, compilers) and keep only Nix + Markdown + Rust editing.
@@ -110,18 +101,9 @@
     exec rustfmt --edition "''${edition:-2021}" --emit stdout
   '';
 in {
-  options.helix = {
-    liveConfigPath = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = "${config.home.homeDirectory}/.config/nixos";
-      description = ''
-        Path to a live checkout of this nixos repo. When set, helix's editable
-        config files are out-of-store symlinks into it (edit without rebuild).
-        Set to null where the repo isn't checked out at a fixed path (e.g.
-        nix-on-droid) to copy the files from the store instead.
-      '';
-    };
+  imports = [../live-config.nix];
 
+  options.helix = {
     minimal = lib.mkOption {
       type = lib.types.bool;
       default = false;
@@ -181,23 +163,11 @@ in {
       file = {
         # Nix-generated palette (inherits base16_transparent + scheme colors)
         ".config/helix/themes/base16-nix.toml".source = base16PaletteTheme;
-        # Editable files — live symlink on desktop, store copy elsewhere
-        ".config/helix/themes/custom-base16.toml".source = mkConfigSource {
-          repoPath = "modules/home-manager/editors/helix/custom-base16.toml";
-          storePath = ./helix/custom-base16.toml;
-        };
-        ".config/helix/ignore".source = mkConfigSource {
-          repoPath = "modules/home-manager/editors/helix/ignore";
-          storePath = ./helix/ignore;
-        };
-        ".config/harper/dictionary.txt".source = mkConfigSource {
-          repoPath = "modules/home-manager/editors/helix/harper_dict.txt";
-          storePath = ./helix/harper_dict.txt;
-        };
-        ".config/rumdl/rumdl.toml".source = mkConfigSource {
-          repoPath = "modules/home-manager/editors/helix/rumdl.toml";
-          storePath = ./helix/rumdl.toml;
-        };
+        # Editable files, live where a checkout holds the link
+        ".config/helix/themes/custom-base16.toml".source = live "custom-base16.toml";
+        ".config/helix/ignore".source = live "ignore";
+        ".config/harper/dictionary.txt".source = live "harper_dict.txt";
+        ".config/rumdl/rumdl.toml".source = live "rumdl.toml";
       };
     };
 

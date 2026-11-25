@@ -26,6 +26,7 @@ deploying, secrets, the network) is in the [handbook](docs/README.md).
 .
 ├── flake.nix              # Inputs, hosts, overlays, checks, dev shell, templates
 ├── hosts/                 # Per-host hardware and system config
+├── live/                  # Config files that apply on save, no switch needed
 ├── modules/
 │   ├── home-manager/      # User-level config (programs, dotfiles, theming)
 │   ├── system/            # System-level config (boot, desktop, networking, services)

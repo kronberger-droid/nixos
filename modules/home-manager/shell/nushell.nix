@@ -23,8 +23,13 @@
 
   # Centralised personal directory paths — change here, updates everywhere
   dirs = {
-    nixosConfig = "~/.config/nixos";
-    templates = "~/.config/nixos/templates";
+    # Not the nixos checkout, which may sit anywhere: the link to its `live/`
+    # folder (../live-config.nix), which `flake` writes and reads back. The
+    # fallback is for users that import this file without that module.
+    liveLink =
+      if options ? liveConfig
+      then config.liveConfig.link
+      else "${config.xdg.configHome}/nixos-live";
     projects = "~/Projects";
     vault = vaultTilde;
   };
@@ -438,18 +443,48 @@ in {
           }
       }
 
+      # The nixos checkout this machine was last switched from, or null.
+      # `flake` records it by pointing ${dirs.liveLink} at <checkout>/live. A
+      # link into the store is the activation fallback and names no checkout,
+      # so the search then goes up from the current directory.
+      def flakeCheckout []: nothing -> any {
+          let link = "${dirs.liveLink}"
+          if ($link | path exists) {
+              let target = ($link | path expand)
+              if not ($target | str starts-with "/nix/store/") {
+                  return ($target | path dirname)
+              }
+          }
+          mut dir = (pwd)
+          loop {
+              if ($dir | path join "flake.nix" | path exists) and ($dir | path join "live" | path exists) {
+                  return $dir
+              }
+              let parent = ($dir | path dirname)
+              if $parent == $dir { return null }
+              $dir = $parent
+          }
+      }
+
       # NixOS flake management (uses nh for nice diffs and colored output)
       # Also supports: flake init <template> to scaffold a new project from this
-      # flake's `templates` output (sources under ${dirs.templates})
+      # flake's `templates` output (sources under templates/ in the checkout)
       def flake [
           action: string = "switch"                          # switch, boot, test, build, dry, update, rollback, init
           template?: string                                  # template name for init (e.g. rust-cli, rust-gui)
           --update (-u)                                      # update flake inputs first
-          --dir (-d): string = "${dirs.nixosConfig}"           # flake directory
+          --dir (-d): string                                 # flake directory (default: the checkout last switched from)
           --remote (-r)                                      # build on homeserver, then pull via its cache
       ] {
+          let flake_dir = if $dir != null { $dir | path expand } else { flakeCheckout }
+          if $flake_dir == null {
+              print $"(ansi red)No nixos checkout known on this machine.(ansi reset)"
+              print "Run this inside the checkout or pass --dir; a switch from it is remembered."
+              return
+          }
+
           if $action == "init" {
-              let templates_dir = ("${dirs.templates}" | path expand)
+              let templates_dir = ($flake_dir | path join "templates")
               if ($template == null) {
                   print "Available templates:"
                   ls $templates_dir | where type == dir | get name | each { |d| print $"  - ($d | path basename)" }
@@ -464,12 +499,10 @@ in {
               }
               # The templates are outputs of the root flake; templates/ itself
               # has no flake.nix, so it is only listed, never referenced.
-              nix flake init --template $"("${dirs.nixosConfig}" | path expand)#($template)"
+              nix flake init --template $"($flake_dir)#($template)"
               print $"(ansi green)Initialized flake from template '($template)'.(ansi reset)"
               return
           }
-
-          let flake_dir = ($dir | path expand)
 
           # Check for unstaged changes — flakes only see git-added files
           let not_added = (git -C $flake_dir diff --name-only | str trim)
@@ -546,10 +579,26 @@ in {
           let nh_action = if $action == "dry" { "build" } else { $action }
           let nh_args = if $action == "dry" { ["--dry"] } else { [] }
 
-          try {
+          let done = (try {
               nh os $nh_action $flake_dir ...$nh_args
+              true
           } catch {
               print $"\n(ansi yellow)Build interrupted or failed.(ansi reset)"
+              false
+          })
+
+          # Record this checkout as the one the live config files are read
+          # from (../live-config.nix). After the switch, so that activation
+          # has already had its turn at the link. The link itself is never
+          # `path expand`ed here: that would resolve it to its old target.
+          let live = ($flake_dir | path join "live")
+          if $done and $action in ["switch" "boot" "test"] and ($live | path exists) {
+              let link = "${dirs.liveLink}"
+              let moved = (not ($link | path exists)) or ($link | path expand) != ($live | path expand)
+              ^ln -sfnT $live $link
+              if $moved {
+                  print $"(ansi cyan)Live config now follows ($live)(ansi reset)"
+              }
           }
       }
 

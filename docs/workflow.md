@@ -1,7 +1,8 @@
 # Workflow
 
-Changing the config and getting the change onto a machine. The flake lives in
-`~/.config/nixos`.
+Changing the config and getting the change onto a machine. The checkout can
+sit anywhere: nothing in the config names its path, and `flake` remembers the
+one it last switched from. The examples here use `~/.config/nixos`.
 
 ## The loop
 
@@ -51,6 +52,23 @@ diff before activating.
 `nix-remote` account, builds this host's system there, and leaves a GC root
 under that account so the build survives until it is pulled. Worth it on the
 laptops for anything that compiles; it needs the tailnet end to end.
+
+## Live config files
+
+Everything in `live/` takes effect on save, with no switch: the helix theme,
+ignore list, spelling dictionary and rumdl rules, and the yazi flavor. A file
+outside `live/` needs a switch.
+
+Programs reach those files through one link, `~/.config/nixos-live`, which
+points at `<checkout>/live`. `flake switch`, `boot` and `test` point it at the
+checkout they ran from, and `flake` without `--dir` reads it back to find that
+checkout. So after moving the checkout, run `flake` once from inside it, or
+with `--dir <new path>`.
+
+Where no checkout holds the link (a fresh install, a deleted checkout, the
+droid), activation points it at the store copy of `live/`. The files then
+match the last switch and are read-only. `modules/home-manager/live-config.nix`
+has the details.
 
 ## Deploying the homeserver
 
@@ -161,6 +179,7 @@ way.
 | Server services | `modules/system/services/` |
 | Desktop: niri, bar, launcher | `modules/home-manager/desktop/` |
 | Shell, the `flake` command, git | `modules/home-manager/shell/` |
+| Config files editable without a switch | `live/` |
 | Apps and their sandboxes | `modules/home-manager/apps/` |
 | Claude Code settings, global CLAUDE.md, skills | `modules/home-manager/apps/claude*.nix`, `claude-md*.md`, `skills/` |
 | Addresses, keys and IDs used by more than one host | `modules/shared/` |

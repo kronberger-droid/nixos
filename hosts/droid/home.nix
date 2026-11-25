@@ -96,10 +96,6 @@ in {
     };
   };
 
-  # The repo isn't checked out at a fixed path on Android, so copy helix's
-  # editable config from the store instead of out-of-store symlinking.
-  helix.liveConfigPath = null;
-
   # Lean editor on mobile: Nix + Markdown + Rust only, no Typst/Python/GLSL.
   helix.minimal = true;
 

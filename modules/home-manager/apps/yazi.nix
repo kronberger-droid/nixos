@@ -2,13 +2,12 @@
   pkgs,
   config,
   ...
-}: let
-  mkSymlink = path:
-    config.lib.file.mkOutOfStoreSymlink
-    "${config.home.homeDirectory}/.config/nixos/${path}";
-in {
+}: {
+  imports = [../live-config.nix];
+
+  # Editable in place, from `live/yazi/` (see ../live-config.nix).
   xdg.configFile."yazi/flavors/base16-transparent.yazi/flavor.toml".source =
-    mkSymlink "modules/home-manager/apps/yazi/base16-transparent.toml";
+    config.lib.liveConfig.source "yazi/base16-transparent.toml";
 
   programs.yazi = {
     enable = true;
