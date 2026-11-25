@@ -546,13 +546,14 @@ in {
         };
       }
 
-      # Inactive window opacity. The blur is drawn behind the window, so it
-      # only shows through the 5% this lets through; lower `opacity` to see
-      # more of it. Xray is niri's default with blur: tiled windows blur the
-      # wallpaper once instead of whatever is below them.
+      # Inactive window opacity. The blur is drawn behind the window, so
+      # `opacity` sets how much of it shows: at 0.95 it was close to
+      # invisible. It fades the window's content by the same amount, so this
+      # is also the legibility knob. Xray is niri's default with blur: tiled
+      # windows blur the wallpaper once instead of whatever is below them.
       {
         matches = [{is-focused = false;}];
-        opacity = 0.95;
+        opacity = 0.85;
         background-effect.blur = true;
       }
     ];
