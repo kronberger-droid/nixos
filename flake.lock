@@ -766,11 +766,11 @@
     "nushell-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1795515356,
-        "narHash": "sha256-XAfmlUX2+Tm0/Wl11VHbOKap6sjU63WV1MHSIcm/83c=",
+        "lastModified": 1795601112,
+        "narHash": "sha256-1EHPzw5WAt6yrUIqsQpw/ySlkrF+9sm8+nGqOVn4cY8=",
         "owner": "kronberger-droid",
         "repo": "nushell",
-        "rev": "222116bf6b068d52ffd7ee7ab717cf9f57f1f5e9",
+        "rev": "c0ab0c22154139e3408368f50f2050a862b5306f",
         "type": "github"
       },
       "original": {
