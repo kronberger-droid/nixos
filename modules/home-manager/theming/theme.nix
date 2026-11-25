@@ -54,9 +54,13 @@ in {
   home.pointerCursor = {
     enable = true;
     gtk.enable = true;
-    package = pkgs.quintom-cursor-theme;
-    name = "Quintom_Ink";
-    size = 22;
+    # Adwaita's cursors and icons are one package, and the one the nixpak
+    # sandboxes already have on their XCURSOR_PATH and XDG_DATA_DIRS
+    # (gui-base), so apps in them load the same ones.
+    package = pkgs.adwaita-icon-theme;
+    name = "Adwaita";
+    # The smallest size the theme ships.
+    size = 24;
   };
 
   gtk = {
@@ -64,8 +68,8 @@ in {
     gtk4.theme = null;
     theme = gtkTheme;
     iconTheme = {
-      name = "Qogir";
-      package = pkgs.qogir-icon-theme;
+      name = "Adwaita";
+      package = pkgs.adwaita-icon-theme;
     };
     gtk3.extraCss = adwaitaColors;
     gtk4.extraCss = adwaitaColors;
