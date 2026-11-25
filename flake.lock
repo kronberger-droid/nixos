@@ -968,11 +968,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795616249,
-        "narHash": "sha256-NHXPC56SIRxBYa3Kw6RHHQ7Iys6l2WFnb+s8WyMs0sM=",
+        "lastModified": 1795616749,
+        "narHash": "sha256-baBdxLxlGOux/WC2l5S451AEIgWBKqoc8WPfjH2JNn0=",
         "owner": "kronberger-droid",
         "repo": "sieb",
-        "rev": "5b36593d8a719b4f5b6c32bfe7ed96338f2d4b47",
+        "rev": "1583279597f79604acbd2052ada1b5b4bd67c855",
         "type": "github"
       },
       "original": {
