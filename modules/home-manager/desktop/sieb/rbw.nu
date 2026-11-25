@@ -84,6 +84,14 @@ def emit [value: record] {
     print ($value | to json --raw)
 }
 
+# A whole menu in one write. sieb holds a menu back for a moment until the
+# row it is to select has arrived, so that it opens on that row instead of
+# jumping to it. Rows printed one at a time, with an rbw call between
+# them, take longer than it waits.
+def emit-all [values: list] {
+    print ($values | each {|value| $value | to json --raw } | str join "\n")
+}
+
 # Vault text for the prompt and message, which sieb draws as plain text:
 # control characters out.
 def plain []: any -> string {
@@ -228,7 +236,7 @@ def entries-menu [queue: list, note: string = "", select?: string] {
     } else {
         $"queued: (queue-text $queue)"
     }
-    emit {message: ([$note $status] | where {|it| $it | is-not-empty } | str join "    ")}
+    let message = {message: ([$note $status] | where {|it| $it | is-not-empty } | str join "    ")}
     # Rows above the entries, which `new-selection` counts too.
     let above = if ($queue | is-empty) {
         []
@@ -241,17 +249,17 @@ def entries-menu [queue: list, note: string = "", select?: string] {
     let entries = $list.stdout | from json | where {|it| $it.id =~ $UUID }
         | sort-by {|e| $e.folder | default ""} name
     let at = $entries | enumerate | where {|it| $it.item.id == $select } | get --optional 0.index
-    if $at != null { emit {new-selection: ($at + ($above | length))} }
-    for row in $above { emit $row }
-    for it in $entries {
+    let selection = if $at == null { [] } else { [{new-selection: ($at + ($above | length))}] }
+    let rows = $entries | each {|it|
         let folder = if ($it.folder | is-empty) { "" } else { $"($it.folder | shown)/" }
         let detail = if $it.type == "Login" { $it.user } else { $it.type }
         let entry = {do: "entry", id: $it.id, name: $it.name, type: $it.type}
-        emit {
+        {
             text: $"($folder)($it.name | shown)  <span alpha='55%'>($detail | shown)</span>"
             info: ($entry | encode)
         }
     }
+    emit-all [$message ...$selection ...$above ...$rows]
 }
 
 # A field's value for display, only ever one in SHOWN.
@@ -278,24 +286,25 @@ def fields-menu [entry: record, queue: list, select?: string] {
         return
     }
     let fields = $listed.stdout | lines | where {|f| $f | is-not-empty }
-    # In row order, after the back row: the notes are listed last. sieb
-    # places the selection as the first row arrives, so this goes first.
-    let rows = $fields | where {|f| $f != "notes" } | append ($fields | where {|f| $f == "notes" })
-    let at = $rows | enumerate | where {|it| $it.item == $select } | get --optional 0.index
-    if $at != null { emit {new-selection: ($at + 1)} }
-    emit $back
-    for field in ($fields | where {|f| $f != "notes" }) {
+    # In row order, after the back row: the notes are listed last.
+    let order = $fields | where {|f| $f != "notes" } | append ($fields | where {|f| $f == "notes" })
+    let at = $order | enumerate | where {|it| $it.item == $select } | get --optional 0.index
+    let selection = if $at == null { [] } else { [{new-selection: ($at + 1)}] }
+    let named = $fields | where {|f| $f != "notes" } | each {|field|
         let glyph = $GLYPHS | get --optional $field | default $GLYPH_OTHER
         let value = read-shown $entry.id $field | lines | str join ", "
         let value = if ($value | is-empty) { "" } else { $"  <span alpha='55%'>($value | shown)</span>" }
-        emit {text: $"($glyph) ($field | shown)($value)", info: ({do: "field", field: $field} | encode)}
+        {text: $"($glyph) ($field | shown)($value)", info: ({do: "field", field: $field} | encode)}
     }
-    if "notes" in $fields {
-        emit {text: $"($GLYPHS.notes) copy the notes", info: ({do: "copy", field: "notes"} | encode)}
-        for line in (read-shown $entry.id "notes" | lines) {
-            emit {text: $"<span alpha='70%'>($line | shown)</span>", selectable: false}
-        }
+    let notes = if "notes" in $fields {
+        [{text: $"($GLYPHS.notes) copy the notes", info: ({do: "copy", field: "notes"} | encode)}]
+        | append (read-shown $entry.id "notes" | lines | each {|line|
+            {text: $"<span alpha='70%'>($line | shown)</span>", selectable: false}
+        })
+    } else {
+        []
     }
+    emit-all [...$selection $back ...$named ...$notes]
 }
 
 # The sh side, run detached so sieb closes and focus goes back. $1 to $3
