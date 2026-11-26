@@ -81,6 +81,18 @@ in {
       default = ["194.242.2.4#base.dns.mullvad.net" "2a07:e340::4#base.dns.mullvad.net"];
       description = "Resolvers asked through the tunnel, over DoT";
     };
+
+    bypass = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      example = ["128.130.44.206/32"];
+      description = ''
+        Destinations that leave by the uplink instead of the tunnel, for
+        hosts that are only reachable from the network the machine sits in
+        but lie outside its own subnet. They go out unencrypted from the
+        real address, on whatever network the machine is on.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -142,21 +154,30 @@ in {
           ActivationPolicy = "manual";
           RequiredForOnline = "no";
         };
-        routingPolicyRules = [
-          {
+        # The bypass rules come first and look up main whole, default route
+        # included, which the 10000 rule below leaves out.
+        routingPolicyRules =
+          map (to: {
+            To = to;
             Table = "main";
-            SuppressPrefixLength = 0;
-            Priority = 10000;
-            Family = "both";
-          }
-          {
-            FirewallMark = table;
-            InvertRule = true;
-            Table = table;
-            Priority = 10001;
-            Family = "both";
-          }
-        ];
+            Priority = 9999;
+          })
+          cfg.bypass
+          ++ [
+            {
+              Table = "main";
+              SuppressPrefixLength = 0;
+              Priority = 10000;
+              Family = "both";
+            }
+            {
+              FirewallMark = table;
+              InvertRule = true;
+              Table = table;
+              Priority = 10001;
+              Family = "both";
+            }
+          ];
       };
     };
 
