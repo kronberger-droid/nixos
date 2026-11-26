@@ -13,10 +13,12 @@
   glyph = code: builtins.fromJSON ''"\u${code}"'';
 
   # The colors rofi's colors.rasi derived from the base16 scheme, in the
-  # same roles: background and background-alt at 90%, base0F the accent,
-  # base0D and base09 the blue and red pills.
+  # same roles: background and background-alt, base0F the accent, base0D
+  # and base09 the blue and red pills. The background is at 80%, down from
+  # rofi's 90%, so the blur behind the panel shows; the boxes and pills on
+  # top of it keep 90%.
   s = config.scheme;
-  background = "#${s.base00}e6";
+  background = "#${s.base00}cc";
   alternate = "#${s.base01}e6";
   foreground = "#${s.base05}";
   dark = "#${s.base00}";
@@ -58,7 +60,6 @@
         accent = foreground;
         prompt = foreground;
         placeholder = foreground;
-        row = background;
         selected = foreground;
         selected-text = dark;
         match = accent;
