@@ -33,6 +33,10 @@
     spacing = 10;
     placeholder = "search...";
     counter = false;
+    # Behind the panel only, which shows through the 90% backgrounds below.
+    # sieb asks niri for it; the layer rule in niri.nix makes it a blur of
+    # the windows and not of the wallpaper.
+    blur = true;
   };
 
   # After rofi's launcher/style-2.rasi.
