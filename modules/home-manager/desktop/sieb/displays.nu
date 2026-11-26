@@ -13,7 +13,8 @@
 #
 # niri has no mirroring, so the copy is wl-mirror showing the panel in a
 # fullscreen window on the external display. That display keeps its own
-# mode, and a different aspect ratio gets bars. Picking a side closes it.
+# mode, and a different aspect ratio gets bars. Picking a side closes it,
+# and so does either display going away: see `main mirror`.
 
 const NOTIFY_SEND = "@libnotify@/bin/notify-send"
 const PKILL       = "@procps@/bin/pkill"
@@ -22,8 +23,11 @@ const SIEB        = "@sieb@/bin/sieb"
 const THEME       = "@theme@"
 const WL_MIRROR   = "@wlMirror@/bin/wl-mirror"
 
+const SELF  = path self
 const SIDES = [Right Left Top Bottom]
 const COPY  = "Duplicate"
+# How often the copy checks that both displays are still there.
+const POLL  = 2sec
 
 def notify [body: string] {
   ^$NOTIFY_SEND "Displays" $body | complete | ignore
@@ -62,14 +66,42 @@ def stop-mirror [] {
   ^$PKILL -x wl-mirror | complete | ignore
 }
 
-def main [] {
+# The outputs that are on, or null when niri does not answer.
+def active-outputs []: nothing -> any {
   let asked = (^niri msg -j outputs | complete)
-  if $asked.exit_code != 0 {
+  if $asked.exit_code != 0 { return null }
+  # An output that is off has no logical geometry.
+  $asked.stdout | from json | values | where logical != null
+}
+
+# Runs the copy of `base` on `other` and closes it once either is gone.
+#
+# Left running after an unplug, the copy does harm: niri moves its window
+# to the panel along with the rest of the workspace, where it shows the
+# panel on the panel. That workspace then looks frozen and smears the
+# cursor, since every frame it captures holds the one before.
+def "main mirror" [other: string, base: string] {
+  let mirror = (job spawn {
+    ^$WL_MIRROR --fullscreen-output $other $base o+e> /dev/null
+  })
+  loop {
+    sleep $POLL
+    # Closed by hand, or by `stop-mirror` for a new pick.
+    if (job list | where id == $mirror | is-empty) { return }
+    let names = (active-outputs | default [] | get name)
+    if $other not-in $names or $base not-in $names {
+      job kill $mirror
+      return
+    }
+  }
+}
+
+def main [] {
+  let active = (active-outputs)
+  if $active == null {
     notify "niri did not answer"
     exit 1
   }
-  # An output that is off has no logical geometry.
-  let active = ($asked.stdout | from json | values | where logical != null)
   if ($active | length) != 2 {
     notify $"This needs two active displays, there are ($active | length)"
     return
@@ -97,7 +129,7 @@ def main [] {
   if $picked == $COPY {
     stop-mirror
     # Its own session, so it outlives this script.
-    ^$SETSID -f $WL_MIRROR --fullscreen-output $other.name $base.name o+e> /dev/null
+    ^$SETSID -f $SELF mirror $other.name $base.name o+e> /dev/null
   } else if $picked in $SIDES {
     stop-mirror
     let to = (place $picked $base.logical $other.logical)
