@@ -2,6 +2,7 @@ _: {
   imports = [
     ./hardware-configuration.nix
     ./speaker-eq.nix
+    ./printer.nix
     ../common.nix
     ../../modules/profiles/secureboot-laptop.nix
     ../../modules/system/hardware/uvc-camera.nix
