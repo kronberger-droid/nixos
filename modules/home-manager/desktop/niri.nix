@@ -231,8 +231,10 @@ in {
       "${modifier}+Shift+E".action.spawn = config.sieb.commands.power;
       "${modifier}+Shift+P".action.spawn = config.sieb.commands.rbw;
 
+      "${modifier}+Shift+D".action.spawn = config.sieb.commands.displays;
+
       # Notifications
-      "${modifier}+Shift+D".action.spawn = ["${pkgs.mako}/bin/makoctl" "dismiss" "-a"];
+      "${modifier}+Shift+N".action.spawn = ["${pkgs.mako}/bin/makoctl" "dismiss" "-a"];
 
       # Screenshots
       "Print".action.screenshot = [];

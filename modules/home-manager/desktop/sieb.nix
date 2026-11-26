@@ -200,6 +200,20 @@
     };
     isExecutable = true;
   };
+  # Where the external display sits; see sieb/displays.nu. On the power
+  # menu's small card, like the other short prompts.
+  displays = pkgs.replaceVarsWith {
+    src = ./sieb/displays.nu;
+    replacements = {
+      inherit (pkgs) coreutils libnotify procps;
+      nu = pkgs.nushell;
+      utilLinux = pkgs.util-linux;
+      wlMirror = pkgs.wl-mirror;
+      theme = "${powerTheme}";
+      inherit sieb;
+    };
+    isExecutable = true;
+  };
   launcher = [
     "${sieb}/bin/sieb"
     "--config"
@@ -235,6 +249,12 @@ in {
       # screenrec's. Callers pass --lines to fit their entries and --badge.
       default = ["${sieb}/bin/sieb" "--config" "${powerTheme}"];
       description = "argv of a small dmenu prompt, for scripts.";
+    };
+    displays = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      readOnly = true;
+      default = ["${displays}"];
+      description = "argv of the display layout menu, for compositor binds.";
     };
     rbw = lib.mkOption {
       type = lib.types.listOf lib.types.str;
