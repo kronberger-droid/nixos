@@ -1,0 +1,372 @@
+*PPD-Adobe: "4.3"
+*FormatVersion: "4.3"
+*FileVersion: "2.1.1"
+*LanguageVersion: English
+*LanguageEncoding: ISOLatin1
+*PSVersion: "(3010.000) 0"
+*LanguageLevel: "3"
+*FileSystem: False
+*PCFileName: "drvless.ppd"
+*Manufacturer: "Canon"
+*ModelName: "Canon Printer"
+*Product: "(Canon Printer)"
+*NickName: "Canon Printer, driverless, 2.1.1"
+*ShortNickName: "Canon Printer"
+*DefaultOutputOrder: Normal
+*ColorDevice: True
+*LandscapeOrientation: Plus90
+*cupsVersion: 2.4
+*cupsSNMPSupplies: False
+*cupsLanguages: "en ko ja zh-tw de es zh-cn it fr"
+*APSupplies: "http://128.130.44.211/rps/airprint"
+*cupsSingleFile: True
+*cupsFilter2: "application/vnd.cups-pdf application/pdf 0 -"
+*cupsFilter2: "image/jpeg image/jpeg 0 -"
+*OpenUI *PageSize/Media Size: PickOne
+*OrderDependency: 10 AnySetup *PageSize
+*DefaultPageSize: A4
+*PageSize A3: "<</PageSize[841.889763779528 1190.551181102362]>>setpagedevice"
+*PageSize A3.Borderless: "<</PageSize[841.889763779528 1190.551181102362]>>setpagedevice"
+*PageSize A4: "<</PageSize[595.275590551181 841.889763779528]>>setpagedevice"
+*PageSize A4.Borderless: "<</PageSize[595.275590551181 841.889763779528]>>setpagedevice"
+*PageSize A5: "<</PageSize[419.527559055118 595.275590551181]>>setpagedevice"
+*PageSize A5.Borderless: "<</PageSize[419.527559055118 595.275590551181]>>setpagedevice"
+*PageSize A6: "<</PageSize[297.637795275591 419.527559055118]>>setpagedevice"
+*PageSize A6.Borderless: "<</PageSize[297.637795275591 419.527559055118]>>setpagedevice"
+*PageSize ARCHB: "<</PageSize[864 1296]>>setpagedevice"
+*PageSize ARCHB.Borderless: "<</PageSize[864 1296]>>setpagedevice"
+*PageSize B4: "<</PageSize[728.503937007874 1031.811023622047]>>setpagedevice"
+*PageSize B4.Borderless: "<</PageSize[728.503937007874 1031.811023622047]>>setpagedevice"
+*PageSize B5: "<</PageSize[515.905511811024 728.503937007874]>>setpagedevice"
+*PageSize B5.Borderless: "<</PageSize[515.905511811024 728.503937007874]>>setpagedevice"
+*PageSize Env10: "<</PageSize[296.985826771654 684]>>setpagedevice"
+*PageSize Env10.Borderless: "<</PageSize[296.985826771654 684]>>setpagedevice"
+*PageSize EnvC5: "<</PageSize[459.212598425197 649.133858267717]>>setpagedevice"
+*PageSize EnvC5.Borderless: "<</PageSize[459.212598425197 649.133858267717]>>setpagedevice"
+*PageSize EnvChou3: "<</PageSize[340.157480314961 666.141732283465]>>setpagedevice"
+*PageSize EnvChou3.Borderless: "<</PageSize[340.157480314961 666.141732283465]>>setpagedevice"
+*PageSize EnvChou4: "<</PageSize[255.11811023622 581.102362204724]>>setpagedevice"
+*PageSize EnvChou4.Borderless: "<</PageSize[255.11811023622 581.102362204724]>>setpagedevice"
+*PageSize EnvDL: "<</PageSize[311.811023622047 623.622047244094]>>setpagedevice"
+*PageSize EnvDL.Borderless: "<</PageSize[311.811023622047 623.622047244094]>>setpagedevice"
+*PageSize EnvKaku2: "<</PageSize[680.314960629921 941.102362204724]>>setpagedevice"
+*PageSize EnvKaku2.Borderless: "<</PageSize[680.314960629921 941.102362204724]>>setpagedevice"
+*PageSize EnvMonarch: "<</PageSize[278.985826771654 540]>>setpagedevice"
+*PageSize EnvMonarch.Borderless: "<</PageSize[278.985826771654 540]>>setpagedevice"
+*PageSize Executive: "<</PageSize[522 756]>>setpagedevice"
+*PageSize Executive.Borderless: "<</PageSize[522 756]>>setpagedevice"
+*PageSize Legal: "<</PageSize[612 1008]>>setpagedevice"
+*PageSize Legal.Borderless: "<</PageSize[612 1008]>>setpagedevice"
+*PageSize Letter: "<</PageSize[612 792]>>setpagedevice"
+*PageSize Letter.Borderless: "<</PageSize[612 792]>>setpagedevice"
+*PageSize SRA3: "<</PageSize[907.086614173228 1275.590551181102]>>setpagedevice"
+*PageSize SRA3.Borderless: "<</PageSize[907.086614173228 1275.590551181102]>>setpagedevice"
+*PageSize Statement: "<</PageSize[396 612]>>setpagedevice"
+*PageSize Statement.Borderless: "<</PageSize[396 612]>>setpagedevice"
+*PageSize Tabloid: "<</PageSize[792 1224]>>setpagedevice"
+*PageSize Tabloid.Borderless: "<</PageSize[792 1224]>>setpagedevice"
+*CloseUI: *PageSize
+*OpenUI *PageRegion/Media Size: PickOne
+*OrderDependency: 10 AnySetup *PageRegion
+*DefaultPageRegion: A4
+*PageRegion A3: "<</PageSize[841.889763779528 1190.551181102362]>>setpagedevice"
+*PageRegion A3.Borderless: "<</PageSize[841.889763779528 1190.551181102362]>>setpagedevice"
+*PageRegion A4: "<</PageSize[595.275590551181 841.889763779528]>>setpagedevice"
+*PageRegion A4.Borderless: "<</PageSize[595.275590551181 841.889763779528]>>setpagedevice"
+*PageRegion A5: "<</PageSize[419.527559055118 595.275590551181]>>setpagedevice"
+*PageRegion A5.Borderless: "<</PageSize[419.527559055118 595.275590551181]>>setpagedevice"
+*PageRegion A6: "<</PageSize[297.637795275591 419.527559055118]>>setpagedevice"
+*PageRegion A6.Borderless: "<</PageSize[297.637795275591 419.527559055118]>>setpagedevice"
+*PageRegion ARCHB: "<</PageSize[864 1296]>>setpagedevice"
+*PageRegion ARCHB.Borderless: "<</PageSize[864 1296]>>setpagedevice"
+*PageRegion B4: "<</PageSize[728.503937007874 1031.811023622047]>>setpagedevice"
+*PageRegion B4.Borderless: "<</PageSize[728.503937007874 1031.811023622047]>>setpagedevice"
+*PageRegion B5: "<</PageSize[515.905511811024 728.503937007874]>>setpagedevice"
+*PageRegion B5.Borderless: "<</PageSize[515.905511811024 728.503937007874]>>setpagedevice"
+*PageRegion Env10: "<</PageSize[296.985826771654 684]>>setpagedevice"
+*PageRegion Env10.Borderless: "<</PageSize[296.985826771654 684]>>setpagedevice"
+*PageRegion EnvC5: "<</PageSize[459.212598425197 649.133858267717]>>setpagedevice"
+*PageRegion EnvC5.Borderless: "<</PageSize[459.212598425197 649.133858267717]>>setpagedevice"
+*PageRegion EnvChou3: "<</PageSize[340.157480314961 666.141732283465]>>setpagedevice"
+*PageRegion EnvChou3.Borderless: "<</PageSize[340.157480314961 666.141732283465]>>setpagedevice"
+*PageRegion EnvChou4: "<</PageSize[255.11811023622 581.102362204724]>>setpagedevice"
+*PageRegion EnvChou4.Borderless: "<</PageSize[255.11811023622 581.102362204724]>>setpagedevice"
+*PageRegion EnvDL: "<</PageSize[311.811023622047 623.622047244094]>>setpagedevice"
+*PageRegion EnvDL.Borderless: "<</PageSize[311.811023622047 623.622047244094]>>setpagedevice"
+*PageRegion EnvKaku2: "<</PageSize[680.314960629921 941.102362204724]>>setpagedevice"
+*PageRegion EnvKaku2.Borderless: "<</PageSize[680.314960629921 941.102362204724]>>setpagedevice"
+*PageRegion EnvMonarch: "<</PageSize[278.985826771654 540]>>setpagedevice"
+*PageRegion EnvMonarch.Borderless: "<</PageSize[278.985826771654 540]>>setpagedevice"
+*PageRegion Executive: "<</PageSize[522 756]>>setpagedevice"
+*PageRegion Executive.Borderless: "<</PageSize[522 756]>>setpagedevice"
+*PageRegion Legal: "<</PageSize[612 1008]>>setpagedevice"
+*PageRegion Legal.Borderless: "<</PageSize[612 1008]>>setpagedevice"
+*PageRegion Letter: "<</PageSize[612 792]>>setpagedevice"
+*PageRegion Letter.Borderless: "<</PageSize[612 792]>>setpagedevice"
+*PageRegion SRA3: "<</PageSize[907.086614173228 1275.590551181102]>>setpagedevice"
+*PageRegion SRA3.Borderless: "<</PageSize[907.086614173228 1275.590551181102]>>setpagedevice"
+*PageRegion Statement: "<</PageSize[396 612]>>setpagedevice"
+*PageRegion Statement.Borderless: "<</PageSize[396 612]>>setpagedevice"
+*PageRegion Tabloid: "<</PageSize[792 1224]>>setpagedevice"
+*PageRegion Tabloid.Borderless: "<</PageSize[792 1224]>>setpagedevice"
+*CloseUI: *PageRegion
+*DefaultImageableArea: A4
+*DefaultPaperDimension: A4
+*ImageableArea A3: "14.173228346457 14.173228346457 827.716535433071 1176.377952755905"
+*PaperDimension A3: "841.889763779528 1190.551181102362"
+*ImageableArea A3.Borderless: "0 0 841.889763779528 1190.551181102362"
+*PaperDimension A3.Borderless: "841.889763779528 1190.551181102362"
+*ImageableArea A4: "14.173228346457 14.173228346457 581.102362204724 827.716535433071"
+*PaperDimension A4: "595.275590551181 841.889763779528"
+*ImageableArea A4.Borderless: "0 0 595.275590551181 841.889763779528"
+*PaperDimension A4.Borderless: "595.275590551181 841.889763779528"
+*ImageableArea A5: "14.173228346457 14.173228346457 405.354330708661 581.102362204724"
+*PaperDimension A5: "419.527559055118 595.275590551181"
+*ImageableArea A5.Borderless: "0 0 419.527559055118 595.275590551181"
+*PaperDimension A5.Borderless: "419.527559055118 595.275590551181"
+*ImageableArea A6: "14.173228346457 14.173228346457 283.464566929134 405.354330708661"
+*PaperDimension A6: "297.637795275591 419.527559055118"
+*ImageableArea A6.Borderless: "0 0 297.637795275591 419.527559055118"
+*PaperDimension A6.Borderless: "297.637795275591 419.527559055118"
+*ImageableArea ARCHB: "14.173228346457 14.173228346457 849.826771653543 1281.826771653543"
+*PaperDimension ARCHB: "864 1296"
+*ImageableArea ARCHB.Borderless: "0 0 864 1296"
+*PaperDimension ARCHB.Borderless: "864 1296"
+*ImageableArea B4: "14.173228346457 14.173228346457 714.330708661417 1017.637795275591"
+*PaperDimension B4: "728.503937007874 1031.811023622047"
+*ImageableArea B4.Borderless: "0 0 728.503937007874 1031.811023622047"
+*PaperDimension B4.Borderless: "728.503937007874 1031.811023622047"
+*ImageableArea B5: "14.173228346457 14.173228346457 501.732283464567 714.330708661417"
+*PaperDimension B5: "515.905511811024 728.503937007874"
+*ImageableArea B5.Borderless: "0 0 515.905511811024 728.503937007874"
+*PaperDimension B5.Borderless: "515.905511811024 728.503937007874"
+*ImageableArea Env10: "14.173228346457 14.173228346457 282.812598425197 669.826771653543"
+*PaperDimension Env10: "296.985826771654 684"
+*ImageableArea Env10.Borderless: "0 0 296.985826771654 684"
+*PaperDimension Env10.Borderless: "296.985826771654 684"
+*ImageableArea EnvC5: "14.173228346457 14.173228346457 445.03937007874 634.96062992126"
+*PaperDimension EnvC5: "459.212598425197 649.133858267717"
+*ImageableArea EnvC5.Borderless: "0 0 459.212598425197 649.133858267717"
+*PaperDimension EnvC5.Borderless: "459.212598425197 649.133858267717"
+*ImageableArea EnvChou3: "14.173228346457 14.173228346457 325.984251968504 651.968503937008"
+*PaperDimension EnvChou3: "340.157480314961 666.141732283465"
+*ImageableArea EnvChou3.Borderless: "0 0 340.157480314961 666.141732283465"
+*PaperDimension EnvChou3.Borderless: "340.157480314961 666.141732283465"
+*ImageableArea EnvChou4: "14.173228346457 14.173228346457 240.944881889764 566.929133858268"
+*PaperDimension EnvChou4: "255.11811023622 581.102362204724"
+*ImageableArea EnvChou4.Borderless: "0 0 255.11811023622 581.102362204724"
+*PaperDimension EnvChou4.Borderless: "255.11811023622 581.102362204724"
+*ImageableArea EnvDL: "14.173228346457 14.173228346457 297.637795275591 609.448818897638"
+*PaperDimension EnvDL: "311.811023622047 623.622047244094"
+*ImageableArea EnvDL.Borderless: "0 0 311.811023622047 623.622047244094"
+*PaperDimension EnvDL.Borderless: "311.811023622047 623.622047244094"
+*ImageableArea EnvKaku2: "14.173228346457 14.173228346457 666.141732283465 926.929133858268"
+*PaperDimension EnvKaku2: "680.314960629921 941.102362204724"
+*ImageableArea EnvKaku2.Borderless: "0 0 680.314960629921 941.102362204724"
+*PaperDimension EnvKaku2.Borderless: "680.314960629921 941.102362204724"
+*ImageableArea EnvMonarch: "14.173228346457 14.173228346457 264.812598425197 525.826771653543"
+*PaperDimension EnvMonarch: "278.985826771654 540"
+*ImageableArea EnvMonarch.Borderless: "0 0 278.985826771654 540"
+*PaperDimension EnvMonarch.Borderless: "278.985826771654 540"
+*ImageableArea Executive: "14.173228346457 14.173228346457 507.826771653543 741.826771653543"
+*PaperDimension Executive: "522 756"
+*ImageableArea Executive.Borderless: "0 0 522 756"
+*PaperDimension Executive.Borderless: "522 756"
+*ImageableArea Legal: "14.173228346457 14.173228346457 597.826771653543 993.826771653543"
+*PaperDimension Legal: "612 1008"
+*ImageableArea Legal.Borderless: "0 0 612 1008"
+*PaperDimension Legal.Borderless: "612 1008"
+*ImageableArea Letter: "14.173228346457 14.173228346457 597.826771653543 777.826771653543"
+*PaperDimension Letter: "612 792"
+*ImageableArea Letter.Borderless: "0 0 612 792"
+*PaperDimension Letter.Borderless: "612 792"
+*ImageableArea SRA3: "14.173228346457 14.173228346457 892.913385826772 1261.417322834646"
+*PaperDimension SRA3: "907.086614173228 1275.590551181102"
+*ImageableArea SRA3.Borderless: "0 0 907.086614173228 1275.590551181102"
+*PaperDimension SRA3.Borderless: "907.086614173228 1275.590551181102"
+*ImageableArea Statement: "14.173228346457 14.173228346457 381.826771653543 597.826771653543"
+*PaperDimension Statement: "396 612"
+*ImageableArea Statement.Borderless: "0 0 396 612"
+*PaperDimension Statement.Borderless: "396 612"
+*ImageableArea Tabloid: "14.173228346457 14.173228346457 777.826771653543 1209.826771653543"
+*PaperDimension Tabloid: "792 1224"
+*ImageableArea Tabloid.Borderless: "0 0 792 1224"
+*PaperDimension Tabloid.Borderless: "792 1224"
+*HWMargins: "0 0 0 0"
+*ParamCustomPageSize Width: 1 points 277.795275590551 907.086614173228
+*ParamCustomPageSize Height: 2 points 277.795275590551 1296
+*ParamCustomPageSize WidthOffset: 3 points 0 0
+*ParamCustomPageSize HeightOffset: 4 points 0 0
+*ParamCustomPageSize Orientation: 5 int 0 3
+*CustomPageSize True: "pop pop pop <</PageSize[5 -2 roll]/ImagingBBox null>>setpagedevice"
+*OpenUI *InputSlot/Media Source: PickOne
+*OrderDependency: 10 AnySetup *InputSlot
+*DefaultInputSlot: Tray1
+*InputSlot Auto: "<</MediaPosition 0>>setpagedevice"
+*InputSlot Tray1: "<</MediaPosition 20>>setpagedevice"
+*InputSlot Tray2: "<</MediaPosition 21>>setpagedevice"
+*InputSlot Tray3: "<</MediaPosition 22>>setpagedevice"
+*InputSlot Tray4: "<</MediaPosition 23>>setpagedevice"
+*InputSlot ByPassTray: "<</MediaPosition 19>>setpagedevice"
+*CloseUI: *InputSlot
+*OpenUI *MediaType/Media Type: PickOne
+*OrderDependency: 10 AnySetup *MediaType
+*DefaultMediaType: Com.canon.oip.stationery2
+*MediaType Auto: "<</MediaType(Auto)>>setpagedevice"
+*MediaType Com.canon.oip.flimsy2: "<</MediaType(Com.canon.oip.flimsy2)>>setpagedevice"
+*MediaType StationeryLightweight: "<</MediaType(StationeryLightweight)>>setpagedevice"
+*MediaType Com.canon.oip.flimsy: "<</MediaType(Com.canon.oip.flimsy)>>setpagedevice"
+*MediaType Stationery: "<</MediaType(Stationery)>>setpagedevice"
+*MediaType Com.canon.oip.stationery: "<</MediaType(Com.canon.oip.stationery)>>setpagedevice"
+*MediaType Com.canon.oip.stationery2: "<</MediaType(Com.canon.oip.stationery2)>>setpagedevice"
+*MediaType Com.canon.oip.stationery3: "<</MediaType(Com.canon.oip.stationery3)>>setpagedevice"
+*MediaType Com.canon.oip.color: "<</MediaType(Com.canon.oip.color)>>setpagedevice"
+*MediaType StationeryHeavyweight: "<</MediaType(StationeryHeavyweight)>>setpagedevice"
+*MediaType Com.canon.oip.pasteboard: "<</MediaType(Com.canon.oip.pasteboard)>>setpagedevice"
+*MediaType Com.canon.oip.pasteboard2: "<</MediaType(Com.canon.oip.pasteboard2)>>setpagedevice"
+*MediaType Com.canon.oip.pasteboard3: "<</MediaType(Com.canon.oip.pasteboard3)>>setpagedevice"
+*MediaType Com.canon.oip.pasteboard4: "<</MediaType(Com.canon.oip.pasteboard4)>>setpagedevice"
+*MediaType Com.canon.oip.pasteboard5: "<</MediaType(Com.canon.oip.pasteboard5)>>setpagedevice"
+*MediaType Com.canon.oip.pasteboard6: "<</MediaType(Com.canon.oip.pasteboard6)>>setpagedevice"
+*MediaType Com.canon.oip.pasteboard7: "<</MediaType(Com.canon.oip.pasteboard7)>>setpagedevice"
+*MediaType Com.canon.oip.recycled: "<</MediaType(Com.canon.oip.recycled)>>setpagedevice"
+*MediaType Com.canon.oip.recycled2: "<</MediaType(Com.canon.oip.recycled2)>>setpagedevice"
+*MediaType Com.canon.oip.recycled3: "<</MediaType(Com.canon.oip.recycled3)>>setpagedevice"
+*MediaType Com.canon.oip.type1SideCoated1: "<</MediaType(Com.canon.oip.type1SideCoated1)>>setpagedevice"
+*MediaType Com.canon.oip.type1SideCoated2: "<</MediaType(Com.canon.oip.type1SideCoated2)>>setpagedevice"
+*MediaType Com.canon.oip.type2SideCoated1: "<</MediaType(Com.canon.oip.type2SideCoated1)>>setpagedevice"
+*MediaType Com.canon.oip.type2SideCoated2: "<</MediaType(Com.canon.oip.type2SideCoated2)>>setpagedevice"
+*MediaType Com.canon.oip.type1SideCoated3: "<</MediaType(Com.canon.oip.type1SideCoated3)>>setpagedevice"
+*MediaType Com.canon.oip.type2SideCoated3: "<</MediaType(Com.canon.oip.type2SideCoated3)>>setpagedevice"
+*MediaType Com.canon.oip.JapanesePaper: "<</MediaType(Com.canon.oip.JapanesePaper)>>setpagedevice"
+*MediaType Com.canon.oip.tracing: "<</MediaType(Com.canon.oip.tracing)>>setpagedevice"
+*MediaType Labels: "<</MediaType(Labels)>>setpagedevice"
+*MediaType Com.canon.oip.labels: "<</MediaType(Com.canon.oip.labels)>>setpagedevice"
+*MediaType Transparency: "<</MediaType(Transparency)>>setpagedevice"
+*MediaType Com.canon.oip.transparency: "<</MediaType(Com.canon.oip.transparency)>>setpagedevice"
+*MediaType StationeryBond: "<</MediaType(StationeryBond)>>setpagedevice"
+*MediaType Com.canon.oip.bond: "<</MediaType(Com.canon.oip.bond)>>setpagedevice"
+*MediaType Com.canon.oip.postCard: "<</MediaType(Com.canon.oip.postCard)>>setpagedevice"
+*MediaType TabStock: "<</MediaType(TabStock)>>setpagedevice"
+*MediaType Com.canon.oip.tab: "<</MediaType(Com.canon.oip.tab)>>setpagedevice"
+*MediaType Com.canon.oip.tab2: "<</MediaType(Com.canon.oip.tab2)>>setpagedevice"
+*MediaType Com.canon.oip.tab3: "<</MediaType(Com.canon.oip.tab3)>>setpagedevice"
+*MediaType Com.canon.oip.tab4: "<</MediaType(Com.canon.oip.tab4)>>setpagedevice"
+*MediaType StationeryPrepunched: "<</MediaType(StationeryPrepunched)>>setpagedevice"
+*MediaType Com.canon.oip.prePunched: "<</MediaType(Com.canon.oip.prePunched)>>setpagedevice"
+*MediaType Envelope: "<</MediaType(Envelope)>>setpagedevice"
+*MediaType Com.canon.oip.envelope: "<</MediaType(Com.canon.oip.envelope)>>setpagedevice"
+*MediaType Com.canon.oip.letterHead1: "<</MediaType(Com.canon.oip.letterHead1)>>setpagedevice"
+*MediaType Com.canon.oip.letterHead2: "<</MediaType(Com.canon.oip.letterHead2)>>setpagedevice"
+*MediaType Com.canon.oip.letterHead3: "<</MediaType(Com.canon.oip.letterHead3)>>setpagedevice"
+*MediaType Com.canon.oip.letterHead4: "<</MediaType(Com.canon.oip.letterHead4)>>setpagedevice"
+*MediaType Com.canon.oip.letterHead5: "<</MediaType(Com.canon.oip.letterHead5)>>setpagedevice"
+*MediaType Com.canon.oip.letterHead6: "<</MediaType(Com.canon.oip.letterHead6)>>setpagedevice"
+*MediaType Com.canon.oip.letterHead7: "<</MediaType(Com.canon.oip.letterHead7)>>setpagedevice"
+*CloseUI: *MediaType
+*% ColorModel from print-color-mode-supported
+*OpenUI *ColorModel/Color Mode: PickOne
+*OrderDependency: 10 AnySetup *ColorModel
+*ColorModel RGB/Color: ""
+*ColorModel Gray/Monochrome: ""
+*ColorModel AutoGray/Auto Monochrome: ""
+*DefaultColorModel: RGB
+*CloseUI: *ColorModel
+*OpenUI *Duplex/2-Sided Printing: PickOne
+*OrderDependency: 10 AnySetup *Duplex
+*DefaultDuplex: None
+*Duplex None/Off: "<</Duplex false>>setpagedevice"
+*Duplex DuplexNoTumble/On (Portrait): "<</Duplex true/Tumble false>>setpagedevice"
+*Duplex DuplexTumble/On (Landscape): "<</Duplex true/Tumble true>>setpagedevice"
+*CloseUI: *Duplex
+*cupsBackSide: Normal
+*OpenUI *OutputBin/Output Bin: PickOne
+*OrderDependency: 10 AnySetup *OutputBin
+*DefaultOutputBin: Auto
+*OutputBin Tray1: ""
+*PageStackOrder Tray1: Normal
+*OutputBin Tray2: ""
+*PageStackOrder Tray2: Normal
+*OutputBin Auto: ""
+*PageStackOrder Auto: Normal
+*CloseUI: *OutputBin
+*OpenUI *StapleLocation/Staple: PickOne
+*OrderDependency: 10 AnySetup *StapleLocation
+*DefaultStapleLocation: None
+*StapleLocation None/None: ""
+*StapleLocation SinglePortrait: ""
+*cupsIPPFinishings 20/staple-top-left: "*StapleLocation SinglePortrait"
+*StapleLocation SingleRevLandscape: ""
+*cupsIPPFinishings 21/staple-bottom-left: "*StapleLocation SingleRevLandscape"
+*StapleLocation SingleLandscape: ""
+*cupsIPPFinishings 22/staple-top-right: "*StapleLocation SingleLandscape"
+*StapleLocation SingleRevPortrait: ""
+*cupsIPPFinishings 23/staple-bottom-right: "*StapleLocation SingleRevPortrait"
+*StapleLocation DualPortrait: ""
+*cupsIPPFinishings 28/staple-dual-left: "*StapleLocation DualPortrait"
+*StapleLocation DualLandscape: ""
+*cupsIPPFinishings 29/staple-dual-top: "*StapleLocation DualLandscape"
+*StapleLocation DualRevPortrait: ""
+*cupsIPPFinishings 30/staple-dual-right: "*StapleLocation DualRevPortrait"
+*StapleLocation DualRevLandscape: ""
+*cupsIPPFinishings 31/staple-dual-bottom: "*StapleLocation DualRevLandscape"
+*CloseUI: *StapleLocation
+*OpenUI *cupsFinishingTemplate/Finishing Template: PickOne
+*OrderDependency: 10 AnySetup *cupsFinishingTemplate
+*DefaultcupsFinishingTemplate: None
+*cupsFinishingTemplate None/None: ""
+*cupsFinishingTemplate Staple: "
+*en_US.cupsFinishingTemplate Staple/staple: ""
+"
+*End
+*cupsFinishingTemplate StapleTopLeft: "
+*en_US.cupsFinishingTemplate StapleTopLeft/staple-top-left: ""
+"
+*End
+*cupsFinishingTemplate StapleBottomLeft: "
+*en_US.cupsFinishingTemplate StapleBottomLeft/staple-bottom-left: ""
+"
+*End
+*cupsFinishingTemplate StapleTopRight: "
+*en_US.cupsFinishingTemplate StapleTopRight/staple-top-right: ""
+"
+*End
+*cupsFinishingTemplate StapleBottomRight: "
+*en_US.cupsFinishingTemplate StapleBottomRight/staple-bottom-right: ""
+"
+*End
+*cupsFinishingTemplate StapleDualLeft: "
+*en_US.cupsFinishingTemplate StapleDualLeft/staple-dual-left: ""
+"
+*End
+*cupsFinishingTemplate StapleDualTop: "
+*en_US.cupsFinishingTemplate StapleDualTop/staple-dual-top: ""
+"
+*End
+*cupsFinishingTemplate StapleDualRight: "
+*en_US.cupsFinishingTemplate StapleDualRight/staple-dual-right: ""
+"
+*End
+*cupsFinishingTemplate StapleDualBottom: "
+*en_US.cupsFinishingTemplate StapleDualBottom/staple-dual-bottom: ""
+"
+*End
+*CloseUI: *cupsFinishingTemplate
+*cupsUIConstraint finishing-template: "*cupsFinishingTemplate *StapleLocation"
+*cupsUIResolver finishing-template: "*cupsFinishingTemplate None *StapleLocation None"
+*DefaultResolution: 300dpi
+*OpenUI *cupsPrintQuality/Print Quality: PickOne
+*OrderDependency: 10 AnySetup *cupsPrintQuality
+*DefaultcupsPrintQuality: Normal
+*cupsPrintQuality Draft/Draft: "<</HWResolution[300 300]>>setpagedevice"
+*cupsPrintQuality Normal/Normal: "<</HWResolution[300 300]>>setpagedevice"
+*CloseUI: *cupsPrintQuality
+*OpenUI *print-scaling/Print Scaling: PickOne
+*OrderDependency: 10 AnySetup *print-scaling
+*Defaultprint-scaling: auto
+*print-scaling auto: ""
+*print-scaling auto-fit: ""
+*print-scaling fit: ""
+*print-scaling fill: ""
+*print-scaling none: ""
+*CloseUI: *print-scaling
