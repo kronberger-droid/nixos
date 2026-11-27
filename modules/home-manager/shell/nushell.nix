@@ -144,7 +144,7 @@ in {
     # Fetch what is waiting in Taildrop now. The taildrop-receive service does
     # this on its own as files arrive; this is for a host without it.
     def receive [] {
-        ^tailscale file get --conflict=rename ($nu.home-path | path join Downloads)
+        ^tailscale file get --conflict=rename ($nu.home-dir | path join Downloads)
     }
 
     # Launch a GUI app detached from this shell — survives closing the terminal
