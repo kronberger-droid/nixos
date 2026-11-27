@@ -1,7 +1,6 @@
 {...}: {
   imports = [
     ./packages.nix
-    ./firefox.nix
     ./helium.nix
     ./bitwarden.nix
     ./quickemu.nix
