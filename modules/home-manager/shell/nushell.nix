@@ -152,6 +152,51 @@ in {
         ^setsid -f ...$cmd out> /dev/null err> /dev/null
     }
 
+    # Open Obsidian on a folder, the current one by default. A folder inside
+    # a vault opens that vault. Any other folder becomes a new vault: the
+    # obsidian:// URI only reaches vaults Obsidian already lists, so the
+    # folder is added to that list first. Obsidian is a Flatpak that sees
+    # only the notes tree, ~/Projects and Downloads (apps/flatpak.nix).
+    def obsidian [dir: path = "."] {
+        let app = "md.obsidian.Obsidian"
+        let target = ($dir | path expand)
+        if ($target | path type) != "dir" {
+            error make {msg: $"not a directory: ($target)"}
+        }
+        let list = ($nu.home-dir | path join .var app $app config obsidian obsidian.json)
+        if not ($list | path exists) {
+            error make {msg: $"no vault list at ($list); start Obsidian once first"}
+        }
+        let state = (open --raw $list | from json)
+        let vaults = ($state.vaults? | default {})
+
+        # The nearest ancestor holding .obsidian, else the folder itself.
+        let parts = ($target | path split)
+        let root = (
+            ($parts | length)..1
+            | each {|n| $parts | first $n | path join }
+            | where {|p| $p | path join .obsidian | path exists }
+            | get 0?
+            | default $target
+        )
+
+        let known = ($vaults | transpose id vault | where {|v| $v.vault.path == $root })
+        let id = if ($known | is-not-empty) {
+            $known.0.id
+        } else {
+            # A running Obsidian keeps the list in memory: it would not find
+            # the new vault and would write the entry away on its next save.
+            if $app in (^flatpak ps --columns=application | lines) {
+                error make {msg: $"($root) is not a vault yet and Obsidian is running; quit it and run this again"}
+            }
+            let id = (random binary 8 | encode hex | str lowercase)
+            let entry = {path: $root, ts: (date now | format date "%s%3f" | into int)}
+            $state | upsert vaults ($vaults | insert $id $entry) | to json | save -f $list
+            $id
+        }
+        detach flatpak run $app $"obsidian://open?vault=($id)"
+    }
+
     # Pick a color from the screen with niri's built-in picker and copy the
     # hex to the clipboard. Escape cancels; niri then prints null.
     def color-picker [] {
