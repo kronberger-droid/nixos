@@ -70,8 +70,8 @@ Project `CLAUDE.md` and memory load only for the directory the session started
 in. When the work targets a different repo, read that repo's `CLAUDE.md` and
 `~/.claude/projects/<slug>/memory/MEMORY.md` before acting (the slug is the
 absolute path with `/` and `.` turned into `-`, e.g.
-`-home-kronberger--config-nixos`). System, desktop and package questions are
-about `~/.config/nixos` wherever the session started.
+`-home-kronberger-Projects-nix-nixos`). System, desktop and package questions are
+about `~/Projects/nix/nixos` wherever the session started.
 
 ## Worktree sessions
 
@@ -112,7 +112,7 @@ reconstructing the conventions from memory.
   Python. Invocation from the Bash tool, the traps of the nu build on this
   machine, a Python translation table, and when Python is justified. Also the
   command reference and the guide to Rust tests in the nushell repo.
-- **`nixos-config`** — any edit or check in `~/.config/nixos`. Which hosts a
+- **`nixos-config`** — any edit or check in `~/Projects/nix/nixos`. Which hosts a
   change reaches and the cheapest check that proves it, before reaching for
   `nix flake check`.
 
@@ -120,7 +120,7 @@ reconstructing the conventions from memory.
 
 `~/.claude/CLAUDE.md` is a symlink into the nix store and cannot be edited in
 place. The source is `modules/home-manager/apps/claude-md.md` in
-`~/.config/nixos`, and the skills listed above live beside it in
+`~/Projects/nix/nixos`, and the skills listed above live beside it in
 `apps/skills/*.md`. Edit there, stage the change so the flake can see it, then
 `flake switch`. `~/.claude/settings.json` is the same story: an activation
 script in `apps/claude.nix` merges it on rebuild, so hand edits there are lost.

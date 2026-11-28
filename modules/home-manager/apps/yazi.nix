@@ -81,7 +81,7 @@
         }
         {
           on = ["g" "x"];
-          run = "cd ~/.config/nixos";
+          run = "cd ~/Projects/nix/nixos";
           desc = "Go to NixOS config";
         }
         {

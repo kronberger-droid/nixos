@@ -2,8 +2,8 @@
 name: nixos-config
 description: Work on Martin's NixOS flake. Which hosts a change reaches, and the cheapest check that proves it.
 when_to_use: >-
-  Before editing or checking anything in the nixos config (`~/.config/nixos`,
-  `~/Projects/other/nixos` in the sandbox), from whichever repo the session
+  Before editing or checking anything in the nixos config (`~/Projects/nix/nixos`,
+  the same path in the sandbox), from whichever repo the session
   started in. Also before running `nix flake check`, `nix build` or a host
   evaluation there.
 user-invocable: true

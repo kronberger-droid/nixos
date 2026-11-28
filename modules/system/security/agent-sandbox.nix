@@ -22,7 +22,7 @@
 #   - its own home at 750, group `claude`, with the primary user in that
 #     group: Martin reads the agent's tree, the agent never reads his (the
 #     primary home stays closed to everyone but him).
-#   - read-only access to ~/Projects and ~/.config/nixos through ACLs
+#   - read-only access to ~/Projects through ACLs
 #     (claude-sandbox-read-acl below); everything else in the primary home
 #     stays closed, and nothing in those trees is writable.
 #   - its own ssh key, generated on first boot, no passphrase and no agent.
@@ -78,7 +78,7 @@
   primaryHome = config.users.users.${username}.home;
   vaultSrc = "${primaryHome}/${vaultRel}";
   # What the sandbox reads of the primary home: claude-sandbox-read-acl.
-  sharedTrees = ["${primaryHome}/Projects" "${primaryHome}/.config/nixos"];
+  sharedTrees = ["${primaryHome}/Projects"];
   vaultDst = "${home}/${vaultRel}";
 
   # `machinectl shell claude@` rather than `sudo -u claude -i`: machined runs

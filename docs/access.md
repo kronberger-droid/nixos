@@ -116,7 +116,7 @@ separate uid with its own home, on every host
 What the sandbox can touch:
 
 - Its own home, `/home/claude`. You can read it; it cannot read yours.
-- `~/Projects` and `~/.config/nixos`, read-only.
+- `~/Projects`, read-only.
 - The vault, read and write, mounted at the same path under its home.
 - GitHub through a fine-grained token scoped repo by repo. A push that fails
   with 403 on one of your repos means the token has not been granted that

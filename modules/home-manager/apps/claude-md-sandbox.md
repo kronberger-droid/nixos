@@ -3,8 +3,8 @@
 
 You are the `claude` unix account, a separate uid from mine
 (`security.agentSandbox` in my nixos config). The boundary is the point: my
-home, `/home/kronberger`, is closed to you except two read-only trees,
-`~/Projects` and `~/.config/nixos`, so you can read what I am working on. Never
+home, `/home/kronberger`, is closed to you except one read-only tree,
+`~/Projects`, so you can read what I am working on. Never
 write there; a permission error anywhere else is the design working. Work
 from what this account holds.
 
@@ -52,7 +52,7 @@ from what this account holds.
   setup hooks that point `pkg-config` and the linker at the library, which
   `nix shell` skips.
 - **This file** is generated too. Here the nixos config is
-  `~/Projects/other/nixos` (`kronberger-droid/nixos`), and this section's source is
+  `~/Projects/nix/nixos` (`kronberger-droid/nixos`), and this section's source is
   `modules/home-manager/apps/claude-md-sandbox.md`, appended in
   `modules/home-manager/users/claude.nix`.
 
@@ -74,7 +74,7 @@ these rules:
   rules. Show me the exact `set`/`delete` lines and wait for my yes before
   `commit-confirm`. Reading config (`show configuration`, `show ...`) needs no
   confirmation.
-- **Afterwards refresh the snapshot** in `~/Projects/other/nixos`:
+- **Afterwards refresh the snapshot** in `~/Projects/nix/nixos`:
   `nu hosts/edgerouter/pull-config.nu --user claude --key ~/.ssh/id_ed25519`,
   then commit it like any other work. Check the diff for secrets first.
 - `hosts/edgerouter/README.md` lists the settings that look wrong and are

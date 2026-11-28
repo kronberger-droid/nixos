@@ -101,7 +101,7 @@ this box; cloudflared dials out.
 Publishing a change:
 
 ```nu
-# in the website repo: commit and push, then in ~/.config/nixos
+# in the website repo: commit and push, then in ~/Projects/nix/nixos
 nix flake update website
 deploy .#homeserver
 ```

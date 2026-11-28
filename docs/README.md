@@ -29,7 +29,7 @@ Commands are Nushell unless they run over `ssh`, where the far side is bash.
 | Look at the bridge when it misbehaves | `ssh homeserver journalctl -u mautrix-whatsapp -n 100` | [homeserver](homeserver.md#matrix-and-whatsapp) |
 | Rebuild this machine | `flake` | [workflow](workflow.md#switching-a-workstation) |
 | Rebuild this machine, building on the server | `flake -r` | [workflow](workflow.md#switching-a-workstation) |
-| Deploy the homeserver | `deploy .#homeserver` in `~/.config/nixos` | [workflow](workflow.md#deploying-the-homeserver) |
+| Deploy the homeserver | `deploy .#homeserver` in `~/Projects/nix/nixos` | [workflow](workflow.md#deploying-the-homeserver) |
 | Check a change before switching | `nix flake check` | [workflow](workflow.md#checking-a-change) |
 | Undo a bad switch | `flake rollback` | [workflow](workflow.md#rolling-back) |
 | Add or edit a secret | `agenix -e <name>.age` in `secrets/`, on intelNuc | [workflow](workflow.md#secrets) |

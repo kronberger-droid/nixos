@@ -9,15 +9,15 @@
 # Where the session opens, in order:
 #   1. the sandbox's checkout of the repo the current directory is in
 #   2. a fresh clone of it, after asking
-#   3. the current directory itself, where the sandbox can read it (~/Projects
-#      and ~/.config/nixos, read-only there)
+#   3. the current directory itself, where the sandbox can read it (~/Projects,
+#      read-only there)
 #   4. the sandbox's home
 #
 # The sandbox mirrors ~/Projects: ~/Projects/rust/reedline here is
 # /home/claude/Projects/rust/reedline there, so a path means the same thing on
 # both sides. That mirror path is tried first. A new clone (the fork, `gh repo
 # clone` adds the parent as `upstream`) goes to the mirror path inside
-# ~/Projects, to other/<repo> for a repo elsewhere such as ~/.config/nixos.
+# ~/Projects, to other/<repo> for a repo elsewhere.
 #
 # Failing the path, "same repo" means the two checkouts share a GitHub remote,
 # compared as owner/repo. Directory names miss the common case: here `origin`

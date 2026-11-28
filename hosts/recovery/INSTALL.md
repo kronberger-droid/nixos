@@ -89,7 +89,7 @@ sudo dd if=(glob result-recovery/iso/*.iso | first) of=/dev/sdX bs=4M status=pro
   has to again:
   ```nu
   rbw register     # API key client_id + secret: web vault, Security > Keys
-  cd ~/.config/nixos/secrets    # agenix reads ./secrets.nix
+  cd ~/Projects/nix/nixos/secrets    # agenix reads ./secrets.nix
   open ~/.local/share/rbw/device_id | agenix -e rbw-device-id-<host>.age
   ```
   Then `git add` it and rebuild: the plain file is swapped for the link

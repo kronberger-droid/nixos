@@ -2,12 +2,12 @@
 
 Changing the config and getting the change onto a machine. The checkout can
 sit anywhere: nothing in the config names its path, and `flake` remembers the
-one it last switched from. The examples here use `~/.config/nixos`.
+one it last switched from. The examples here use `~/Projects/nix/nixos`.
 
 ## The loop
 
 ```nu
-cd ~/.config/nixos
+cd ~/Projects/nix/nixos
 # edit
 git add -A                # a flake only sees files git knows about
 nix flake check           # every host evaluates, formatting, .nu parsing
@@ -75,7 +75,7 @@ has the details.
 From any workstation:
 
 ```nu
-cd ~/.config/nixos
+cd ~/Projects/nix/nixos
 deploy .#homeserver
 ```
 
@@ -135,7 +135,7 @@ Each secret is readable by the hosts that use it plus the editor, which is
 intelNuc's host key. So editing happens on intelNuc, as root:
 
 ```nu
-cd ~/.config/nixos/secrets
+cd ~/Projects/nix/nixos/secrets
 sudo agenix -e <name>.age -i /etc/ssh/ssh_host_ed25519_key
 ```
 
